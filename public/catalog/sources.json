@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-07-26T18:00:00+00:00",
+  "generated_at": "2026-07-26T19:48:00Z",
   "notice": "All catalog visuals are project-generated originals, not official manufacturer photography and not proof of an exact product match. Brand names identify the requested search target; the manager must confirm the exact SKU, colour, size, availability and price.",
   "items": [
     {
@@ -8,21 +8,21 @@
       "file": "asics-sky-elite-ff-3.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; cold-studio geometric art normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-26T18:00:00+00:00"
+        "generated_at": "2026-07-26T19:48:00Z"
       },
-      "output_bytes": 25826,
+      "output_bytes": 48480,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "38ea11c7ae6168e9627e9ceeb28213838bf71eb0d8ad01305499e606a2fc1d30",
+      "output_sha256": "79739d8fae6cd8b9775a1c5286579531802088b5535b07bcd1531bfe0723a991",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: asics-sky-elite-ff-3",
-        "verified_at": "2026-07-26T18:00:00+00:00"
+        "verified_at": "2026-07-26T19:48:00Z"
       }
     },
     {
@@ -30,21 +30,21 @@
       "file": "asics-sky-elite-ff-mt-3.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; cold-studio geometric art normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-26T18:00:00+00:00"
+        "generated_at": "2026-07-26T19:48:00Z"
       },
-      "output_bytes": 23658,
+      "output_bytes": 36744,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "7ea19d34a5d47e5fc46a635440ece8c8e05d61e0cd95626ba638dd869953eecb",
+      "output_sha256": "8870e5a9cddb0a1a53e63fff0ffe80fecaacf0aeacb9f9fa2f397f9da32f6742",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: asics-sky-elite-ff-mt-3",
-        "verified_at": "2026-07-26T18:00:00+00:00"
+        "verified_at": "2026-07-26T19:48:00Z"
       }
     },
     {
@@ -52,21 +52,21 @@
       "file": "asics-metarise-2.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; cold-studio geometric art normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-26T18:00:00+00:00"
+        "generated_at": "2026-07-26T19:48:00Z"
       },
-      "output_bytes": 22426,
+      "output_bytes": 40980,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "07d78d5bd614500e787e9e09e4a34065bb075e2db7dea29a5f4fe85a40d2731c",
+      "output_sha256": "7d283131784098706e4d556d049e8f268d65cd5f1a54122cc98e73e61154f969",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: asics-metarise-2",
-        "verified_at": "2026-07-26T18:00:00+00:00"
+        "verified_at": "2026-07-26T19:48:00Z"
       }
     },
     {
@@ -74,21 +74,21 @@
       "file": "asics-netburner-ballistic-ff-4.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; cold-studio geometric art normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-26T18:00:00+00:00"
+        "generated_at": "2026-07-26T19:48:00Z"
       },
-      "output_bytes": 24182,
+      "output_bytes": 48162,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "4a8db630d84862e5994de8fe398071e8401d99d2297c56698546d18402e7f408",
+      "output_sha256": "e83bc0cb996d34627d11289612630f0d4aeebf10f54883332abaaa6316a83fee",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: asics-netburner-ballistic-ff-4",
-        "verified_at": "2026-07-26T18:00:00+00:00"
+        "verified_at": "2026-07-26T19:48:00Z"
       }
     },
     {
@@ -96,21 +96,21 @@
       "file": "asics-gel-tactic-13.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; cold-studio geometric art normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-26T18:00:00+00:00"
+        "generated_at": "2026-07-26T19:48:00Z"
       },
-      "output_bytes": 24292,
+      "output_bytes": 38460,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "995965b4eb8981f42c182752a16c9a139f33d200d623685149a46b2cd8fe6d9d",
+      "output_sha256": "f074386eac87d488956c13733796ff6c987ad88fe58afe4b82234159b7854e20",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: asics-gel-tactic-13",
-        "verified_at": "2026-07-26T18:00:00+00:00"
+        "verified_at": "2026-07-26T19:48:00Z"
       }
     },
     {
@@ -118,21 +118,21 @@
       "file": "mizuno-wave-lightning-z8.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; cold-studio geometric art normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-26T18:00:00+00:00"
+        "generated_at": "2026-07-26T19:48:00Z"
       },
-      "output_bytes": 25234,
+      "output_bytes": 41412,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "a16edf6fb9205c5fc9b76a4aaacd4b75599fdf5ec6867f608800d0d6868a4777",
+      "output_sha256": "ec4c05d57e4c712962dc6660108b66653b752a56ecd3fdcf6e4ff4aabe80cd2a",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: mizuno-wave-lightning-z8",
-        "verified_at": "2026-07-26T18:00:00+00:00"
+        "verified_at": "2026-07-26T19:48:00Z"
       }
     },
     {
@@ -140,21 +140,21 @@
       "file": "mizuno-wave-lightning-z8-mid.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; cold-studio geometric art normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-26T18:00:00+00:00"
+        "generated_at": "2026-07-26T19:48:00Z"
       },
-      "output_bytes": 21456,
+      "output_bytes": 47384,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "00c621aaa3c44ef09e83a9ccb8ff3ea68d2fbccb33afb91700eccb2e994ea204",
+      "output_sha256": "47b5ddd1d7b29deb58a491d5f03cfce381840fef3b5212ff8ab408b734c19d85",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: mizuno-wave-lightning-z8-mid",
-        "verified_at": "2026-07-26T18:00:00+00:00"
+        "verified_at": "2026-07-26T19:48:00Z"
       }
     },
     {
@@ -162,21 +162,21 @@
       "file": "mizuno-wave-momentum-elite-mid.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; cold-studio geometric art normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-26T18:00:00+00:00"
+        "generated_at": "2026-07-26T19:48:00Z"
       },
-      "output_bytes": 23120,
+      "output_bytes": 37364,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "124181b26b155ed4f5ea2d9d3803f08a5bdcaf71f03e36109354ba46253c46e3",
+      "output_sha256": "b3609f9eb540fbd00d33c1fcedd3a436efff40f77f813be94e50c3ab5f974ac6",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: mizuno-wave-momentum-elite-mid",
-        "verified_at": "2026-07-26T18:00:00+00:00"
+        "verified_at": "2026-07-26T19:48:00Z"
       }
     },
     {
@@ -184,21 +184,21 @@
       "file": "mizuno-wave-momentum-pro.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; cold-studio geometric art normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-26T18:00:00+00:00"
+        "generated_at": "2026-07-26T19:48:00Z"
       },
-      "output_bytes": 23092,
+      "output_bytes": 41402,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "7f670e78fe36159ea2131a6ea1d51cd372b1520485de221a92aba93857190332",
+      "output_sha256": "f595197b3c2f87f3d30e5f0d3d8dba7c2a0bd211ceb33fdd691efb3e2a2085a4",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: mizuno-wave-momentum-pro",
-        "verified_at": "2026-07-26T18:00:00+00:00"
+        "verified_at": "2026-07-26T19:48:00Z"
       }
     },
     {
@@ -206,21 +206,21 @@
       "file": "mizuno-wave-luminous-3.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; cold-studio geometric art normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-26T18:00:00+00:00"
+        "generated_at": "2026-07-26T19:48:00Z"
       },
-      "output_bytes": 25376,
+      "output_bytes": 48280,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "502b0fc1037a6de5330ee438969a2a9ce869659d43a6bbbdad3f5aac1895e478",
+      "output_sha256": "03710e31d595266d5e8ca42807a6e71bbe800b14f8bc53fefbc4859b8e3a78c6",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: mizuno-wave-luminous-3",
-        "verified_at": "2026-07-26T18:00:00+00:00"
+        "verified_at": "2026-07-26T19:48:00Z"
       }
     },
     {
@@ -228,21 +228,21 @@
       "file": "mizuno-wave-voltage-2.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; cold-studio geometric art normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-26T18:00:00+00:00"
+        "generated_at": "2026-07-26T19:48:00Z"
       },
-      "output_bytes": 23612,
+      "output_bytes": 38080,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "dc45079704356a254dfb9ecb94323a60a9188caeb71aa8afa237c87bba2a97ba",
+      "output_sha256": "92f3fe209841af507f326eeae21387c8f24226305ce549ade4a66bf648dacac3",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: mizuno-wave-voltage-2",
-        "verified_at": "2026-07-26T18:00:00+00:00"
+        "verified_at": "2026-07-26T19:48:00Z"
       }
     },
     {
@@ -250,21 +250,21 @@
       "file": "nike-zoom-hyperset-2.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; cold-studio geometric art normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-26T18:00:00+00:00"
+        "generated_at": "2026-07-26T19:48:00Z"
       },
-      "output_bytes": 21180,
+      "output_bytes": 39200,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "f1c809383c5f887d5096ac219f5405da95fbcf0f55e0945acf98acc6fe1aa1ff",
+      "output_sha256": "f49f3749abf4133ed88a8edd2e89c9d4ffe9281268d656b2420ccebdf8395a5b",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: nike-zoom-hyperset-2",
-        "verified_at": "2026-07-26T18:00:00+00:00"
+        "verified_at": "2026-07-26T19:48:00Z"
       }
     },
     {
@@ -272,21 +272,21 @@
       "file": "nike-hyperace-3-se.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; cold-studio geometric art normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-26T18:00:00+00:00"
+        "generated_at": "2026-07-26T19:48:00Z"
       },
-      "output_bytes": 22452,
+      "output_bytes": 48476,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "b0b262f3f3d2cc1971bd8d3a67ae485ed3ef1ced7b1b568a48fa684c9d73ff70",
+      "output_sha256": "0f6fc265e74bd68ad1b199494c39278412180de533c9a45c428e7347cb29f50d",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: nike-hyperace-3-se",
-        "verified_at": "2026-07-26T18:00:00+00:00"
+        "verified_at": "2026-07-26T19:48:00Z"
       }
     },
     {
@@ -294,21 +294,21 @@
       "file": "adidas-crazyflight-6-mid.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; cold-studio geometric art normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-26T18:00:00+00:00"
+        "generated_at": "2026-07-26T19:48:00Z"
       },
-      "output_bytes": 25930,
+      "output_bytes": 38154,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "36f74bb010c32fc0c925289604f31e4d5ea27d24e88fdd7f6e25026850023fe2",
+      "output_sha256": "28dc93db95ee9ff74cba4137ad1d2374844efcebe6c13f473eb1892654b248a5",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: adidas-crazyflight-6-mid",
-        "verified_at": "2026-07-26T18:00:00+00:00"
+        "verified_at": "2026-07-26T19:48:00Z"
       }
     },
     {
@@ -316,21 +316,21 @@
       "file": "nike-metcon-10.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; cold-studio geometric art normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-26T18:00:00+00:00"
+        "generated_at": "2026-07-26T19:48:00Z"
       },
-      "output_bytes": 21834,
+      "output_bytes": 41114,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "2e192d0edf9141f6b8155126a175109cf001a5ccac589060324bd51a73d359a4",
+      "output_sha256": "79afc2138738828f903d9de28aa4bd97d12dcc0eb024154dd476bac6702c3442",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: nike-metcon-10",
-        "verified_at": "2026-07-26T18:00:00+00:00"
+        "verified_at": "2026-07-26T19:48:00Z"
       }
     },
     {
@@ -338,21 +338,21 @@
       "file": "reebok-nano-x5.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; cold-studio geometric art normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-26T18:00:00+00:00"
+        "generated_at": "2026-07-26T19:48:00Z"
       },
-      "output_bytes": 23060,
+      "output_bytes": 48548,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "c6127a30b1449cd6195f652173ee24f4530d852ef2936c4b4a7c0e880236cf42",
+      "output_sha256": "dc24020ef594fbb90ba60f5de80a2be4be0ec603400c8ee1237e2615787616ba",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: reebok-nano-x5",
-        "verified_at": "2026-07-26T18:00:00+00:00"
+        "verified_at": "2026-07-26T19:48:00Z"
       }
     },
     {
@@ -360,21 +360,21 @@
       "file": "adidas-dropset-3.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; cold-studio geometric art normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-26T18:00:00+00:00"
+        "generated_at": "2026-07-26T19:48:00Z"
       },
-      "output_bytes": 21244,
+      "output_bytes": 36336,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "ec51d1d5e1e99eea3dc67dd19350fed1d0694a907783c276cffa31b7131e81c5",
+      "output_sha256": "183c40f325b79d9c0ecce0b3fadf20ad588470314ca57da4c7b7c02ba946f713",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: adidas-dropset-3",
-        "verified_at": "2026-07-26T18:00:00+00:00"
+        "verified_at": "2026-07-26T19:48:00Z"
       }
     },
     {
@@ -382,21 +382,21 @@
       "file": "under-armour-tribase-reign-6.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; cold-studio geometric art normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-26T18:00:00+00:00"
+        "generated_at": "2026-07-26T19:48:00Z"
       },
-      "output_bytes": 22284,
+      "output_bytes": 41210,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "414fa2a6931fdcfc67a610462662305a38dbba3be5ea492cfacba371f56c4856",
+      "output_sha256": "6b039e58eb439a8f4754809f25f7c117de11362b6e107f178bda0ef86ee1494e",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: under-armour-tribase-reign-6",
-        "verified_at": "2026-07-26T18:00:00+00:00"
+        "verified_at": "2026-07-26T19:48:00Z"
       }
     },
     {
@@ -404,21 +404,21 @@
       "file": "hoka-ora-recovery-slide-3.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; cold-studio geometric art normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-26T18:00:00+00:00"
+        "generated_at": "2026-07-26T19:48:00Z"
       },
-      "output_bytes": 22308,
+      "output_bytes": 21338,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "696f709c2116697f8faf623fb2262a754fc992775bda261c6ca17b29ba60baaa",
+      "output_sha256": "2c2ae54c91c769abdae921b0d4ee7432413fa0975e3886083784a4a662fbc769",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: hoka-ora-recovery-slide-3",
-        "verified_at": "2026-07-26T18:00:00+00:00"
+        "verified_at": "2026-07-26T19:48:00Z"
       }
     },
     {
@@ -426,21 +426,21 @@
       "file": "nike-calm-slide.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; cold-studio geometric art normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-26T18:00:00+00:00"
+        "generated_at": "2026-07-26T19:48:00Z"
       },
-      "output_bytes": 19226,
+      "output_bytes": 17710,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "9dc7d5b3c01a2f94cb2d45fdea5bdae6b5368ebb8dd587c917fc0c44c8f8f454",
+      "output_sha256": "f57c6593375dd6bc004847e22967bfe33c280505b8a042b0397199205de18970",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: nike-calm-slide",
-        "verified_at": "2026-07-26T18:00:00+00:00"
+        "verified_at": "2026-07-26T19:48:00Z"
       }
     },
     {
@@ -448,21 +448,21 @@
       "file": "nike-dri-fit-volleyball-jersey.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; cold-studio geometric art normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-26T18:00:00+00:00"
+        "generated_at": "2026-07-26T19:48:00Z"
       },
-      "output_bytes": 19856,
+      "output_bytes": 30816,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "bd1393e6e379ed40063407cd083758f77b9cd2b96d18abbb9d4da3873864b321",
+      "output_sha256": "448cd05842908bacec443de02591ad59b9bec53cf85c50e75c99b2821c4b75d9",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: nike-dri-fit-volleyball-jersey",
-        "verified_at": "2026-07-26T18:00:00+00:00"
+        "verified_at": "2026-07-26T19:48:00Z"
       }
     },
     {
@@ -470,21 +470,21 @@
       "file": "mizuno-volleyball-practice-tee.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; cold-studio geometric art normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-26T18:00:00+00:00"
+        "generated_at": "2026-07-26T19:48:00Z"
       },
-      "output_bytes": 15436,
+      "output_bytes": 29768,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "0c310afb63ade1506bab27d20aa63be24ad9fff1af3a322e1ef0b4c1c2ea7ad0",
+      "output_sha256": "3bd198b0d35633247e0fca1f80de52bd37f3c43b9a11f6b1972d21d522008d9e",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: mizuno-volleyball-practice-tee",
-        "verified_at": "2026-07-26T18:00:00+00:00"
+        "verified_at": "2026-07-26T19:48:00Z"
       }
     },
     {
@@ -492,21 +492,21 @@
       "file": "asics-actibreeze-match-top.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; cold-studio geometric art normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-26T18:00:00+00:00"
+        "generated_at": "2026-07-26T19:48:00Z"
       },
-      "output_bytes": 15212,
+      "output_bytes": 31092,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "106db2687fa9e837e499edb5a5ee3b810d7faa38f62e1a716a3b38e0b04d93f6",
+      "output_sha256": "5722bbaec205ba52dfc845acfa7442d4b15ff01128219386c87370aad692c0c6",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: asics-actibreeze-match-top",
-        "verified_at": "2026-07-26T18:00:00+00:00"
+        "verified_at": "2026-07-26T19:48:00Z"
       }
     },
     {
@@ -514,21 +514,21 @@
       "file": "adidas-crazyflight-shorts.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; cold-studio geometric art normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-26T18:00:00+00:00"
+        "generated_at": "2026-07-26T19:48:00Z"
       },
-      "output_bytes": 14216,
+      "output_bytes": 13010,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "f4ad11e0cf209b6ebd2f924f337925d9de0e89fa0aa30eb778cfadf414b32962",
+      "output_sha256": "178d3e4e3bdd672ea023faeb88f60b5dce3de46563d747a6449d90c0a7d51b2e",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: adidas-crazyflight-shorts",
-        "verified_at": "2026-07-26T18:00:00+00:00"
+        "verified_at": "2026-07-26T19:48:00Z"
       }
     },
     {
@@ -536,21 +536,21 @@
       "file": "nike-pro-compression-shorts.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; cold-studio geometric art normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-26T18:00:00+00:00"
+        "generated_at": "2026-07-26T19:48:00Z"
       },
-      "output_bytes": 13632,
+      "output_bytes": 12516,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "6bdcca01c41856cb3c9f34005af4803e6916ce7680c5315bfb83fbe4d9049596",
+      "output_sha256": "7b3d337c960feaa65a9c7ac45c24cb30191f4eab0eed3a17e62d88e9632d1f5a",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: nike-pro-compression-shorts",
-        "verified_at": "2026-07-26T18:00:00+00:00"
+        "verified_at": "2026-07-26T19:48:00Z"
       }
     },
     {
@@ -558,21 +558,21 @@
       "file": "under-armour-heatgear-top.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; cold-studio geometric art normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-26T18:00:00+00:00"
+        "generated_at": "2026-07-26T19:48:00Z"
       },
-      "output_bytes": 15400,
+      "output_bytes": 30542,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "cc1399c12c63f3dc4330866703d305d2784c2ffc305a1a353ae1adec963bcd70",
+      "output_sha256": "1dafa821424aeb993c1492165a3c039f1b297c2a4bcd479a2f22c02c1c4cb676",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: under-armour-heatgear-top",
-        "verified_at": "2026-07-26T18:00:00+00:00"
+        "verified_at": "2026-07-26T19:48:00Z"
       }
     },
     {
@@ -580,21 +580,21 @@
       "file": "adidas-own-the-run-shorts.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; cold-studio geometric art normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-26T18:00:00+00:00"
+        "generated_at": "2026-07-26T19:48:00Z"
       },
-      "output_bytes": 15646,
+      "output_bytes": 14736,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "d8a71c6694d04d4d4d5f8afe840ab55eae4d8f71c8f71ee1edbbb56d7aafa138",
+      "output_sha256": "0b5822b6494295dea27f94a9143193a2f1a49182da3950e68f85f3bba8304f33",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: adidas-own-the-run-shorts",
-        "verified_at": "2026-07-26T18:00:00+00:00"
+        "verified_at": "2026-07-26T19:48:00Z"
       }
     },
     {
@@ -602,21 +602,21 @@
       "file": "on-performance-tights.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; cold-studio geometric art normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-26T18:00:00+00:00"
+        "generated_at": "2026-07-26T19:48:00Z"
       },
-      "output_bytes": 13162,
+      "output_bytes": 12028,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "6e4ad0ef5436748c441c2c02f9583eb68085f43cb5c1606f7ad3c7dc862f4f8d",
+      "output_sha256": "ef1c425a236189e4abf2ff59f1df32f522959fa3ec2e2fc7069825aacbf71a2a",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: on-performance-tights",
-        "verified_at": "2026-07-26T18:00:00+00:00"
+        "verified_at": "2026-07-26T19:48:00Z"
       }
     },
     {
@@ -624,21 +624,21 @@
       "file": "nike-therma-fit-training-hoodie.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; cold-studio geometric art normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-26T18:00:00+00:00"
+        "generated_at": "2026-07-26T19:48:00Z"
       },
-      "output_bytes": 19694,
+      "output_bytes": 18530,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "93b85f56123eb88b8f64f0d1f14e0254151b6e95e95c21583faac90a1502fd5e",
+      "output_sha256": "6096bcc86f49fe8556702e0ef8d5e8de925580f9250545ea2aace1498f14a260",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: nike-therma-fit-training-hoodie",
-        "verified_at": "2026-07-26T18:00:00+00:00"
+        "verified_at": "2026-07-26T19:48:00Z"
       }
     },
     {
@@ -646,21 +646,21 @@
       "file": "adidas-zne-track-jacket.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; cold-studio geometric art normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-26T18:00:00+00:00"
+        "generated_at": "2026-07-26T19:48:00Z"
       },
-      "output_bytes": 19846,
+      "output_bytes": 18532,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "5adb36b1e24c9b148a4bd0e3c0d0aecfdc287d156f41295c3bda516049db5c08",
+      "output_sha256": "007a0d9ab81ecbc52707e5462bf4239b24f5f4a059a0bfa4ed7774b7c23decc8",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: adidas-zne-track-jacket",
-        "verified_at": "2026-07-26T18:00:00+00:00"
+        "verified_at": "2026-07-26T19:48:00Z"
       }
     },
     {
@@ -668,21 +668,21 @@
       "file": "asics-gel-1130-black-pure-silver.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; cold-studio geometric art normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-26T18:00:00+00:00"
+        "generated_at": "2026-07-26T19:48:00Z"
       },
-      "output_bytes": 18490,
+      "output_bytes": 46918,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "0fa676af5cd03b23236141a35baa9494fd91773e8625c055c18e9af93330497e",
+      "output_sha256": "27098c70f01ba041783ee760851f41e0d71819c06c4993ac0caad95867d57e4b",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: asics-gel-1130-black-pure-silver",
-        "verified_at": "2026-07-26T18:00:00+00:00"
+        "verified_at": "2026-07-26T19:48:00Z"
       }
     },
     {
@@ -690,21 +690,21 @@
       "file": "asics-gel-nyc-cream-oyster-grey.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; cold-studio geometric art normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-26T18:00:00+00:00"
+        "generated_at": "2026-07-26T19:48:00Z"
       },
-      "output_bytes": 21982,
+      "output_bytes": 35754,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "59cc795ca369b33f1a9ecee691c242175bb4d4a16e96a400175d7570aad19cca",
+      "output_sha256": "e60368a178d5faadef144cf4decdb0545bbdeb91bc8516de3446e79979708f26",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: asics-gel-nyc-cream-oyster-grey",
-        "verified_at": "2026-07-26T18:00:00+00:00"
+        "verified_at": "2026-07-26T19:48:00Z"
       }
     },
     {
@@ -712,21 +712,21 @@
       "file": "asics-gel-kayano-14-white-midnight.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; cold-studio geometric art normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-26T18:00:00+00:00"
+        "generated_at": "2026-07-26T19:48:00Z"
       },
-      "output_bytes": 20220,
+      "output_bytes": 40336,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "df107496cdc99e76f3be2943361b3886b5d44244ba7d9f4880012eeeb2e1f085",
+      "output_sha256": "761cfbccd65258cb734e1f2707638e00d7cc9bb0434fe6a1b6dba2aa23a4f650",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: asics-gel-kayano-14-white-midnight",
-        "verified_at": "2026-07-26T18:00:00+00:00"
+        "verified_at": "2026-07-26T19:48:00Z"
       }
     },
     {
@@ -734,21 +734,21 @@
       "file": "salomon-xt-6-white-lunar-rock.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; cold-studio geometric art normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-26T18:00:00+00:00"
+        "generated_at": "2026-07-26T19:48:00Z"
       },
-      "output_bytes": 22770,
+      "output_bytes": 48722,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "85976381af688cb0a10736e737996ffe0506f15ebebff6b559edfc9365902305",
+      "output_sha256": "8128c238c7841316dc836a115e98f1dc41b299a32aa1d46a06cc3fcf1598bb47",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: salomon-xt-6-white-lunar-rock",
-        "verified_at": "2026-07-26T18:00:00+00:00"
+        "verified_at": "2026-07-26T19:48:00Z"
       }
     },
     {
@@ -756,21 +756,21 @@
       "file": "new-balance-9060-rain-cloud.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; cold-studio geometric art normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-26T18:00:00+00:00"
+        "generated_at": "2026-07-26T19:48:00Z"
       },
-      "output_bytes": 21600,
+      "output_bytes": 38174,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "14ccbd9c613eb7f74985f814744d6b78184275eed2dd212431984a3bf8694bf7",
+      "output_sha256": "2df1719e73aad70033de255739e1742a47e0f0b52f2987f8345baf100456c99f",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: new-balance-9060-rain-cloud",
-        "verified_at": "2026-07-26T18:00:00+00:00"
+        "verified_at": "2026-07-26T19:48:00Z"
       }
     },
     {
@@ -778,21 +778,21 @@
       "file": "new-balance-2002r-protection-pack.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; cold-studio geometric art normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-26T18:00:00+00:00"
+        "generated_at": "2026-07-26T19:48:00Z"
       },
-      "output_bytes": 21872,
+      "output_bytes": 40326,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "11458a0d5fece316a8013c84611bc7486b7f77e5ab3e6f7ee4fea7bef5ae1e91",
+      "output_sha256": "8bfc4acace087c06896d8c0bbf880dfacb423b6d447e610ad6bfeff166a729f7",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: new-balance-2002r-protection-pack",
-        "verified_at": "2026-07-26T18:00:00+00:00"
+        "verified_at": "2026-07-26T19:48:00Z"
       }
     },
     {
@@ -800,21 +800,21 @@
       "file": "new-balance-530-white-silver-navy.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; cold-studio geometric art normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-26T18:00:00+00:00"
+        "generated_at": "2026-07-26T19:48:00Z"
       },
-      "output_bytes": 22354,
+      "output_bytes": 47740,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "31a56d439505a7d85dcd676b1f22da6af1796e0813ccffba3f48b96fc7f26b7f",
+      "output_sha256": "e80307bb82cd976289a78ac5964a3c43757bedf506e1529576f18e4e4893a8fa",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: new-balance-530-white-silver-navy",
-        "verified_at": "2026-07-26T18:00:00+00:00"
+        "verified_at": "2026-07-26T19:48:00Z"
       }
     },
     {
@@ -822,21 +822,21 @@
       "file": "new-balance-1906r-silver-metallic.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; cold-studio geometric art normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-26T18:00:00+00:00"
+        "generated_at": "2026-07-26T19:48:00Z"
       },
-      "output_bytes": 21462,
+      "output_bytes": 37320,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "675094bcb7efe7b94bc1bf1ec8f17ff538fb3aaf3406a3bf75059f3f50965f12",
+      "output_sha256": "d03954c92d8d6de64fdfb8364928dd11b5c96f8b4b19a44bbc1cdc69313cdeb4",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: new-balance-1906r-silver-metallic",
-        "verified_at": "2026-07-26T18:00:00+00:00"
+        "verified_at": "2026-07-26T19:48:00Z"
       }
     },
     {
@@ -844,21 +844,21 @@
       "file": "nike-zoom-vomero-5-photon-dust.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; cold-studio geometric art normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-26T18:00:00+00:00"
+        "generated_at": "2026-07-26T19:48:00Z"
       },
-      "output_bytes": 22960,
+      "output_bytes": 41104,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "0364acbd03e051d518a8808ef89c3eab3d506dbe5ae1d5e9714a5ea20aa7443b",
+      "output_sha256": "3709e26bef3326484cc9ee887d0c3c2ff620b7c61eef7b6f9d93722c4f113fcd",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: nike-zoom-vomero-5-photon-dust",
-        "verified_at": "2026-07-26T18:00:00+00:00"
+        "verified_at": "2026-07-26T19:48:00Z"
       }
     },
     {
@@ -866,21 +866,21 @@
       "file": "nike-air-max-95-black-anthracite.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; cold-studio geometric art normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-26T18:00:00+00:00"
+        "generated_at": "2026-07-26T19:48:00Z"
       },
-      "output_bytes": 19074,
+      "output_bytes": 47682,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "d68138db4e9a4d976f6727959165aed4f31492959130deb8f3b767b86b24288b",
+      "output_sha256": "8b4e49f97fc5038c37b57e1d141fa77cf02506374a177f5263753b2e17d790a0",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: nike-air-max-95-black-anthracite",
-        "verified_at": "2026-07-26T18:00:00+00:00"
+        "verified_at": "2026-07-26T19:48:00Z"
       }
     },
     {
@@ -888,21 +888,21 @@
       "file": "nike-air-force-1-07-white.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; cold-studio geometric art normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-26T18:00:00+00:00"
+        "generated_at": "2026-07-26T19:48:00Z"
       },
-      "output_bytes": 21860,
+      "output_bytes": 36994,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "9e71959bb06d89dc160dab5c8ff4fae250a598357d979c1b1b2e9c6f78d6f1a7",
+      "output_sha256": "fd1e9da5df5c415a2bf79bab2a8a2570cdaf229ee0410506f80f47a59bfb40d4",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: nike-air-force-1-07-white",
-        "verified_at": "2026-07-26T18:00:00+00:00"
+        "verified_at": "2026-07-26T19:48:00Z"
       }
     },
     {
@@ -910,21 +910,21 @@
       "file": "nike-dunk-low-panda.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; cold-studio geometric art normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-26T18:00:00+00:00"
+        "generated_at": "2026-07-26T19:48:00Z"
       },
-      "output_bytes": 20246,
+      "output_bytes": 38836,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "c9bc4dd8ebd47db3d6f72add151a8218167e1357fb679f58e7188657f0409d51",
+      "output_sha256": "ee82a41f0b261273f012578752cfa330df6118830bef00e064e1c2340b6e2a3b",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: nike-dunk-low-panda",
-        "verified_at": "2026-07-26T18:00:00+00:00"
+        "verified_at": "2026-07-26T19:48:00Z"
       }
     },
     {
@@ -932,21 +932,21 @@
       "file": "air-jordan-4-black-cat.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; cold-studio geometric art normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-26T18:00:00+00:00"
+        "generated_at": "2026-07-26T19:48:00Z"
       },
-      "output_bytes": 17464,
+      "output_bytes": 48124,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "ba3b9943c98ad8f999400cfa7ab7cdf9031aa6f2152c761d85adbdba9a0494af",
+      "output_sha256": "5cbe00c73a00e9b813db5ffec8fd8ee2249dc1fc4535b80256086718c8112ba3",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: air-jordan-4-black-cat",
-        "verified_at": "2026-07-26T18:00:00+00:00"
+        "verified_at": "2026-07-26T19:48:00Z"
       }
     },
     {
@@ -954,21 +954,21 @@
       "file": "air-jordan-5-wolf-grey.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; cold-studio geometric art normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-26T18:00:00+00:00"
+        "generated_at": "2026-07-26T19:48:00Z"
       },
-      "output_bytes": 22608,
+      "output_bytes": 37150,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "d413a99e686a690970b054f11ccd06d57346f2f59e23c6033f200b99e9244710",
+      "output_sha256": "d817eed3a8ff7ff617d81cf07dd9d686175a1f82f4247f9e652485c1b28ad643",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: air-jordan-5-wolf-grey",
-        "verified_at": "2026-07-26T18:00:00+00:00"
+        "verified_at": "2026-07-26T19:48:00Z"
       }
     },
     {
@@ -976,21 +976,21 @@
       "file": "air-jordan-1-low-white-black.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; cold-studio geometric art normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-26T18:00:00+00:00"
+        "generated_at": "2026-07-26T19:48:00Z"
       },
-      "output_bytes": 21272,
+      "output_bytes": 40806,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "c3f00110235bb41494787e5e6fcf8c4e90f33c82ec132d03302330049fc453d0",
+      "output_sha256": "69c6dc46691e9a195f28ef06deb9342567c804b94e8518aaee26f6ac0695e208",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: air-jordan-1-low-white-black",
-        "verified_at": "2026-07-26T18:00:00+00:00"
+        "verified_at": "2026-07-26T19:48:00Z"
       }
     },
     {
@@ -998,21 +998,21 @@
       "file": "adidas-samba-og-white-black.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; cold-studio geometric art normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-26T18:00:00+00:00"
+        "generated_at": "2026-07-26T19:48:00Z"
       },
-      "output_bytes": 22094,
+      "output_bytes": 47994,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "0c48fac59383b876d4abaf023c9afdb8a4d3f64901b3dd6802c61171e6034d3f",
+      "output_sha256": "a534592ad1251ccd02dc94c1c82bb3d2180d3168a581cf901bd0802b70873b8e",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: adidas-samba-og-white-black",
-        "verified_at": "2026-07-26T18:00:00+00:00"
+        "verified_at": "2026-07-26T19:48:00Z"
       }
     },
     {
@@ -1020,21 +1020,21 @@
       "file": "adidas-gazelle-indoor-green.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; cold-studio geometric art normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-26T18:00:00+00:00"
+        "generated_at": "2026-07-26T19:48:00Z"
       },
-      "output_bytes": 22436,
+      "output_bytes": 36328,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "34080b55d55da546f31a4001d35dfb32d9491a41a27dcd7c45497acb30b9c561",
+      "output_sha256": "bc8d964cd075217383d246bbabb892f993510eb7505564eda243a5dc7a1b67c4",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: adidas-gazelle-indoor-green",
-        "verified_at": "2026-07-26T18:00:00+00:00"
+        "verified_at": "2026-07-26T19:48:00Z"
       }
     },
     {
@@ -1042,21 +1042,21 @@
       "file": "adidas-campus-00s-core-black.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; cold-studio geometric art normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-26T18:00:00+00:00"
+        "generated_at": "2026-07-26T19:48:00Z"
       },
-      "output_bytes": 20746,
+      "output_bytes": 40996,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "22e0f0d946a0122fd0df6abfa39d280265046d1121f2222bbb00ec3f78a1aa4f",
+      "output_sha256": "47daf81670b5d464911a6f805828d04edfe4714ffecfc9af075ac1a1a1e358a7",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: adidas-campus-00s-core-black",
-        "verified_at": "2026-07-26T18:00:00+00:00"
+        "verified_at": "2026-07-26T19:48:00Z"
       }
     },
     {
@@ -1064,21 +1064,21 @@
       "file": "converse-chuck-70-high-black.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; cold-studio geometric art normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-26T18:00:00+00:00"
+        "generated_at": "2026-07-26T19:48:00Z"
       },
-      "output_bytes": 24090,
+      "output_bytes": 48964,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "6adc12aa10cc997aa3daa26a1b2ff3a46812c5797aa8000eb68bbe9f7b248d37",
+      "output_sha256": "033523349181e75ed2b709f6180efa48474b01e4453a677dbaa09c7d904bab98",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: converse-chuck-70-high-black",
-        "verified_at": "2026-07-26T18:00:00+00:00"
+        "verified_at": "2026-07-26T19:48:00Z"
       }
     },
     {
@@ -1086,21 +1086,21 @@
       "file": "vans-old-skool-36-black-white.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; cold-studio geometric art normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-26T18:00:00+00:00"
+        "generated_at": "2026-07-26T19:48:00Z"
       },
-      "output_bytes": 22276,
+      "output_bytes": 38384,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "c34bb809f7976641f1324d03dd62ab4a9634aa006210b30b83e7121b1ea35fa0",
+      "output_sha256": "a3cf68ef1254aadc3d7ca2873f900bf061fdd478edbc047719f76e8cee252bd5",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: vans-old-skool-36-black-white",
-        "verified_at": "2026-07-26T18:00:00+00:00"
+        "verified_at": "2026-07-26T19:48:00Z"
       }
     },
     {
@@ -1108,21 +1108,21 @@
       "file": "nike-mind-001-slide-black.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; cold-studio geometric art normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-26T18:00:00+00:00"
+        "generated_at": "2026-07-26T19:48:00Z"
       },
-      "output_bytes": 15376,
+      "output_bytes": 14348,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "d985485005585726e943ddb76f3307987e106dd54e97b849f108c143863f2ce3",
+      "output_sha256": "fc2b6995ed02b3b826df4b61abe72a4fa8d6f00407ce9fce5d7e4099a992a300",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: nike-mind-001-slide-black",
-        "verified_at": "2026-07-26T18:00:00+00:00"
+        "verified_at": "2026-07-26T19:48:00Z"
       }
     },
     {
@@ -1130,21 +1130,21 @@
       "file": "timberland-field-boot-beef-broccoli.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; cold-studio geometric art normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-26T18:00:00+00:00"
+        "generated_at": "2026-07-26T19:48:00Z"
       },
-      "output_bytes": 19200,
+      "output_bytes": 18118,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "601febf148bb0f6de3bb519a3b2505b70a21c6b2690a6af0fe8f64347d6ef6e4",
+      "output_sha256": "d0461e4f4a5c928d489bb3b7db85a8d76de069dd16d72cd57442d3f3e230094a",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: timberland-field-boot-beef-broccoli",
-        "verified_at": "2026-07-26T18:00:00+00:00"
+        "verified_at": "2026-07-26T19:48:00Z"
       }
     },
     {
@@ -1152,21 +1152,21 @@
       "file": "essentials-hoodie-light-oatmeal.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; cold-studio geometric art normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-26T18:00:00+00:00"
+        "generated_at": "2026-07-26T19:48:00Z"
       },
-      "output_bytes": 21602,
+      "output_bytes": 20424,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "8cc1d8e306bf265fa39728e1ae16431e8e888dd4d2def78bafbb176aad9c6f63",
+      "output_sha256": "3febbd36c689093505dfe8b352f1d4703f2c015306fe30550967f686f58cc67e",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: essentials-hoodie-light-oatmeal",
-        "verified_at": "2026-07-26T18:00:00+00:00"
+        "verified_at": "2026-07-26T19:48:00Z"
       }
     },
     {
@@ -1174,21 +1174,21 @@
       "file": "north-face-1996-nuptse-black.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; cold-studio geometric art normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-26T18:00:00+00:00"
+        "generated_at": "2026-07-26T19:48:00Z"
       },
-      "output_bytes": 10894,
+      "output_bytes": 10082,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "1cffe1280c8d9e8f584b1f6f88e48588cc156ab27e28e7b445c51337395489fe",
+      "output_sha256": "febb0ca02ac209147430ea83b0dfe0ee97d881f5ba2b3bc672906836abd8e0dc",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: north-face-1996-nuptse-black",
-        "verified_at": "2026-07-26T18:00:00+00:00"
+        "verified_at": "2026-07-26T19:48:00Z"
       }
     },
     {
@@ -1196,21 +1196,21 @@
       "file": "supreme-mm6-zip-hoodie-black.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; cold-studio geometric art normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-26T18:00:00+00:00"
+        "generated_at": "2026-07-26T19:48:00Z"
       },
-      "output_bytes": 13468,
+      "output_bytes": 12566,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "2f11b858f722556d767eeabe21b7dbdc2a6d3dfd78bc5b54a96f9fe36ca3ab98",
+      "output_sha256": "4ceaac1036d7ce09844d6db4b20278ca81c4382b6ae057e7275c6f9c3f6abb5c",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: supreme-mm6-zip-hoodie-black",
-        "verified_at": "2026-07-26T18:00:00+00:00"
+        "verified_at": "2026-07-26T19:48:00Z"
       }
     },
     {
@@ -1218,21 +1218,21 @@
       "file": "jordan-nigel-sylvester-bike-air-jersey.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; cold-studio geometric art normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-26T18:00:00+00:00"
+        "generated_at": "2026-07-26T19:48:00Z"
       },
-      "output_bytes": 23714,
+      "output_bytes": 30772,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "7e1003c23e6c88ddb68a342cd45240dbd972669e8d49ed377eba74e3969c6a72",
+      "output_sha256": "32223f6a93ca28fbc8e061dfed898294b21eb6f160bd64220340e2584a94f0d3",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: jordan-nigel-sylvester-bike-air-jersey",
-        "verified_at": "2026-07-26T18:00:00+00:00"
+        "verified_at": "2026-07-26T19:48:00Z"
       }
     },
     {
@@ -1240,21 +1240,21 @@
       "file": "nike-barcelona-ronaldinho-jersey.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; cold-studio geometric art normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-26T18:00:00+00:00"
+        "generated_at": "2026-07-26T19:48:00Z"
       },
-      "output_bytes": 21210,
+      "output_bytes": 30966,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "8943597555f918b5e93ca441a8dd19541689792adf7e069653e78972473658d5",
+      "output_sha256": "4cee7ed6743a9112d99123cc259770f0d62ab32b30677e89766195c5b0441e8f",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: nike-barcelona-ronaldinho-jersey",
-        "verified_at": "2026-07-26T18:00:00+00:00"
+        "verified_at": "2026-07-26T19:48:00Z"
       }
     },
     {
@@ -1262,21 +1262,21 @@
       "file": "kith-adidas-messi-tee.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; cold-studio geometric art normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-26T18:00:00+00:00"
+        "generated_at": "2026-07-26T19:48:00Z"
       },
-      "output_bytes": 15818,
+      "output_bytes": 30108,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "423c8d4b89bb6de9d21cb07fd3f9d5f47b336d15aad039ea3854ba4ad8c0ee95",
+      "output_sha256": "c3255a17e13142cd27ef2a2a11ea3dfead264bcd25ffafd31a6c18e5a4f2f176",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: kith-adidas-messi-tee",
-        "verified_at": "2026-07-26T18:00:00+00:00"
+        "verified_at": "2026-07-26T19:48:00Z"
       }
     },
     {
@@ -1284,21 +1284,21 @@
       "file": "nike-hoops-elite-backpack.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; cold-studio geometric art normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-26T18:00:00+00:00"
+        "generated_at": "2026-07-26T19:48:00Z"
       },
-      "output_bytes": 12098,
+      "output_bytes": 10882,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "97affeeaab5c3314d5f1b10de899a982be8278b627856cfb4569236be98c6dd9",
+      "output_sha256": "df09ec434993041818c94b564bae30fc0f695d9822e49bd71bb9df8f6be2fa78",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: nike-hoops-elite-backpack",
-        "verified_at": "2026-07-26T18:00:00+00:00"
+        "verified_at": "2026-07-26T19:48:00Z"
       }
     },
     {
@@ -1306,21 +1306,21 @@
       "file": "new-era-yankees-59fifty-black.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; cold-studio geometric art normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-26T18:00:00+00:00"
+        "generated_at": "2026-07-26T19:48:00Z"
       },
-      "output_bytes": 14986,
+      "output_bytes": 13612,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "e2763bebf5cbeba451b647b4ded062b11b43d74351f0e9e9f72bfa7530e326d1",
+      "output_sha256": "88910c67bb7a4e3d0c0aa311d3d15721638d50f065721ebba0d701031cc3f130",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: new-era-yankees-59fifty-black",
-        "verified_at": "2026-07-26T18:00:00+00:00"
+        "verified_at": "2026-07-26T19:48:00Z"
       }
     }
   ]

@@ -6,6 +6,7 @@ __pycache__/
 .env*
 !.env.example
 .DS_Store
+.codex/
 coverage/
 generated/
 .playwright-cli/

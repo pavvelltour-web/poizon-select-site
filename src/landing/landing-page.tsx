@@ -6,8 +6,8 @@ import {
   filterCatalog,
   type CatalogCategory,
   type CatalogProduct,
+  type ProductKind,
 } from "../catalog/catalog"
-import { MagicMarquee } from "./magic-marquee"
 import {
   buildOrderRequest,
   buildTelegramBotUrl,
@@ -21,25 +21,52 @@ interface LandingPageProps {
   configuredBotUsername?: string | null
 }
 
-const processItems = [
-  "Название или ссылка",
-  "Поиск карточки",
-  "Сверка фото и цены",
-  "Проверка перед заказом",
+const categoryCopy: Record<ActiveCategory, string> = {
+  all: "Вся витрина: sport-first, лайфстайл и одежда",
+  volleyball: "Зал, прыжок, боковое движение и фиксация",
+  training: "ОФП, силовой зал и функциональные тренировки",
+  recovery: "Слайды, худи и вещи после тренировки",
+  lifestyle: "Кроссовки на каждый день и культовые пары",
+  apparel: "Футболки, худи, аксессуары и верхний слой",
+}
+
+const kindLabels: Record<ProductKind, string> = {
+  footwear: "Обувь",
+  apparel: "Одежда",
+  accessory: "Аксессуар",
+}
+
+const sizeHints: Record<ProductKind, string> = {
+  footwear: "EU 39–45 · точный размер проверит менеджер",
+  apparel: "S–XL · посадку сверяем перед оплатой",
+  accessory: "One size / размер по карточке",
+}
+
+const marketplaceNotes = [
+  {
+    title: "Поиск как в крупном магазине",
+    text: "Сначала задача и категория, потом карточка товара. Без длинного лендинга перед покупкой.",
+  },
+  {
+    title: "Цена как рыночный ориентир",
+    text: "Показываем диапазон по РФ для sport-first, но финал считаем после проверки размера и продавца.",
+  },
+  {
+    title: "Один понятный CTA",
+    text: "Карточка готовит чистый запрос для Telegram-бота: бренд, модель, артикул или сценарий.",
+  },
 ]
 
-export function LandingPage({
-  configuredBotUsername,
-}: LandingPageProps) {
+export function LandingPage({ configuredBotUsername }: LandingPageProps) {
   const [category, setCategory] = useState<ActiveCategory>("all")
   const [search, setSearch] = useState("")
   const [selectedProduct, setSelectedProduct] =
     useState<CatalogProduct | null>(null)
-  const [copyState, setCopyState] = useState<
-    "idle" | "copied" | "failed"
-  >("idle")
-  const orderHeadingRef = useRef<HTMLHeadingElement>(null)
-  const orderTriggerRef = useRef<HTMLButtonElement>(null)
+  const [copyState, setCopyState] = useState<"idle" | "copied" | "failed">(
+    "idle",
+  )
+  const sheetHeadingRef = useRef<HTMLHeadingElement>(null)
+  const productTriggerRef = useRef<HTMLButtonElement>(null)
 
   const botUsername = resolveBotUsername(
     configuredBotUsername === undefined
@@ -53,9 +80,21 @@ export function LandingPage({
   )
   const request = selectedProduct ? buildOrderRequest(selectedProduct) : ""
 
+  const categoryCounts = useMemo(() => {
+    const counts = new Map<ActiveCategory, number>([["all", catalogProducts.length]])
+    for (const item of catalogCategories) {
+      if (item.id === "all") continue
+      counts.set(
+        item.id,
+        catalogProducts.filter((product) => product.category === item.id).length,
+      )
+    }
+    return counts
+  }, [])
+
   useEffect(() => {
     if (!selectedProduct) return
-    orderHeadingRef.current?.focus({ preventScroll: true })
+    sheetHeadingRef.current?.focus({ preventScroll: true })
   }, [selectedProduct])
 
   useEffect(() => {
@@ -63,30 +102,25 @@ export function LandingPage({
 
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key !== "Escape") return
-
       event.preventDefault()
-      const trigger = orderTriggerRef.current
-      setSelectedProduct(null)
-      queueMicrotask(() => {
-        if (trigger?.isConnected) trigger.focus({ preventScroll: true })
-      })
+      closeProduct()
     }
 
     document.addEventListener("keydown", handleEscape)
     return () => document.removeEventListener("keydown", handleEscape)
-  }, [selectedProduct])
+  })
 
-  const prepareRequest = (
+  const openProduct = (
     product: CatalogProduct,
     trigger: HTMLButtonElement,
   ) => {
-    orderTriggerRef.current = trigger
+    productTriggerRef.current = trigger
     setCopyState("idle")
     setSelectedProduct(product)
   }
 
-  const closeRequest = () => {
-    const trigger = orderTriggerRef.current
+  const closeProduct = () => {
+    const trigger = productTriggerRef.current
     setSelectedProduct(null)
     queueMicrotask(() => {
       if (trigger?.isConnected) trigger.focus({ preventScroll: true })
@@ -101,484 +135,424 @@ export function LandingPage({
   return (
     <div
       id="top"
-      className={`buyer-landing ${selectedProduct ? "buyer-landing--order-open" : ""}`}
+      className={`kb-page ${selectedProduct ? "kb-page--sheet-open" : ""}`}
     >
       <a className="skip-link" href="#catalog">
-        Перейти к каталогу
+        Перейти к товарам
       </a>
 
-      <header className="site-header">
-        <a className="brand-lockup" href="#top" aria-label="SELECT — на главную">
-          <span className="brand-lockup__mark" aria-hidden="true">
-            S/
-          </span>
+      <header className="kb-header">
+        <a className="kb-brand" href="#top" aria-label="KicksBase — главная">
+          <img
+            src="brand/kicksbase-logo.webp"
+            width="720"
+            height="720"
+            alt=""
+          />
           <span>
-            <strong>SELECT</strong>
-            <small>personal buyer</small>
+            <strong>KicksBase</strong>
+            <small>Poizon buyer</small>
           </span>
         </a>
 
-        <nav className="site-nav" aria-label="Основная навигация">
+        <nav className="kb-nav" aria-label="Основная навигация">
           <a href="#catalog">Каталог</a>
+          <a href="#fit-guide">Как выбрать</a>
           <a href="#how-it-works">Как заказать</a>
-          <a href="#questions">Вопросы</a>
         </nav>
 
-        <a className="header-action" href="#catalog">
-          Выбрать вещь
-          <ArrowIcon />
+        <a className="kb-header__cta" href="#catalog">
+          Смотреть товары
         </a>
       </header>
 
       <main>
-        <section className="hero" aria-labelledby="hero-title">
-          <div className="hero__copy">
-            <p className="kicker">
-              Каталог байера <span aria-hidden="true">·</span> 60 позиций
+        <section className="hero-shop" aria-labelledby="hero-title">
+          <div className="hero-shop__copy">
+            <p className="eyebrow">Sport-first selection · 60 товаров</p>
+            <h1 id="hero-title">Кроссовки и экипировка для заказа через Poizon.</h1>
+            <p className="hero-shop__lead">
+              Витрина KicksBase начинается со спорта: 20 пар обуви и 10 вещей
+              для волейбола, ОФП и восстановления. Выберите товар, откройте
+              карточку и отправьте готовый запрос в Telegram.
             </p>
-            <h1 id="hero-title">
-              <span className="hero__line">Вы называете</span>
-              <span className="hero__line hero__line--accent">вещь.</span>
-              <span className="hero__line">Мы начинаем</span>
-              <span className="hero__line hero__line--accent">поиск.</span>
-            </h1>
-            <p className="hero__lede">
-              Спортивная подборка для волейболистов стоит первой: 20 пар обуви
-              и 10 вещей для игры, тренировок и восстановления. Ещё 30
-              лайфстайл-позиций сохранены ниже. Цену и размер всегда
-              подтверждаем перед заказом.
-            </p>
-            <div className="hero__actions">
-              <a className="button button--primary" href="#catalog">
-                Смотреть подборку
-                <ArrowIcon />
-              </a>
-              <a className="text-link" href="#how-it-works">
-                Как это работает
-              </a>
-            </div>
-            <dl className="hero__facts">
-              <div>
-                <dt>2 формата</dt>
-                <dd>Название или ссылка</dd>
-              </div>
-              <div>
-                <dt>Без догадок</dt>
-                <dd>Цена только после проверки</dd>
-              </div>
-            </dl>
-          </div>
 
-          <div className="hero__stage" aria-label="Пример задания для байера">
-            <div className="hero__index" aria-hidden="true">
-              60
-            </div>
-            <img
-              className="hero__image"
-              src="catalog/asics-sky-elite-ff-3.webp"
-              width="1200"
-              height="900"
-              alt=""
-            />
-            <article className="buyer-ticket">
-              <div className="buyer-ticket__head">
-                <span>BUYER REQUEST</span>
-                <span>READY</span>
-              </div>
-              <p className="buyer-ticket__title">Найти карточку</p>
-              <dl>
-                <div>
-                  <dt>Что можно прислать</dt>
-                  <dd>Модель, артикул или URL</dd>
-                </div>
-                <div>
-                  <dt>Что получите</dt>
-                  <dd>Карточку, фото и расчёт</dd>
-                </div>
-              </dl>
-              <div className="buyer-ticket__code" aria-hidden="true">
-                <i />
-                <i />
-                <i />
-                <i />
-                <i />
-                <i />
-                <i />
-                <i />
-                <i />
-                <i />
-                <i />
-                <i />
-              </div>
-            </article>
-            <p className="hero__caption">
-              Демо-каталог <span>→</span> запрос в Telegram
-            </p>
-          </div>
-        </section>
-
-        <section className="process-rail" aria-label="Этапы поиска товара">
-          <p className="sr-only">
-            Название или ссылка, поиск карточки, сверка фото и цены, проверка
-            перед заказом.
-          </p>
-          <MagicMarquee pauseOnHover>
-            {processItems.map((item) => (
-              <span className="process-rail__item" key={item}>
-                {item}
-                <span aria-hidden="true">↗</span>
-              </span>
-            ))}
-          </MagicMarquee>
-        </section>
-
-        <section className="catalog-section" id="catalog" aria-labelledby="catalog-title">
-          <div className="section-intro">
-            <p className="kicker">SPORT FIRST · текущая подборка</p>
-            <div>
-              <h2 id="catalog-title">60 товаров: сначала спорт, затем лайфстайл.</h2>
-              <p>
-                Первые 30 позиций собраны для аудитории пляжного и классического
-                волейбола: 20 пар обуви и 10 вещей. Все 30 ценовых диапазонов —
-                редакционные ориентиры по выборочной выборке публичных
-                предложений РФ на 26.07.2026, а не индивидуальная проверка
-                каждой модели или SKU. Конкретный размер, цвет и итоговую цену
-                менеджер сверяет перед оплатой.
-              </p>
-            </div>
-          </div>
-
-          <aside className="sport-pricing" aria-label="Как считается итоговая цена">
-            <div className="sport-pricing__lead">
-              <span>20 пар</span>
-              <span>10 вещей</span>
-              <strong>SPORT FIRST</strong>
-            </div>
-            <div>
-              <p className="sport-pricing__title">Понятная наценка без скрытой цены</p>
-              <p>
-                Итог = закупка + платёжные расходы + международная логистика +
-                сервис. Для обуви ориентир сервиса — <b>max(1 500 ₽, 12%)</b>,
-                для одежды — <b>max(700 ₽, 15%)</b>. Доставка по РФ считается
-                отдельно и процентом повторно не облагается.
-              </p>
-            </div>
-            <div className="sport-pricing__example">
-              <span>Пример расчёта</span>
-              <strong>10 000 + 1 800 + 700 + 1 500 = 14 000 ₽</strong>
-              <small>до доставки по РФ · финал только после проверки</small>
-            </div>
-          </aside>
-
-          <div className="catalog-toolbar">
-            <div
-              className="catalog-filters"
-              role="group"
-              aria-label="Фильтр каталога"
-            >
-              {catalogCategories.map((item) => (
-                <button
-                  key={item.id}
-                  type="button"
-                  aria-pressed={category === item.id}
-                  onClick={() => setCategory(item.id)}
-                >
-                  {item.label}
-                  <span aria-hidden="true">
-                    {item.id === "all"
-                      ? catalogProducts.length
-                      : catalogProducts.filter(
-                          (product) => product.category === item.id,
-                        ).length}
-                  </span>
-                </button>
-              ))}
-            </div>
-
-            <label className="catalog-search">
-              <span className="sr-only">Поиск по каталогу</span>
+            <label className="hero-search">
+              <span>Быстрый поиск</span>
               <SearchIcon />
               <input
                 type="search"
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder="Бренд или модель"
+                placeholder="ASICS, Metarise, Nike, шорты..."
                 autoComplete="off"
               />
             </label>
+
+            <div className="hero-shop__actions" aria-label="Быстрые действия">
+              <a className="button button--primary" href="#catalog">
+                Перейти к каталогу
+                <ArrowIcon />
+              </a>
+              <a className="button button--quiet" href="#fit-guide">
+                Подобрать по задаче
+              </a>
+            </div>
           </div>
 
-          <p className="catalog-count" aria-live="polite">
-            Найдено: {filteredProducts.length}
-          </p>
-
-          {filteredProducts.length > 0 ? (
-            <div className="product-grid">
-              {filteredProducts.map((product) => {
-                const productNumber =
-                  catalogProducts.findIndex(
-                    (catalogProduct) => catalogProduct.slug === product.slug,
-                  ) + 1
-
-                return (
-                  <article
-                    className={`product-card ${product.sportPriority ? "product-card--sport" : ""}`}
-                    key={product.slug}
-                  >
-                    <div
-                      className={`product-card__visual product-card__visual--${product.category}`}
-                    >
-                      <span className="product-card__number" aria-hidden="true">
-                        {String(productNumber).padStart(2, "0")}
-                      </span>
-                      <img
-                        src={product.image}
-                        width="1200"
-                        height="900"
-                        loading="lazy"
-                        decoding="async"
-                        alt=""
-                      />
-                      <span className="product-card__image-note">
-                        Визуальный ориентир
-                      </span>
-                      {product.sportPriority ? (
-                        <span className="product-card__priority">SPORT FIRST</span>
-                      ) : null}
-                    </div>
-                    <div className="product-card__body">
-                      <div className="product-card__meta">
-                        <span>{product.brand}</span>
-                        <span>{product.categoryLabel}</span>
-                      </div>
-                      <h3>{product.name}</h3>
-                      <p>{product.note}</p>
-                      <div className="product-card__footer">
-                        <div>
-                          <span>
-                            {product.marketPrice ? "Рынок РФ*" : "Цена"}
-                          </span>
-                          <strong>{product.marketPrice ?? "по запросу"}</strong>
-                          {product.priceBasis ? (
-                            <small>{product.priceBasis}</small>
-                          ) : null}
-                        </div>
-                        <button
-                          className="circle-action"
-                          type="button"
-                          onClick={(event) =>
-                            prepareRequest(product, event.currentTarget)
-                          }
-                          aria-label={`Проверить цену и размер: ${product.brand} ${product.name}`}
-                        >
-                          <ArrowIcon />
-                        </button>
-                      </div>
-                    </div>
-                  </article>
-                )
-              })}
+          <div className="hero-shop__visual" aria-label="Витрина KicksBase">
+            <img
+              src="brand/kicksbase-hero.webp"
+              width="1600"
+              height="1000"
+              alt="Кроссовки и тренировочная форма на белой студийной поверхности"
+            />
+            <div className="hero-card">
+              <span>SPORT FIRST</span>
+              <strong>30 позиций</strong>
+              <p>Зал, тренинг, recovery</p>
             </div>
-          ) : (
-            <div className="catalog-empty" role="status">
-              <p>В подборке такого названия пока нет.</p>
-              <span>
-                Сбросьте фильтр или отправьте точное название боту — он ищет
-                шире витрины.
-              </span>
-              <button
-                type="button"
-                className="text-link"
-                onClick={() => {
-                  setCategory("all")
-                  setSearch("")
-                }}
-              >
-                Показать все 60 позиций
-              </button>
-            </div>
-          )}
+          </div>
         </section>
 
-        <section
-          className="how-section"
-          id="how-it-works"
-          aria-labelledby="how-title"
-        >
-          <div className="how-section__heading">
-            <p className="kicker">Путь заказа</p>
-            <h2 id="how-title">Три понятных шага — без фальшивой цены на витрине.</h2>
+        <section className="store-logic" aria-label="Принципы витрины">
+          {marketplaceNotes.map((note) => (
+            <article key={note.title}>
+              <h2>{note.title}</h2>
+              <p>{note.text}</p>
+            </article>
+          ))}
+        </section>
+
+        <section className="fit-guide" id="fit-guide" aria-labelledby="fit-title">
+          <div className="section-heading">
+            <p className="eyebrow">Shop by need</p>
+            <h2 id="fit-title">Выберите не раздел, а задачу.</h2>
+          </div>
+          <div className="need-grid">
+            <button type="button" onClick={() => setCategory("volleyball")}>
+              <span>01</span>
+              <strong>Волейбол</strong>
+              <small>Прыжок, боковая устойчивость, зал</small>
+            </button>
+            <button type="button" onClick={() => setCategory("training")}>
+              <span>02</span>
+              <strong>Тренинг</strong>
+              <small>ОФП, силовая, функциональная работа</small>
+            </button>
+            <button type="button" onClick={() => setCategory("recovery")}>
+              <span>03</span>
+              <strong>Recovery</strong>
+              <small>Слайды, тёплый слой, дорога домой</small>
+            </button>
+            <button type="button" onClick={() => setCategory("lifestyle")}>
+              <span>04</span>
+              <strong>Лайфстайл</strong>
+              <small>Пары на каждый день и громкие силуэты</small>
+            </button>
+          </div>
+        </section>
+
+        <section className="catalog-shell" id="catalog" aria-labelledby="catalog-title">
+          <div className="section-heading section-heading--catalog">
+            <div>
+              <p className="eyebrow">Catalog</p>
+              <h2 id="catalog-title">60 товаров в понятной магазинной сетке.</h2>
+            </div>
+            <p>
+              Для sport-first позиций указан редакционный диапазон рынка РФ на
+              26.07.2026. Это не оферта и не обещание наличия: менеджер
+              подтверждает цвет, размер, продавца и итоговую цену перед оплатой.
+            </p>
+          </div>
+
+          <div className="catalog-layout">
+            <aside className="catalog-sidebar" aria-label="Фильтр каталога">
+              <p>Категории</p>
+              <div className="category-list" role="group" aria-label="Категории">
+                {catalogCategories.map((item) => (
+                  <button
+                    key={item.id}
+                    type="button"
+                    aria-pressed={category === item.id}
+                    onClick={() => setCategory(item.id)}
+                  >
+                    <span>{item.label}</span>
+                    <small aria-hidden="true">{categoryCounts.get(item.id) ?? 0}</small>
+                  </button>
+                ))}
+              </div>
+              <div className="sidebar-note">
+                <strong>{categoryCounts.get(category) ?? 0}</strong>
+                <span>{categoryCopy[category]}</span>
+              </div>
+            </aside>
+
+            <div className="catalog-main">
+              <div className="catalog-bar">
+                <p aria-live="polite">Найдено: {filteredProducts.length}</p>
+                <label className="catalog-search">
+                  <span className="sr-only">Поиск по каталогу</span>
+                  <SearchIcon />
+                  <input
+                    type="search"
+                    value={search}
+                    onChange={(event) => setSearch(event.target.value)}
+                    placeholder="Поиск по бренду, модели или артикулу"
+                    autoComplete="off"
+                  />
+                </label>
+              </div>
+
+              {filteredProducts.length > 0 ? (
+                <div className="product-grid">
+                  {filteredProducts.map((product, index) => (
+                    <button
+                      className={`product-card ${product.sportPriority ? "product-card--sport" : ""}`}
+                      type="button"
+                      key={product.slug}
+                      onClick={(event) => openProduct(product, event.currentTarget)}
+                      aria-label={`Проверить цену и размер: ${product.brand} ${product.name}`}
+                    >
+                      <span className="product-card__visual">
+                        <img
+                          src={product.image}
+                          width="1200"
+                          height="900"
+                          loading={index < 6 ? "eager" : "lazy"}
+                          decoding="async"
+                          alt=""
+                        />
+                        <span className="product-card__badge">
+                          {product.sportPriority ? "SPORT" : kindLabels[product.kind]}
+                        </span>
+                      </span>
+                      <span className="product-card__body">
+                        <span className="product-card__meta">
+                          <span>{product.brand}</span>
+                          <span>{product.categoryLabel}</span>
+                        </span>
+                        <strong>{product.name}</strong>
+                        <span className="product-card__note">{product.note}</span>
+                        <span className="product-card__bottom">
+                          <span>
+                            <small>{product.marketPrice ? "Рынок РФ*" : "Цена"}</small>
+                            <b>{product.marketPrice ?? "по запросу"}</b>
+                          </span>
+                          <span className="product-card__arrow">
+                            <ArrowIcon />
+                          </span>
+                        </span>
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="catalog-empty" role="status">
+                  <h3>В подборке такого названия пока нет.</h3>
+                  <p>
+                    Сбросьте фильтр или отправьте точное название боту: он ищет
+                    шире этой витрины.
+                  </p>
+                  <button
+                    type="button"
+                    className="button button--quiet"
+                    onClick={() => {
+                      setCategory("all")
+                      setSearch("")
+                    }}
+                  >
+                    Показать все 60 позиций
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+
+        <section className="how-section" id="how-it-works" aria-labelledby="how-title">
+          <div className="section-heading">
+            <p className="eyebrow">Order flow</p>
+            <h2 id="how-title">Как клиент проходит путь.</h2>
           </div>
           <ol className="steps">
             <li>
-              <span>01</span>
-              <h3>Покажите товар</h3>
-              <p>
-                Выберите позицию здесь, напишите название или пришлите ссылку
-                на открытую HTML-карточку товара. Большинство таких страниц
-                бот попробует разобрать автоматически.
-              </p>
+              <span>1</span>
+              <h3>Открывает карточку</h3>
+              <p>Смотрит ориентир, назначение, диапазон рынка и доступный тип размера.</p>
             </li>
             <li>
-              <span>02</span>
-              <h3>Проверьте совпадение</h3>
-              <p>
-                Бот выделит модель из запроса и попробует найти её карточку в
-                источнике Poizon. Если автоматическое распознавание не
-                сработает, запрос увидит менеджер.
-              </p>
+              <span>2</span>
+              <h3>Отправляет запрос</h3>
+              <p>Сайт готовит короткий текст для бота без лишних фраз и HTML.</p>
             </li>
             <li>
-              <span>03</span>
-              <h3>Подтвердите расчёт</h3>
-              <p>
-                Сверьте фото, размер и актуальную цену. Если источник не
-                подтвердился, запрос уйдёт на ручную проверку.
-              </p>
+              <span>3</span>
+              <h3>Получает проверку</h3>
+              <p>Бот или менеджер сверяет карточку, размер, продавца и итоговый расчёт.</p>
             </li>
           </ol>
         </section>
 
-        <section
-          className="questions-section"
-          id="questions"
-          aria-labelledby="questions-title"
-        >
-          <div>
-            <p className="kicker">Коротко о важном</p>
-            <h2 id="questions-title">До первого сообщения.</h2>
+        <section className="trust-section" aria-labelledby="trust-title">
+          <div className="section-heading">
+            <p className="eyebrow">Before payment</p>
+            <h2 id="trust-title">Что важно знать перед заказом.</h2>
           </div>
-          <div className="questions-list">
-            <details>
-              <summary>
-                Можно искать товар, которого нет в подборке?
-                <PlusIcon />
-              </summary>
+          <div className="trust-grid">
+            <article>
+              <h3>Каталог показывает 60 товарных ориентиров</h3>
               <p>
-                Да. Каталог показывает 60 товарных ориентиров. Бот принимает
-                свободное название, артикул или ссылку на публичную страницу
-                товара.
+                30 sport-first позиций стоят в начале витрины: 20 пар обуви и
+                10 вещей для спортсменов. Остальные 30 — сохранённые
+                лайфстайл-позиции.
               </p>
-            </details>
-            <details>
-              <summary>
-                Почему здесь нет фиксированных цен?
-                <PlusIcon />
-              </summary>
+            </article>
+            <article>
+              <h3>Все 30 ценовых диапазонов — редакционные ориентиры</h3>
               <p>
-                Цена зависит от размера, продавца и момента проверки. Сайт не
-                показывает выдуманную стоимость: расчёт формируется после
-                подтверждения карточки источника.
+                Это рыночная выборка на 26.07.2026, а не индивидуальная
+                проверка каждой модели или SKU. Финальный расчёт делает менеджер
+                перед оплатой.
               </p>
-            </details>
-            <details>
-              <summary>
-                Сайт работает без токена Telegram?
-                <PlusIcon />
-              </summary>
+            </article>
+            <article>
+              <h3>Визуалы помогают выбрать, но не заменяют проверку</h3>
               <p>
-                Да. В демо-режиме запрос можно подготовить и скопировать. Для
-                кнопки перехода достаточно публичного имени бота; секретный
-                BOT_TOKEN сайту не нужен и не должен попадать в его файлы.
+                Изображения — project-generated референсы. Цвет, продавец,
+                размерную сетку и наличие подтверждаем в карточке Poizon.
               </p>
-            </details>
+            </article>
           </div>
-        </section>
-
-        <section className="closing-cta" aria-labelledby="closing-title">
-          <p className="kicker">Не нашли нужное?</p>
-          <h2 id="closing-title">Принесите ссылку. Поиск начнём с неё.</h2>
-          <p>
-            Лучше всего подходят открытые HTML-карточки магазинов: бот
-            попробует извлечь название и сопоставить его с Poizon. Сложные или
-            закрытые страницы уйдут менеджеру на ручную проверку.
-          </p>
-          <a className="button button--light" href="#catalog">
-            Выбрать отправную точку
-            <ArrowIcon />
-          </a>
         </section>
       </main>
 
-      <footer className="site-footer">
-        <a className="brand-lockup brand-lockup--footer" href="#top">
-          <span className="brand-lockup__mark" aria-hidden="true">
-            S/
-          </span>
+      <footer className="kb-footer">
+        <a className="kb-brand" href="#top" aria-label="KicksBase — наверх">
+          <img src="brand/kicksbase-logo.webp" width="720" height="720" alt="" />
           <span>
-            <strong>SELECT</strong>
-            <small>personal buyer</small>
+            <strong>KicksBase</strong>
+            <small>Poizon buyer</small>
           </span>
         </a>
         <p>
-          Демонстрационная витрина. Товарные знаки принадлежат их владельцам.
-          Наличие и цена подтверждаются отдельно.
+          Визуалы являются project-generated референсами, не официальными
+          фото брендов. Товарные знаки принадлежат владельцам.
         </p>
-        <a href="#top">Наверх ↑</a>
+        <a href="#top">Наверх</a>
       </footer>
 
       {selectedProduct && (
-        <aside
-          className="order-dock"
-          aria-labelledby="order-dock-title"
-          data-testid="order-dock"
-        >
-          <div className="order-dock__identity">
-            <span>Запрос подготовлен</span>
-            <h2 id="order-dock-title" ref={orderHeadingRef} tabIndex={-1}>
-              {selectedProduct.brand} {selectedProduct.name}
-            </h2>
-          </div>
-          <label className="order-dock__request">
-            <span>Текст для бота</span>
-            <textarea readOnly value={request} rows={4} />
-          </label>
-          <div className="order-dock__actions">
-            <button
-              type="button"
-              className="button button--primary"
-              onClick={copyRequest}
-            >
-              <CopyIcon />
-              {copyState === "copied" ? "Запрос скопирован" : "Скопировать"}
-            </button>
-            {botUrl ? (
-              <a
-                className="button button--outline"
-                href={botUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Открыть @{botUsername}
-                <ArrowIcon />
-              </a>
-            ) : (
-              <p className="order-dock__demo">
-                Демо-режим: запрос можно скопировать. Ссылка на Telegram
-                появится после подключения бота.
-              </p>
-            )}
-            {copyState === "failed" && (
-              <p className="order-dock__feedback" role="alert">
-                Не удалось скопировать автоматически. Выделите текст выше и
-                скопируйте его вручную.
-              </p>
-            )}
-            <p className="sr-only" aria-live="polite">
-              {copyState === "copied"
-                ? "Запрос скопирован в буфер обмена"
-                : ""}
-            </p>
-          </div>
+        <>
           <button
-            className="order-dock__close"
+            className="sheet-scrim"
             type="button"
-            onClick={closeRequest}
-            aria-label="Закрыть подготовленный запрос"
+            onClick={closeProduct}
+            aria-label="Закрыть карточку товара"
+          />
+          <aside
+            className="product-sheet"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="product-sheet-title"
+            data-testid="order-dock"
           >
-            <CloseIcon />
-          </button>
-        </aside>
+            <button
+              className="product-sheet__close"
+              type="button"
+              onClick={closeProduct}
+              aria-label="Закрыть карточку товара"
+            >
+              <CloseIcon />
+            </button>
+            <div className="product-sheet__media">
+              <img
+                src={selectedProduct.image}
+                width="1200"
+                height="900"
+                alt={`${selectedProduct.brand} ${selectedProduct.name}`}
+              />
+            </div>
+            <div className="product-sheet__content">
+              <p className="eyebrow">
+                {selectedProduct.sportPriority ? "Sport-first" : kindLabels[selectedProduct.kind]}
+              </p>
+              <h2 id="product-sheet-title" ref={sheetHeadingRef} tabIndex={-1}>
+                {selectedProduct.brand} {selectedProduct.name}
+              </h2>
+              <p>{selectedProduct.note}</p>
+
+              <dl className="product-facts">
+                <div>
+                  <dt>Категория</dt>
+                  <dd>{selectedProduct.categoryLabel}</dd>
+                </div>
+                <div>
+                  <dt>Размер</dt>
+                  <dd>{sizeHints[selectedProduct.kind]}</dd>
+                </div>
+                <div>
+                  <dt>{selectedProduct.marketPrice ? "Ориентир рынка" : "Цена"}</dt>
+                  <dd>{selectedProduct.marketPrice ?? "по запросу"}</dd>
+                </div>
+              </dl>
+
+              {selectedProduct.priceBasis ? (
+                <p className="product-sheet__fineprint">
+                  {selectedProduct.priceBasis}. Финальный расчёт формируется
+                  после проверки карточки, размера и продавца.
+                </p>
+              ) : (
+                <p className="product-sheet__fineprint">
+                  Лайфстайл-позиции считаются после проверки конкретной
+                  карточки и размера.
+                </p>
+              )}
+
+              <label className="request-box">
+                <span>Текст для Telegram</span>
+                <textarea readOnly value={request} rows={3} />
+              </label>
+
+              <div className="product-sheet__actions">
+                <button
+                  type="button"
+                  className="button button--primary"
+                  onClick={copyRequest}
+                >
+                  <CopyIcon />
+                  {copyState === "copied" ? "Запрос скопирован" : "Скопировать запрос"}
+                </button>
+                {botUrl ? (
+                  <a
+                    className="button button--dark"
+                    href={botUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Открыть @{botUsername}
+                    <ArrowIcon />
+                  </a>
+                ) : (
+                  <p className="product-sheet__demo">
+                    Демо-режим: запрос можно скопировать. Ссылка на Telegram
+                    появится после подключения имени бота.
+                  </p>
+                )}
+              </div>
+
+              {copyState === "failed" ? (
+                <p className="product-sheet__feedback" role="alert">
+                  Не удалось скопировать автоматически. Выделите текст выше и
+                  скопируйте его вручную.
+                </p>
+              ) : null}
+              <p className="sr-only" aria-live="polite">
+                {copyState === "copied" ? "Запрос скопирован в буфер обмена" : ""}
+              </p>
+            </div>
+          </aside>
+        </>
       )}
     </div>
   )
@@ -614,14 +588,6 @@ function CloseIcon() {
   return (
     <svg viewBox="0 0 20 20" aria-hidden="true">
       <path d="m5 5 10 10M15 5 5 15" />
-    </svg>
-  )
-}
-
-function PlusIcon() {
-  return (
-    <svg viewBox="0 0 20 20" aria-hidden="true">
-      <path d="M10 3v14M3 10h14" />
     </svg>
   )
 }
