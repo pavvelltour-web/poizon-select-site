@@ -15,13 +15,16 @@ describe("LandingPage", () => {
     expect(screen.getAllByText("по запросу")).toHaveLength(30)
     expect(screen.getAllByText("Рынок РФ*")).toHaveLength(30)
     expect(
-      screen.getAllByText(
-        "Редакционный ориентир · выборка РФ 26.07.2026",
-      ),
-    ).toHaveLength(30)
+      screen.getByText(/Для sport-first позиций указан редакционный диапазон/),
+    ).toHaveTextContent("26.07.2026")
     expect(
-      screen.getByText(/Все 30 ценовых диапазонов — редакционные ориентиры/),
-    ).toHaveTextContent("а не индивидуальная проверка каждой модели или SKU")
+      screen.getByRole("heading", {
+        name: /Все 30 ценовых диапазонов — редакционные ориентиры/,
+      }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByText(/а не индивидуальная проверка каждой модели или SKU/),
+    ).toBeInTheDocument()
   })
 
   it("states the factual catalog total in the FAQ", () => {
@@ -49,7 +52,10 @@ describe("LandingPage", () => {
     const user = userEvent.setup()
     render(<LandingPage configuredBotUsername={null} />)
 
-    await user.type(screen.getByRole("searchbox"), "definitely-not-a-product")
+    await user.type(
+      screen.getByRole("searchbox", { name: "Быстрый поиск" }),
+      "definitely-not-a-product",
+    )
     expect(screen.getByRole("status")).toHaveTextContent(
       "В подборке такого названия пока нет.",
     )
@@ -66,7 +72,10 @@ describe("LandingPage", () => {
     const user = userEvent.setup()
     render(<LandingPage configuredBotUsername={null} />)
 
-    await user.type(screen.getByRole("searchbox"), "Ronaldinho")
+    await user.type(
+      screen.getByRole("searchbox", { name: "Быстрый поиск" }),
+      "Ronaldinho",
+    )
     await user.click(
       screen.getByRole("button", {
         name: /Проверить цену и размер: Nike Football FC Barcelona Ronaldinho/,
@@ -97,7 +106,7 @@ describe("LandingPage", () => {
         name: /Проверить цену и размер: ASICS SKY ELITE FF 3/,
       }),
     )
-    await user.click(screen.getByRole("button", { name: "Скопировать" }))
+    await user.click(screen.getByRole("button", { name: /Скопировать/ }))
 
     expect(screen.getByRole("alert")).toHaveTextContent(
       "Выделите текст выше и скопируйте его вручную.",

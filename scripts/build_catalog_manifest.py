@@ -52,8 +52,8 @@ def build(generated_at: str) -> dict[str, object]:
                 "provenance": {
                     "kind": "project-generated-original",
                     "generator": (
-                        "scripts/generate_catalog_art.py; cold-studio geometric art "
-                        "normalized to metadata-free 1200x900 WebP"
+                        "scripts/generate_catalog_art.py; project-generated product "
+                        "reference cutouts normalized to metadata-free 1200x900 WebP"
                     ),
                     "official_product_photo": False,
                     "generated_at": generated_at,

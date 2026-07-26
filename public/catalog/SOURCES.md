@@ -4,8 +4,8 @@ All 60 catalog images are local project-generated visual references. They are
 normalized metadata-free WebP files at 1200×900; the browser does not contact
 third-party image hosts.
 
-- All 60 visuals use the same cold-studio geometric art direction rendered by
-  `scripts/generate_catalog_art.py` and normalized locally.
+- All 60 visuals use the same cold-studio product-reference direction rendered
+  by `scripts/generate_catalog_art.py` and normalized locally.
 
 They are not official manufacturer photos and must not be presented as proof of
 an exact colour, material, SKU, size, availability or price match. Brand and

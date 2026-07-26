@@ -128,6 +128,7 @@ const publicFiles = await sourceFiles(publicRoot)
 const publicEntries = await readdir(publicRoot, { withFileTypes: true })
 const allowedPublicEntries = new Set([
   "THIRD_PARTY_NOTICES.md",
+  "brand",
   "catalog",
   "favicon.svg",
 ])
@@ -147,6 +148,10 @@ const allowedCatalogEntries = new Set([
   "sources.json",
   ...catalogManifest.items.map((item) => item.file),
 ])
+const allowedBrandEntries = new Set([
+  "kicksbase-hero.webp",
+  "kicksbase-logo.webp",
+])
 for (const file of publicFiles) {
   const relative = path.relative(publicRoot, file)
   const extension = path.extname(file).toLowerCase()
@@ -157,8 +162,15 @@ for (const file of publicFiles) {
     fail(`public/catalog contains an unexpected release artifact: ${relative}`)
   }
   if (
+    relative.startsWith(`brand${path.sep}`) &&
+    !allowedBrandEntries.has(path.basename(file))
+  ) {
+    fail(`public/brand contains an unexpected release artifact: ${relative}`)
+  }
+  if (
     !auditedTextExtensions.has(extension) &&
-    !(relative.startsWith(`catalog${path.sep}`) && extension === ".webp")
+    !(relative.startsWith(`catalog${path.sep}`) && extension === ".webp") &&
+    !(relative.startsWith(`brand${path.sep}`) && extension === ".webp")
   ) {
     fail(`public contains an unaudited file type: ${relative}`)
   }

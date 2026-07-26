@@ -139,9 +139,10 @@ uv run --frozen python scripts/fetch_catalog_images.py
 uv run python scripts/build_catalog_manifest.py
 ```
 
-Геометрический генератор `scripts/generate_catalog_art.py` воспроизводит все
-60 иллюстраций — SPORT FIRST и lifestyle — в едином холодном studio-стиле.
-Публикуемые нормализованные WebP хранятся в `public/catalog`.
+Генератор `scripts/generate_catalog_art.py` воспроизводит все 60 карточек —
+SPORT FIRST и lifestyle — как единые холодные studio-референсы с товарными
+cutout-изображениями там, где это уместно. Публикуемые нормализованные WebP
+хранятся в `public/catalog`.
 
 ## UI и границы интеграции
 
