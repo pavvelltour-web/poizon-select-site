@@ -24,6 +24,9 @@ export type ProductCategory =
   | "recovery"
   | "lifestyle"
   | "apparel"
+  | "protection"
+  | "balls"
+  | "bags"
 
 export type ProductKind = "footwear" | "apparel" | "accessory"
 export type CatalogSort = "featured" | "price-asc" | "price-desc" | "name"
@@ -916,8 +919,8 @@ const existingProducts: readonly ProductSource[] = [
     slug: "nike-hoops-elite-backpack",
     brand: "Nike",
     name: "Hoops Elite Backpack Black",
-    category: "apparel",
-    categoryLabel: "Аксессуары · рюкзак",
+    category: "bags",
+    categoryLabel: "Сумки и мелочи · рюкзак",
     kind: "accessory",
     sportPriority: false,
     query: "Nike Hoops Elite Backpack Black Anthracite Metallic Silver DX9786-010",
@@ -927,8 +930,8 @@ const existingProducts: readonly ProductSource[] = [
     slug: "new-era-yankees-59fifty-black",
     brand: "New Era",
     name: "New York Yankees 59FIFTY Black",
-    category: "apparel",
-    categoryLabel: "Аксессуары · кепка",
+    category: "bags",
+    categoryLabel: "Сумки и мелочи · кепка",
     kind: "accessory",
     sportPriority: false,
     query: "New Era New York Yankees 59FIFTY Black 60955984",
@@ -1179,8 +1182,8 @@ const expandedProducts: readonly ProductSource[] = [
     slug: "nike-vapor-elite-volleyball-kneepads",
     brand: "Nike",
     name: "Vapor Elite Volleyball Kneepads",
-    category: "apparel",
-    categoryLabel: "Аксессуары · наколенники",
+    category: "protection",
+    categoryLabel: "Защита · наколенники",
     kind: "accessory",
     sportPriority: true,
     query: "Nike Vapor Elite Volleyball Kneepads",
@@ -1193,8 +1196,8 @@ const expandedProducts: readonly ProductSource[] = [
     slug: "mizuno-vs1-ultra-kneepad",
     brand: "Mizuno",
     name: "VS-1 Ultra Kneepad",
-    category: "apparel",
-    categoryLabel: "Аксессуары · наколенники",
+    category: "protection",
+    categoryLabel: "Защита · наколенники",
     kind: "accessory",
     sportPriority: true,
     query: "Mizuno VS-1 Ultra Kneepad volleyball",
@@ -1207,8 +1210,8 @@ const expandedProducts: readonly ProductSource[] = [
     slug: "molten-v5m5000-flistatec",
     brand: "Molten",
     name: "V5M5000 Flistatec",
-    category: "apparel",
-    categoryLabel: "Аксессуары · мяч",
+    category: "balls",
+    categoryLabel: "Мячи · волейбол",
     kind: "accessory",
     sportPriority: true,
     query: "Molten V5M5000 Flistatec volleyball",
@@ -1308,8 +1311,8 @@ const equipmentProducts: readonly ProductSource[] = [
     slug: "mcdavid-hex-knee-pads",
     brand: "McDavid",
     name: "HEX Knee Pads",
-    category: "apparel",
-    categoryLabel: "Аксессуары · наколенники",
+    category: "protection",
+    categoryLabel: "Защита · наколенники",
     kind: "accessory",
     sportPriority: true,
     query: "McDavid HEX Knee Pads",
@@ -1322,8 +1325,8 @@ const equipmentProducts: readonly ProductSource[] = [
     slug: "bauerfeind-sports-knee-support",
     brand: "Bauerfeind",
     name: "Sports Knee Support",
-    category: "apparel",
-    categoryLabel: "Аксессуары · поддержка колена",
+    category: "protection",
+    categoryLabel: "Защита · поддержка колена",
     kind: "accessory",
     sportPriority: true,
     query: "Bauerfeind Sports Knee Support",
@@ -1336,8 +1339,8 @@ const equipmentProducts: readonly ProductSource[] = [
     slug: "mcdavid-hex-elbow-pads",
     brand: "McDavid",
     name: "HEX Elbow Pads",
-    category: "apparel",
-    categoryLabel: "Аксессуары · налокотники",
+    category: "protection",
+    categoryLabel: "Защита · налокотники",
     kind: "accessory",
     sportPriority: true,
     query: "McDavid HEX Elbow Pads",
@@ -1350,8 +1353,8 @@ const equipmentProducts: readonly ProductSource[] = [
     slug: "nike-essential-volleyball-elbow-pads",
     brand: "Nike",
     name: "Essential Volleyball Elbow Pads",
-    category: "apparel",
-    categoryLabel: "Аксессуары · налокотники",
+    category: "protection",
+    categoryLabel: "Защита · налокотники",
     kind: "accessory",
     sportPriority: true,
     query: "Nike Essential Volleyball Elbow Pads",
@@ -1364,8 +1367,8 @@ const equipmentProducts: readonly ProductSource[] = [
     slug: "mizuno-arm-sleeves",
     brand: "Mizuno",
     name: "Arm Sleeves",
-    category: "apparel",
-    categoryLabel: "Аксессуары · рукава",
+    category: "protection",
+    categoryLabel: "Защита · рукава",
     kind: "accessory",
     sportPriority: true,
     query: "Mizuno Arm Sleeves volleyball",
@@ -1378,8 +1381,8 @@ const equipmentProducts: readonly ProductSource[] = [
     slug: "nike-everyday-cushion-crew-socks-6pk",
     brand: "Nike",
     name: "Everyday Cushion Crew Socks 6PK",
-    category: "apparel",
-    categoryLabel: "Аксессуары · носки",
+    category: "bags",
+    categoryLabel: "Сумки и мелочи · носки",
     kind: "accessory",
     sportPriority: true,
     query: "Nike Everyday Cushion Crew Socks 6 Pack",
@@ -1392,8 +1395,8 @@ const equipmentProducts: readonly ProductSource[] = [
     slug: "stance-icon-crew-socks",
     brand: "Stance",
     name: "Icon Crew Socks",
-    category: "apparel",
-    categoryLabel: "Аксессуары · носки",
+    category: "bags",
+    categoryLabel: "Сумки и мелочи · носки",
     kind: "accessory",
     sportPriority: true,
     query: "Stance Icon Crew Socks",
@@ -1406,8 +1409,8 @@ const equipmentProducts: readonly ProductSource[] = [
     slug: "molten-v5m4500-volleyball",
     brand: "Molten",
     name: "V5M4500 Volleyball",
-    category: "apparel",
-    categoryLabel: "Аксессуары · мяч",
+    category: "balls",
+    categoryLabel: "Мячи · волейбол",
     kind: "accessory",
     sportPriority: true,
     query: "Molten V5M4500 Volleyball",
@@ -1420,8 +1423,8 @@ const equipmentProducts: readonly ProductSource[] = [
     slug: "mikasa-v200w-volleyball",
     brand: "Mikasa",
     name: "V200W Volleyball",
-    category: "apparel",
-    categoryLabel: "Аксессуары · мяч",
+    category: "balls",
+    categoryLabel: "Мячи · волейбол",
     kind: "accessory",
     sportPriority: true,
     query: "Mikasa V200W Volleyball",
@@ -1434,8 +1437,8 @@ const equipmentProducts: readonly ProductSource[] = [
     slug: "wilson-evo-nxt-basketball",
     brand: "Wilson",
     name: "Evo NXT Basketball",
-    category: "apparel",
-    categoryLabel: "Аксессуары · баскетбольный мяч",
+    category: "balls",
+    categoryLabel: "Мячи · баскетбол",
     kind: "accessory",
     sportPriority: true,
     query: "Wilson Evo NXT Basketball",
@@ -1448,8 +1451,8 @@ const equipmentProducts: readonly ProductSource[] = [
     slug: "nike-brasilia-training-duffel",
     brand: "Nike",
     name: "Brasilia Training Duffel",
-    category: "apparel",
-    categoryLabel: "Аксессуары · сумка",
+    category: "bags",
+    categoryLabel: "Сумки и мелочи · сумка",
     kind: "accessory",
     sportPriority: true,
     query: "Nike Brasilia Training Duffel",
@@ -1462,8 +1465,8 @@ const equipmentProducts: readonly ProductSource[] = [
     slug: "adidas-tiro-league-duffel",
     brand: "adidas",
     name: "Tiro League Duffel",
-    category: "apparel",
-    categoryLabel: "Аксессуары · сумка",
+    category: "bags",
+    categoryLabel: "Сумки и мелочи · сумка",
     kind: "accessory",
     sportPriority: true,
     query: "adidas Tiro League Duffel",
@@ -1610,6 +1613,36 @@ const performanceBasketballOverrides: Record<string, Partial<ProductSource>> = {
   },
 }
 
+const requestPriceGuides: Record<string, string> = {
+  "asics-gel-1130-black-pure-silver": "11–16 тыс. ₽",
+  "asics-gel-nyc-cream-oyster-grey": "14–21 тыс. ₽",
+  "asics-gel-kayano-14-white-midnight": "15–23 тыс. ₽",
+  "salomon-xt-6-white-lunar-rock": "17–26 тыс. ₽",
+  "new-balance-9060-rain-cloud": "14–22 тыс. ₽",
+  "new-balance-2002r-protection-pack": "16–28 тыс. ₽",
+  "new-balance-530-white-silver-navy": "10–15 тыс. ₽",
+  "new-balance-1906r-silver-metallic": "13–20 тыс. ₽",
+  "nike-zoom-vomero-5-photon-dust": "13–21 тыс. ₽",
+  "nike-air-max-95-black-anthracite": "20–34 тыс. ₽",
+  "nike-air-force-1-07-white": "11–16 тыс. ₽",
+  "nike-dunk-low-panda": "12–18 тыс. ₽",
+  "adidas-samba-og-white-black": "12–18 тыс. ₽",
+  "adidas-gazelle-indoor-green": "12–19 тыс. ₽",
+  "adidas-campus-00s-core-black": "10–16 тыс. ₽",
+  "converse-chuck-70-high-black": "8–13 тыс. ₽",
+  "vans-old-skool-36-black-white": "7–12 тыс. ₽",
+  "nike-mind-001-slide-black": "14–24 тыс. ₽",
+  "timberland-field-boot-beef-broccoli": "16–27 тыс. ₽",
+  "essentials-hoodie-light-oatmeal": "9–16 тыс. ₽",
+  "north-face-1996-nuptse-black": "28–45 тыс. ₽",
+  "supreme-mm6-zip-hoodie-black": "45–80 тыс. ₽",
+  "jordan-nigel-sylvester-bike-air-jersey": "12–22 тыс. ₽",
+  "nike-barcelona-ronaldinho-jersey": "14–26 тыс. ₽",
+  "kith-adidas-messi-tee": "12–20 тыс. ₽",
+  "nike-hoops-elite-backpack": "8–14 тыс. ₽",
+  "new-era-yankees-59fifty-black": "4–8 тыс. ₽",
+}
+
 function withFallbackGallery(product: ProductSource): CatalogProduct {
   const fallbackImage = `catalog/${product.assetSlug ?? product.slug}.webp`
   const gallery = projectGallery(product)
@@ -1633,6 +1666,12 @@ export const catalogProducts: readonly CatalogProduct[] = catalogProductSource.m
     withFallbackGallery({
       ...product,
       ...performanceBasketballOverrides[product.slug],
+      ...(requestPriceGuides[product.slug]
+        ? {
+            marketPrice: requestPriceGuides[product.slug],
+            priceBasis: MARKET_PRICE_BASIS,
+          }
+        : {}),
     }),
 )
 
@@ -1678,7 +1717,11 @@ function matchesCatalogCategory(
   if (category === "sneakers") {
     return product.kind === "footwear" && product.category === "lifestyle"
   }
-  if (category === "volleyball" || category === "basketball") {
+  if (
+    category === "volleyball" ||
+    category === "basketball" ||
+    category === "recovery"
+  ) {
     return product.category === category
   }
   if (category === "apparel") {
@@ -1686,29 +1729,29 @@ function matchesCatalogCategory(
   }
   if (category === "protection") {
     return (
-      product.kind === "accessory" &&
-      textIncludes(product, /наколен|налокот|sleeve|support|strap|tape|тейп/i)
+      product.category === "protection" ||
+      (product.kind === "accessory" &&
+        textIncludes(product, /наколен|налокот|sleeve|support|strap|tape|тейп/i))
     )
   }
   if (category === "balls") {
     return (
-      product.kind === "accessory" &&
-      textIncludes(product, /мяч|volleyball|basketball|molten|mikasa|wilson/i)
+      product.category === "balls" ||
+      (product.kind === "accessory" &&
+        textIncludes(product, /мяч|volleyball|basketball|molten|mikasa|wilson/i))
     )
   }
   if (category === "training") {
     return product.category === "training" || textIncludes(product, /resistance|band|bottle|резин/i)
   }
-  if (category === "recovery") {
-    return product.category === "recovery"
-  }
   if (category === "bags") {
-    return textIncludes(product, /bag|backpack|duffel|нос|кепк|cap|сумк|рюкзак/i)
+    return product.category === "bags" || textIncludes(product, /bag|backpack|duffel|нос|кепк|cap|сумк|рюкзак/i)
   }
   return false
 }
 
 function priceRank(product: CatalogProduct): number {
+  if (product.orderQuote) return product.orderQuote.totalRub / 1000
   if (!product.marketPrice) return Number.POSITIVE_INFINITY
 
   const [rawValue] = product.marketPrice.match(/\d+(?:[,.]\d+)?/u) ?? []

@@ -22,9 +22,9 @@ describe("LandingPage", () => {
     expect(productButtons()).toHaveLength(100)
     expect(screen.queryByText("по запросу")).toBeNull()
     expect(screen.getAllByText("Цена от")).toHaveLength(100)
-    expect(screen.getAllByText("от 7 000 ₽").length).toBeGreaterThan(0)
-    expect(screen.getAllByText("от 3 000 ₽").length).toBeGreaterThan(0)
-    expect(screen.getAllByText("от 2 500 ₽").length).toBeGreaterThan(0)
+    expect(screen.getAllByText("от 13 465 ₽").length).toBeGreaterThan(0)
+    expect(screen.getAllByText("от 45 тыс. ₽").length).toBeGreaterThan(0)
+    expect(screen.getAllByText("от 4 тыс. ₽").length).toBeGreaterThan(0)
     expect(
       screen.getByText(/Перед оплатой всё должно быть понятно/),
     ).toBeInTheDocument()
@@ -133,7 +133,12 @@ describe("LandingPage", () => {
     const user = userEvent.setup()
     render(<LandingPage configuredBotUsername={null} />)
 
-    await user.click(screen.getByRole("button", { name: /Баскетбол/ }))
+    await user.click(
+      within(screen.getByRole("group", { name: "Категории" })).getByRole(
+        "button",
+        { name: /Баскетбол/ },
+      ),
+    )
     await user.type(screen.getByRole("searchbox", { name: "Поиск по каталогу" }), "nike")
     await user.click(
       screen.getByRole("button", { name: /Открыть карточку: Nike G.T. Cut Academy/ }),

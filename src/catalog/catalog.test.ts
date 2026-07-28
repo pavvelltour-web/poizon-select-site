@@ -31,7 +31,16 @@ describe("catalogProducts", () => {
     ).toHaveLength(22)
     expect(
       catalogProducts.filter((product) => product.category === "apparel"),
-    ).toHaveLength(23)
+    ).toHaveLength(6)
+    expect(
+      catalogProducts.filter((product) => product.category === "protection"),
+    ).toHaveLength(7)
+    expect(
+      catalogProducts.filter((product) => product.category === "balls"),
+    ).toHaveLength(4)
+    expect(
+      catalogProducts.filter((product) => product.category === "bags"),
+    ).toHaveLength(6)
   })
 
   it("keeps sport-priority focused on volleyball, basketball and support items", () => {
@@ -83,6 +92,7 @@ describe("catalogProducts", () => {
         ),
       ).toBe(true)
       imagePaths.add(product.fallbackImage)
+      expect(Boolean(product.marketPrice || product.orderQuote)).toBe(true)
     }
 
     expect(imagePaths.size).toBe(100)
@@ -115,7 +125,7 @@ describe("catalogProducts", () => {
     )
   })
 
-  it("sorts deterministically without inventing prices for request-only items", () => {
+  it("sorts deterministically with prices for every catalog item", () => {
     const trainingNike = filterCatalog(catalogProducts, "training", "NIKE")
 
     expect(sortCatalog(trainingNike, "featured").map((product) => product.slug)).toEqual([
@@ -125,9 +135,11 @@ describe("catalogProducts", () => {
       "nike-hyperfuel-water-bottle",
     ])
     expect(sortCatalog(catalogProducts, "price-asc")[0].slug).toBe(
-      "rocktape-kinesiology-tape-black",
+      "adidas-crazyflight-shorts",
     )
-    expect(sortCatalog(catalogProducts, "price-asc").at(-1)?.marketPrice).toBeUndefined()
+    expect(sortCatalog(catalogProducts, "price-asc").at(-1)?.slug).toBe(
+      "supreme-mm6-zip-hoodie-black",
+    )
     expect(sortCatalog(catalogProducts, "name")[0].brand).toBe("adidas")
   })
 

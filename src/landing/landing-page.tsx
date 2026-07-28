@@ -44,6 +44,7 @@ import {
   copyOrderRequest,
   resolveBotUsername,
 } from "./order-request"
+import { MagicMarquee } from "./magic-marquee"
 
 type ActiveCategory = "all" | CatalogCategory
 
@@ -154,6 +155,54 @@ const scenarioTiles: readonly {
     text: "Слайды, роллы и восстановление, чтобы следующая тренировка не начиналась с боли.",
     metric: "10 позиций",
     icon: TimerReset,
+  },
+] as const
+
+const quickFilters: readonly {
+  label: string
+  detail: string
+  category: ActiveCategory
+  search?: string
+  sort?: CatalogSort
+  icon: LucideIcon
+}[] = [
+  {
+    label: "Обувь для прыжка",
+    detail: "волейбол + зал",
+    category: "court-shoes",
+    icon: Zap,
+  },
+  {
+    label: "Баскетбол для зала",
+    detail: "мягкость и контроль",
+    category: "basketball",
+    icon: CircleDot,
+  },
+  {
+    label: "Защита колена",
+    detail: "наколенники и поддержка",
+    category: "protection",
+    search: "колен",
+    icon: ShieldCheck,
+  },
+  {
+    label: "Мячи",
+    detail: "игра и команда",
+    category: "balls",
+    icon: CircleDot,
+  },
+  {
+    label: "До 10 тыс.",
+    detail: "сначала доступное",
+    category: "all",
+    sort: "price-asc",
+    icon: BadgeCheck,
+  },
+  {
+    label: "Сумка + мелочи",
+    detail: "то, что берут с собой",
+    category: "bags",
+    icon: Backpack,
   },
 ] as const
 
@@ -379,14 +428,45 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
   useEffect(() => {
     if (!selectedProduct) return
 
-    const handleEscape = (event: KeyboardEvent) => {
-      if (event.key !== "Escape") return
-      event.preventDefault()
-      closeProduct()
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = "hidden"
+
+    const handleDialogKeys = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault()
+        closeProduct()
+        return
+      }
+
+      if (event.key !== "Tab") return
+
+      const dialog = document.querySelector<HTMLElement>(".product-sheet")
+      if (!dialog) return
+
+      const focusable = Array.from(
+        dialog.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), textarea:not([disabled]), select:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        ),
+      ).filter((element) => !element.hasAttribute("disabled"))
+
+      const first = focusable[0]
+      const last = focusable.at(-1)
+      if (!first || !last) return
+
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault()
+        last.focus()
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault()
+        first.focus()
+      }
     }
 
-    document.addEventListener("keydown", handleEscape)
-    return () => document.removeEventListener("keydown", handleEscape)
+    document.addEventListener("keydown", handleDialogKeys)
+    return () => {
+      document.body.style.overflow = previousOverflow
+      document.removeEventListener("keydown", handleDialogKeys)
+    }
   })
 
   const selectCategory = (nextCategory: ActiveCategory) => {
@@ -407,6 +487,23 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
   const updateSort = (nextSort: CatalogSort) => {
     setSort(nextSort)
     writeUrl({ sort: nextSort })
+  }
+
+  const applyQuickFilter = (filter: (typeof quickFilters)[number]) => {
+    const nextSearch = filter.search ?? ""
+    const nextSort = filter.sort ?? "featured"
+    setCategory(filter.category)
+    setSearch(nextSearch)
+    setSort(nextSort)
+    setSelectedSlug(null)
+    setSelectedImageIndex(0)
+    setCopyState("idle")
+    writeUrl({
+      category: filter.category,
+      search: nextSearch,
+      sort: nextSort,
+      productSlug: null,
+    })
   }
 
   const resetCatalog = () => {
@@ -496,8 +593,8 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
             <p className="eyebrow">Заловая экипировка · обувь · защита</p>
             <h1 id="hero-title">KICKSBASE</h1>
             <p className="shop-hero__lead">
-              База экипировки для волейбола, баскетбола и тренировок в зале.
-              Подбирайте пару, защиту, форму и инвентарь в одном каталоге.
+              Экипировка для тех, кто живет залом: волейбол, баскетбольные пары,
+              защита, форма и восстановление в одном коротком каталоге.
             </p>
             <div className="hero-actions">
               <a className="button button--primary" href="#catalog">
@@ -519,8 +616,8 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
             <div className="pavel-note">
               <Medal aria-hidden="true" size={18} />
               <span>
-                Подход игрока: сначала посадка, сцепление и задача в зале,
-                потом бренд и цвет.
+                Подход Павла Шустрова: сначала посадка, сцепление и задача в зале,
+                потом модель, цвет и размер.
               </span>
             </div>
             <div className="hero-marks" aria-label="Преимущества каталога">
@@ -564,6 +661,34 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
               )
             })}
           </div>
+        </section>
+
+        <MagicMarquee className="culture-ribbon" repeat={4} pauseOnHover>
+          <span>Заловая база</span>
+          <span>Пары под прыжок</span>
+          <span>Баскетбол для волейболистов</span>
+          <span>Защита колена</span>
+          <span>Мячи</span>
+          <span>Recovery</span>
+          <span>KICKSBASE</span>
+        </MagicMarquee>
+
+        <section className="brand-system" aria-label="Система подбора KICKSBASE">
+          <article>
+            <span>BASE 01</span>
+            <strong>Обувь под движение</strong>
+            <p>Прыжок, боковая работа, мягкое приземление и пары, которые волейболисты часто берут из баскетбола.</p>
+          </article>
+          <article>
+            <span>BASE 02</span>
+            <strong>Комплект на тренировку</strong>
+            <p>Защита, мячи, резина, бутылки, носки и сумки — без лишнего шума, сразу вокруг реального зала.</p>
+          </article>
+          <article>
+            <span>BASE 03</span>
+            <strong>Расчет до оплаты</strong>
+            <p>В карточке видно цену от, формулу заказа и что менеджер уточнит перед финальным подтверждением.</p>
+          </article>
         </section>
 
         <section className="catalog-shell" id="catalog" aria-labelledby="catalog-title">
@@ -637,6 +762,31 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
             </button>
           </div>
 
+          <div className="quick-refine" aria-label="Быстрые подборки">
+            {quickFilters.map((filter) => {
+              const QuickIcon = filter.icon
+              const pressed =
+                category === filter.category &&
+                search === (filter.search ?? "") &&
+                sort === (filter.sort ?? "featured")
+
+              return (
+                <button
+                  key={`${filter.category}-${filter.label}`}
+                  type="button"
+                  aria-pressed={pressed}
+                  onClick={() => applyQuickFilter(filter)}
+                >
+                  <QuickIcon aria-hidden="true" size={18} />
+                  <span>
+                    <strong>{filter.label}</strong>
+                    <em>{filter.detail}</em>
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+
           <div className="category-row" role="group" aria-label="Категории">
             {catalogCategories.map((item) => {
               const CategoryIcon = categoryIcons[item.id]
@@ -678,9 +828,10 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
 
                 return (
                   <button
-                    className="product-card"
+                    className={`product-card ${index % 13 === 0 ? "product-card--feature" : ""}`}
                     type="button"
                     key={product.slug}
+                    data-category={product.category}
                     style={{ "--card-index": index } as CSSProperties}
                     onClick={(event) => openProduct(product, event.currentTarget)}
                     aria-label={`Открыть карточку: ${product.brand} ${product.name}`}
@@ -713,6 +864,9 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
                       <span className="product-card__badge">
                         {getProductBadge(product)}
                       </span>
+                      <span className="product-card__category">
+                        {product.categoryLabel}
+                      </span>
                       <span className="product-card__dots" aria-hidden="true">
                         {product.gallery.slice(0, 5).map((image, dotIndex) => (
                           <span key={`${image.src}-${dotIndex}`} />
@@ -726,7 +880,8 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
                         {productUse}
                       </span>
                       <span className="product-card__tags" aria-hidden="true">
-                        {tags.slice(0, 1).map((tag) => (
+                        <span>{product.gallery.length} ракурсов</span>
+                        {tags.slice(0, 2).map((tag) => (
                           <span key={tag}>{tag}</span>
                         ))}
                       </span>
