@@ -1,13 +1,23 @@
 import {
   ArrowUpRight,
   BadgeCheck,
+  Backpack,
+  CircleDot,
   Copy,
+  Dumbbell,
+  Footprints,
   RotateCcw,
   Search,
   Send,
+  ShieldCheck,
   ShoppingBag,
+  Shirt,
   SlidersHorizontal,
+  Sparkles,
+  Trophy,
+  Waves,
   X,
+  Zap,
 } from "lucide-react"
 import { useEffect, useMemo, useRef, useState } from "react"
 
@@ -24,6 +34,7 @@ import {
   type ProductKind,
 } from "../catalog/catalog"
 import type { CSSProperties } from "react"
+import type { LucideIcon } from "lucide-react"
 import {
   buildOrderRequest,
   buildTelegramBotUrl,
@@ -52,23 +63,45 @@ const sortOptions: readonly { id: CatalogSort; label: string }[] = [
 ]
 
 const categoryCopy: Record<ActiveCategory, string> = {
-  all: "Вся подборка",
-  volleyball: "Зал, прыжок и боковая устойчивость",
-  basketball: "Баскетбольные performance-пары, которые берут для волейбольного зала",
-  training: "ОФП, силовой зал и функциональные тренировки",
-  recovery: "Слайды, теплый слой и восстановление",
-  lifestyle: "Кроссовки на каждый день и культовые пары",
-  apparel: "Футболки, худи, аксессуары и верхний слой",
+  all: "Вся витрина",
+  "court-shoes": "Волейбол, баскетбол и заловая работа",
+  sneakers: "Кроссовки, кеды и пары на каждый день",
+  volleyball: "Пары и экипировка под волейбольный зал",
+  basketball: "Баскетбольные пары, которые берут для зала",
+  apparel: "Форма, компрессия, худи и верхний слой",
+  protection: "Наколенники, налокотники, тейпы и поддержка",
+  balls: "Волейбольные и баскетбольные мячи",
+  training: "Резина, бутылки и функциональная база",
+  recovery: "Слайды, роллы и восстановление после зала",
+  bags: "Сумки, рюкзаки, носки и мелкие вещи",
 }
 
 const categoryTone: Record<ActiveCategory, string> = {
   all: "gear",
+  "court-shoes": "jump",
+  sneakers: "street",
   volleyball: "jump",
   basketball: "court",
+  apparel: "kit",
+  protection: "guard",
+  balls: "ball",
   training: "train",
   recovery: "reset",
-  lifestyle: "street",
-  apparel: "kit",
+  bags: "carry",
+}
+
+const categoryIcons: Record<ActiveCategory, LucideIcon> = {
+  all: Sparkles,
+  "court-shoes": Zap,
+  sneakers: Footprints,
+  volleyball: Trophy,
+  basketball: CircleDot,
+  apparel: Shirt,
+  protection: ShieldCheck,
+  balls: CircleDot,
+  training: Dumbbell,
+  recovery: Waves,
+  bags: Backpack,
 }
 
 const kindLabels: Record<ProductKind, string> = {
@@ -196,10 +229,7 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
     const counts = new Map<ActiveCategory, number>([["all", catalogProducts.length]])
     for (const item of catalogCategories) {
       if (item.id === "all") continue
-      counts.set(
-        item.id,
-        catalogProducts.filter((product) => product.category === item.id).length,
-      )
+      counts.set(item.id, filterCatalog(catalogProducts, item.id, "").length)
     }
     return counts
   }, [])
@@ -467,19 +497,28 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
           </div>
 
           <div className="category-row" role="group" aria-label="Категории">
-            {catalogCategories.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                aria-pressed={category === item.id}
-                onClick={() => selectCategory(item.id)}
-                data-tone={categoryTone[item.id]}
-              >
-                <span className="category-row__mark" aria-hidden="true" />
-                <span>{item.label}</span>
-                <small>{categoryCounts.get(item.id) ?? 0}</small>
-              </button>
-            ))}
+            {catalogCategories.map((item) => {
+              const CategoryIcon = categoryIcons[item.id]
+
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  aria-pressed={category === item.id}
+                  onClick={() => selectCategory(item.id)}
+                  data-tone={categoryTone[item.id]}
+                >
+                  <span className="category-row__mark" aria-hidden="true" />
+                  <span className="category-row__icon" aria-hidden="true">
+                    <CategoryIcon size={19} strokeWidth={2.2} />
+                  </span>
+                  <span className="category-row__content">
+                    <span>{item.label}</span>
+                    <small>{categoryCounts.get(item.id) ?? 0}</small>
+                  </span>
+                </button>
+              )
+            })}
           </div>
 
           <div className="catalog-status" aria-live="polite">

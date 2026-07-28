@@ -104,6 +104,10 @@ describe("catalogProducts", () => {
 
   it("filters by category and a case-insensitive search phrase", () => {
     expect(filterCatalog(catalogProducts, "volleyball", "")).toHaveLength(23)
+    expect(filterCatalog(catalogProducts, "court-shoes", "")).toHaveLength(37)
+    expect(filterCatalog(catalogProducts, "sneakers", "")).toHaveLength(22)
+    expect(filterCatalog(catalogProducts, "protection", "")).toHaveLength(9)
+    expect(filterCatalog(catalogProducts, "balls", "")).toHaveLength(6)
     expect(filterCatalog(catalogProducts, "all", "ronaldinho")).toHaveLength(1)
     expect(filterCatalog(catalogProducts, "basketball", "NIKE")).toHaveLength(7)
     expect(filterCatalog(catalogProducts, "recovery", "not-a-real-product")).toEqual(

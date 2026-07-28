@@ -39,7 +39,7 @@ describe("LandingPage", () => {
 
     await user.click(screen.getByRole("button", { name: /Волейбол/ }))
     expect(productButtons()).toHaveLength(23)
-    expect(screen.getByText("Зал, прыжок и боковая устойчивость")).toBeInTheDocument()
+    expect(screen.getByText("Пары и экипировка под волейбольный зал")).toBeInTheDocument()
     expect(window.location.search).toBe("?category=volleyball")
 
     await user.type(screen.getByRole("searchbox", { name: "Поиск по каталогу" }), "nike")
@@ -133,7 +133,7 @@ describe("LandingPage", () => {
     const user = userEvent.setup()
     render(<LandingPage configuredBotUsername={null} />)
 
-    await user.click(screen.getByRole("button", { name: /Баскетбол для зала/ }))
+    await user.click(screen.getByRole("button", { name: /Баскетбол/ }))
     await user.type(screen.getByRole("searchbox", { name: "Поиск по каталогу" }), "nike")
     await user.click(
       screen.getByRole("button", { name: /Открыть карточку: Nike G.T. Cut Academy/ }),

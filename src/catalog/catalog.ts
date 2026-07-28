@@ -1,17 +1,29 @@
 export const catalogCategories = [
-  { id: "all", label: "Вся подборка" },
+  { id: "all", label: "Всё" },
+  { id: "court-shoes", label: "Заловая обувь" },
+  { id: "sneakers", label: "Кроссовки и кеды" },
   { id: "volleyball", label: "Волейбол" },
-  { id: "basketball", label: "Баскетбол для зала" },
-  { id: "training", label: "Тренировки" },
-  { id: "recovery", label: "Восстановление" },
-  { id: "lifestyle", label: "Лайфстайл" },
-  { id: "apparel", label: "Одежда и аксессуары" },
+  { id: "basketball", label: "Баскетбол" },
+  { id: "apparel", label: "Одежда" },
+  { id: "protection", label: "Защита" },
+  { id: "balls", label: "Мячи" },
+  { id: "training", label: "Инвентарь" },
+  { id: "recovery", label: "Recovery" },
+  { id: "bags", label: "Сумки и мелочи" },
 ] as const
 
 export type CatalogCategory = Exclude<
   (typeof catalogCategories)[number]["id"],
   "all"
 >
+
+export type ProductCategory =
+  | "volleyball"
+  | "basketball"
+  | "training"
+  | "recovery"
+  | "lifestyle"
+  | "apparel"
 
 export type ProductKind = "footwear" | "apparel" | "accessory"
 export type CatalogSort = "featured" | "price-asc" | "price-desc" | "name"
@@ -49,7 +61,7 @@ export interface CatalogProduct {
   slug: string
   brand: string
   name: string
-  category: CatalogCategory
+  category: ProductCategory
   categoryLabel: string
   kind: ProductKind
   sportPriority: boolean
@@ -1632,7 +1644,9 @@ export function filterCatalog(
   const normalizedSearch = search.trim().toLocaleLowerCase("ru")
 
   return products.filter((product) => {
-    if (category !== "all" && product.category !== category) return false
+    if (category !== "all" && !matchesCatalogCategory(product, category)) {
+      return false
+    }
     if (!normalizedSearch) return true
 
     return [
@@ -1648,6 +1662,50 @@ export function filterCatalog(
       .toLocaleLowerCase("ru")
       .includes(normalizedSearch)
   })
+}
+
+function textIncludes(product: CatalogProduct, pattern: RegExp): boolean {
+  return pattern.test(`${product.brand} ${product.name} ${product.categoryLabel} ${product.note}`)
+}
+
+function matchesCatalogCategory(
+  product: CatalogProduct,
+  category: CatalogCategory,
+): boolean {
+  if (category === "court-shoes") {
+    return product.kind === "footwear" && product.sportPriority
+  }
+  if (category === "sneakers") {
+    return product.kind === "footwear" && product.category === "lifestyle"
+  }
+  if (category === "volleyball" || category === "basketball") {
+    return product.category === category
+  }
+  if (category === "apparel") {
+    return product.kind === "apparel"
+  }
+  if (category === "protection") {
+    return (
+      product.kind === "accessory" &&
+      textIncludes(product, /наколен|налокот|sleeve|support|strap|tape|тейп/i)
+    )
+  }
+  if (category === "balls") {
+    return (
+      product.kind === "accessory" &&
+      textIncludes(product, /мяч|volleyball|basketball|molten|mikasa|wilson/i)
+    )
+  }
+  if (category === "training") {
+    return product.category === "training" || textIncludes(product, /resistance|band|bottle|резин/i)
+  }
+  if (category === "recovery") {
+    return product.category === "recovery"
+  }
+  if (category === "bags") {
+    return textIncludes(product, /bag|backpack|duffel|нос|кепк|cap|сумк|рюкзак/i)
+  }
+  return false
 }
 
 function priceRank(product: CatalogProduct): number {
