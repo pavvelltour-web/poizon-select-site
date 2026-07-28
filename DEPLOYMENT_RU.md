@@ -1,57 +1,84 @@
-# Публикация отдельного сайта SELECT
+# Быстрая публикация KICKSBASE
 
 Этот каталог самодостаточен: его можно вынести в отдельный Git-репозиторий и
 развернуть как обычную статику.
 
-## Проверка и demo
+## Сегодня: сайт в сеть
 
 ```bash
 npm ci --ignore-scripts
 npm run check
+npm run build:production
+```
+
+Самый быстрый качественный путь:
+
+1. Подключить репозиторий к Cloudflare Pages, Render Static Site или Vercel.
+2. Указать build command: `npm run build:production`.
+3. Указать output directory: `dist`.
+4. Добавить только публичную переменную `VITE_BOT_USERNAME=YourBuyerBot`.
+5. Подключить домен через DNS хостинга.
+6. Открыть сайт с телефона и компьютера, проверить каталог, поиск, карточку,
+   копирование запроса и ссылку Telegram.
+
+`BOT_TOKEN`, CRM credentials, database URL и любые серверные секреты сайту не
+нужны и не должны попадать в `VITE_*`.
+
+## Локальная проверка
+
+```bash
+npm ci --ignore-scripts
+cp .env.example .env.local
+npm run dev
+```
+
+Обычно Vite откроется на `http://127.0.0.1:5173`. Для закрытого показа готовой
+сборки:
+
+```bash
 npm run build
 npm run preview
 ```
 
-Demo-сборка попадает в `dist/`. Она предназначена для закрытого показа.
+## Что проверяет release-gate
 
-## Production
+Каталог содержит 100 локальных визуальных ориентиров и 400 галерейных ракурсов.
+Они не являются официальными фото производителя. Provenance, хэши и права
+записаны в `public/catalog/sources.json`; release-gate проходит для всех 100
+основных файлов. Точный SKU, цвет, размер, наличие и цену нужно подтверждать
+перед заказом.
 
-Публичная сборка обязана использовать release-gate:
+Перед публичной сдачей должны пройти:
 
 ```bash
 npm run verify:release
 npm run build:production
 ```
 
-Каталог содержит 60 локальных проектных визуальных ориентиров. Они не являются
-официальными фото производителя. Provenance, хэши и права записаны в
-`public/catalog/sources.json`; release-gate проходит для всех 60 файлов.
-Точный SKU, цвет, размер, наличие и цену всё равно нужно подтверждать перед
-заказом.
+## Бесплатные API, которые реально стоит внедрять
 
-Настройки static host:
+В статический сайт внешние API не добавляем: это ломает privacy, CORS и
+контроль секретов. Подключать нужно в CRM/Telegram-боте.
 
-- install: `npm ci --ignore-scripts`;
-- build: `npm run build:production`;
-- output/publish directory: `dist`;
-- допустимая переменная: `VITE_BOT_USERNAME=YourBuyerBot`.
+- **Bank of Russia XML**: официальный курс CNY/RUB для расчета заказа.
+  Внедрять в CRM/бот: кеш на 6-24 часа, ручной override курса, fallback.
+- **Currency-api**: безключевой резервный курс, только как сверка/backup.
+- **Telegram Bot API**: заявки, статусы, уведомления менеджеру. Токен только
+  на сервере, webhook secret, rate limit и экранирование сообщений.
+- **URLhaus**: серверная проверка присланных ссылок перед парсингом. Не
+  заменяет allowlist доменов и SSRF-защиту.
+- **QuickChart**: картинки отчетов для Telegram/CRM: заявки, маржа, конверсия.
+  Отправлять только агрегаты, без персональных данных.
 
-`BOT_TOKEN`, CRM credentials, database URL и любые серверные секреты сайту не
-нужны и не должны попадать в `VITE_*`.
+Не стоит внедрять из public-apis: FakeStore/DummyJSON, BestBuy/eBay/Shopee и
+похожие shopping API. Для реального заказа они либо моковые, либо требуют ключи,
+OAuth, нерелевантный рынок или права поставщика.
 
-## Самый быстрый deploy через GitHub Pages
+## Минимальный стек для всего проекта
 
-После выделения `site/` в отдельный репозиторий:
-
-1. GitHub → **Settings → Pages → Source: GitHub Actions**.
-2. GitHub → **Settings → Secrets and variables → Actions → Variables**.
-3. Добавить публичную переменную `VITE_BOT_USERNAME=YourBuyerBot`.
-4. Отправить проверенный commit в `main`.
-5. Workflow `.github/workflows/deploy-pages.yml` сам выполнит тесты,
-   production release-gate и публикацию.
-
-`BOT_TOKEN` в GitHub Pages не добавляется: токен нужен только серверному
-процессу бота.
-
-Разделение текущего монорепозитория через `git subtree` описано в
-`docs/GIT_AND_DEPLOY_RU.md` основного проекта.
+- Сайт: Cloudflare Pages/Render Static/Vercel, бесплатно или почти бесплатно.
+- CRM + бот: один VPS `300-700 ₽/мес` или Railway/Render/Railway-like сервис.
+- База: Neon/Supabase free tier на старте.
+- Домен: дешевый `.ru`, DNS на выбранный хостинг.
+- Обязательные документы: оферта/условия, политика персональных данных,
+  контакты, порядок возврата/отмены.

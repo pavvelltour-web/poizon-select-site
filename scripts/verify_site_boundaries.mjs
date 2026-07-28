@@ -150,7 +150,7 @@ const allowedCatalogEntries = new Set([
   ...catalogManifest.items.map((item) => item.file),
 ])
 const allowedBrandEntries = new Set([
-  "kicksbase-hero-v2.webp",
+  "kicksbase-culture-hero.webp",
   "kicksbase-hero.webp",
   "kicksbase-logo.webp",
 ])

@@ -1,5 +1,6 @@
 import {
   ArrowUpRight,
+  BadgeCheck,
   Copy,
   RotateCcw,
   Search,
@@ -58,6 +59,16 @@ const categoryCopy: Record<ActiveCategory, string> = {
   recovery: "Слайды, теплый слой и восстановление",
   lifestyle: "Кроссовки на каждый день и культовые пары",
   apparel: "Футболки, худи, аксессуары и верхний слой",
+}
+
+const categoryTone: Record<ActiveCategory, string> = {
+  all: "gear",
+  volleyball: "jump",
+  basketball: "court",
+  training: "train",
+  recovery: "reset",
+  lifestyle: "street",
+  apparel: "kit",
 }
 
 const kindLabels: Record<ProductKind, string> = {
@@ -119,28 +130,6 @@ function getProductTags(product: CatalogProduct): string[] {
   if (/стабил|боков|control/.test(note)) tags.push("стабильность")
 
   return Array.from(new Set(tags)).slice(0, 3)
-}
-
-function getProductFit(product: CatalogProduct): string {
-  if (product.category === "basketball") {
-    return "Подойдет: зал, резкие смены направления, игровые тренировки."
-  }
-  if (product.category === "volleyball") {
-    return "Подойдет: тренировки, матч, прыжок и боковая работа."
-  }
-  if (product.category === "training") {
-    return "Подойдет: ОФП, силовая база и функциональные занятия."
-  }
-  if (product.category === "recovery") {
-    return "Подойдет: восстановление, дорога после зала и теплый слой."
-  }
-  if (product.kind === "apparel") {
-    return "Подойдет: базовый комплект, тренировки и повседневная носка."
-  }
-  if (product.kind === "accessory") {
-    return "Подойдет: сбор формы, зал и ежедневный комплект."
-  }
-  return "Подойдет: повседневная пара, спортстиль и комплект после тренировки."
 }
 
 function isCategory(value: string | null): value is ActiveCategory {
@@ -349,7 +338,7 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
 
       <header className="kb-header">
         <a className="kb-brand" href="/" aria-label="KICKSBASE">
-          <span className="kb-brand__mark" aria-hidden="true">KB</span>
+          <img src="brand/kicksbase-logo.webp" width="80" height="80" alt="" />
           <span>
             <strong>KICKSBASE</strong>
             <small>Заловая экипировка</small>
@@ -382,38 +371,53 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
 
       <main>
         <section className="shop-hero" aria-labelledby="hero-title">
+          <a className="shop-hero__media" href="#catalog" aria-label="Открыть каталог">
+            <img
+              src="brand/kicksbase-culture-hero.webp"
+              width="1536"
+              height="864"
+              alt="Фирменный зал KICKSBASE с экипировкой, court wall и лаймовыми линиями"
+            />
+          </a>
           <div className="shop-hero__copy">
-            <p className="eyebrow">Кроссовки · форма · защита · recovery</p>
+            <p className="eyebrow">Court kit · shoes · recovery</p>
             <h1 id="hero-title">KICKSBASE</h1>
             <p className="shop-hero__lead">
-              Собираем экипировку для волейбола, баскетбольного зала и тренировок:
-              пары, форму, защиту, резину, роллы и аксессуары. Выбираете товар,
-              менеджер подтверждает размер, бирки, упаковку и финальную сумму до оплаты.
+              Экипировка для людей, которые живут залом: обувь, форма, защита и
+              recovery в одной чистой витрине.
             </p>
-            <div className="hero-stats" aria-label="Статистика каталога">
+            <div className="hero-actions">
+              <a className="button button--primary" href="#catalog">
+                <ShoppingBag aria-hidden="true" size={18} />
+                Смотреть каталог
+              </a>
+              {botUrl ? (
+                <a
+                  className="button button--quiet"
+                  href={botUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  <Send aria-hidden="true" size={18} />
+                  Telegram
+                </a>
+              ) : null}
+            </div>
+            <div className="hero-marks" aria-label="Преимущества каталога">
               <span>
-                <strong>100</strong>
-                позиций для зала
+                <BadgeCheck aria-hidden="true" size={16} />
+                100 позиций
               </span>
               <span>
-                <strong>стенд</strong>
-                обувь, форма, защита
+                <BadgeCheck aria-hidden="true" size={16} />
+                Полный комплект
               </span>
               <span>
-                <strong>до оплаты</strong>
-                размер, бирки, итог
+                <BadgeCheck aria-hidden="true" size={16} />
+                Итог до оплаты
               </span>
             </div>
           </div>
-
-          <a className="shop-hero__media" href="#catalog" aria-label="Открыть каталог">
-            <img
-              src="brand/kicksbase-hero-v2.webp"
-              width="1600"
-              height="1000"
-              alt="Заловая экипировка, кроссовки, форма и аксессуары на лавке у площадки"
-            />
-          </a>
         </section>
 
         <section className="catalog-shell" id="catalog" aria-labelledby="catalog-title">
@@ -469,7 +473,9 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
                 type="button"
                 aria-pressed={category === item.id}
                 onClick={() => selectCategory(item.id)}
+                data-tone={categoryTone[item.id]}
               >
+                <span className="category-row__mark" aria-hidden="true" />
                 <span>{item.label}</span>
                 <small>{categoryCounts.get(item.id) ?? 0}</small>
               </button>
@@ -515,13 +521,14 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
                     <span className="product-card__body">
                       <span className="product-card__brand">{product.brand}</span>
                       <strong>{product.name}</strong>
-                      <span className="product-card__meta">{product.categoryLabel}</span>
+                      <span className="product-card__meta">
+                        {product.categoryLabel}
+                      </span>
                       <span className="product-card__tags" aria-hidden="true">
-                        {tags.map((tag) => (
+                        {tags.slice(0, 2).map((tag) => (
                           <span key={tag}>{tag}</span>
                         ))}
                       </span>
-                      <span className="product-card__note">{getProductFit(product)}</span>
                       <span className="product-card__bottom">
                         <span>
                           <small>{price.label}</small>
@@ -599,7 +606,7 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
       <footer className="kb-footer">
         <div className="kb-footer__intro">
           <a className="kb-brand" href="/" aria-label="KICKSBASE">
-            <span className="kb-brand__mark" aria-hidden="true">KB</span>
+            <img src="brand/kicksbase-logo.webp" width="80" height="80" alt="" />
             <span>
               <strong>KICKSBASE</strong>
               <small>Заловая экипировка</small>
