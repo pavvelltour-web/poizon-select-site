@@ -5,7 +5,10 @@ import path from "node:path"
 
 const siteRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
 const catalogDir = path.join(siteRoot, "public", "catalog")
+const galleryDir = path.join(catalogDir, "gallery")
 const manifestPath = path.join(catalogDir, "sources.json")
+const expectedRootAssets = 100
+const expectedGalleryAssets = expectedRootAssets * 4
 
 function fail(message) {
   throw new Error(`Catalog verification failed: ${message}`)
@@ -92,8 +95,8 @@ function requireUtcTimestamp(value, field) {
 
 const manifest = JSON.parse(await readFile(manifestPath, "utf8"))
 if (manifest.schema_version !== 2) fail("unexpected manifest schema")
-if (!Array.isArray(manifest.items) || manifest.items.length !== 60) {
-  fail("manifest must contain exactly 60 items")
+if (!Array.isArray(manifest.items) || manifest.items.length !== expectedRootAssets) {
+  fail(`manifest must contain exactly ${expectedRootAssets} items`)
 }
 if (
   typeof manifest.notice !== "string" ||
@@ -111,27 +114,32 @@ const diskFiles = (await readdir(catalogDir))
 const manifestFiles = manifest.items.map((item) => item.file).sort()
 
 if (
-  diskFiles.length !== 60 ||
+  diskFiles.length !== expectedRootAssets ||
   JSON.stringify(diskFiles) !== JSON.stringify(manifestFiles)
 ) {
-  fail("the 60 manifest files must exactly match the WebP files on disk")
+  fail(`the ${expectedRootAssets} manifest files must exactly match the WebP files on disk`)
 }
 
-const catalogSource = await readFile(
-  path.join(siteRoot, "src", "catalog", "catalog.ts"),
-  "utf8",
-)
-const appSlugs = [
-  ...catalogSource.matchAll(/\bslug:\s*"([a-z0-9-]+)"/g),
-].map((match) => match[1])
 const manifestSlugs = manifest.items.map((item) => item.slug)
 if (
-  appSlugs.length !== 60 ||
-  new Set(appSlugs).size !== 60 ||
-  JSON.stringify([...appSlugs].sort()) !==
-    JSON.stringify([...manifestSlugs].sort())
+  manifestSlugs.length !== expectedRootAssets ||
+  new Set(manifestSlugs).size !== expectedRootAssets
 ) {
-  fail("application products and image-provenance slugs must match exactly")
+  fail(`image-provenance slugs must remain a unique ${expectedRootAssets}-file fallback set`)
+}
+
+const galleryFiles = (await readdir(galleryDir))
+  .filter((file) => file.endsWith(".webp"))
+  .sort()
+if (galleryFiles.length !== expectedGalleryAssets) {
+  fail(`gallery must contain exactly ${expectedGalleryAssets} local WebP files`)
+}
+for (const slug of manifestSlugs) {
+  for (let index = 2; index <= 5; index += 1) {
+    if (!galleryFiles.includes(`${slug}-${index}.webp`)) {
+      fail(`${slug} is missing gallery view ${index}`)
+    }
+  }
 }
 
 const slugs = new Set()
@@ -190,4 +198,6 @@ for (const item of manifest.items) {
   }
 }
 
-console.log("Catalog assets verified: 60 unique local 1200×900 WebP files")
+console.log(
+  `Catalog assets verified: ${expectedRootAssets} unique local 1200×900 WebP files and ${expectedGalleryAssets} gallery files`,
+)

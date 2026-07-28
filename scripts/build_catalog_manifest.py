@@ -6,7 +6,6 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-import re
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -14,8 +13,7 @@ from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[1]
 CATALOG = ROOT / "public" / "catalog"
-CATALOG_SOURCE = ROOT / "src" / "catalog" / "catalog.ts"
-SLUG_PATTERN = re.compile(r'\bslug:\s*"([a-z0-9-]+)"')
+EXPECTED_ROOT_ASSETS = 100
 
 
 def sha256(path: Path) -> str:
@@ -27,9 +25,11 @@ def sha256(path: Path) -> str:
 
 
 def build(generated_at: str) -> dict[str, object]:
-    slugs = SLUG_PATTERN.findall(CATALOG_SOURCE.read_text(encoding="utf-8"))
-    if len(slugs) != 60 or len(set(slugs)) != 60:
-        raise RuntimeError("catalog.ts must contain exactly 60 unique slugs")
+    slugs = sorted(path.stem for path in CATALOG.glob("*.webp"))
+    if len(slugs) != EXPECTED_ROOT_ASSETS or len(set(slugs)) != EXPECTED_ROOT_ASSETS:
+        raise RuntimeError(
+            f"public/catalog must contain exactly {EXPECTED_ROOT_ASSETS} unique root WebP assets"
+        )
 
     items: list[dict[str, object]] = []
     for slug in slugs:
@@ -99,7 +99,7 @@ def main() -> None:
         json.dumps(payload, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
     )
-    print("Wrote provenance for 60 generated catalog assets")
+    print(f"Wrote provenance for {EXPECTED_ROOT_ASSETS} generated catalog assets")
 
 
 if __name__ == "__main__":

@@ -35,10 +35,10 @@ describe("Telegram order handoff", () => {
     expect(request).not.toMatch(/[<>]/)
   })
 
-  it("keeps all 60 catalog handoffs unique, one-line and bot-ready", () => {
+  it("keeps all 100 catalog handoffs unique, one-line and bot-ready", () => {
     const requests = catalogProducts.map(buildOrderRequest)
 
-    expect(new Set(requests).size).toBe(60)
+    expect(new Set(requests).size).toBe(100)
     for (const [index, request] of requests.entries()) {
       expect(request).toBe(catalogProducts[index].query)
       expect(request).toMatch(/^[^\r\n:]{3,300}$/u)

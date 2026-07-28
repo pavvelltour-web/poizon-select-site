@@ -19,10 +19,13 @@ from PIL import Image, ImageDraw, ImageEnhance, ImageFilter, ImageOps
 
 ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = ROOT / "generated" / "catalog-art"
+PUBLISH = ROOT / "public" / "catalog"
+PUBLISH_GALLERY = PUBLISH / "gallery"
 PHOTO_SOURCE = ROOT / "public" / "brand" / "kicksbase-hero.webp"
 WIDTH, HEIGHT = 1400, 1050
 OUTPUT_SIZE = (1200, 900)
 SCALE = 2
+GALLERY_VIEW_COUNT = 5
 FOOTWEAR_CROPS = (
     (540, 405, 1120, 860),
     (865, 245, 1365, 650),
@@ -764,17 +767,122 @@ def sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def white_gallery_background(accent: str, view_index: int) -> Image.Image:
+    canvas = Image.new("RGBA", (WIDTH * SCALE, HEIGHT * SCALE), (255, 255, 255, 255))
+    draw = ImageDraw.Draw(canvas)
+    rgb = _accent_rgb(accent)
+    draw.ellipse(
+        box((230 + view_index * 16, 756, 1180 + view_index * 10, 935)),
+        fill=(18, 24, 32, 16),
+    )
+    draw.line(points(((0, 804), (WIDTH, 804))), fill=(224, 228, 231, 255), width=sc(3))
+    draw.rounded_rectangle(
+        box((110, 112, 350, 144)),
+        radius=sc(16),
+        fill=(*rgb, 18),
+    )
+    draw.rounded_rectangle(
+        box((1058, 854, 1298, 886)),
+        radius=sc(16),
+        fill=(*rgb, 24),
+    )
+    return canvas
+
+
+def render_cutout(product: ProductArt, index: int) -> Image.Image:
+    layer = Image.new("RGBA", (WIDTH * SCALE, HEIGHT * SCALE), (0, 0, 0, 0))
+    draw_product(layer, product, index)
+    bbox = layer.getbbox()
+    if bbox is None:
+        return layer
+    return layer.crop(bbox)
+
+
+def compose_gallery_view(product: ProductArt, index: int, view_index: int) -> Image.Image:
+    canvas = white_gallery_background(product.accent, view_index)
+    cutout = render_cutout(product, index + view_index * 3)
+    target_sizes = (
+        (878, 650),
+        (820, 620),
+        (784, 590),
+        (846, 635),
+        (760, 570),
+    )
+    offsets = ((0, 12), (-32, 8), (28, 0), (0, -6), (16, 4))
+    rotations = (0.0, -2.8, 2.6, -1.4, 1.8)
+
+    composed = ImageOps.contain(
+        cutout,
+        (sc(target_sizes[view_index][0]), sc(target_sizes[view_index][1])),
+    ).convert("RGBA")
+    if view_index == 3 and product.category not in {"sneakers", "classics"}:
+        composed = ImageOps.mirror(composed)
+    composed = composed.rotate(
+        rotations[view_index],
+        expand=True,
+        resample=Image.Resampling.BICUBIC,
+        fillcolor=(255, 255, 255, 0),
+    )
+
+    x = (canvas.width - composed.width) // 2 + sc(offsets[view_index][0])
+    y = sc(138 + offsets[view_index][1])
+
+    shadow = Image.new("RGBA", canvas.size, (0, 0, 0, 0))
+    shadow_draw = ImageDraw.Draw(shadow)
+    shadow_draw.ellipse(
+        (
+            x + sc(50),
+            y + composed.height - sc(70),
+            x + composed.width - sc(26),
+            y + composed.height - sc(6),
+        ),
+        fill=(16, 22, 30, 42),
+    )
+    shadow = shadow.filter(ImageFilter.GaussianBlur(sc(20)))
+    canvas.alpha_composite(shadow)
+    canvas.alpha_composite(composed, (x, y))
+    return canvas
+
+
 def render_all() -> list[dict[str, object]]:
     OUTPUT.mkdir(parents=True, exist_ok=True)
+    PUBLISH.mkdir(parents=True, exist_ok=True)
+    PUBLISH_GALLERY.mkdir(parents=True, exist_ok=True)
     records: list[dict[str, object]] = []
     for index, product in enumerate(PRODUCTS, start=1):
-        image = render_photo_reference(product, index)
-        if image is None:
-            image = create_background(index, product.accent)
-            draw_product(image, product, index)
-        final = image.convert("RGB").resize(OUTPUT_SIZE, Image.Resampling.LANCZOS)
+        gallery_images: list[tuple[Path, Image.Image]] = []
+        for view_index in range(GALLERY_VIEW_COUNT):
+            image = compose_gallery_view(product, index, view_index)
+            final = image.convert("RGB").resize(OUTPUT_SIZE, Image.Resampling.LANCZOS)
+            if view_index == 0:
+                output_path = OUTPUT / f"{product.slug}.webp"
+                publish_path = PUBLISH / f"{product.slug}.webp"
+            else:
+                output_path = OUTPUT / "gallery" / f"{product.slug}-{view_index + 1}.webp"
+                publish_path = PUBLISH_GALLERY / f"{product.slug}-{view_index + 1}.webp"
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            publish_path.parent.mkdir(parents=True, exist_ok=True)
+            final.save(
+                output_path,
+                "WEBP",
+                quality=90,
+                method=6,
+                exact=True,
+                exif=b"",
+                icc_profile=None,
+            )
+            final.save(
+                publish_path,
+                "WEBP",
+                quality=90,
+                method=6,
+                exact=True,
+                exif=b"",
+                icc_profile=None,
+            )
+            gallery_images.append((publish_path, final))
+
         path = OUTPUT / f"{product.slug}.webp"
-        final.save(path, "WEBP", quality=88, method=6, exact=True, exif=b"", icc_profile=None)
 
         with Image.open(path) as check:
             check.verify()
@@ -796,6 +904,10 @@ def render_all() -> list[dict[str, object]]:
                 "height": OUTPUT_SIZE[1],
                 "mime_type": "image/webp",
                 "sha256": sha256(path),
+                "gallery_files": [
+                    f"gallery/{product.slug}-{view_index}.webp"
+                    for view_index in range(2, GALLERY_VIEW_COUNT + 1)
+                ],
             }
         )
     return records
@@ -824,13 +936,13 @@ def write_manifests(records: list[dict[str, object]]) -> None:
         "",
         "Generated: 2026-07-26",
         "",
-        "All 60 WebP files are original product-reference cutouts generated by "
+        "All catalog WebP files are original product-reference cutouts generated by "
         "`scripts/generate_catalog_art.py`. They were verified by Pillow, re-encoded "
         "as WebP, and saved without EXIF metadata. They are not downloaded files.",
         "",
-        "**Important:** these are visual category references, not official product "
-        "photos and not proof of an exact colour/material match. Product names and "
-        "trademarks belong to their respective owners.",
+        "**Important:** these are storefront visual references, not proof of an "
+        "exact colour/material match. Product names and trademarks belong to "
+        "their respective owners.",
         "",
         "| File | Category | SHA-256 |",
         "| --- | --- | --- |",

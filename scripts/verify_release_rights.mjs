@@ -9,13 +9,14 @@ const manifest = JSON.parse(
     "utf8",
   ),
 )
+const expectedCatalogItems = 100
 
 function fail(message) {
   throw new Error(`Public release blocked: ${message}`)
 }
 
-if (!Array.isArray(manifest.items) || manifest.items.length !== 60) {
-  fail("catalog manifest must contain exactly 60 items")
+if (!Array.isArray(manifest.items) || manifest.items.length !== expectedCatalogItems) {
+  fail(`catalog manifest must contain exactly ${expectedCatalogItems} items`)
 }
 
 const acceptedStatuses = new Set(["licensed", "owned", "supplier-api"])
@@ -40,10 +41,10 @@ for (const item of manifest.items) {
 
 if (missing.length > 0) {
   fail(
-    `${missing.length}/60 item(s) lack confirmed rights metadata ` +
+    `${missing.length}/${expectedCatalogItems} item(s) lack confirmed rights metadata ` +
       `(rights.status, rights.license_reference, rights.verified_at): ` +
       missing.join(", "),
   )
 }
 
-console.log("Public release rights verified for all 60 catalog images")
+console.log(`Public release rights verified for all ${expectedCatalogItems} catalog images`)

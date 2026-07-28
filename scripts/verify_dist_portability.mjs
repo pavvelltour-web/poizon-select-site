@@ -4,6 +4,8 @@ import path from "node:path"
 
 const siteRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
 const distRoot = path.join(siteRoot, "dist")
+const expectedCatalogFiles = 100
+const expectedGalleryFiles = expectedCatalogFiles * 4
 
 function fail(message) {
   throw new Error(`Built-site verification failed: ${message}`)
@@ -89,8 +91,16 @@ const catalogFiles = files.filter(
     path.dirname(file) === path.join(distRoot, "catalog") &&
     file.endsWith(".webp"),
 )
-if (catalogFiles.length !== 60) {
-  fail("dist must contain exactly 60 local catalog WebP files")
+if (catalogFiles.length !== expectedCatalogFiles) {
+  fail(`dist must contain exactly ${expectedCatalogFiles} local catalog WebP files`)
+}
+const galleryFiles = files.filter(
+  (file) =>
+    path.dirname(file) === path.join(distRoot, "catalog", "gallery") &&
+    file.endsWith(".webp"),
+)
+if (galleryFiles.length !== expectedGalleryFiles) {
+  fail(`dist must contain exactly ${expectedGalleryFiles} local catalog gallery WebP files`)
 }
 
 const javascript = (
@@ -115,5 +125,5 @@ for (const file of catalogFiles) {
 }
 
 console.log(
-  "Built site verified: relative assets, /demo/ compatible, 60 local catalog images, third-party notice, no source maps",
+  `Built site verified: relative assets, /demo/ compatible, ${expectedCatalogFiles} local catalog images, ${expectedGalleryFiles} gallery images, third-party notice, no source maps`,
 )

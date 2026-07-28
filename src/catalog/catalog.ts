@@ -1,6 +1,7 @@
 export const catalogCategories = [
   { id: "all", label: "Вся подборка" },
   { id: "volleyball", label: "Волейбол" },
+  { id: "basketball", label: "Баскетбол для зала" },
   { id: "training", label: "Тренировки" },
   { id: "recovery", label: "Восстановление" },
   { id: "lifestyle", label: "Лайфстайл" },
@@ -13,9 +14,36 @@ export type CatalogCategory = Exclude<
 >
 
 export type ProductKind = "footwear" | "apparel" | "accessory"
+export type CatalogSort = "featured" | "price-asc" | "price-desc" | "name"
 
 export const MARKET_PRICE_BASIS =
-  "Редакционный ориентир · выборка РФ 26.07.2026"
+  "Редакционный ориентир · рынок РФ 28.07.2026"
+
+export const PRICE_FORMULA_BASIS =
+  "Расчет по текущей формуле заказа"
+
+export interface CatalogImage {
+  src: string
+  alt: string
+  source?: string
+}
+
+export interface PriceQuote {
+  productKind: ProductKind
+  priceYuan: number
+  yuanRate: number
+  purchaseRub: number
+  paymentFeePercent: number
+  paymentFee: number
+  internationalLogistics: number
+  mandatoryFees: number
+  serviceFeePercent: number
+  serviceFeeFloor: number
+  serviceFee: number
+  quoteRub: number
+  rfDelivery: number
+  totalRub: number
+}
 
 export interface CatalogProduct {
   slug: string
@@ -29,10 +57,133 @@ export interface CatalogProduct {
   note: string
   marketPrice?: string
   priceBasis?: string
+  chinaPriceYuan?: number
+  formulaBasis?: string
   image: string
+  fallbackImage: string
+  gallery: readonly CatalogImage[]
+  orderQuote?: PriceQuote
 }
 
-const sportProducts: readonly Omit<CatalogProduct, "image">[] = [
+type ProductSource = Omit<
+  CatalogProduct,
+  "fallbackImage" | "formulaBasis" | "gallery" | "image" | "orderQuote"
+> & {
+  assetSlug?: string
+  gallery?: readonly CatalogImage[]
+}
+
+const pricingDefaults = {
+  yuanRate: 12.5,
+  paymentFeePercent: 7,
+  internationalLogistics: 1800,
+  mandatoryFees: 0,
+  footwearServiceFeeFloor: 1500,
+  footwearServiceFeePercent: 12,
+  apparelAccessoryServiceFeeFloor: 700,
+  apparelAccessoryServiceFeePercent: 15,
+  rfDelivery: 0,
+} as const
+
+function money(value: number): number {
+  return Math.round((value + 1e-9) * 100) / 100
+}
+
+export function calculateOrderQuote(
+  priceYuan: number,
+  productKind: ProductKind,
+): PriceQuote {
+  const purchaseRub = money(priceYuan * pricingDefaults.yuanRate)
+  const paymentFee = money(
+    (purchaseRub * pricingDefaults.paymentFeePercent) / 100,
+  )
+  const serviceFeeFloor =
+    productKind === "footwear"
+      ? pricingDefaults.footwearServiceFeeFloor
+      : pricingDefaults.apparelAccessoryServiceFeeFloor
+  const serviceFeePercent =
+    productKind === "footwear"
+      ? pricingDefaults.footwearServiceFeePercent
+      : pricingDefaults.apparelAccessoryServiceFeePercent
+  const serviceFee = money(
+    Math.max(serviceFeeFloor, (purchaseRub * serviceFeePercent) / 100),
+  )
+  const quoteRub = money(
+    purchaseRub +
+      paymentFee +
+      pricingDefaults.internationalLogistics +
+      pricingDefaults.mandatoryFees +
+      serviceFee,
+  )
+  const totalRub = money(quoteRub + pricingDefaults.rfDelivery)
+
+  return {
+    productKind,
+    priceYuan,
+    yuanRate: pricingDefaults.yuanRate,
+    purchaseRub,
+    paymentFeePercent: pricingDefaults.paymentFeePercent,
+    paymentFee,
+    internationalLogistics: pricingDefaults.internationalLogistics,
+    mandatoryFees: pricingDefaults.mandatoryFees,
+    serviceFeePercent,
+    serviceFeeFloor,
+    serviceFee,
+    quoteRub,
+    rfDelivery: pricingDefaults.rfDelivery,
+    totalRub,
+  }
+}
+
+export function formatRub(amount: number): string {
+  return `${new Intl.NumberFormat("ru-RU", {
+    maximumFractionDigits: 0,
+  })
+    .format(amount)
+    .replace(/\u00a0/g, " ")} ₽`
+}
+
+function asicsGallery(code: string, label: string): CatalogImage[] {
+  const views = [
+    ["SR_RT_GLB", "side"],
+    ["SB_FR_GLB", "front"],
+    ["SB_FL_GLB", "side alternate"],
+    ["SB_BT_GLB", "outsole"],
+  ] as const
+
+  return views.map(([view, angle]) => ({
+    src: `https://images.asics.com/is/image/asics/${code}_${view}?$sfcc-product$&wid=1200&hei=900`,
+    alt: `${label} · ${angle}`,
+    source: "ASICS product media",
+  }))
+}
+
+function nikeGallery(name: string, urls: readonly string[]): CatalogImage[] {
+  return urls.slice(0, 7).map((src, index) => ({
+    src,
+    alt: `${name} · ракурс ${index + 1}`,
+    source: "Nike product media",
+  }))
+}
+
+function projectGallery(product: ProductSource): CatalogImage[] {
+  const assetSlug = product.assetSlug ?? product.slug
+  const frames = [
+    `catalog/${assetSlug}.webp`,
+    `catalog/gallery/${assetSlug}-2.webp`,
+    `catalog/gallery/${assetSlug}-3.webp`,
+    `catalog/gallery/${assetSlug}-4.webp`,
+    `catalog/gallery/${assetSlug}-5.webp`,
+  ]
+
+  return frames.map((src, index) => ({
+    src,
+    alt: `${product.brand} ${product.name} · ракурс ${index + 1}`,
+    source: "Project-generated studio reference",
+  }))
+}
+
+const sportProducts: readonly ProductSource[] = [
   {
     slug: "asics-sky-elite-ff-3",
     brand: "ASICS",
@@ -45,6 +196,8 @@ const sportProducts: readonly Omit<CatalogProduct, "image">[] = [
     note: "Флагманский low · для атакующих игроков",
     marketPrice: "17,5–20,5 тыс. ₽",
     priceBasis: MARKET_PRICE_BASIS,
+    chinaPriceYuan: 980,
+    gallery: asicsGallery("1051A080_100", "ASICS SKY ELITE FF 3"),
   },
   {
     slug: "asics-sky-elite-ff-mt-3",
@@ -58,6 +211,8 @@ const sportProducts: readonly Omit<CatalogProduct, "image">[] = [
     note: "Средняя высота · прыжок и фиксация",
     marketPrice: "20–22,5 тыс. ₽",
     priceBasis: MARKET_PRICE_BASIS,
+    chinaPriceYuan: 1080,
+    gallery: asicsGallery("1051A081_100", "ASICS SKY ELITE FF MT 3"),
   },
   {
     slug: "asics-metarise-2",
@@ -71,6 +226,8 @@ const sportProducts: readonly Omit<CatalogProduct, "image">[] = [
     note: "Премиальная модель · приоритет для доигровщика",
     marketPrice: "24–34 тыс. ₽",
     priceBasis: MARKET_PRICE_BASIS,
+    chinaPriceYuan: 1500,
+    gallery: asicsGallery("1051A089_100", "ASICS METARISE 2"),
   },
   {
     slug: "asics-netburner-ballistic-ff-4",
@@ -97,6 +254,8 @@ const sportProducts: readonly Omit<CatalogProduct, "image">[] = [
     note: "Универсальный зал · средний ценовой сегмент",
     marketPrice: "14–16 тыс. ₽",
     priceBasis: MARKET_PRICE_BASIS,
+    chinaPriceYuan: 760,
+    gallery: asicsGallery("1071A102_100", "ASICS GEL-TACTIC 13"),
   },
   {
     slug: "mizuno-wave-lightning-z8",
@@ -188,6 +347,13 @@ const sportProducts: readonly Omit<CatalogProduct, "image">[] = [
     note: "Импортная модель · верхний ценовой сегмент",
     marketPrice: "24–25 тыс. ₽",
     priceBasis: MARKET_PRICE_BASIS,
+    chinaPriceYuan: 1180,
+    gallery: nikeGallery("Nike ZOOM HYPERSET 2", [
+      "https://static.nike.com/a/images/t_web_pdp_936_v2/f_auto,u_9ddf04c7-2a9a-4d76-add1-d15af8f0263d,c_scale,fl_relative,w_1.0,h_1.0,fl_layer_apply/f8bf3cba-270d-47c7-87e4-d7e8b69d2f38/NIKE+ZOOM+HYPERSET+2+SE.png",
+      "https://static.nike.com/a/images/t_default/f8bf3cba-270d-47c7-87e4-d7e8b69d2f38/NIKE+ZOOM+HYPERSET+2+SE.png",
+      "https://static.nike.com/a/images/t_PDP_144_v1/f_auto,q_auto:eco/f8bf3cba-270d-47c7-87e4-d7e8b69d2f38/NIKE+ZOOM+HYPERSET+2+SE.png",
+      "https://static.nike.com/a/images/t_web_pdp_535_v2/f_auto,u_9ddf04c7-2a9a-4d76-add1-d15af8f0263d,c_scale,fl_relative,w_1.0,h_1.0,fl_layer_apply/f8bf3cba-270d-47c7-87e4-d7e8b69d2f38/NIKE+ZOOM+HYPERSET+2+SE.png",
+    ]),
   },
   {
     slug: "nike-hyperace-3-se",
@@ -425,7 +591,7 @@ const sportProducts: readonly Omit<CatalogProduct, "image">[] = [
   },
 ] as const
 
-const existingProducts: readonly Omit<CatalogProduct, "image">[] = [
+const existingProducts: readonly ProductSource[] = [
   {
     slug: "asics-gel-1130-black-pure-silver",
     brand: "ASICS",
@@ -758,13 +924,705 @@ const existingProducts: readonly Omit<CatalogProduct, "image">[] = [
   },
 ] as const
 
-const catalogProductSource = [...sportProducts, ...existingProducts] as const
+const expandedProducts: readonly ProductSource[] = [
+  {
+    slug: "asics-upcourt-6",
+    brand: "ASICS",
+    name: "UPCOURT 6",
+    category: "volleyball",
+    categoryLabel: "Волейбол · доступная",
+    kind: "footwear",
+    sportPriority: true,
+    query: "ASICS UPCOURT 6 volleyball 1071A104",
+    note: "Легкая базовая пара для тренировок в зале · хороший вход для любителей",
+    marketPrice: "7–10 тыс. ₽",
+    priceBasis: MARKET_PRICE_BASIS,
+    chinaPriceYuan: 420,
+  },
+  {
+    slug: "asics-rote-japan-lyte-ff-3",
+    brand: "ASICS",
+    name: "ROTE JAPAN LYTE FF 3",
+    category: "volleyball",
+    categoryLabel: "Волейбол · скорость",
+    kind: "footwear",
+    sportPriority: true,
+    query: "ASICS ROTE JAPAN LYTE FF 3 volleyball 1053A054",
+    note: "Легкая клубная модель · быстрые перемещения и работа на реакции",
+    marketPrice: "13–18 тыс. ₽",
+    priceBasis: MARKET_PRICE_BASIS,
+    chinaPriceYuan: 820,
+  },
+  {
+    slug: "mizuno-wave-momentum-3",
+    brand: "Mizuno",
+    name: "WAVE MOMENTUM 3",
+    category: "volleyball",
+    categoryLabel: "Волейбол · амортизация",
+    kind: "footwear",
+    sportPriority: true,
+    query: "Mizuno WAVE MOMENTUM 3 volleyball",
+    note: "Комфортная пара для прыжков и долгих игровых сессий · не дубль Momentum Pro",
+    marketPrice: "15–22 тыс. ₽",
+    priceBasis: MARKET_PRICE_BASIS,
+    chinaPriceYuan: 980,
+  },
+  {
+    slug: "mizuno-cyclone-speed-5",
+    brand: "Mizuno",
+    name: "CYCLONE SPEED 5",
+    category: "volleyball",
+    categoryLabel: "Волейбол · начальный зал",
+    kind: "footwear",
+    sportPriority: true,
+    query: "Mizuno CYCLONE SPEED 5 volleyball V1GA2580",
+    note: "Гибкая flat-sole модель для новичков и любительских тренировок",
+    marketPrice: "7–11 тыс. ₽",
+    priceBasis: MARKET_PRICE_BASIS,
+    chinaPriceYuan: 460,
+  },
+  {
+    slug: "adidas-stabil-16-indoor",
+    brand: "adidas",
+    name: "STABIL 16 Indoor",
+    category: "volleyball",
+    categoryLabel: "Волейбол · indoor stability",
+    kind: "footwear",
+    sportPriority: true,
+    query: "adidas STABIL 16 Indoor volleyball handball",
+    note: "Зальная indoor-пара для волейбола и гандбола · стабильность на боковых движениях",
+    marketPrice: "14–21 тыс. ₽",
+    priceBasis: MARKET_PRICE_BASIS,
+    chinaPriceYuan: 900,
+  },
+  {
+    slug: "anta-kai-1",
+    brand: "ANTA",
+    name: "KAI 1",
+    category: "basketball",
+    categoryLabel: "Баскетбол для зала · контроль",
+    kind: "footwear",
+    sportPriority: true,
+    query: "ANTA KAI 1 Kyrie Irving basketball",
+    note: "Цепкая guard-пара · альтернатива Nike для зала",
+    marketPrice: "14–22 тыс. ₽",
+    priceBasis: MARKET_PRICE_BASIS,
+    chinaPriceYuan: 780,
+  },
+  {
+    slug: "li-ning-wade-808-4-ultra",
+    brand: "Li-Ning",
+    name: "Wade 808 4 Ultra",
+    category: "basketball",
+    categoryLabel: "Баскетбол для зала · быстрый старт",
+    kind: "footwear",
+    sportPriority: true,
+    query: "Li-Ning Wade 808 4 Ultra basketball",
+    note: "Стабильность и контроль с drop-in BOOM · сильный китайский performance-сегмент",
+    marketPrice: "16–24 тыс. ₽",
+    priceBasis: MARKET_PRICE_BASIS,
+    chinaPriceYuan: 980,
+  },
+  {
+    slug: "adidas-harden-volume-9",
+    brand: "adidas",
+    name: "Harden Volume 9",
+    category: "basketball",
+    categoryLabel: "Баскетбол для зала · амортизация",
+    kind: "footwear",
+    sportPriority: true,
+    query: "adidas Harden Volume 9 basketball",
+    note: "Boost и Lightstrike · для игроков, которым нужна мягче посадка и уверенный стоп",
+    marketPrice: "15–23 тыс. ₽",
+    priceBasis: MARKET_PRICE_BASIS,
+    chinaPriceYuan: 920,
+  },
+  {
+    slug: "new-balance-two-wxy-v5",
+    brand: "New Balance",
+    name: "TWO WXY v5",
+    category: "basketball",
+    categoryLabel: "Баскетбол для зала · универсальная",
+    kind: "footwear",
+    sportPriority: true,
+    query: "New Balance TWO WXY v5 basketball",
+    note: "Позиционно-универсальная пара · FuelCell и Fresh Foam X для зала",
+    marketPrice: "12–18 тыс. ₽",
+    priceBasis: MARKET_PRICE_BASIS,
+    chinaPriceYuan: 760,
+  },
+  {
+    slug: "nike-aone",
+    brand: "Nike",
+    name: "A'One",
+    category: "basketball",
+    categoryLabel: "Баскетбол для зала · женская посадка",
+    kind: "footwear",
+    sportPriority: true,
+    query: "Nike A'One Aja Wilson basketball",
+    note: "Сигнатура A'ja Wilson · хороший слот для женской волейбольной аудитории",
+    marketPrice: "13–19 тыс. ₽",
+    priceBasis: MARKET_PRICE_BASIS,
+    chinaPriceYuan: 760,
+  },
+  {
+    slug: "nike-free-metcon-6",
+    brand: "Nike",
+    name: "Free Metcon 6",
+    category: "training",
+    categoryLabel: "Тренировки · гибрид",
+    kind: "footwear",
+    sportPriority: true,
+    query: "Nike Free Metcon 6 training",
+    note: "ОФП, прыжковые связки, HIIT и легкая силовая · мягче и гибче Metcon 10",
+    marketPrice: "10–16 тыс. ₽",
+    priceBasis: MARKET_PRICE_BASIS,
+    chinaPriceYuan: 620,
+  },
+  {
+    slug: "puma-fuse-3",
+    brand: "PUMA",
+    name: "Fuse 3.0",
+    category: "training",
+    categoryLabel: "Тренировки · силовая база",
+    kind: "footwear",
+    sportPriority: true,
+    query: "PUMA Fuse 3.0 training",
+    note: "Стабильная low-to-ground платформа · бюджетная альтернатива Metcon/Nano",
+    marketPrice: "8–13 тыс. ₽",
+    priceBasis: MARKET_PRICE_BASIS,
+    chinaPriceYuan: 520,
+  },
+  {
+    slug: "oofos-ooahh-slide",
+    brand: "OOFOS",
+    name: "OOahh Slide",
+    category: "recovery",
+    categoryLabel: "Восстановление · слайды",
+    kind: "footwear",
+    sportPriority: true,
+    query: "OOFOS OOahh Slide recovery sandal",
+    note: "Классический recovery-слайд после зала · премиум-дополнение к Nike Calm",
+    marketPrice: "6–10 тыс. ₽",
+    priceBasis: MARKET_PRICE_BASIS,
+    chinaPriceYuan: 360,
+  },
+  {
+    slug: "crocs-mellow-recovery-slide",
+    brand: "Crocs",
+    name: "Mellow Recovery Slide",
+    category: "recovery",
+    categoryLabel: "Восстановление · мягкие слайды",
+    kind: "footwear",
+    sportPriority: true,
+    query: "Crocs Mellow Recovery Slide",
+    note: "Массовый recovery-сценарий · мягкая пена и понятный размерный спрос",
+    marketPrice: "4,5–8 тыс. ₽",
+    priceBasis: MARKET_PRICE_BASIS,
+    chinaPriceYuan: 260,
+  },
+  {
+    slug: "adidas-handball-spezial-core-black",
+    brand: "adidas",
+    name: "Handball Spezial Core Black",
+    category: "lifestyle",
+    categoryLabel: "Лайфстайл · кеды",
+    kind: "footwear",
+    sportPriority: false,
+    query: "adidas Handball Spezial Core Black DB3021",
+    note: "Архивный indoor-силуэт · не дубль Samba/Gazelle и хорошо ложится в sport retail",
+    marketPrice: "9–15 тыс. ₽",
+    priceBasis: MARKET_PRICE_BASIS,
+    chinaPriceYuan: 620,
+  },
+  {
+    slug: "new-balance-1000-black",
+    brand: "New Balance",
+    name: "1000 Black",
+    category: "lifestyle",
+    categoryLabel: "Лайфстайл · ретро runner",
+    kind: "footwear",
+    sportPriority: false,
+    query: "New Balance 1000 black M1000",
+    note: "Y2K-retro runner · логичное расширение после 1906R/2002R/9060",
+    marketPrice: "14–22 тыс. ₽",
+    priceBasis: MARKET_PRICE_BASIS,
+    chinaPriceYuan: 860,
+  },
+  {
+    slug: "asics-gel-kayano-20-glacier-grey",
+    brand: "ASICS",
+    name: "GEL-KAYANO 20 Glacier Grey",
+    category: "lifestyle",
+    categoryLabel: "Лайфстайл · tech runner",
+    kind: "footwear",
+    sportPriority: false,
+    query: "ASICS GEL-KAYANO 20 Glacier Grey",
+    note: "Свежий sportstyle-акцент · техничнее GEL-1130 и не повторяет KAYANO 14",
+    marketPrice: "16–24 тыс. ₽",
+    priceBasis: MARKET_PRICE_BASIS,
+    chinaPriceYuan: 980,
+  },
+  {
+    slug: "nike-vapor-elite-volleyball-kneepads",
+    brand: "Nike",
+    name: "Vapor Elite Volleyball Kneepads",
+    category: "apparel",
+    categoryLabel: "Аксессуары · наколенники",
+    kind: "accessory",
+    sportPriority: true,
+    query: "Nike Vapor Elite Volleyball Kneepads",
+    note: "Премиальные наколенники для матчей · понятный допродажный товар к обуви",
+    marketPrice: "4–7,5 тыс. ₽",
+    priceBasis: MARKET_PRICE_BASIS,
+    chinaPriceYuan: 280,
+  },
+  {
+    slug: "mizuno-vs1-ultra-kneepad",
+    brand: "Mizuno",
+    name: "VS-1 Ultra Kneepad",
+    category: "apparel",
+    categoryLabel: "Аксессуары · наколенники",
+    kind: "accessory",
+    sportPriority: true,
+    query: "Mizuno VS-1 Ultra Kneepad volleyball",
+    note: "Защита для либеро и защитных игроков · профильная альтернатива Nike",
+    marketPrice: "3,5–6,5 тыс. ₽",
+    priceBasis: MARKET_PRICE_BASIS,
+    chinaPriceYuan: 220,
+  },
+  {
+    slug: "molten-v5m5000-flistatec",
+    brand: "Molten",
+    name: "V5M5000 Flistatec",
+    category: "apparel",
+    categoryLabel: "Аксессуары · мяч",
+    kind: "accessory",
+    sportPriority: true,
+    query: "Molten V5M5000 Flistatec volleyball",
+    note: "Матчевый мяч Flistatec · якорный аксессуар для волейбольного спроса",
+    marketPrice: "8–13 тыс. ₽",
+    priceBasis: MARKET_PRICE_BASIS,
+    chinaPriceYuan: 520,
+  },
+]
 
-export const catalogProducts: readonly CatalogProduct[] =
-  catalogProductSource.map((product) => ({
+const equipmentProducts: readonly ProductSource[] = [
+  {
+    slug: "theraband-resistance-band-set",
+    brand: "TheraBand",
+    name: "Resistance Band Set",
+    category: "training",
+    categoryLabel: "Тренировки · резина",
+    kind: "accessory",
+    sportPriority: true,
+    query: "TheraBand Resistance Band Set training",
+    note: "Набор резины для разминки плеч, прыжковой подготовки и домашнего ОФП",
+    marketPrice: "1,5–3,5 тыс. ₽",
+    priceBasis: MARKET_PRICE_BASIS,
+    chinaPriceYuan: 90,
+  },
+  {
+    slug: "nike-resistance-band-heavy",
+    brand: "Nike",
+    name: "Resistance Band Heavy",
+    category: "training",
+    categoryLabel: "Тренировки · силовая резина",
+    kind: "accessory",
+    sportPriority: true,
+    query: "Nike Resistance Band Heavy training",
+    note: "Плотная резина для активации, приседаний, тяги и разминки перед залом",
+    marketPrice: "2–4,5 тыс. ₽",
+    priceBasis: MARKET_PRICE_BASIS,
+    chinaPriceYuan: 160,
+  },
+  {
+    slug: "triggerpoint-grid-foam-roller",
+    brand: "TriggerPoint",
+    name: "GRID Foam Roller",
+    category: "recovery",
+    categoryLabel: "Восстановление · ролл",
+    kind: "accessory",
+    sportPriority: true,
+    query: "TriggerPoint GRID Foam Roller",
+    note: "Жесткий ролл для икр, квадрицепса и спины после игровых тренировок",
+    marketPrice: "3,5–7 тыс. ₽",
+    priceBasis: MARKET_PRICE_BASIS,
+    chinaPriceYuan: 220,
+  },
+  {
+    slug: "hyperice-vyper-go-roller",
+    brand: "Hyperice",
+    name: "Vyper Go Roller",
+    category: "recovery",
+    categoryLabel: "Восстановление · виброролл",
+    kind: "accessory",
+    sportPriority: true,
+    query: "Hyperice Vyper Go Roller",
+    note: "Премиальный ролл для восстановления, команды и домашней recovery-зоны",
+    marketPrice: "11–18 тыс. ₽",
+    priceBasis: MARKET_PRICE_BASIS,
+    chinaPriceYuan: 820,
+  },
+  {
+    slug: "rocktape-kinesiology-tape-black",
+    brand: "RockTape",
+    name: "Kinesiology Tape Black",
+    category: "recovery",
+    categoryLabel: "Восстановление · тейп",
+    kind: "accessory",
+    sportPriority: true,
+    query: "RockTape Kinesiology Tape Black",
+    note: "Кинезио тейп для игровой недели, плеча, колена и голеностопа",
+    marketPrice: "1,2–2,5 тыс. ₽",
+    priceBasis: MARKET_PRICE_BASIS,
+    chinaPriceYuan: 75,
+  },
+  {
+    slug: "mueller-jumpers-knee-strap",
+    brand: "Mueller",
+    name: "Jumper's Knee Strap",
+    category: "recovery",
+    categoryLabel: "Восстановление · коленный ремень",
+    kind: "accessory",
+    sportPriority: true,
+    query: "Mueller Jumper's Knee Strap",
+    note: "Компактная поддержка под колено для прыжковых нагрузок и тренировочного режима",
+    marketPrice: "1,5–3,5 тыс. ₽",
+    priceBasis: MARKET_PRICE_BASIS,
+    chinaPriceYuan: 120,
+  },
+  {
+    slug: "mcdavid-hex-knee-pads",
+    brand: "McDavid",
+    name: "HEX Knee Pads",
+    category: "apparel",
+    categoryLabel: "Аксессуары · наколенники",
+    kind: "accessory",
+    sportPriority: true,
+    query: "McDavid HEX Knee Pads",
+    note: "Мягкая HEX-защита для падений, зала и игроков, которым нужна гибкость",
+    marketPrice: "3,5–6,5 тыс. ₽",
+    priceBasis: MARKET_PRICE_BASIS,
+    chinaPriceYuan: 220,
+  },
+  {
+    slug: "bauerfeind-sports-knee-support",
+    brand: "Bauerfeind",
+    name: "Sports Knee Support",
+    category: "apparel",
+    categoryLabel: "Аксессуары · поддержка колена",
+    kind: "accessory",
+    sportPriority: true,
+    query: "Bauerfeind Sports Knee Support",
+    note: "Компрессионная поддержка для тренировок, восстановления и аккуратной нагрузки",
+    marketPrice: "8–14 тыс. ₽",
+    priceBasis: MARKET_PRICE_BASIS,
+    chinaPriceYuan: 620,
+  },
+  {
+    slug: "mcdavid-hex-elbow-pads",
+    brand: "McDavid",
+    name: "HEX Elbow Pads",
+    category: "apparel",
+    categoryLabel: "Аксессуары · налокотники",
+    kind: "accessory",
+    sportPriority: true,
+    query: "McDavid HEX Elbow Pads",
+    note: "Налокотники для защиты при падениях, приемах и интенсивных тренировках",
+    marketPrice: "3–6 тыс. ₽",
+    priceBasis: MARKET_PRICE_BASIS,
+    chinaPriceYuan: 210,
+  },
+  {
+    slug: "nike-essential-volleyball-elbow-pads",
+    brand: "Nike",
+    name: "Essential Volleyball Elbow Pads",
+    category: "apparel",
+    categoryLabel: "Аксессуары · налокотники",
+    kind: "accessory",
+    sportPriority: true,
+    query: "Nike Essential Volleyball Elbow Pads",
+    note: "Легкая защита локтей для приема, защиты и тренировок на паркете",
+    marketPrice: "2,5–5 тыс. ₽",
+    priceBasis: MARKET_PRICE_BASIS,
+    chinaPriceYuan: 170,
+  },
+  {
+    slug: "mizuno-arm-sleeves",
+    brand: "Mizuno",
+    name: "Arm Sleeves",
+    category: "apparel",
+    categoryLabel: "Аксессуары · рукава",
+    kind: "accessory",
+    sportPriority: true,
+    query: "Mizuno Arm Sleeves volleyball",
+    note: "Компрессионные рукава для зала, подачи и защиты предплечья",
+    marketPrice: "2–4 тыс. ₽",
+    priceBasis: MARKET_PRICE_BASIS,
+    chinaPriceYuan: 150,
+  },
+  {
+    slug: "nike-everyday-cushion-crew-socks-6pk",
+    brand: "Nike",
+    name: "Everyday Cushion Crew Socks 6PK",
+    category: "apparel",
+    categoryLabel: "Аксессуары · носки",
+    kind: "accessory",
+    sportPriority: true,
+    query: "Nike Everyday Cushion Crew Socks 6 Pack",
+    note: "Базовые плотные носки для тренировок, матчей и ежедневного комплекта",
+    marketPrice: "2,5–5 тыс. ₽",
+    priceBasis: MARKET_PRICE_BASIS,
+    chinaPriceYuan: 170,
+  },
+  {
+    slug: "stance-icon-crew-socks",
+    brand: "Stance",
+    name: "Icon Crew Socks",
+    category: "apparel",
+    categoryLabel: "Аксессуары · носки",
+    kind: "accessory",
+    sportPriority: true,
+    query: "Stance Icon Crew Socks",
+    note: "Акцентные crew-носки для зала и повседневной пары",
+    marketPrice: "1,5–3 тыс. ₽",
+    priceBasis: MARKET_PRICE_BASIS,
+    chinaPriceYuan: 100,
+  },
+  {
+    slug: "molten-v5m4500-volleyball",
+    brand: "Molten",
+    name: "V5M4500 Volleyball",
+    category: "apparel",
+    categoryLabel: "Аксессуары · мяч",
+    kind: "accessory",
+    sportPriority: true,
+    query: "Molten V5M4500 Volleyball",
+    note: "Тренировочный мяч для секций, любительских команд и регулярной игры",
+    marketPrice: "6–10 тыс. ₽",
+    priceBasis: MARKET_PRICE_BASIS,
+    chinaPriceYuan: 390,
+  },
+  {
+    slug: "mikasa-v200w-volleyball",
+    brand: "Mikasa",
+    name: "V200W Volleyball",
+    category: "apparel",
+    categoryLabel: "Аксессуары · мяч",
+    kind: "accessory",
+    sportPriority: true,
+    query: "Mikasa V200W Volleyball",
+    note: "Матчевый волейбольный мяч с высоким узнаваемым спросом",
+    marketPrice: "8–13 тыс. ₽",
+    priceBasis: MARKET_PRICE_BASIS,
+    chinaPriceYuan: 520,
+  },
+  {
+    slug: "wilson-evo-nxt-basketball",
+    brand: "Wilson",
+    name: "Evo NXT Basketball",
+    category: "apparel",
+    categoryLabel: "Аксессуары · баскетбольный мяч",
+    kind: "accessory",
+    sportPriority: true,
+    query: "Wilson Evo NXT Basketball",
+    note: "Игровой баскетбольный мяч для зала, разминки и командной экипировки",
+    marketPrice: "7–12 тыс. ₽",
+    priceBasis: MARKET_PRICE_BASIS,
+    chinaPriceYuan: 480,
+  },
+  {
+    slug: "nike-brasilia-training-duffel",
+    brand: "Nike",
+    name: "Brasilia Training Duffel",
+    category: "apparel",
+    categoryLabel: "Аксессуары · сумка",
+    kind: "accessory",
+    sportPriority: true,
+    query: "Nike Brasilia Training Duffel",
+    note: "Вместительная сумка под форму, пару, защиту и воду на тренировку",
+    marketPrice: "4–8 тыс. ₽",
+    priceBasis: MARKET_PRICE_BASIS,
+    chinaPriceYuan: 320,
+  },
+  {
+    slug: "adidas-tiro-league-duffel",
+    brand: "adidas",
+    name: "Tiro League Duffel",
+    category: "apparel",
+    categoryLabel: "Аксессуары · сумка",
+    kind: "accessory",
+    sportPriority: true,
+    query: "adidas Tiro League Duffel",
+    note: "Командная сумка для тренировок, выездов и базового спортивного комплекта",
+    marketPrice: "3,5–7 тыс. ₽",
+    priceBasis: MARKET_PRICE_BASIS,
+    chinaPriceYuan: 280,
+  },
+  {
+    slug: "camelbak-podium-chill-bottle",
+    brand: "CamelBak",
+    name: "Podium Chill Bottle",
+    category: "training",
+    categoryLabel: "Тренировки · бутылка",
+    kind: "accessory",
+    sportPriority: true,
+    query: "CamelBak Podium Chill Bottle",
+    note: "Термобутылка для зала, игровых дней и тренировок с высокой нагрузкой",
+    marketPrice: "1,5–3,5 тыс. ₽",
+    priceBasis: MARKET_PRICE_BASIS,
+    chinaPriceYuan: 110,
+  },
+  {
+    slug: "nike-hyperfuel-water-bottle",
+    brand: "Nike",
+    name: "HyperFuel Water Bottle",
+    category: "training",
+    categoryLabel: "Тренировки · бутылка",
+    kind: "accessory",
+    sportPriority: true,
+    query: "Nike HyperFuel Water Bottle",
+    note: "Легкая бутылка для тренировки, матча и сумки на каждый заловый день",
+    marketPrice: "1,5–3 тыс. ₽",
+    priceBasis: MARKET_PRICE_BASIS,
+    chinaPriceYuan: 90,
+  },
+]
+
+const catalogProductSource = [
+  ...sportProducts,
+  ...expandedProducts,
+  ...equipmentProducts,
+  ...existingProducts,
+] as const
+
+const performanceBasketballOverrides: Record<string, Partial<ProductSource>> = {
+  "nike-metcon-10": {
+    slug: "nike-gt-cut-academy",
+    brand: "Nike",
+    name: "G.T. Cut Academy",
+    category: "basketball",
+    categoryLabel: "Баскетбол для волейбола · скорость",
+    kind: "footwear",
+    sportPriority: true,
+    query: "Nike G.T. Cut Academy basketball volleyball",
+    note: "Быстрая низкая пара · хороший выбор для либеро, связующих и доигровщиков",
+    marketPrice: "12–17 тыс. ₽",
+    priceBasis: MARKET_PRICE_BASIS,
+    chinaPriceYuan: 760,
+  },
+  "reebok-nano-x5": {
+    slug: "nike-sabrina-3",
+    brand: "Nike",
+    name: "Sabrina 3",
+    category: "basketball",
+    categoryLabel: "Баскетбол для волейбола · контроль",
+    kind: "footwear",
+    sportPriority: true,
+    query: "Nike Sabrina 3 basketball volleyball",
+    note: "Легкая guard-пара · цепкая подошва и стабильность на резких сменах направления",
+    marketPrice: "16–22 тыс. ₽",
+    priceBasis: MARKET_PRICE_BASIS,
+    chinaPriceYuan: 980,
+  },
+  "adidas-dropset-3": {
+    slug: "nike-lebron-nxxt-genisus",
+    brand: "Nike",
+    name: "LeBron NXXT Genisus",
+    category: "basketball",
+    categoryLabel: "Баскетбол для волейбола · амортизация",
+    kind: "footwear",
+    sportPriority: true,
+    query: "Nike LeBron NXXT Genisus basketball volleyball",
+    note: "Более мощная амортизация · для тяжелых игроков и частых прыжков",
+    marketPrice: "18–25 тыс. ₽",
+    priceBasis: MARKET_PRICE_BASIS,
+    chinaPriceYuan: 1120,
+  },
+  "under-armour-tribase-reign-6": {
+    slug: "nike-kd-18",
+    brand: "Nike",
+    name: "KD 18",
+    category: "basketball",
+    categoryLabel: "Баскетбол для волейбола · баланс",
+    kind: "footwear",
+    sportPriority: true,
+    query: "Nike KD 18 basketball volleyball",
+    note: "Баланс сцепления и мягкости · универсально для зала, если нужна амортизация",
+    marketPrice: "18–26 тыс. ₽",
+    priceBasis: MARKET_PRICE_BASIS,
+    chinaPriceYuan: 1180,
+  },
+  "air-jordan-4-black-cat": {
+    slug: "jordan-luka-4",
+    brand: "Jordan",
+    name: "Luka 4",
+    category: "basketball",
+    categoryLabel: "Баскетбол для волейбола · стабильность",
+    kind: "footwear",
+    sportPriority: true,
+    query: "Jordan Luka 4 basketball volleyball",
+    note: "Стабильная платформа · для боковых перемещений и уверенной посадки",
+    marketPrice: "17–24 тыс. ₽",
+    priceBasis: MARKET_PRICE_BASIS,
+    chinaPriceYuan: 1020,
+  },
+  "air-jordan-5-wolf-grey": {
+    slug: "nike-ja-3",
+    brand: "Nike",
+    name: "Ja 3",
+    category: "basketball",
+    categoryLabel: "Баскетбол для волейбола · взрыв",
+    kind: "footwear",
+    sportPriority: true,
+    query: "Nike Ja 3 basketball volleyball",
+    note: "Быстрый guard-силуэт · резкое ускорение и плотная посадка",
+    marketPrice: "15–22 тыс. ₽",
+    priceBasis: MARKET_PRICE_BASIS,
+    chinaPriceYuan: 940,
+  },
+  "air-jordan-1-low-white-black": {
+    slug: "way-of-wade-all-city-12",
+    brand: "Li-Ning",
+    name: "Way of Wade All City 12",
+    category: "basketball",
+    categoryLabel: "Баскетбол для волейбола · цепкость",
+    kind: "footwear",
+    sportPriority: true,
+    query: "Li-Ning Way of Wade All City 12 basketball volleyball",
+    note: "Популярный performance-вариант · часто берут как заловую альтернативу волейболу",
+    marketPrice: "14–22 тыс. ₽",
+    priceBasis: MARKET_PRICE_BASIS,
+    chinaPriceYuan: 880,
+  },
+}
+
+function withFallbackGallery(product: ProductSource): CatalogProduct {
+  const fallbackImage = `catalog/${product.assetSlug ?? product.slug}.webp`
+  const gallery = projectGallery(product)
+  const orderQuote =
+    product.chinaPriceYuan === undefined
+      ? undefined
+      : calculateOrderQuote(product.chinaPriceYuan, product.kind)
+
+  return {
     ...product,
-    image: `catalog/${product.slug}.webp`,
-  }))
+    fallbackImage,
+    formulaBasis: product.chinaPriceYuan ? PRICE_FORMULA_BASIS : undefined,
+    gallery,
+    image: gallery[0]?.src ?? fallbackImage,
+    orderQuote,
+  }
+}
+
+export const catalogProducts: readonly CatalogProduct[] = catalogProductSource.map(
+  (product) =>
+    withFallbackGallery({
+      ...product,
+      ...performanceBasketballOverrides[product.slug],
+    }),
+)
 
 export function filterCatalog(
   products: readonly CatalogProduct[],
@@ -790,4 +1648,51 @@ export function filterCatalog(
       .toLocaleLowerCase("ru")
       .includes(normalizedSearch)
   })
+}
+
+function priceRank(product: CatalogProduct): number {
+  if (!product.marketPrice) return Number.POSITIVE_INFINITY
+
+  const [rawValue] = product.marketPrice.match(/\d+(?:[,.]\d+)?/u) ?? []
+  if (!rawValue) return Number.POSITIVE_INFINITY
+
+  return Number.parseFloat(rawValue.replace(",", "."))
+}
+
+export function sortCatalog(
+  products: readonly CatalogProduct[],
+  sort: CatalogSort,
+): CatalogProduct[] {
+  const indexedProducts = products.map((product, index) => ({ product, index }))
+
+  indexedProducts.sort((left, right) => {
+    if (sort === "featured") return left.index - right.index
+    if (sort === "name") {
+      const byBrand = left.product.brand.localeCompare(right.product.brand, "ru")
+      if (byBrand !== 0) return byBrand
+      return left.product.name.localeCompare(right.product.name, "ru")
+    }
+
+    const leftPrice = priceRank(left.product)
+    const rightPrice = priceRank(right.product)
+    const pricedDelta =
+      Number.isFinite(leftPrice) === Number.isFinite(rightPrice)
+        ? 0
+        : Number.isFinite(leftPrice)
+          ? -1
+          : 1
+    if (pricedDelta !== 0) return pricedDelta
+
+    const priceDelta =
+      sort === "price-asc" ? leftPrice - rightPrice : rightPrice - leftPrice
+    return priceDelta || left.index - right.index
+  })
+
+  return indexedProducts.map(({ product }) => product)
+}
+
+export function findProductBySlug(slug: string | null): CatalogProduct | null {
+  if (!slug) return null
+
+  return catalogProducts.find((product) => product.slug === slug) ?? null
 }

@@ -146,9 +146,11 @@ if (!Array.isArray(catalogManifest.items)) {
 const allowedCatalogEntries = new Set([
   "SOURCES.md",
   "sources.json",
+  "gallery",
   ...catalogManifest.items.map((item) => item.file),
 ])
 const allowedBrandEntries = new Set([
+  "kicksbase-hero-v2.webp",
   "kicksbase-hero.webp",
   "kicksbase-logo.webp",
 ])
@@ -157,6 +159,10 @@ for (const file of publicFiles) {
   const extension = path.extname(file).toLowerCase()
   if (
     relative.startsWith(`catalog${path.sep}`) &&
+    !(
+      relative.startsWith(`catalog${path.sep}gallery${path.sep}`) &&
+      /^[a-z0-9-]+-[2-5]\.webp$/.test(path.basename(file))
+    ) &&
     !allowedCatalogEntries.has(path.basename(file))
   ) {
     fail(`public/catalog contains an unexpected release artifact: ${relative}`)
