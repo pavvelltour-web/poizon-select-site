@@ -26,7 +26,7 @@ describe("LandingPage", () => {
     expect(screen.getAllByText("от 3 000 ₽").length).toBeGreaterThan(0)
     expect(screen.getAllByText("от 2 500 ₽").length).toBeGreaterThan(0)
     expect(
-      screen.getByText(/Подтверждаем детали заказа/),
+      screen.getByText(/Перед оплатой всё должно быть понятно/),
     ).toBeInTheDocument()
     expect(
       screen.getByText(/Бирки и упаковка/),

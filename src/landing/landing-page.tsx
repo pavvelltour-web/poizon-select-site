@@ -6,6 +6,8 @@ import {
   Copy,
   Dumbbell,
   Footprints,
+  Medal,
+  MoveRight,
   RotateCcw,
   Search,
   Send,
@@ -14,6 +16,7 @@ import {
   Shirt,
   SlidersHorizontal,
   Sparkles,
+  TimerReset,
   Trophy,
   Waves,
   X,
@@ -76,6 +79,20 @@ const categoryCopy: Record<ActiveCategory, string> = {
   bags: "Сумки, рюкзаки, носки и мелкие вещи",
 }
 
+const categoryDetails: Record<ActiveCategory, string> = {
+  all: "Полная база",
+  "court-shoes": "Сцепление и стабильность",
+  sneakers: "Кроссовки и кеды",
+  volleyball: "Прыжок и боковая работа",
+  basketball: "Амортизация и контроль",
+  apparel: "Форма и слои",
+  protection: "Колени, локти, тейпы",
+  balls: "Для игры и команды",
+  training: "ОФП и база",
+  recovery: "После нагрузки",
+  bags: "То, что берут с собой",
+}
+
 const categoryTone: Record<ActiveCategory, string> = {
   all: "gear",
   "court-shoes": "jump",
@@ -103,6 +120,42 @@ const categoryIcons: Record<ActiveCategory, LucideIcon> = {
   recovery: Waves,
   bags: Backpack,
 }
+
+const heroProductSlugs = [
+  "asics-sky-elite-ff-3",
+  "nike-kd-18",
+  "triggerpoint-grid-foam-roller",
+] as const
+
+const scenarioTiles: readonly {
+  id: ActiveCategory
+  title: string
+  text: string
+  metric: string
+  icon: LucideIcon
+}[] = [
+  {
+    id: "court-shoes",
+    title: "Игровой день",
+    text: "Пары с цепким сцеплением, стабильной боковой работой и мягким приземлением.",
+    metric: "37 пар",
+    icon: Medal,
+  },
+  {
+    id: "protection",
+    title: "Контакт и защита",
+    text: "Наколенники, налокотники, тейпы и поддержка для плотных тренировок.",
+    metric: "9 позиций",
+    icon: ShieldCheck,
+  },
+  {
+    id: "recovery",
+    title: "После зала",
+    text: "Слайды, роллы и восстановление, чтобы следующая тренировка не начиналась с боли.",
+    metric: "10 позиций",
+    icon: TimerReset,
+  },
+] as const
 
 const kindLabels: Record<ProductKind, string> = {
   footwear: "Обувь",
@@ -141,7 +194,7 @@ function getDisplayPrice(product: CatalogProduct) {
   }
 
   return {
-    detail: "после проверки",
+    detail: "после уточнения",
     label: "Цена от",
     value: fallbackFromPrices[product.kind],
   }
@@ -163,6 +216,29 @@ function getProductTags(product: CatalogProduct): string[] {
   if (/стабил|боков|control/.test(note)) tags.push("стабильность")
 
   return Array.from(new Set(tags)).slice(0, 3)
+}
+
+function getProductBadge(product: CatalogProduct): string {
+  const note = product.note.toLowerCase()
+  if (product.category === "recovery") return "После зала"
+  if (product.category === "basketball") return "Контроль"
+  if (product.category === "volleyball") return /прыж|jump/.test(note) ? "Прыжок" : "Зал"
+  if (product.kind === "accessory") return /колен|локот|tape|support|strap/.test(note) ? "Защита" : "Комплект"
+  if (product.kind === "apparel") return "Форма"
+  return "Everyday"
+}
+
+function getProductUse(product: CatalogProduct): string {
+  const note = product.note.toLowerCase()
+  if (/амортиз|мягк|cushion|призем/.test(note)) return "Для мягкого приземления"
+  if (/стабил|боков|control|support/.test(note)) return "Для стабильной боковой работы"
+  if (/цеп|grip|traction/.test(note)) return "Для цепкого зального покрытия"
+  if (/ролл|slide|recovery|восстанов/.test(note)) return "Для восстановления после нагрузки"
+  if (/резин|band|офп|силов|functional/.test(note)) return "Для ОФП и тренировочной базы"
+  if (product.category === "basketball") return "Для резких смен направления"
+  if (product.category === "volleyball") return "Для тренировок и игровых дней"
+  if (product.kind === "apparel") return "Для формы, разминки и дороги в зал"
+  return "Для комплекта вокруг основной пары"
 }
 
 function isCategory(value: string | null): value is ActiveCategory {
@@ -216,6 +292,13 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
     [selectedSlug],
   )
   const selectedProductPrice = selectedProduct ? getDisplayPrice(selectedProduct) : null
+  const heroProducts = useMemo(
+    () =>
+      heroProductSlugs
+        .map((slug) => findProductBySlug(slug))
+        .filter((product): product is CatalogProduct => product !== null),
+    [],
+  )
   const selectedGallery = selectedProduct?.gallery ?? []
   const selectedImage =
     selectedGallery[Math.min(selectedImageIndex, selectedGallery.length - 1)] ??
@@ -403,23 +486,23 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
         <section className="shop-hero" aria-labelledby="hero-title">
           <a className="shop-hero__media" href="#catalog" aria-label="Открыть каталог">
             <img
-              src="brand/kicksbase-culture-hero.webp"
+              src="brand/kicksbase-court-base-hero.webp"
               width="1536"
               height="864"
-              alt="Фирменный зал KICKSBASE с экипировкой, court wall и лаймовыми линиями"
+              alt="Темная заловая база KICKSBASE с экипировкой, игроком и лаймовыми линиями"
             />
           </a>
           <div className="shop-hero__copy">
-            <p className="eyebrow">Court kit · shoes · recovery</p>
+            <p className="eyebrow">Заловая экипировка · обувь · защита</p>
             <h1 id="hero-title">KICKSBASE</h1>
             <p className="shop-hero__lead">
-              Экипировка для людей, которые живут залом: обувь, форма, защита и
-              recovery в одной чистой витрине.
+              База экипировки для волейбола, баскетбола и тренировок в зале.
+              Подбирайте пару, защиту, форму и инвентарь в одном каталоге.
             </p>
             <div className="hero-actions">
               <a className="button button--primary" href="#catalog">
                 <ShoppingBag aria-hidden="true" size={18} />
-                Смотреть каталог
+                Собрать комплект
               </a>
               {botUrl ? (
                 <a
@@ -429,24 +512,57 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
                   rel="noopener noreferrer"
                 >
                   <Send aria-hidden="true" size={18} />
-                  Telegram
+                  Написать менеджеру
                 </a>
               ) : null}
+            </div>
+            <div className="pavel-note">
+              <Medal aria-hidden="true" size={18} />
+              <span>
+                Подход игрока: сначала посадка, сцепление и задача в зале,
+                потом бренд и цвет.
+              </span>
             </div>
             <div className="hero-marks" aria-label="Преимущества каталога">
               <span>
                 <BadgeCheck aria-hidden="true" size={16} />
-                100 позиций
+                Обувь под зал
               </span>
               <span>
                 <BadgeCheck aria-hidden="true" size={16} />
-                Полный комплект
+                Расчёт до оплаты
               </span>
               <span>
                 <BadgeCheck aria-hidden="true" size={16} />
-                Итог до оплаты
+                Бирки и упаковка
               </span>
             </div>
+          </div>
+          <div className="hero-board" aria-label="Быстрый выбор экипировки">
+            <div className="hero-board__head">
+              <span>Выбор для старта</span>
+              <small>пара · игра · восстановление</small>
+            </div>
+            {heroProducts.map((product) => {
+              const price = getDisplayPrice(product)
+
+              return (
+                <button
+                  className="hero-pick"
+                  key={product.slug}
+                  type="button"
+                  onClick={(event) => openProduct(product, event.currentTarget)}
+                >
+                  <img src={product.image} width="1200" height="900" alt="" />
+                  <span>
+                    <small>{getProductBadge(product)}</small>
+                    <strong>{product.brand} {product.name}</strong>
+                    <em>{price.value}</em>
+                  </span>
+                  <MoveRight aria-hidden="true" size={18} />
+                </button>
+              )
+            })}
           </div>
         </section>
 
@@ -454,12 +570,37 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
           <div className="catalog-heading">
             <div>
               <p className="eyebrow">Каталог</p>
-              <h2 id="catalog-title">Соберите комплект под зал и тренировки.</h2>
+              <h2 id="catalog-title">Выберите экипировку под свою игру.</h2>
             </div>
             <p>
-              Фильтруйте по спорту, модели и типу товара. В карточке видны цена от,
-              назначение и быстрый запрос менеджеру.
+              Разделы собраны по реальным сценариям: прыжок, боковая работа,
+              защита коленей, тренировка и восстановление после зала.
             </p>
+          </div>
+
+          <div className="scenario-grid" aria-label="Сценарии выбора">
+            {scenarioTiles.map((tile) => {
+              const ScenarioIcon = tile.icon
+
+              return (
+                <button
+                  key={tile.id}
+                  type="button"
+                  onClick={() => selectCategory(tile.id)}
+                  aria-pressed={category === tile.id}
+                >
+                  <span className="scenario-grid__icon" aria-hidden="true">
+                    <ScenarioIcon size={22} />
+                  </span>
+                  <span>
+                    <small>{tile.metric}</small>
+                    <strong>{tile.title}</strong>
+                    <em>{tile.text}</em>
+                  </span>
+                  <MoveRight aria-hidden="true" size={18} />
+                </button>
+              )
+            })}
           </div>
 
           <div className="catalog-toolbar" aria-label="Фильтры каталога">
@@ -470,7 +611,7 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
                 type="search"
                 value={search}
                 onChange={(event) => updateSearch(event.target.value)}
-                placeholder="ASICS, Metarise, Nike, худи..."
+                placeholder="Nike, ASICS, Mizuno, наколенники, мяч..."
                 autoComplete="off"
               />
             </label>
@@ -514,6 +655,7 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
                   </span>
                   <span className="category-row__content">
                     <span>{item.label}</span>
+                    <em>{categoryDetails[item.id]}</em>
                     <small>{categoryCounts.get(item.id) ?? 0}</small>
                   </span>
                 </button>
@@ -531,6 +673,8 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
               {filteredProducts.map((product, index) => {
                 const price = getDisplayPrice(product)
                 const tags = getProductTags(product)
+                const alternateImage = product.gallery[1]?.src ?? product.image
+                const productUse = getProductUse(product)
 
                 return (
                   <button
@@ -543,6 +687,7 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
                   >
                     <span className="product-card__visual">
                       <img
+                        className="product-card__image product-card__image--primary"
                         src={product.image}
                         width="1200"
                         height="900"
@@ -553,18 +698,35 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
                           event.currentTarget.src = product.fallbackImage
                         }}
                       />
+                      <img
+                        className="product-card__image product-card__image--alt"
+                        src={alternateImage}
+                        width="1200"
+                        height="900"
+                        loading="lazy"
+                        decoding="async"
+                        alt=""
+                        onError={(event) => {
+                          event.currentTarget.src = product.fallbackImage
+                        }}
+                      />
                       <span className="product-card__badge">
-                        {product.sportPriority ? "Sport" : kindLabels[product.kind]}
+                        {getProductBadge(product)}
+                      </span>
+                      <span className="product-card__dots" aria-hidden="true">
+                        {product.gallery.slice(0, 5).map((image, dotIndex) => (
+                          <span key={`${image.src}-${dotIndex}`} />
+                        ))}
                       </span>
                     </span>
                     <span className="product-card__body">
                       <span className="product-card__brand">{product.brand}</span>
                       <strong>{product.name}</strong>
                       <span className="product-card__meta">
-                        {product.categoryLabel}
+                        {productUse}
                       </span>
                       <span className="product-card__tags" aria-hidden="true">
-                        {tags.slice(0, 2).map((tag) => (
+                        {tags.slice(0, 1).map((tag) => (
                           <span key={tag}>{tag}</span>
                         ))}
                       </span>
@@ -574,7 +736,10 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
                           <b>{price.value}</b>
                           <em>{price.detail}</em>
                         </span>
-                        <ArrowUpRight aria-hidden="true" size={19} />
+                        <span className="product-card__cta">
+                          Подробнее
+                          <ArrowUpRight aria-hidden="true" size={16} />
+                        </span>
                       </span>
                     </span>
                   </button>
@@ -599,23 +764,23 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
         <section className="how-section" id="how-it-works" aria-labelledby="how-title">
           <div className="section-heading">
             <p className="eyebrow">Как заказать</p>
-            <h2 id="how-title">Путь заказа короткий и понятный.</h2>
+            <h2 id="how-title">Заказ без лишней переписки.</h2>
           </div>
           <ol className="steps">
             <li>
               <span>1</span>
-              <h3>Открыть карточку</h3>
-              <p>Посмотреть ракурсы, категорию, назначение и стартовую цену.</p>
+              <h3>Выберите товар</h3>
+              <p>Откройте карточку, посмотрите ракурсы, назначение и цену от.</p>
             </li>
             <li>
               <span>2</span>
-              <h3>Отправить запрос</h3>
-              <p>Сайт готовит короткую строку для Telegram без лишней разметки.</p>
+              <h3>Отправьте заявку</h3>
+              <p>Сайт соберёт короткое сообщение с моделью и ценой для Telegram.</p>
             </li>
             <li>
               <span>3</span>
-              <h3>Получить расчет</h3>
-              <p>Менеджер сверяет размер, продавца, наличие, бирки и итоговую сумму.</p>
+              <h3>Получите финальный расчёт</h3>
+              <p>Размер, продавец, бирки, упаковка и итоговая сумма фиксируются до оплаты.</p>
             </li>
           </ol>
         </section>
@@ -623,20 +788,20 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
         <section className="trust-section" id="trust" aria-labelledby="trust-title">
           <div className="section-heading">
             <p className="eyebrow">Перед оплатой</p>
-            <h2 id="trust-title">Подтверждаем детали заказа.</h2>
+            <h2 id="trust-title">Перед оплатой всё должно быть понятно.</h2>
           </div>
           <div className="trust-grid">
             <article>
-              <h3>Бирки и упаковка</h3>
-              <p>Показываем доступный размер, цвет, бирки, коробку или упаковку товара.</p>
+              <h3>Карточка товара</h3>
+              <p>Показываем размер, цвет, продавца, бирки и упаковку по конкретной позиции.</p>
             </article>
             <article>
-              <h3>Финальная сумма</h3>
-              <p>Считаем выкуп, комиссию, логистику и доставку до оплаты.</p>
+              <h3>Честный итог</h3>
+              <p>Считаем выкуп, комиссию, логистику и доставку до оплаты без внезапных доплат.</p>
             </article>
             <article>
-              <h3>Подбор комплекта</h3>
-              <p>Помогаем собрать пару, защиту, recovery и тренировочные аксессуары под задачу.</p>
+              <h3>Подбор под игру</h3>
+              <p>Собираем пару, защиту и инвентарь под зал, нагрузку и бюджет.</p>
             </article>
           </div>
         </section>
@@ -653,13 +818,13 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
           </a>
           <p>
             Витрина для быстрого выбора экипировки под заказ через Telegram. Вы
-            выбираете товар, мы подтверждаем размер, бирки, упаковку и финальную сумму до оплаты.
+            выбираете товар и получаете размер, бирки, упаковку и финальную сумму до оплаты.
           </p>
         </div>
 
         <div className="kb-footer__grid" aria-label="Уточнения по заказу">
           <article>
-            <strong>Проверка</strong>
+            <strong>Детали заказа</strong>
             <p>SKU, продавец, размер, цвет и наличие.</p>
           </article>
           <article>
