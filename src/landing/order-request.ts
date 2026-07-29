@@ -27,11 +27,17 @@ export function buildTelegramBotUrl(username: string | null): string | null {
   return `https://t.me/${validatedUsername}`
 }
 
-export function buildOrderRequest(product: CatalogProduct): string {
+export function buildOrderRequest(
+  product: CatalogProduct,
+  selectedSize?: unknown,
+): string {
   // This string crosses the site → Telegram bot trust boundary. Keep it to
   // the exact catalog query: the bot can accept it immediately in the idle
   // state and the provider identity matcher is not polluted by UI prose.
-  return cleanLine(product.query)
+  const query = cleanLine(product.query)
+  const size = typeof selectedSize === "string" ? cleanLine(selectedSize) : ""
+
+  return size ? `${query}\nРазмер: ${size}` : query
 }
 
 export async function copyOrderRequest(text: string): Promise<boolean> {

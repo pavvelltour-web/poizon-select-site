@@ -326,6 +326,145 @@ function getProductUse(product: CatalogProduct): string {
   return "Для комплекта вокруг основной пары"
 }
 
+const footwearSizes = [
+  "EU 36",
+  "EU 37",
+  "EU 38",
+  "EU 39",
+  "EU 40",
+  "EU 41",
+  "EU 42",
+  "EU 43",
+  "EU 44",
+  "EU 45",
+  "EU 46",
+] as const
+
+const apparelSizes = ["XS", "S", "M", "L", "XL", "XXL"] as const
+const supportSizes = ["S", "M", "L", "XL"] as const
+const oneSize = ["One size"] as const
+
+interface TaskMatch {
+  product: CatalogProduct
+  reason: string
+  score: number
+}
+
+function getSizeOptions(product: CatalogProduct): readonly string[] {
+  if (product.kind === "footwear") return footwearSizes
+  if (product.kind === "apparel") return apparelSizes
+
+  const productText = `${product.name} ${product.query}`.toLowerCase()
+  if (/knee|elbow|sleeve|support|strap|pad|brace/.test(productText)) {
+    return supportSizes
+  }
+
+  return oneSize
+}
+
+function normalizedText(value: string): string {
+  return value.toLocaleLowerCase("ru").replace(/ё/g, "е")
+}
+
+function productSearchText(product: CatalogProduct): string {
+  return normalizedText(
+    [
+      product.brand,
+      product.name,
+      product.query,
+      product.note,
+      product.category,
+      product.categoryLabel,
+      product.kind,
+    ].join(" "),
+  )
+}
+
+function scoreTaskProduct(product: CatalogProduct, task: string): TaskMatch | null {
+  const normalizedTask = normalizedText(task)
+  if (!normalizedTask.trim()) return null
+
+  const haystack = productSearchText(product)
+  const reasons = new Set<string>()
+  let score = 0
+
+  const add = (points: number, reason: string) => {
+    score += points
+    reasons.add(reason)
+  }
+
+  const words = normalizedTask
+    .split(/[^\p{L}\p{N}]+/u)
+    .filter((word) => word.length >= 3)
+  for (const word of words) {
+    if (haystack.includes(word)) add(2, "точное совпадение")
+  }
+
+  if (/прыг|прыж|jump|волей|зал/.test(normalizedTask)) {
+    if (product.category === "volleyball" || product.kind === "footwear") {
+      add(10, "прыжок и сцепление")
+    }
+  }
+
+  if (/баскет|резк|смен|амортиз|cushion|control/.test(normalizedTask)) {
+    if (product.category === "basketball" || product.kind === "footwear") {
+      add(9, "амортизация и контроль")
+    }
+  }
+
+  if (/колен|локт|защит|тейп|support|strap|pad|sleeve/.test(normalizedTask)) {
+    if (product.category === "protection") add(12, "защита суставов")
+  }
+
+  if (/форма|джерси|худи|одеж|layer|jersey|hoodie/.test(normalizedTask)) {
+    if (product.kind === "apparel") add(10, "форма и верхний слой")
+  }
+
+  if (/мяч|команд|ball|волейбол/.test(normalizedTask)) {
+    if (product.category === "balls") add(10, "инвентарь для игры")
+  }
+
+  if (/восстанов|ролл|массаж|slide|recovery|после/.test(normalizedTask)) {
+    if (product.category === "recovery") add(11, "восстановление после зала")
+  }
+
+  if (/резин|офп|тренир|бутыл|band|training|bottle/.test(normalizedTask)) {
+    if (product.category === "training") add(9, "тренировочная база")
+  }
+
+  if (/сумк|рюкзак|носок|bag|sock|carry/.test(normalizedTask)) {
+    if (product.category === "bags") add(9, "сумка и мелочи")
+  }
+
+  if (/дешев|бюдж|недорог|до\s?\d|price|cheap/.test(normalizedTask)) {
+    if ((product.orderQuote?.totalRub ?? Number.MAX_SAFE_INTEGER) < 15000) {
+      add(5, "мягче по бюджету")
+    }
+  }
+
+  if (product.sportPriority) add(1, "спортивный приоритет")
+  if (score <= 0) return null
+
+  return {
+    product,
+    reason: Array.from(reasons).slice(0, 2).join(" + "),
+    score,
+  }
+}
+
+function findTaskMatches(task: string): TaskMatch[] {
+  return catalogProducts
+    .map((product) => scoreTaskProduct(product, task))
+    .filter((match): match is TaskMatch => match !== null)
+    .sort((left, right) => {
+      if (right.score !== left.score) return right.score - left.score
+      const leftPrice = left.product.orderQuote?.totalRub ?? Number.MAX_SAFE_INTEGER
+      const rightPrice = right.product.orderQuote?.totalRub ?? Number.MAX_SAFE_INTEGER
+      return leftPrice - rightPrice
+    })
+    .slice(0, 6)
+}
+
 function isCategory(value: string | null): value is ActiveCategory {
   return catalogCategories.some((category) => category.id === value)
 }
@@ -355,11 +494,13 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
   const initialState = useMemo(() => readUrlState(), [])
   const [category, setCategory] = useState<ActiveCategory>(initialState.category)
   const [search, setSearch] = useState(initialState.search)
+  const [taskPrompt, setTaskPrompt] = useState("")
   const [sort, setSort] = useState<CatalogSort>(initialState.sort)
   const [selectedSlug, setSelectedSlug] = useState<string | null>(
     initialState.productSlug,
   )
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
+  const [selectedSize, setSelectedSize] = useState<string | null>(null)
   const [copyState, setCopyState] = useState<"idle" | "copied" | "failed">(
     "idle",
   )
@@ -384,26 +525,19 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
         .filter((product): product is CatalogProduct => product !== null),
     [],
   )
-  const heroSpotlight = heroProducts[0] ?? null
-  const heroSecondary = heroProducts.slice(1)
   const selectedGallery = selectedProduct?.gallery ?? []
   const selectedVisibleGallery = selectedGallery.slice(0, 7)
   const selectedImage =
     selectedGallery[Math.min(selectedImageIndex, selectedGallery.length - 1)] ??
     null
+  const selectedSizeOptions = selectedProduct ? getSizeOptions(selectedProduct) : []
   const filteredProducts = useMemo(() => {
     return sortCatalog(filterCatalog(catalogProducts, category, search), sort)
   }, [category, search, sort])
-  const request = selectedProduct ? buildOrderRequest(selectedProduct) : ""
-
-  const categoryCounts = useMemo(() => {
-    const counts = new Map<ActiveCategory, number>([["all", catalogProducts.length]])
-    for (const item of catalogCategories) {
-      if (item.id === "all") continue
-      counts.set(item.id, filterCatalog(catalogProducts, item.id, "").length)
-    }
-    return counts
-  }, [])
+  const taskMatches = useMemo(() => findTaskMatches(taskPrompt), [taskPrompt])
+  const request = selectedProduct
+    ? buildOrderRequest(selectedProduct, selectedSize)
+    : ""
 
   const writeUrl = (
     nextState: Partial<UrlState>,
@@ -445,6 +579,7 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
       setSort(nextState.sort)
       setSelectedSlug(nextState.productSlug)
       setSelectedImageIndex(0)
+      setSelectedSize(null)
       setCopyState("idle")
     }
 
@@ -469,6 +604,7 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
     if (!selectedSlug || selectedProduct) return
     setSelectedSlug(null)
     setSelectedImageIndex(0)
+    setSelectedSize(null)
     writeUrl({ productSlug: null }, "replace")
   })
 
@@ -525,6 +661,7 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
     setCategory(nextCategory)
     setSelectedSlug(null)
     setSelectedImageIndex(0)
+    setSelectedSize(null)
     setCopyState("idle")
     writeUrl({ category: nextCategory, productSlug: null })
   }
@@ -533,6 +670,7 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
     setSearch(nextSearch)
     setSelectedSlug(null)
     setSelectedImageIndex(0)
+    setSelectedSize(null)
     writeUrl({ search: nextSearch, productSlug: null })
   }
 
@@ -549,6 +687,7 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
     setSort(nextSort)
     setSelectedSlug(null)
     setSelectedImageIndex(0)
+    setSelectedSize(null)
     setCopyState("idle")
     writeUrl({
       category: filter.category,
@@ -564,6 +703,7 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
     setSort("featured")
     setSelectedSlug(null)
     setSelectedImageIndex(0)
+    setSelectedSize(null)
     setCopyState("idle")
     writeUrl({ category: "all", search: "", sort: "featured", productSlug: null })
   }
@@ -573,6 +713,7 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
     setCopyState("idle")
     setSelectedSlug(product.slug)
     setSelectedImageIndex(0)
+    setSelectedSize(null)
     writeUrl({ productSlug: product.slug }, "push")
   }
 
@@ -580,6 +721,7 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
     const trigger = productTriggerRef.current
     setSelectedSlug(null)
     setSelectedImageIndex(0)
+    setSelectedSize(null)
     setCopyState("idle")
     writeUrl({ productSlug: null }, "replace")
     queueMicrotask(() => {
@@ -694,41 +836,17 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
             </dl>
           </div>
           <div className="shop-hero__media" aria-hidden="true">
-            <span className="hero-orbit" />
-            {heroSpotlight ? (
-              <div className="hero-product-stage">
-                <span className="hero-product-stage__label">
-                  Featured pick
-                </span>
-                <img
-                  src={heroSpotlight.image}
-                  width="1200"
-                  height="900"
-                  alt=""
-                  onError={(event) => {
-                    event.currentTarget.src = heroSpotlight.fallbackImage
-                  }}
-                />
-                <span className="hero-product-stage__caption">
-                  <strong>{heroSpotlight.brand}</strong>
-                  <em>{heroSpotlight.name}</em>
-                </span>
-              </div>
-            ) : null}
-            <div className="hero-media-stack">
-              {heroSecondary.map((product) => (
-                <span key={product.slug}>
-                  <img
-                    src={product.image}
-                    width="1200"
-                    height="900"
-                    alt=""
-                    onError={(event) => {
-                      event.currentTarget.src = product.fallbackImage
-                    }}
-                  />
-                </span>
-              ))}
+            <div className="hero-product-stage hero-product-stage--atmosphere">
+              <img
+                src="brand/kicksbase-hero-court-v2.webp"
+                width="1792"
+                height="1024"
+                alt=""
+              />
+              <span className="hero-product-stage__caption">
+                <strong>COURT KIT</strong>
+                <em>Pair, protection, recovery</em>
+              </span>
             </div>
           </div>
           <div className="hero-board" aria-label="Быстрый выбор экипировки">
@@ -829,6 +947,80 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
             </p>
           </div>
 
+          <div className="ai-finder" aria-label="AI-подбор под задачу">
+            <div className="ai-finder__copy">
+              <Sparkles aria-hidden="true" size={22} />
+              <span>
+                <strong>AI-подбор под задачу</strong>
+                <em>Опишите игру, покрытие, боль или бюджет, а каталог поднимет подходящие позиции.</em>
+              </span>
+            </div>
+            <label className="ai-finder__input">
+              <span className="sr-only">Опишите задачу для AI-подбора</span>
+              <Search aria-hidden="true" size={18} />
+              <input
+                type="search"
+                value={taskPrompt}
+                onChange={(event) => setTaskPrompt(event.target.value)}
+                placeholder="Например: прыжок в волейболе, мягкое приземление, защита коленей..."
+                autoComplete="off"
+              />
+            </label>
+            <div className="ai-finder__chips" aria-label="Быстрые задачи">
+              {[
+                "прыжок и мягкое приземление",
+                "защита коленей",
+                "мяч для команды",
+                "восстановление после зала",
+              ].map((task) => (
+                <button
+                  key={task}
+                  type="button"
+                  onClick={() => setTaskPrompt(task)}
+                >
+                  {task}
+                </button>
+              ))}
+            </div>
+            {taskPrompt.trim() ? (
+              <div className="ai-finder__results" aria-live="polite">
+                {taskMatches.length > 0 ? (
+                  taskMatches.slice(0, 4).map((match) => {
+                    const price = getDisplayPrice(match.product)
+
+                    return (
+                      <button
+                        key={match.product.slug}
+                        type="button"
+                        onClick={(event) =>
+                          openProduct(match.product, event.currentTarget)
+                        }
+                      >
+                        <img
+                          src={match.product.image}
+                          width="1200"
+                          height="900"
+                          alt=""
+                          onError={(event) => {
+                            event.currentTarget.src = match.product.fallbackImage
+                          }}
+                        />
+                        <span>
+                          <small>{match.reason}</small>
+                          <strong>{match.product.brand} {match.product.name}</strong>
+                          <em>{price.value}</em>
+                        </span>
+                        <MoveRight aria-hidden="true" size={18} />
+                      </button>
+                    )
+                  })
+                ) : (
+                  <p>Не нашли точного совпадения. Попробуйте указать спорт, покрытие или бюджет.</p>
+                )}
+              </div>
+            ) : null}
+          </div>
+
           <div className="scenario-grid" aria-label="Сценарии выбора">
             {scenarioTiles.map((tile) => {
               const ScenarioIcon = tile.icon
@@ -844,7 +1036,7 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
                     <ScenarioIcon size={22} />
                   </span>
                   <span>
-                    <small>{tile.metric}</small>
+                    <small>{categoryDetails[tile.id]}</small>
                     <strong>{tile.title}</strong>
                     <em>{tile.text}</em>
                   </span>
@@ -932,7 +1124,6 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
                   <span className="category-row__content">
                     <span>{item.label}</span>
                     <em>{categoryDetails[item.id]}</em>
-                    <small>{categoryCounts.get(item.id) ?? 0}</small>
                   </span>
                 </button>
               )
@@ -940,7 +1131,6 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
           </div>
 
           <div className="catalog-status" aria-live="polite">
-            <strong>{filteredProducts.length}</strong>
             <span>{categoryCopy[category]}</span>
           </div>
 
@@ -996,9 +1186,6 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
                       <span className="product-card__badge">{productAccent}</span>
                       <span className="product-card__category">
                         {product.categoryLabel}
-                      </span>
-                      <span className="product-card__angle-strip" aria-hidden="true">
-                        {product.gallery.length} ракурсов
                       </span>
                     </span>
                     <span className="product-card__body">
@@ -1166,7 +1353,7 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
                 }}
               />
               <div className="product-sheet__media-meta">
-                <span>{selectedVisibleGallery.length} ракурсов</span>
+                <span>Gallery</span>
                 <strong>{selectedProduct.brand}</strong>
               </div>
               <div className="product-sheet__thumbs" aria-label="Галерея товара">
@@ -1200,6 +1387,28 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
               </h2>
               <p>{selectedProduct.note}</p>
 
+              <div className="product-size" aria-label="Выбор размера">
+                <span>
+                  <strong>Размер</strong>
+                  <em>Выберите перед заявкой, менеджер проверит наличие</em>
+                </span>
+                <div className="product-size__grid">
+                  {selectedSizeOptions.map((size) => (
+                    <button
+                      key={size}
+                      type="button"
+                      aria-pressed={selectedSize === size}
+                      onClick={() => {
+                        setSelectedSize(size)
+                        setCopyState("idle")
+                      }}
+                    >
+                      {size}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <div className="product-sheet__purchase">
                 <span>
                   <small>{selectedProductPrice?.label}</small>
@@ -1212,9 +1421,14 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
                     href={botUrl}
                     target="_blank"
                     rel="noopener noreferrer"
+                    aria-disabled={!selectedSize}
+                    onClick={(event) => {
+                      if (selectedSize) return
+                      event.preventDefault()
+                    }}
                   >
                     <Send aria-hidden="true" size={18} />
-                    Заказать
+                    {selectedSize ? "Заказать" : "Выберите размер"}
                   </a>
                 ) : (
                   <a className="button button--primary" href="#catalog" onClick={closeProduct}>
@@ -1232,6 +1446,10 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
                 <div>
                   <dt>Тип</dt>
                   <dd>{kindLabels[selectedProduct.kind]}</dd>
+                </div>
+                <div>
+                  <dt>Размер</dt>
+                  <dd>{selectedSize ?? "Не выбран"}</dd>
                 </div>
                 <div>
                   <dt>{selectedProductPrice?.label}</dt>

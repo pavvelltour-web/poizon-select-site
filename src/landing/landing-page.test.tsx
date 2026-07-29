@@ -99,9 +99,31 @@ describe("LandingPage", () => {
     expect((within(dock).getByRole("textbox") as HTMLTextAreaElement).value).toBe(
       "Nike FC Barcelona Ronaldinho number 10 Jersey",
     )
+    await user.click(within(dock).getByRole("button", { name: "M" }))
+    expect((within(dock).getByRole("textbox") as HTMLTextAreaElement).value).toBe(
+      "Nike FC Barcelona Ronaldinho number 10 Jersey\nРазмер: M",
+    )
     expect(within(dock).getByText(/Ссылка на менеджера появится/)).toBeInTheDocument()
     expect(within(dock).queryByText(/VITE_BOT_USERNAME/)).toBeNull()
     expect(within(dock).queryByRole("link", { name: /Открыть @/ })).toBeNull()
+  })
+
+  it("surfaces task-based AI matches from a plain-language need", async () => {
+    const user = userEvent.setup()
+    render(<LandingPage configuredBotUsername={null} />)
+
+    await user.type(
+      screen.getByRole("searchbox", { name: "Опишите задачу для AI-подбора" }),
+      "прыжок и мягкое приземление",
+    )
+
+    const finder = screen.getByLabelText("AI-подбор под задачу")
+    expect(finder).toHaveTextContent(
+      "прыжок и сцепление",
+    )
+    expect(
+      within(finder).getByRole("button", { name: /ASICS SKY ELITE FF 3/ }),
+    ).toBeInTheDocument()
   })
 
   it("hydrates a product dialog from a URL and browser back restores catalog context", async () => {

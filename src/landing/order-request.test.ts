@@ -35,8 +35,15 @@ describe("Telegram order handoff", () => {
     expect(request).not.toMatch(/[<>]/)
   })
 
+  it("adds a selected size as a clean second line", () => {
+    const request = buildOrderRequest(catalogProducts[0], "EU 43")
+
+    expect(request).toBe("ASICS SKY ELITE FF 3 volleyball\nРазмер: EU 43")
+    expect(request).not.toMatch(/[<>]/)
+  })
+
   it("keeps all 100 catalog handoffs unique, one-line and bot-ready", () => {
-    const requests = catalogProducts.map(buildOrderRequest)
+    const requests = catalogProducts.map((product) => buildOrderRequest(product))
 
     expect(new Set(requests).size).toBe(100)
     for (const [index, request] of requests.entries()) {

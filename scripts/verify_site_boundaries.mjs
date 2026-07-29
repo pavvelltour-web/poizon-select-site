@@ -152,6 +152,7 @@ const allowedCatalogEntries = new Set([
 const allowedBrandEntries = new Set([
   "kicksbase-court-base-hero.webp",
   "kicksbase-culture-hero.webp",
+  "kicksbase-hero-court-v2.webp",
   "kicksbase-hero.webp",
   "kicksbase-logo.webp",
 ])
