@@ -384,6 +384,8 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
         .filter((product): product is CatalogProduct => product !== null),
     [],
   )
+  const heroSpotlight = heroProducts[0] ?? null
+  const heroSecondary = heroProducts.slice(1)
   const selectedGallery = selectedProduct?.gallery ?? []
   const selectedVisibleGallery = selectedGallery.slice(0, 7)
   const selectedImage =
@@ -618,25 +620,18 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
 
       <main>
         <section className="shop-hero" aria-labelledby="hero-title">
-          <a className="shop-hero__media" href="#catalog" aria-label="Открыть каталог">
-            <img
-              src="brand/kicksbase-court-base-hero.webp"
-              width="1536"
-              height="864"
-              alt="Темная заловая база KICKSBASE с витриной экипировки и лаймовыми линиями площадки"
-            />
-          </a>
           <div className="shop-hero__copy">
-            <p className="eyebrow">Court base · volleyball · basketball</p>
+            <p className="eyebrow">POIZON sports edit · Moscow delivery</p>
             <h1 id="hero-title">KICKSBASE</h1>
             <p className="shop-hero__lead">
-              Заловая база Павла Шустрова: игровые пары, защита, мячи,
-              форма и восстановление для волейбола и баскетбола.
+              Спортивная витрина с расчетом до оплаты: игровые пары, защита,
+              форма и восстановление. Выбираете модель, менеджер подтверждает
+              размер, продавца, бирки и итог.
             </p>
             <div className="hero-actions">
               <a className="button button--primary" href="#catalog">
                 <ShoppingBag aria-hidden="true" size={18} />
-                Собрать комплект
+                Открыть витрину
               </a>
               {botUrl ? (
                 <a
@@ -653,7 +648,7 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
             <div className="pavel-note">
               <Medal aria-hidden="true" size={18} />
               <span>
-                Сначала движение и покрытие. Потом модель, размер и цвет.
+                Сначала задача и покрытие. Потом модель, размер, продавец и цвет.
               </span>
             </div>
             <div className="hero-marks" aria-label="Преимущества каталога">
@@ -685,10 +680,48 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
               </div>
             </dl>
           </div>
+          <div className="shop-hero__media" aria-hidden="true">
+            <span className="hero-orbit" />
+            {heroSpotlight ? (
+              <div className="hero-product-stage">
+                <span className="hero-product-stage__label">
+                  Featured pick
+                </span>
+                <img
+                  src={heroSpotlight.image}
+                  width="1200"
+                  height="900"
+                  alt=""
+                  onError={(event) => {
+                    event.currentTarget.src = heroSpotlight.fallbackImage
+                  }}
+                />
+                <span className="hero-product-stage__caption">
+                  <strong>{heroSpotlight.brand}</strong>
+                  <em>{heroSpotlight.name}</em>
+                </span>
+              </div>
+            ) : null}
+            <div className="hero-media-stack">
+              {heroSecondary.map((product) => (
+                <span key={product.slug}>
+                  <img
+                    src={product.image}
+                    width="1200"
+                    height="900"
+                    alt=""
+                    onError={(event) => {
+                      event.currentTarget.src = product.fallbackImage
+                    }}
+                  />
+                </span>
+              ))}
+            </div>
+          </div>
           <div className="hero-board" aria-label="Быстрый выбор экипировки">
             <div className="hero-board__head">
-              <span>Starter stack</span>
-              <small>3 входа в базу</small>
+              <span>Buyer’s edit</span>
+              <small>3 быстрых входа</small>
             </div>
             {heroProducts.map((product) => {
               const price = getDisplayPrice(product)
@@ -720,16 +753,6 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
             })}
           </div>
         </section>
-
-        <div className="culture-strip" aria-label="KICKSBASE catalog focus">
-          <span>Заловая база</span>
-          <span>Пары под прыжок</span>
-          <span>Баскетбол для волейболистов</span>
-          <span>Защита колена</span>
-          <span>Мячи</span>
-          <span>Recovery</span>
-          <span>KICKSBASE</span>
-        </div>
 
         <section className="brand-system" aria-label="Система подбора KICKSBASE">
           <article>
@@ -919,7 +942,7 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
 
                 return (
                   <button
-                    className={`product-card ${index % 13 === 0 ? "product-card--feature" : ""}`}
+                    className="product-card"
                     type="button"
                     key={product.slug}
                     data-category={product.category}
