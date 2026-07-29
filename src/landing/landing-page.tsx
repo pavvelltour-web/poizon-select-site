@@ -700,7 +700,15 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
                   type="button"
                   onClick={(event) => openProduct(product, event.currentTarget)}
                 >
-                  <img src={product.image} width="1200" height="900" alt="" />
+                  <img
+                    src={product.image}
+                    width="1200"
+                    height="900"
+                    alt=""
+                    onError={(event) => {
+                      event.currentTarget.src = product.fallbackImage
+                    }}
+                  />
                   <span>
                     <small>{getProductBadge(product)}</small>
                     <strong>{product.brand} {product.name}</strong>

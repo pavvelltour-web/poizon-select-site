@@ -63,11 +63,19 @@ describe("catalogProducts", () => {
 
   it("keeps every product field useful with consistent local gallery sets", () => {
     const imagePaths = new Set<string>()
+    const productsWithProductMedia = new Set<string>()
 
     for (const product of catalogProducts) {
       const assetSlug = product.fallbackImage
         .replace(/^catalog\//, "")
         .replace(/\.webp$/, "")
+      const fallbackGallery = [
+        product.fallbackImage,
+        `catalog/gallery/${assetSlug}-2.webp`,
+        `catalog/gallery/${assetSlug}-3.webp`,
+        `catalog/gallery/${assetSlug}-4.webp`,
+        `catalog/gallery/${assetSlug}-5.webp`,
+      ]
 
       expect(product.slug).toMatch(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
       expect(product.brand.trim()).toBe(product.brand)
@@ -78,24 +86,34 @@ describe("catalogProducts", () => {
       expect(product.query.length).toBeGreaterThan(8)
       expect(product.fallbackImage).toMatch(/^catalog\/[a-z0-9-]+\.webp$/)
       expect(product.gallery).toHaveLength(5)
-      expect(product.image).toBe(product.fallbackImage)
-      expect(product.gallery.map((image) => image.src)).toEqual([
-        product.fallbackImage,
-        `catalog/gallery/${assetSlug}-2.webp`,
-        `catalog/gallery/${assetSlug}-3.webp`,
-        `catalog/gallery/${assetSlug}-4.webp`,
-        `catalog/gallery/${assetSlug}-5.webp`,
-      ])
-      expect(
-        product.gallery.every(
-          (image) => image.source === "Project-generated studio reference",
-        ),
-      ).toBe(true)
+      expect(product.image).toBe(product.gallery[0]?.src)
+      expect(product.gallery.map((image) => image.src)).toContain(product.fallbackImage)
+      if (product.image === product.fallbackImage) {
+        expect(product.gallery.map((image) => image.src)).toEqual(fallbackGallery)
+        expect(
+          product.gallery.every(
+            (image) => image.source === "Project-generated studio reference",
+          ),
+        ).toBe(true)
+      } else {
+        expect(product.image).toMatch(/^https:\/\//)
+        expect(
+          product.gallery.some((image) => image.source?.includes("product media")),
+        ).toBe(true)
+        productsWithProductMedia.add(product.slug)
+      }
       imagePaths.add(product.fallbackImage)
       expect(Boolean(product.marketPrice || product.orderQuote)).toBe(true)
     }
 
     expect(imagePaths.size).toBe(100)
+    expect([...productsWithProductMedia].sort()).toEqual([
+      "asics-gel-tactic-13",
+      "asics-metarise-2",
+      "asics-sky-elite-ff-3",
+      "asics-sky-elite-ff-mt-3",
+      "nike-zoom-hyperset-2",
+    ])
   })
 
   it("calculates buyer-facing order quotes with the backend component formula", () => {
