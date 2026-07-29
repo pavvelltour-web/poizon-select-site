@@ -1,0 +1,265 @@
+{
+  "schema_version": 1,
+  "updated_at": "2026-07-29T00:00:00Z",
+  "purpose": "Audited queue for replacing weak project-generated product references with GPT Image 2.0+ studio packshots after clean product parsing.",
+  "model_policy": "gpt-image-2-or-newer",
+  "default_output": {
+    "background": "pure white studio background",
+    "style": "realistic ecommerce product photography",
+    "minimum_views": 4,
+    "maximum_views": 7
+  },
+  "quality_gate": [
+    "clean-parse the target product from reliable public product pages before generation",
+    "one product only on pure white studio background",
+    "preserve product type, silhouette, materials, construction cues, color family and visible branding implied by the exact product name",
+    "no model, hands, props, packaging, UI chrome, text overlays, watermarks, vector art or illustration",
+    "keep the complete product inside frame except for explicit material-detail views",
+    "manager must still verify exact SKU, color, size, tags, packaging and availability before payment"
+  ],
+  "items": [
+    {
+      "slug": "mizuno-vs1-ultra-kneepad",
+      "priority": 1,
+      "replacement_required": true,
+      "quality_issue": "current generated kneepad reads synthetic and soft; protection products need clear padding shape and fabric texture",
+      "review_basis": "visible accessory/protection cards weaken the premium storefront more than footwear cards",
+      "research_queries": ["Mizuno VS-1 Ultra Kneepad volleyball product side front back detail"],
+      "requested_views": ["front-pair", "side-profile", "rear-profile", "top-down", "material-detail", "scale-pair"]
+    },
+    {
+      "slug": "nike-vapor-elite-volleyball-kneepads",
+      "priority": 1,
+      "replacement_required": true,
+      "quality_issue": "generated pads lack convincing sleeve compression, foam form and Nike product proportions",
+      "review_basis": "protection category is a high-risk visual weak point",
+      "research_queries": ["Nike Vapor Elite Volleyball Kneepads product photos front side back"],
+      "requested_views": ["front-pair", "side-profile", "rear-profile", "top-down", "material-detail", "scale-pair"]
+    },
+    {
+      "slug": "mcdavid-hex-knee-pads",
+      "priority": 1,
+      "replacement_required": true,
+      "quality_issue": "hex padding can become abstract in generated art; needs accurate honeycomb pad geometry",
+      "review_basis": "protective gear with distinctive construction needs exact-looking geometry",
+      "research_queries": ["McDavid HEX Knee Pads product photo front side back detail"],
+      "requested_views": ["front-pair", "side-profile", "rear-profile", "top-down", "material-detail", "scale-pair"]
+    },
+    {
+      "slug": "mcdavid-hex-elbow-pads",
+      "priority": 1,
+      "replacement_required": true,
+      "quality_issue": "small elbow pads risk looking like generic sleeves instead of McDavid HEX pads",
+      "review_basis": "same construction family as knee pads and should be regenerated together",
+      "research_queries": ["McDavid HEX Elbow Pads product photo front side back detail"],
+      "requested_views": ["front-pair", "side-profile", "rear-profile", "top-down", "material-detail", "scale-pair"]
+    },
+    {
+      "slug": "molten-v5m5000-flistatec",
+      "priority": 1,
+      "replacement_required": true,
+      "quality_issue": "ball panels, logo placement and Flistatec geometry must be crisp; weak renders look toy-like",
+      "review_basis": "balls are simple shapes where inaccurate panel lines are obvious",
+      "research_queries": ["Molten V5M5000 Flistatec volleyball product photo panels logo"],
+      "requested_views": ["front-logo", "side-panel", "rear-panel", "top-down", "texture-detail", "seam-detail"]
+    },
+    {
+      "slug": "mikasa-v200w-volleyball",
+      "priority": 1,
+      "replacement_required": true,
+      "quality_issue": "Mikasa V200W panel layout and yellow-blue color blocking need exact-looking geometry",
+      "review_basis": "iconic ball; wrong pattern hurts credibility immediately",
+      "research_queries": ["Mikasa V200W volleyball product photo panel layout logo detail"],
+      "requested_views": ["front-logo", "side-panel", "rear-panel", "top-down", "texture-detail", "seam-detail"]
+    },
+    {
+      "slug": "molten-v5m4500-volleyball",
+      "priority": 1,
+      "replacement_required": true,
+      "quality_issue": "panel geometry and markings must not drift into generic volleyball artwork",
+      "review_basis": "same visual risk as other balls",
+      "research_queries": ["Molten V5M4500 volleyball product photo logo panel detail"],
+      "requested_views": ["front-logo", "side-panel", "rear-panel", "top-down", "texture-detail", "seam-detail"]
+    },
+    {
+      "slug": "wilson-evo-nxt-basketball",
+      "priority": 1,
+      "replacement_required": true,
+      "quality_issue": "basketball channels and material texture need realistic leather/rubber surface",
+      "review_basis": "ball closeups expose generated texture quickly",
+      "research_queries": ["Wilson Evo NXT Basketball product photo channel texture logo"],
+      "requested_views": ["front-logo", "side-panel", "rear-panel", "top-down", "texture-detail", "seam-detail"]
+    },
+    {
+      "slug": "theraband-resistance-band-set",
+      "priority": 1,
+      "replacement_required": true,
+      "quality_issue": "flat bands often render as abstract ribbons; needs real rolled/set composition without props",
+      "review_basis": "training accessories currently look least like commerce photography",
+      "research_queries": ["TheraBand Resistance Band Set product photo colors rolled bands"],
+      "requested_views": ["front-set", "side-set", "top-down", "stacked-view", "material-detail", "color-range"]
+    },
+    {
+      "slug": "nike-resistance-band-heavy",
+      "priority": 1,
+      "replacement_required": true,
+      "quality_issue": "loop band shape and Nike mark should read as a real heavy training band",
+      "review_basis": "generic rubber loops look especially artificial when generated",
+      "research_queries": ["Nike Resistance Band Heavy product photo loop band logo"],
+      "requested_views": ["front-loop", "side-loop", "top-down", "folded-view", "material-detail", "logo-detail"]
+    },
+    {
+      "slug": "triggerpoint-grid-foam-roller",
+      "priority": 1,
+      "replacement_required": true,
+      "quality_issue": "GRID roller texture and hollow cylinder profile must be accurate and tactile",
+      "review_basis": "roller texture is a brand-signature detail",
+      "research_queries": ["TriggerPoint GRID Foam Roller product photo texture hollow side"],
+      "requested_views": ["side-profile", "front-end", "rear-end", "top-down", "texture-detail", "scale-view"]
+    },
+    {
+      "slug": "hyperice-vyper-go-roller",
+      "priority": 1,
+      "replacement_required": true,
+      "quality_issue": "vibration roller controls, end caps and texture should not blur into a generic cylinder",
+      "review_basis": "premium recovery device; must look like hardware, not a foam tube",
+      "research_queries": ["Hyperice Vyper Go roller product photo controls texture side"],
+      "requested_views": ["side-profile", "front-end", "rear-end", "top-down", "control-detail", "texture-detail"]
+    },
+    {
+      "slug": "rocktape-kinesiology-tape-black",
+      "priority": 1,
+      "replacement_required": true,
+      "quality_issue": "tape roll/strip needs crisp fabric edge and accurate black product appearance",
+      "review_basis": "small black accessory can become a vague rectangle in generated art",
+      "research_queries": ["RockTape Kinesiology Tape Black product photo roll strip texture"],
+      "requested_views": ["front-roll", "side-roll", "top-down", "strip-view", "material-detail", "edge-detail"]
+    },
+    {
+      "slug": "mueller-jumpers-knee-strap",
+      "priority": 1,
+      "replacement_required": true,
+      "quality_issue": "strap shape and fastening detail must be readable at card size",
+      "review_basis": "small support items need clean silhouette on white",
+      "research_queries": ["Mueller Jumper's Knee Strap product photo side front fastener"],
+      "requested_views": ["front-profile", "side-profile", "rear-profile", "top-down", "fastener-detail", "material-detail"]
+    },
+    {
+      "slug": "bauerfeind-sports-knee-support",
+      "priority": 1,
+      "replacement_required": true,
+      "quality_issue": "knit compression texture and anatomical shaping must look real",
+      "review_basis": "premium protection SKU should not look like a generic sleeve",
+      "research_queries": ["Bauerfeind Sports Knee Support product photo front side knit detail"],
+      "requested_views": ["front-profile", "side-profile", "rear-profile", "top-down", "knit-detail", "shape-detail"]
+    },
+    {
+      "slug": "nike-essential-volleyball-elbow-pads",
+      "priority": 1,
+      "replacement_required": true,
+      "quality_issue": "elbow pad proportions and sleeve seam detail need accurate product photography",
+      "review_basis": "same protection-grid priority as kneepads",
+      "research_queries": ["Nike Essential Volleyball Elbow Pads product photo front side back"],
+      "requested_views": ["front-pair", "side-profile", "rear-profile", "top-down", "material-detail", "scale-pair"]
+    },
+    {
+      "slug": "mizuno-arm-sleeves",
+      "priority": 1,
+      "replacement_required": true,
+      "quality_issue": "sleeves need clean pair silhouette, cuff detail and fabric texture",
+      "review_basis": "soft accessories often look flattened or abstract",
+      "research_queries": ["Mizuno Arm Sleeves volleyball product photo pair side detail"],
+      "requested_views": ["front-pair", "side-profile", "rear-profile", "top-down", "cuff-detail", "fabric-detail"]
+    },
+    {
+      "slug": "camelbak-podium-chill-bottle",
+      "priority": 1,
+      "replacement_required": true,
+      "quality_issue": "bottle cap/nozzle, transparent body and printed markings need crisp product realism",
+      "review_basis": "bottles look cheap if shape or nozzle is wrong",
+      "research_queries": ["CamelBak Podium Chill Bottle product photo cap nozzle side"],
+      "requested_views": ["front-profile", "side-profile", "rear-profile", "top-down", "cap-detail", "print-detail"]
+    },
+    {
+      "slug": "nike-hyperfuel-water-bottle",
+      "priority": 1,
+      "replacement_required": true,
+      "quality_issue": "HyperFuel bottle shape and cap construction should not look like a generic bottle",
+      "review_basis": "training accessory visible in catalog and easy to misrender",
+      "research_queries": ["Nike HyperFuel Water Bottle product photo cap side logo"],
+      "requested_views": ["front-profile", "side-profile", "rear-profile", "top-down", "cap-detail", "logo-detail"]
+    },
+    {
+      "slug": "oofos-ooahh-slide",
+      "priority": 1,
+      "replacement_required": true,
+      "quality_issue": "current recovery slide render reads abstract and diagram-like; footbed curve, strap and outsole must look like a real OOFOS slide",
+      "review_basis": "recovery slides are footwear-like but current generated packshots are visibly weaker than performance shoes",
+      "research_queries": ["OOFOS OOahh Slide product photo lateral medial top outsole footbed detail"],
+      "requested_views": ["lateral-profile", "medial-profile", "rear-three-quarter", "top-down-footbed", "outsole-view", "material-detail"]
+    },
+    {
+      "slug": "crocs-mellow-recovery-slide",
+      "priority": 1,
+      "replacement_required": true,
+      "quality_issue": "current slide image looks synthetic; molded foam shape, footbed, strap opening and outsole need product-photo realism",
+      "review_basis": "slide silhouette is simple, so shape drift and fake shadows are immediately visible",
+      "research_queries": ["Crocs Mellow Recovery Slide product photo lateral medial top outsole footbed detail"],
+      "requested_views": ["lateral-profile", "medial-profile", "rear-three-quarter", "top-down-footbed", "outsole-view", "material-detail"]
+    },
+    {
+      "slug": "nike-brasilia-training-duffel",
+      "priority": 1,
+      "replacement_required": true,
+      "quality_issue": "duffel fabric, handles, zipper and logo need real bag structure",
+      "review_basis": "bags are larger commerce items and must not look like soft blocks",
+      "research_queries": ["Nike Brasilia Training Duffel product photo black side handles zipper"],
+      "requested_views": ["front-three-quarter", "side-profile", "rear-three-quarter", "top-down", "zipper-detail", "handle-detail"]
+    },
+    {
+      "slug": "adidas-tiro-league-duffel",
+      "priority": 1,
+      "replacement_required": true,
+      "quality_issue": "bag panels, straps and adidas mark require consistent perspective",
+      "review_basis": "same bag-quality issue as Nike duffel",
+      "research_queries": ["adidas Tiro League Duffel product photo side straps zipper"],
+      "requested_views": ["front-three-quarter", "side-profile", "rear-three-quarter", "top-down", "zipper-detail", "strap-detail"]
+    },
+    {
+      "slug": "nike-hoops-elite-backpack",
+      "priority": 2,
+      "replacement_required": true,
+      "quality_issue": "backpack compartments, straps and reflective/metallic detail need accurate structure",
+      "review_basis": "bag category should be regenerated after priority-1 accessories",
+      "research_queries": ["Nike Hoops Elite Backpack Black Anthracite Metallic Silver product photo"],
+      "requested_views": ["front-profile", "side-profile", "rear-profile", "top-down", "strap-detail", "zipper-detail"]
+    },
+    {
+      "slug": "nike-everyday-cushion-crew-socks-6pk",
+      "priority": 2,
+      "replacement_required": true,
+      "quality_issue": "sock pack/pair arrangement should read as real textile, not a repeated flat symbol",
+      "review_basis": "small textile item needs clear pack composition",
+      "research_queries": ["Nike Everyday Cushion Crew Socks 6 Pack product photo white black"],
+      "requested_views": ["front-pack", "side-pack", "top-down", "pair-view", "fabric-detail", "cuff-detail"]
+    },
+    {
+      "slug": "stance-icon-crew-socks",
+      "priority": 2,
+      "replacement_required": true,
+      "quality_issue": "sock silhouette, ribbing and logo placement need textile realism",
+      "review_basis": "sock item can look like a flat vector without detailed prompt controls",
+      "research_queries": ["Stance Icon Crew Socks product photo pair ribbed logo"],
+      "requested_views": ["front-pair", "side-pair", "top-down", "folded-view", "fabric-detail", "logo-detail"]
+    },
+    {
+      "slug": "new-era-yankees-59fifty-black",
+      "priority": 2,
+      "replacement_required": true,
+      "quality_issue": "cap crown, brim, embroidery and New Era/Yankees marks must be accurate-looking",
+      "review_basis": "structured cap geometry is obvious when wrong",
+      "research_queries": ["New Era New York Yankees 59FIFTY Black 60955984 product photo front side back"],
+      "requested_views": ["front-profile", "side-profile", "rear-profile", "top-down", "embroidery-detail", "brim-detail"]
+    }
+  ]
+}

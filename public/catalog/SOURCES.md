@@ -19,3 +19,7 @@ with:
 ```bash
 uv run python scripts/build_catalog_manifest.py
 ```
+
+Weak reference assets are tracked in `catalog-media/regeneration-queue.json`.
+Run `npm run media:prompts` to export GPT Image 2.0+ regeneration prompts, then
+replace accepted outputs and rebuild this manifest.

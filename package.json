@@ -19,9 +19,10 @@
     "verify:assets": "node scripts/verify_catalog_assets.mjs",
     "verify:boundaries": "node scripts/verify_site_boundaries.mjs",
     "verify:dist": "node scripts/verify_dist_portability.mjs",
+    "verify:media-pipeline": "node scripts/verify_product_media_pipeline.mjs",
     "verify:release-rights": "node scripts/verify_release_rights.mjs",
     "verify:release": "npm run verify:assets && npm run verify:release-rights",
-    "check": "npm run lint && npm test && npm run test:maintainer && npm run build"
+    "check": "npm run lint && npm test && npm run verify:media-pipeline && npm run test:maintainer && npm run build"
   },
   "dependencies": {
     "lucide-react": "1.27.0",
