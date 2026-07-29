@@ -8,6 +8,7 @@ const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..")
 const catalogSourcePath = resolve(repoRoot, "src", "catalog", "catalog.ts")
 const manifestPath = resolve(repoRoot, "public", "catalog", "sources.json")
 const queuePath = resolve(repoRoot, "catalog-media", "regeneration-queue.json")
+const importerPath = resolve(repoRoot, "scripts", "import_ai_contact_sheet.py")
 const promptsPath = resolve(
   repoRoot,
   "catalog-media",
@@ -48,12 +49,20 @@ function assertText(value, field, minLength = 12) {
   }
 }
 
-const [catalogSource, manifest, queue, promptExport] = await Promise.all([
+const [catalogSource, manifest, queue, promptExport, importerSource] = await Promise.all([
   readFile(catalogSourcePath, "utf8"),
   readFile(manifestPath, "utf8").then(JSON.parse),
   readFile(queuePath, "utf8").then(JSON.parse),
   readFile(promptsPath, "utf8").then(JSON.parse),
+  readFile(importerPath, "utf8"),
 ])
+
+if (
+  !importerSource.includes('prompt_payload["products"]') ||
+  !importerSource.includes("prompt file must contain a product list or a products array")
+) {
+  fail("import_ai_contact_sheet.py must support schema-v2 prompt exports")
+}
 
 const products = loadCatalogProducts(catalogSource)
 if (!Array.isArray(products) || products.length !== 100) {

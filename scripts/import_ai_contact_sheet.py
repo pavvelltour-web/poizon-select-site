@@ -126,7 +126,14 @@ def main() -> None:
 
     sheet_path = Path(args.sheet)
     prompt_path = Path(args.prompt_file)
-    product_prompts = json.loads(prompt_path.read_text(encoding="utf-8"))
+    prompt_payload = json.loads(prompt_path.read_text(encoding="utf-8"))
+    product_prompts = (
+        prompt_payload["products"]
+        if isinstance(prompt_payload, dict) and "products" in prompt_payload
+        else prompt_payload
+    )
+    if not isinstance(product_prompts, list):
+        raise RuntimeError("prompt file must contain a product list or a products array")
     product = product_prompts[args.product_index]
     if product["slug"] != args.slug:
         raise RuntimeError(
