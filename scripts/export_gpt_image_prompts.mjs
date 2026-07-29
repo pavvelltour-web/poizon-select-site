@@ -133,8 +133,8 @@ for (const item of queue.items) {
   if (item.replacement_required !== true) {
     fail(`${item.slug} must be marked replacement_required`)
   }
-  if (!Array.isArray(item.requested_views) || item.requested_views.length < 4) {
-    fail(`${item.slug} must request at least 4 views`)
+  if (!Array.isArray(item.requested_views) || item.requested_views.length < 5) {
+    fail(`${item.slug} must request at least 5 views`)
   }
   if (item.requested_views.length > 7) {
     fail(`${item.slug} must request at most 7 views`)

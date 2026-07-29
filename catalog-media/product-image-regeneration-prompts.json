@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-07-29T14:53:25.865Z",
+  "generated_at": "2026-07-29T17:30:15.057Z",
   "generator": "scripts/export_gpt_image_prompts.mjs",
   "source_queue": "catalog-media/regeneration-queue.json",
   "image_model_policy": "Use GPT Image 2.0 or newer; import accepted first 5 views into public/catalog paths, keep extra views in catalog-media/review-renders, then update public/catalog/sources.json hashes.",

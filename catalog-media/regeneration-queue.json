@@ -6,7 +6,7 @@
   "default_output": {
     "background": "pure white studio background",
     "style": "realistic ecommerce product photography",
-    "minimum_views": 4,
+    "minimum_views": 5,
     "maximum_views": 7
   },
   "quality_gate": [
