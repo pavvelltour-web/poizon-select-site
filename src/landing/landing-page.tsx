@@ -919,10 +919,6 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
                     aria-label={`Открыть карточку: ${product.brand} ${product.name}`}
                   >
                     <span className="product-card__visual">
-                      <span className="product-card__rail" aria-hidden="true">
-                        <small>KB</small>
-                        <b>{String(index + 1).padStart(2, "0")}</b>
-                      </span>
                       <img
                         className="product-card__image product-card__image--primary"
                         src={product.image}
@@ -956,11 +952,6 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
                       <span className="product-card__price-chip" aria-hidden="true">
                         {price.value}
                       </span>
-                      <span className="product-card__dots" aria-hidden="true">
-                        {product.gallery.slice(0, 5).map((image, dotIndex) => (
-                          <span key={`${image.src}-${dotIndex}`} />
-                        ))}
-                      </span>
                     </span>
                     <span className="product-card__body">
                       <span className="product-card__topline">
@@ -988,7 +979,6 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
                           <ArrowUpRight aria-hidden="true" size={16} />
                         </span>
                       </span>
-                      <span className="product-card__signal" aria-hidden="true" />
                     </span>
                   </button>
                 )

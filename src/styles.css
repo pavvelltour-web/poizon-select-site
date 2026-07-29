@@ -95,28 +95,15 @@ img {
   z-index: -1;
   inset: 0;
   background:
-    linear-gradient(118deg, transparent 0 36%, rgb(215 255 79 / 16%) 36.04% 36.2%, transparent 36.3%),
-    linear-gradient(64deg, transparent 0 71%, rgb(43 115 255 / 15%) 71.04% 71.22%, transparent 71.32%),
-    linear-gradient(172deg, transparent 0 52%, rgb(255 85 56 / 12%) 52.05% 52.22%, transparent 52.32%),
-    repeating-linear-gradient(90deg, rgb(255 255 255 / 3%) 0 1px, transparent 1px 5.5rem),
-    repeating-linear-gradient(0deg, rgb(255 255 255 / 2.4%) 0 1px, transparent 1px 5.5rem),
+    radial-gradient(circle at 18% 0%, rgb(215 255 79 / 10%), transparent 30rem),
+    radial-gradient(circle at 86% 14%, rgb(255 138 61 / 8%), transparent 28rem),
     linear-gradient(180deg, #07090d 0%, #0d1117 45%, #050608 100%);
   content: "";
   pointer-events: none;
 }
 
 .kb-page::after {
-  position: fixed;
-  z-index: -1;
-  right: -4vw;
-  bottom: 6vh;
-  color: rgb(255 255 255 / 2.8%);
-  content: "KICKSBASE";
-  font-size: clamp(5rem, 16vw, 18rem);
-  font-weight: 950;
-  line-height: 1;
-  pointer-events: none;
-  transform: rotate(-8deg);
+  content: none;
 }
 
 .kb-page--sheet-open {
@@ -290,8 +277,7 @@ img {
   border: 1px solid rgb(255 255 255 / 20%);
   border-radius: var(--radius);
   background:
-    linear-gradient(125deg, rgb(79 231 255 / 9%), transparent 34%),
-    linear-gradient(38deg, rgb(215 255 79 / 10%), transparent 46%),
+    radial-gradient(circle at 18% 40%, rgb(0 0 0 / 36%), transparent 30rem),
     var(--night);
   box-shadow: 0 34px 110px rgb(0 0 0 / 54%);
   isolation: isolate;
@@ -302,12 +288,9 @@ img {
   z-index: 1;
   inset: 0;
   background:
-    linear-gradient(116deg, transparent 0 54%, rgb(215 255 79 / 48%) 54.08% 54.32%, transparent 54.46%),
-    linear-gradient(64deg, transparent 0 77%, rgb(79 231 255 / 35%) 77.05% 77.28%, transparent 77.42%),
-    linear-gradient(90deg, transparent 0 13%, rgb(255 255 255 / 20%) 13.05% 13.18%, transparent 13.25%),
-    radial-gradient(circle at 84% 22%, rgb(255 85 56 / 17%), transparent 24rem);
+    radial-gradient(circle at 78% 18%, rgb(255 138 61 / 13%), transparent 23rem),
+    radial-gradient(circle at 14% 72%, rgb(215 255 79 / 10%), transparent 24rem);
   content: "";
-  mix-blend-mode: screen;
   pointer-events: none;
 }
 
@@ -324,12 +307,7 @@ img {
 }
 
 .shop-hero__copy::after {
-  content: "";
-  width: min(18rem, 42vw);
-  height: 4px;
-  margin-top: 1.8rem;
-  border-radius: 999px;
-  background: linear-gradient(90deg, var(--signal), var(--accent-orange), transparent);
+  content: none;
 }
 
 .pavel-note {
@@ -428,11 +406,9 @@ img {
   gap: 1px;
   width: min(34rem, 100%);
   margin: 1.05rem 0 0;
-  padding: 1px;
   border: 1px solid rgb(255 255 255 / 12%);
   border-radius: var(--radius);
-  background:
-    linear-gradient(135deg, rgb(215 255 79 / 32%), rgb(79 231 255 / 22%), rgb(255 85 56 / 24%));
+  background: rgb(255 255 255 / 8%);
   box-shadow: 0 18px 42px rgb(0 0 0 / 22%);
 }
 
@@ -547,11 +523,11 @@ img {
 }
 
 .culture-ribbon span::before {
-  width: 0.5rem;
-  height: 0.5rem;
-  background: var(--signal);
+  width: 0.32rem;
+  height: 0.32rem;
+  border-radius: 50%;
+  background: rgb(215 255 79 / 72%);
   content: "";
-  transform: rotate(45deg);
 }
 
 .brand-system {
@@ -560,11 +536,9 @@ img {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1px;
   margin: clamp(0.8rem, 2vw, 1.2rem) auto clamp(1.4rem, 4vw, 2.6rem);
-  padding: 1px;
   border: 1px solid rgb(255 255 255 / 12%);
   border-radius: var(--radius);
-  background:
-    linear-gradient(135deg, rgb(215 255 79 / 32%), rgb(43 115 255 / 22%), rgb(255 85 56 / 28%));
+  background: rgb(255 255 255 / 7%);
 }
 
 .brand-system article {
@@ -573,25 +547,24 @@ img {
   padding: clamp(1rem, 2vw, 1.35rem);
   overflow: hidden;
   background:
-    linear-gradient(145deg, rgb(255 255 255 / 11%), rgb(255 255 255 / 3%)),
-    repeating-linear-gradient(135deg, rgb(255 255 255 / 4%) 0 1px, transparent 1px 1.1rem),
+    radial-gradient(circle at 78% 12%, rgb(215 255 79 / 8%), transparent 12rem),
+    linear-gradient(145deg, rgb(255 255 255 / 9%), rgb(255 255 255 / 3%)),
     #0d1116;
 }
 
 .brand-system article:hover::after {
-  transform: rotate(-18deg) translateX(-1.3rem);
+  transform: scaleX(1);
 }
 
 .brand-system article::after {
   position: absolute;
-  right: -1rem;
-  bottom: 0.8rem;
-  width: 7rem;
-  height: 0.34rem;
+  inset: auto 1.1rem 0.85rem;
+  height: 2px;
   background: var(--signal);
   content: "";
-  transform: rotate(-18deg);
-  transform-origin: right center;
+  opacity: 0.72;
+  transform: scaleX(0.58);
+  transform-origin: left center;
   transition: transform 220ms cubic-bezier(.2, .8, .2, 1);
 }
 
@@ -645,21 +618,13 @@ img {
   border: 1px solid rgb(255 255 255 / 12%);
   border-radius: var(--radius);
   background:
-    linear-gradient(112deg, transparent 0 55%, rgb(215 255 79 / 28%) 55.1% 55.45%, transparent 55.58%),
-    linear-gradient(64deg, transparent 0 76%, rgb(43 115 255 / 22%) 76.04% 76.32%, transparent 76.42%),
+    radial-gradient(circle at 76% 18%, rgb(215 255 79 / 10%), transparent 16rem),
     linear-gradient(145deg, rgb(255 255 255 / 9%), rgb(255 255 255 / 3%)),
     #0d1116;
 }
 
 .editorial-index__copy::after {
-  position: absolute;
-  right: -0.28em;
-  bottom: -0.16em;
-  color: rgb(255 255 255 / 4%);
-  content: "04";
-  font-size: clamp(8rem, 18vw, 18rem);
-  font-weight: 950;
-  line-height: 0.8;
+  content: none;
 }
 
 .editorial-index__copy h2 {
@@ -687,11 +652,9 @@ img {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1px;
-  padding: 1px;
   border: 1px solid rgb(255 255 255 / 12%);
   border-radius: var(--radius);
-  background:
-    linear-gradient(135deg, rgb(215 255 79 / 22%), rgb(43 115 255 / 20%), rgb(255 85 56 / 22%));
+  background: rgb(255 255 255 / 7%);
 }
 
 .editorial-index__grid button {
@@ -705,7 +668,6 @@ img {
   border: 0;
   background:
     linear-gradient(145deg, rgb(255 255 255 / 9%), rgb(255 255 255 / 3%)),
-    repeating-linear-gradient(135deg, rgb(255 255 255 / 3%) 0 1px, transparent 1px 1.2rem),
     #0d1116;
   color: var(--ink);
   text-align: left;
@@ -717,13 +679,13 @@ img {
 
 .editorial-index__grid button::before {
   position: absolute;
-  inset: auto 1rem 1rem auto;
-  width: 3rem;
-  height: 0.22rem;
+  inset: auto 1rem 1rem;
+  height: 2px;
   background: var(--signal);
   content: "";
-  transform: rotate(-18deg);
-  transform-origin: right center;
+  opacity: 0.52;
+  transform: scaleX(0.44);
+  transform-origin: left center;
   transition: transform 190ms cubic-bezier(.2, .8, .2, 1);
 }
 
@@ -749,7 +711,7 @@ img {
 
 .editorial-index__grid button:hover::before,
 .editorial-index__grid button[aria-pressed="true"]::before {
-  transform: rotate(-18deg) translateX(-0.8rem);
+  transform: scaleX(1);
 }
 
 .editorial-index__grid span {
@@ -1293,8 +1255,8 @@ img {
   border: 1px solid rgb(255 255 255 / 13%);
   border-radius: var(--radius);
   background:
-    linear-gradient(155deg, color-mix(in srgb, var(--tile-accent, var(--signal)) 13%, transparent), transparent 42%),
-    linear-gradient(180deg, rgb(255 255 255 / 10%), rgb(255 255 255 / 3%)),
+    radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--tile-accent, var(--signal)) 10%, transparent), transparent 14rem),
+    linear-gradient(180deg, rgb(255 255 255 / 9%), rgb(255 255 255 / 3%)),
     #0a0d11;
   box-shadow: inset 0 1px 0 rgb(255 255 255 / 8%);
   text-align: left;
@@ -1331,19 +1293,7 @@ img {
 }
 
 .product-card::before {
-  position: absolute;
-  z-index: 0;
-  inset: 0;
-  background:
-    linear-gradient(110deg, transparent 0 42%, color-mix(in srgb, var(--tile-accent, var(--signal)) 22%, transparent) 42.2% 42.75%, transparent 43%),
-    linear-gradient(180deg, transparent, rgb(0 0 0 / 20%));
-  content: "";
-  opacity: 0;
-  pointer-events: none;
-  transform: translateX(-16%);
-  transition:
-    opacity 180ms ease,
-    transform 260ms cubic-bezier(.2, .8, .2, 1);
+  content: none;
 }
 
 .product-card:hover {
@@ -1352,12 +1302,6 @@ img {
   box-shadow:
     0 24px 58px rgb(0 0 0 / 38%),
     0 0 0 1px color-mix(in srgb, var(--tile-accent, var(--signal)) 12%, transparent);
-}
-
-.product-card:hover::before,
-.product-card:focus-visible::before {
-  opacity: 1;
-  transform: translateX(0);
 }
 
 .product-card__visual,
@@ -1372,9 +1316,7 @@ img {
   aspect-ratio: 1 / 1.08;
   overflow: hidden;
   background:
-    linear-gradient(136deg, transparent 0 53%, color-mix(in srgb, var(--tile-accent, var(--signal)) 32%, transparent) 53.1% 53.55%, transparent 53.7%),
-    repeating-linear-gradient(90deg, rgb(5 6 8 / 6%) 0 1px, transparent 1px 3.6rem),
-    linear-gradient(135deg, #f7f9f2 0%, #eef2e8 58%, #dde6d9 100%);
+    radial-gradient(circle at 48% 28%, #ffffff 0%, #f7f5ed 42%, #ece8dd 100%);
 }
 
 .product-card--feature .product-card__visual {
@@ -1384,8 +1326,8 @@ img {
 .product-card__visual::after {
   position: absolute;
   inset: auto 0 0;
-  height: 34%;
-  background: linear-gradient(180deg, transparent, rgb(17 19 21 / 5%));
+  height: 42%;
+  background: linear-gradient(180deg, transparent, rgb(12 13 14 / 7%));
   content: "";
   pointer-events: none;
 }
@@ -1426,31 +1368,7 @@ img {
 
 .product-card:hover .product-card__image,
 .product-card:focus-visible .product-card__image {
-  transform: scale(1.035) rotate(-0.5deg);
-}
-
-.product-card__rail {
-  position: absolute;
-  z-index: 2;
-  top: 0.65rem;
-  right: 0.65rem;
-  display: grid;
-  min-width: 2.25rem;
-  gap: 0.12rem;
-  justify-items: end;
-  color: rgb(5 6 8 / 72%);
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-  font-weight: 950;
-  line-height: 1;
-  text-transform: uppercase;
-}
-
-.product-card__rail small {
-  font-size: 0.58rem;
-}
-
-.product-card__rail b {
-  font-size: 1rem;
+  transform: scale(1.035);
 }
 
 .product-card__badge {
@@ -1473,9 +1391,9 @@ img {
 
 .product-card__category {
   position: absolute;
-  right: 0.6rem;
-  bottom: 2.6rem;
-  max-width: calc(100% - 4.8rem);
+  right: 0.65rem;
+  bottom: 0.65rem;
+  max-width: calc(100% - 8.4rem);
   padding: 0.26rem 0.46rem;
   overflow: hidden;
   border: 1px solid rgb(5 6 8 / 10%);
@@ -1499,7 +1417,7 @@ img {
   z-index: 2;
   left: 0.65rem;
   bottom: 0.65rem;
-  max-width: calc(100% - 5rem);
+  max-width: 7rem;
   padding: 0.34rem 0.52rem;
   overflow: hidden;
   border: 1px solid rgb(5 6 8 / 12%);
@@ -1512,30 +1430,6 @@ img {
   text-overflow: ellipsis;
   white-space: nowrap;
   backdrop-filter: blur(10px);
-}
-
-.product-card__dots {
-  position: absolute;
-  left: auto;
-  right: 0.65rem;
-  bottom: 0.65rem;
-  display: inline-flex;
-  gap: 0.25rem;
-  padding: 0.25rem;
-  border-radius: 999px;
-  background: rgb(5 6 8 / 28%);
-  backdrop-filter: blur(8px);
-}
-
-.product-card__dots span {
-  width: 0.34rem;
-  height: 0.34rem;
-  border-radius: 50%;
-  background: rgb(5 6 8 / 32%);
-}
-
-.product-card__dots span:first-child {
-  background: var(--signal);
 }
 
 .product-card__body {
@@ -1720,20 +1614,6 @@ img {
 
 .product-card__cta svg {
   color: currentColor;
-}
-
-.product-card__signal {
-  width: min(5.8rem, 42%);
-  height: 0.22rem;
-  border-radius: 999px;
-  background:
-    linear-gradient(90deg, var(--tile-accent, var(--signal)), transparent);
-  transform-origin: left center;
-  transition: transform 190ms cubic-bezier(.2, .8, .2, 1);
-}
-
-.product-card:hover .product-card__signal {
-  transform: scaleX(1.35);
 }
 
 .catalog-empty {
@@ -1995,8 +1875,7 @@ img {
   min-height: 0;
   overflow: hidden;
   background:
-    linear-gradient(136deg, transparent 0 60%, rgb(215 255 79 / 16%) 60.08% 60.35%, transparent 60.45%),
-    linear-gradient(135deg, #ffffff 0%, #f7f6f2 58%, #e9e5da 100%);
+    radial-gradient(circle at 50% 28%, #ffffff 0%, #f8f6ee 42%, #e9e4d6 100%);
 }
 
 .product-sheet__media > img {
@@ -2483,11 +2362,6 @@ img {
     aspect-ratio: 1 / 1.08;
   }
 
-  .product-card__rail {
-    top: 0.5rem;
-    right: 0.5rem;
-  }
-
   .product-card__category {
     display: none;
   }
@@ -2498,11 +2372,6 @@ img {
     max-width: calc(100% - 3.2rem);
     font-size: 0.66rem;
   }
-
-  .product-card__dots {
-    display: none;
-  }
-
   .product-sheet {
     top: auto;
     right: 0.5rem;
