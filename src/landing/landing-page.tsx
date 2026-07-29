@@ -453,6 +453,19 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
   }, [])
 
   useEffect(() => {
+    const scrollToHashTarget = () => {
+      if (window.location.hash !== "#catalog") return
+      requestAnimationFrame(() => {
+        document.getElementById("catalog")?.scrollIntoView({ block: "start" })
+      })
+    }
+
+    scrollToHashTarget()
+    window.addEventListener("hashchange", scrollToHashTarget)
+    return () => window.removeEventListener("hashchange", scrollToHashTarget)
+  }, [])
+
+  useEffect(() => {
     if (!selectedSlug || selectedProduct) return
     setSelectedSlug(null)
     setSelectedImageIndex(0)
