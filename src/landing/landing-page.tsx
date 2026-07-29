@@ -2,6 +2,8 @@ import {
   ArrowUpRight,
   BadgeCheck,
   Backpack,
+  ChevronLeft,
+  ChevronRight,
   CircleDot,
   Copy,
   Dumbbell,
@@ -36,7 +38,7 @@ import {
   type CatalogSort,
   type ProductKind,
 } from "../catalog/catalog"
-import type { CSSProperties } from "react"
+import type { CSSProperties, SyntheticEvent } from "react"
 import type { LucideIcon } from "lucide-react"
 import {
   buildOrderRequest,
@@ -126,6 +128,28 @@ const heroProductSlugs = [
   "nike-kd-18",
   "triggerpoint-grid-foam-roller",
 ] as const
+
+function resolveAssetUrl(src: string): string {
+  if (/^(?:https?:)?\/\//i.test(src) || /^(?:data|blob):/i.test(src)) return src
+
+  const normalizedSrc = src.replace(/^\/+/, "")
+  if (typeof window === "undefined") return normalizedSrc
+
+  const currentPath = window.location.pathname || "/"
+  const basePath = currentPath.endsWith("/")
+    ? currentPath
+    : currentPath.replace(/\/[^/]*$/, "/")
+  return `${basePath}${normalizedSrc}`
+}
+
+function setImageFallback(
+  event: SyntheticEvent<HTMLImageElement>,
+  fallbackImage: string,
+) {
+  const fallbackUrl = resolveAssetUrl(fallbackImage)
+  if (event.currentTarget.getAttribute("src") === fallbackUrl) return
+  event.currentTarget.src = fallbackUrl
+}
 
 const scenarioTiles: readonly {
   id: ActiveCategory
@@ -506,6 +530,7 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
   )
   const sheetHeadingRef = useRef<HTMLHeadingElement>(null)
   const productTriggerRef = useRef<HTMLButtonElement>(null)
+  const galleryTouchStartX = useRef<number | null>(null)
 
   const botUsername = resolveBotUsername(
     configuredBotUsername === undefined
@@ -528,8 +553,14 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
   const selectedGallery = selectedProduct?.gallery ?? []
   const selectedVisibleGallery = selectedGallery.slice(0, 7)
   const selectedImage =
-    selectedGallery[Math.min(selectedImageIndex, selectedGallery.length - 1)] ??
+    selectedVisibleGallery[
+      Math.min(selectedImageIndex, selectedVisibleGallery.length - 1)
+    ] ??
     null
+  const selectedImageDisplayIndex =
+    selectedVisibleGallery.length === 0
+      ? 0
+      : Math.min(selectedImageIndex, selectedVisibleGallery.length - 1) + 1
   const selectedSizeOptions = selectedProduct ? getSizeOptions(selectedProduct) : []
   const filteredProducts = useMemo(() => {
     return sortCatalog(filterCatalog(catalogProducts, category, search), sort)
@@ -569,6 +600,30 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
     if (nextPath === currentPath) return
 
     window.history[mode === "push" ? "pushState" : "replaceState"](null, "", nextPath)
+  }
+
+  const selectProductImage = (index: number) => {
+    setSelectedImageIndex(() => {
+      const count = selectedVisibleGallery.length
+      if (count <= 0) return 0
+      return Math.max(0, Math.min(index, count - 1))
+    })
+  }
+
+  const showPreviousProductImage = () => {
+    setSelectedImageIndex((index) => {
+      const count = selectedVisibleGallery.length
+      if (count <= 1) return 0
+      return (index - 1 + count) % count
+    })
+  }
+
+  const showNextProductImage = () => {
+    setSelectedImageIndex((index) => {
+      const count = selectedVisibleGallery.length
+      if (count <= 1) return 0
+      return (index + 1) % count
+    })
   }
 
   useEffect(() => {
@@ -615,6 +670,13 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
 
   useEffect(() => {
     if (!selectedProduct) return
+    setSelectedImageIndex((index) =>
+      Math.min(index, Math.max(0, selectedVisibleGallery.length - 1)),
+    )
+  }, [selectedProduct, selectedVisibleGallery.length])
+
+  useEffect(() => {
+    if (!selectedProduct) return
 
     const previousOverflow = document.body.style.overflow
     document.body.style.overflow = "hidden"
@@ -623,6 +685,18 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
       if (event.key === "Escape") {
         event.preventDefault()
         closeProduct()
+        return
+      }
+
+      if (event.key === "ArrowLeft") {
+        event.preventDefault()
+        showPreviousProductImage()
+        return
+      }
+
+      if (event.key === "ArrowRight") {
+        event.preventDefault()
+        showNextProductImage()
         return
       }
 
@@ -865,12 +939,12 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
                   onClick={(event) => openProduct(product, event.currentTarget)}
                 >
                   <img
-                    src={product.image}
+                    src={resolveAssetUrl(product.image)}
                     width="1200"
                     height="900"
                     alt=""
                     onError={(event) => {
-                      event.currentTarget.src = product.fallbackImage
+                      setImageFallback(event, product.fallbackImage)
                     }}
                   />
                   <span>
@@ -997,12 +1071,12 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
                         }
                       >
                         <img
-                          src={match.product.image}
+                          src={resolveAssetUrl(match.product.image)}
                           width="1200"
                           height="900"
                           alt=""
                           onError={(event) => {
-                            event.currentTarget.src = match.product.fallbackImage
+                            setImageFallback(event, match.product.fallbackImage)
                           }}
                         />
                         <span>
@@ -1161,26 +1235,26 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
                     <span className="product-card__visual">
                       <img
                         className="product-card__image product-card__image--primary"
-                        src={product.image}
+                        src={resolveAssetUrl(product.image)}
                         width="1200"
                         height="900"
                         loading={index < 8 ? "eager" : "lazy"}
                         decoding="async"
                         alt=""
                         onError={(event) => {
-                          event.currentTarget.src = product.fallbackImage
+                          setImageFallback(event, product.fallbackImage)
                         }}
                       />
                       <img
                         className="product-card__image product-card__image--alt"
-                        src={alternateImage}
+                        src={resolveAssetUrl(alternateImage)}
                         width="1200"
                         height="900"
                         loading="lazy"
                         decoding="async"
                         alt=""
                         onError={(event) => {
-                          event.currentTarget.src = product.fallbackImage
+                          setImageFallback(event, product.fallbackImage)
                         }}
                       />
                       <span className="product-card__badge">{productAccent}</span>
@@ -1342,35 +1416,83 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
               <X aria-hidden="true" size={20} />
             </button>
 
-            <div className="product-sheet__media">
+            <div
+              className="product-sheet__media"
+              onTouchStart={(event) => {
+                galleryTouchStartX.current = event.touches[0]?.clientX ?? null
+              }}
+              onTouchEnd={(event) => {
+                const startX = galleryTouchStartX.current
+                galleryTouchStartX.current = null
+                const endX = event.changedTouches[0]?.clientX
+                if (startX === null || endX === undefined) return
+                const deltaX = endX - startX
+                if (Math.abs(deltaX) < 42) return
+                if (deltaX > 0) showPreviousProductImage()
+                else showNextProductImage()
+              }}
+            >
               <img
-                src={selectedImage?.src ?? selectedProduct.fallbackImage}
+                key={selectedImage?.src ?? selectedProduct.fallbackImage}
+                src={resolveAssetUrl(selectedImage?.src ?? selectedProduct.fallbackImage)}
                 width="1200"
                 height="900"
                 alt={selectedImage?.alt ?? `${selectedProduct.brand} ${selectedProduct.name}`}
                 onError={(event) => {
-                  event.currentTarget.src = selectedProduct.fallbackImage
+                  setImageFallback(event, selectedProduct.fallbackImage)
                 }}
               />
+              <button
+                className="product-sheet__nav product-sheet__nav--prev"
+                type="button"
+                onClick={showPreviousProductImage}
+                disabled={selectedVisibleGallery.length <= 1}
+                aria-label="Предыдущее фото товара"
+              >
+                <ChevronLeft aria-hidden="true" size={24} />
+              </button>
+              <button
+                className="product-sheet__nav product-sheet__nav--next"
+                type="button"
+                onClick={showNextProductImage}
+                disabled={selectedVisibleGallery.length <= 1}
+                aria-label="Следующее фото товара"
+              >
+                <ChevronRight aria-hidden="true" size={24} />
+              </button>
               <div className="product-sheet__media-meta">
-                <span>Gallery</span>
+                <span>
+                  {selectedImageDisplayIndex}/{selectedVisibleGallery.length}
+                </span>
                 <strong>{selectedProduct.brand}</strong>
+              </div>
+              <div className="product-sheet__dots" aria-label="Фото товара">
+                {selectedVisibleGallery.map((image, index) => (
+                  <button
+                    key={`dot-${image.src}-${index}`}
+                    type="button"
+                    aria-label={`Показать фото ${index + 1}`}
+                    aria-current={index === selectedImageIndex}
+                    onClick={() => selectProductImage(index)}
+                  />
+                ))}
               </div>
               <div className="product-sheet__thumbs" aria-label="Галерея товара">
                 {selectedVisibleGallery.map((image, index) => (
                   <button
                     key={`${image.src}-${index}`}
                     type="button"
+                    aria-label={`Показать фото ${index + 1}`}
                     aria-current={index === selectedImageIndex}
-                    onClick={() => setSelectedImageIndex(index)}
+                    onClick={() => selectProductImage(index)}
                   >
                     <img
-                      src={image.src}
+                      src={resolveAssetUrl(image.src)}
                       width="120"
                       height="90"
                       alt=""
                       onError={(event) => {
-                        event.currentTarget.src = selectedProduct.fallbackImage
+                        setImageFallback(event, selectedProduct.fallbackImage)
                       }}
                     />
                   </button>

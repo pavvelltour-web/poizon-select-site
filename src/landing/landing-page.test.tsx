@@ -108,6 +108,43 @@ describe("LandingPage", () => {
     expect(within(dock).queryByRole("link", { name: /Открыть @/ })).toBeNull()
   })
 
+  it("lets the product sheet gallery move through every generated angle", async () => {
+    const user = userEvent.setup()
+    render(<LandingPage configuredBotUsername={null} />)
+
+    await user.click(
+      screen.getByRole("button", {
+        name: /Открыть карточку: ASICS SKY ELITE FF 3/,
+      }),
+    )
+
+    const dock = screen.getByTestId("order-dock")
+    let heroImage = within(dock).getByRole("img", {
+      name: /ASICS SKY ELITE FF 3/,
+    })
+    expect(heroImage).toHaveAttribute("src", expect.stringContaining("asics-sky-elite-ff-3.webp"))
+    expect(within(dock).getByText("1/5")).toBeInTheDocument()
+
+    await user.click(within(dock).getByRole("button", { name: "Следующее фото товара" }))
+
+    heroImage = within(dock).getByRole("img", {
+      name: /ASICS SKY ELITE FF 3/,
+    })
+    expect(heroImage).toHaveAttribute(
+      "src",
+      expect.stringContaining("asics-sky-elite-ff-3-2.webp"),
+    )
+    expect(within(dock).getByText("2/5")).toBeInTheDocument()
+
+    await user.click(within(dock).getByRole("button", { name: "Предыдущее фото товара" }))
+
+    heroImage = within(dock).getByRole("img", {
+      name: /ASICS SKY ELITE FF 3/,
+    })
+    expect(heroImage).toHaveAttribute("src", expect.stringContaining("asics-sky-elite-ff-3.webp"))
+    expect(within(dock).getAllByRole("button", { name: /Показать фото/ })).toHaveLength(10)
+  })
+
   it("surfaces task-based AI matches from a plain-language need", async () => {
     const user = userEvent.setup()
     render(<LandingPage configuredBotUsername={null} />)

@@ -8701,3 +8701,124 @@ html {
     font-size: 1.05rem;
   }
 }
+
+/* Product media carousel: final interaction layer. */
+.product-sheet__media {
+  touch-action: pan-y;
+}
+
+.product-sheet__media > img {
+  animation: product-gallery-in 240ms ease both;
+}
+
+.product-sheet__nav {
+  position: absolute;
+  z-index: 3;
+  top: 50%;
+  display: inline-grid;
+  width: clamp(2.55rem, 4vw, 3.2rem);
+  height: clamp(2.55rem, 4vw, 3.2rem);
+  place-items: center;
+  border: 1px solid rgb(2 8 23 / 16%);
+  border-radius: 999px;
+  background: rgb(255 255 255 / 76%);
+  color: #03101f;
+  box-shadow: 0 1rem 2.2rem rgb(2 8 23 / 20%);
+  transform: translateY(-50%);
+  cursor: pointer;
+  backdrop-filter: blur(14px);
+}
+
+.product-sheet__nav:hover,
+.product-sheet__nav:focus-visible {
+  background: #ffffff;
+  box-shadow:
+    0 1rem 2.2rem rgb(2 8 23 / 24%),
+    0 0 0 3px rgb(215 255 31 / 34%);
+}
+
+.product-sheet__nav:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.product-sheet__nav--prev {
+  left: clamp(0.7rem, 2vw, 1.15rem);
+}
+
+.product-sheet__nav--next {
+  right: clamp(0.7rem, 2vw, 1.15rem);
+}
+
+.product-sheet__dots {
+  position: absolute;
+  z-index: 3;
+  right: 1rem;
+  bottom: calc(1rem + clamp(2.8rem, 5vw, 4.9rem));
+  left: 1rem;
+  display: flex;
+  justify-content: center;
+  gap: 0.4rem;
+  pointer-events: none;
+}
+
+.product-sheet__dots button {
+  width: 0.5rem;
+  height: 0.5rem;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: rgb(2 8 23 / 28%);
+  cursor: pointer;
+  pointer-events: auto;
+}
+
+.product-sheet__dots button[aria-current="true"] {
+  width: 1.6rem;
+  background: var(--kb-volt);
+}
+
+.product-sheet__thumbs {
+  z-index: 3;
+  scrollbar-width: thin;
+}
+
+.product-sheet__thumbs button {
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    transform 160ms ease;
+}
+
+.product-sheet__thumbs button:hover,
+.product-sheet__thumbs button:focus-visible {
+  transform: translateY(-2px);
+}
+
+@keyframes product-gallery-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4%) scale(0.985);
+  }
+}
+
+@media (max-width: 620px) {
+  .product-sheet__nav {
+    width: 2.35rem;
+    height: 2.35rem;
+  }
+
+  .product-sheet__dots {
+    bottom: 0.75rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .product-sheet__media > img {
+    animation: none;
+  }
+
+  .product-sheet__thumbs button {
+    transition: none;
+  }
+}
