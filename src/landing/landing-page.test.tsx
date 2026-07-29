@@ -22,7 +22,7 @@ describe("LandingPage", () => {
     expect(productButtons()).toHaveLength(100)
     expect(screen.queryByText("по запросу")).toBeNull()
     expect(screen.getAllByText("Цена от")).toHaveLength(100)
-    expect(screen.getAllByText("от 13 465 ₽").length).toBeGreaterThan(0)
+    expect(screen.getAllByText("от 22 100 ₽").length).toBeGreaterThan(0)
     expect(screen.getAllByText("от 45 тыс. ₽").length).toBeGreaterThan(0)
     expect(screen.getAllByText("от 4 тыс. ₽").length).toBeGreaterThan(0)
     expect(

@@ -107,12 +107,14 @@ describe("catalogProducts", () => {
     expect(gtCut?.formulaBasis).toBe(PRICE_FORMULA_BASIS)
     expect(gtCut?.orderQuote).toMatchObject({
       priceYuan: 760,
-      yuanRate: 12.5,
-      paymentFeePercent: 7,
-      internationalLogistics: 1800,
-      serviceFeePercent: 12,
+      yuanRate: 13,
+      paymentFeePercent: 2.5,
+      internationalLogistics: 3000,
+      serviceFeePercent: 30,
+      marginTargetPercent: 30,
+      marginFloorPercent: 25,
     })
-    expect(formatRub(gtCut?.orderQuote?.totalRub ?? 0)).toBe("13 465 ₽")
+    expect(formatRub(gtCut?.orderQuote?.totalRub ?? 0)).toBe("22 100 ₽")
   })
 
   it("filters by category and a case-insensitive search phrase", () => {

@@ -50,8 +50,22 @@ export interface PriceQuote {
   purchaseRub: number
   paymentFeePercent: number
   paymentFee: number
+  acquiringFeePercent: number
+  acquiringFee: number
   internationalLogistics: number
+  inboundLogisticsRub: number
   mandatoryFees: number
+  reservePercent: number
+  reserveFee: number
+  usnTaxPercent: number
+  usnTax: number
+  vatProfile: "vat_exempt" | "vat_included"
+  vatPercent: number
+  vatAmount: number
+  marginTargetPercent: number
+  marginFloorPercent: number
+  marginPercent: number
+  marginAmount: number
   serviceFeePercent: number
   serviceFeeFloor: number
   serviceFee: number
@@ -89,19 +103,41 @@ type ProductSource = Omit<
 }
 
 const pricingDefaults = {
-  yuanRate: 12.5,
-  paymentFeePercent: 7,
-  internationalLogistics: 1800,
+  yuanRate: 13,
+  acquiringFeePercent: 2.5,
+  inboundLogisticsRub: 3000,
   mandatoryFees: 0,
-  footwearServiceFeeFloor: 1500,
-  footwearServiceFeePercent: 12,
-  apparelAccessoryServiceFeeFloor: 700,
-  apparelAccessoryServiceFeePercent: 15,
+  reservePercent: 3,
+  usnTaxPercent: 6,
+  vatProfile: "vat_exempt" as const,
+  vatPercent: 22,
+  roundToRub: 100,
   rfDelivery: 0,
 } as const
 
+const marginTiers = [
+  { max: 8_000, target: 40, floor: 35 },
+  { max: 20_000, target: 30, floor: 25 },
+  { max: Number.POSITIVE_INFINITY, target: 25, floor: 20 },
+] as const
+
 function money(value: number): number {
   return Math.round((value + 1e-9) * 100) / 100
+}
+
+function roundUp(value: number, step: number): number {
+  return money(Math.ceil((value - 1e-9) / step) * step)
+}
+
+function marginTierForLandedCost(landedCost: number) {
+  return marginTiers.find((tier) => landedCost <= tier.max) ?? marginTiers.at(-1)!
+}
+
+function vatLoadPercent(
+  vatProfile: "vat_exempt" | "vat_included",
+  vatPercent: number,
+): number {
+  return vatProfile === "vat_exempt" ? 0 : (vatPercent / (100 + vatPercent)) * 100
 }
 
 export function calculateOrderQuote(
@@ -109,26 +145,40 @@ export function calculateOrderQuote(
   productKind: ProductKind,
 ): PriceQuote {
   const purchaseRub = money(priceYuan * pricingDefaults.yuanRate)
-  const paymentFee = money(
-    (purchaseRub * pricingDefaults.paymentFeePercent) / 100,
-  )
-  const serviceFeeFloor =
-    productKind === "footwear"
-      ? pricingDefaults.footwearServiceFeeFloor
-      : pricingDefaults.apparelAccessoryServiceFeeFloor
-  const serviceFeePercent =
-    productKind === "footwear"
-      ? pricingDefaults.footwearServiceFeePercent
-      : pricingDefaults.apparelAccessoryServiceFeePercent
-  const serviceFee = money(
-    Math.max(serviceFeeFloor, (purchaseRub * serviceFeePercent) / 100),
-  )
-  const quoteRub = money(
+  const landedCost = money(
     purchaseRub +
-      paymentFee +
-      pricingDefaults.internationalLogistics +
-      pricingDefaults.mandatoryFees +
-      serviceFee,
+      pricingDefaults.inboundLogisticsRub +
+      pricingDefaults.mandatoryFees,
+  )
+  const tier = marginTierForLandedCost(landedCost)
+  const vatLoad = vatLoadPercent(
+    pricingDefaults.vatProfile,
+    pricingDefaults.vatPercent,
+  )
+  const quoteRub = roundUp(
+    landedCost /
+      (1 -
+        (tier.target +
+          pricingDefaults.acquiringFeePercent +
+          pricingDefaults.reservePercent +
+          pricingDefaults.usnTaxPercent +
+          vatLoad) /
+          100),
+    pricingDefaults.roundToRub,
+  )
+  const acquiringFee = money((quoteRub * pricingDefaults.acquiringFeePercent) / 100)
+  const reserveFee = money((quoteRub * pricingDefaults.reservePercent) / 100)
+  const usnTax = money((quoteRub * pricingDefaults.usnTaxPercent) / 100)
+  const vatAmount = money((quoteRub * vatLoad) / 100)
+  const marginAmount = money(
+    quoteRub -
+      purchaseRub -
+      pricingDefaults.inboundLogisticsRub -
+      pricingDefaults.mandatoryFees -
+      acquiringFee -
+      reserveFee -
+      usnTax -
+      vatAmount,
   )
   const totalRub = money(quoteRub + pricingDefaults.rfDelivery)
 
@@ -137,13 +187,29 @@ export function calculateOrderQuote(
     priceYuan,
     yuanRate: pricingDefaults.yuanRate,
     purchaseRub,
-    paymentFeePercent: pricingDefaults.paymentFeePercent,
-    paymentFee,
-    internationalLogistics: pricingDefaults.internationalLogistics,
-    mandatoryFees: pricingDefaults.mandatoryFees,
-    serviceFeePercent,
-    serviceFeeFloor,
-    serviceFee,
+    paymentFeePercent: pricingDefaults.acquiringFeePercent,
+    paymentFee: acquiringFee,
+    acquiringFeePercent: pricingDefaults.acquiringFeePercent,
+    acquiringFee,
+    internationalLogistics: pricingDefaults.inboundLogisticsRub,
+    inboundLogisticsRub: pricingDefaults.inboundLogisticsRub,
+    mandatoryFees: money(
+      pricingDefaults.mandatoryFees + reserveFee + usnTax + vatAmount,
+    ),
+    reservePercent: pricingDefaults.reservePercent,
+    reserveFee,
+    usnTaxPercent: pricingDefaults.usnTaxPercent,
+    usnTax,
+    vatProfile: pricingDefaults.vatProfile,
+    vatPercent: pricingDefaults.vatProfile === "vat_exempt" ? 0 : pricingDefaults.vatPercent,
+    vatAmount,
+    marginTargetPercent: tier.target,
+    marginFloorPercent: tier.floor,
+    marginPercent: tier.target,
+    marginAmount,
+    serviceFeePercent: tier.target,
+    serviceFeeFloor: 0,
+    serviceFee: marginAmount,
     quoteRub,
     rfDelivery: pricingDefaults.rfDelivery,
     totalRub,
