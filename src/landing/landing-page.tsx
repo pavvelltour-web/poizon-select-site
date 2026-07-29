@@ -937,7 +937,6 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
                 const price = getDisplayPrice(product)
                 const tags = getProductTags(product)
                 const alternateImage = product.gallery[1]?.src ?? product.image
-                const cardGallery = product.gallery.slice(0, 5)
                 const productUse = getProductUse(product)
                 const productAccent =
                   product.kind === "footwear"
@@ -985,25 +984,8 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
                       <span className="product-card__category">
                         {product.categoryLabel}
                       </span>
-                      <span className="product-card__price-chip" aria-hidden="true">
-                        {price.value}
-                      </span>
                       <span className="product-card__angle-strip" aria-hidden="true">
-                        {cardGallery.map((image, imageIndex) => (
-                          <span key={`${image.src}-${imageIndex}`}>
-                            <img
-                              src={image.src}
-                              width="120"
-                              height="90"
-                              loading="lazy"
-                              decoding="async"
-                              alt=""
-                              onError={(event) => {
-                                event.currentTarget.src = product.fallbackImage
-                              }}
-                            />
-                          </span>
-                        ))}
+                        {product.gallery.length} ракурсов
                       </span>
                     </span>
                     <span className="product-card__body">
@@ -1016,7 +998,6 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
                         {productUse}
                       </span>
                       <span className="product-card__tags" aria-hidden="true">
-                        <span>{product.gallery.length} ракурсов</span>
                         {tags.slice(0, 2).map((tag) => (
                           <span key={tag}>{tag}</span>
                         ))}
