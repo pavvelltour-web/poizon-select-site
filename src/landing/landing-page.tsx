@@ -158,6 +158,43 @@ const scenarioTiles: readonly {
   },
 ] as const
 
+const editorialIndex: readonly {
+  id: ActiveCategory
+  code: string
+  title: string
+  text: string
+  icon: LucideIcon
+}[] = [
+  {
+    id: "court-shoes",
+    code: "01 / Shoes",
+    title: "Пара под зал",
+    text: "Волейбольные и баскетбольные модели для прыжка, сцепления и боковой работы.",
+    icon: Zap,
+  },
+  {
+    id: "protection",
+    code: "02 / Guard",
+    title: "Защита",
+    text: "Колени, локти, тейпы и поддержка для плотных тренировок без лишнего риска.",
+    icon: ShieldCheck,
+  },
+  {
+    id: "balls",
+    code: "03 / Team",
+    title: "Мячи",
+    text: "Волейбольные и баскетбольные мячи для команды, зала и регулярной игры.",
+    icon: CircleDot,
+  },
+  {
+    id: "recovery",
+    code: "04 / Reset",
+    title: "Восстановление",
+    text: "Слайды, роллы и база после нагрузки, чтобы следующая тренировка не начиналась с боли.",
+    icon: TimerReset,
+  },
+] as const
+
 const quickFilters: readonly {
   label: string
   detail: string
@@ -586,15 +623,15 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
               src="brand/kicksbase-court-base-hero.webp"
               width="1536"
               height="864"
-              alt="Темная заловая база KICKSBASE с экипировкой, игроком и лаймовыми линиями"
+              alt="Темная заловая база KICKSBASE с витриной экипировки и лаймовыми линиями площадки"
             />
           </a>
           <div className="shop-hero__copy">
-            <p className="eyebrow">Заловая экипировка · обувь · защита</p>
+            <p className="eyebrow">Court base · volleyball · basketball</p>
             <h1 id="hero-title">KICKSBASE</h1>
             <p className="shop-hero__lead">
-              Экипировка для тех, кто живет залом: волейбол, баскетбольные пары,
-              защита, форма и восстановление в одном коротком каталоге.
+              Заловая база Павла Шустрова: игровые пары, защита, мячи,
+              форма и восстановление для волейбола и баскетбола.
             </p>
             <div className="hero-actions">
               <a className="button button--primary" href="#catalog">
@@ -616,8 +653,7 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
             <div className="pavel-note">
               <Medal aria-hidden="true" size={18} />
               <span>
-                Подход Павла Шустрова: сначала посадка, сцепление и задача в зале,
-                потом модель, цвет и размер.
+                Сначала движение и покрытие. Потом модель, размер и цвет.
               </span>
             </div>
             <div className="hero-marks" aria-label="Преимущества каталога">
@@ -637,8 +673,8 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
           </div>
           <div className="hero-board" aria-label="Быстрый выбор экипировки">
             <div className="hero-board__head">
-              <span>Выбор для старта</span>
-              <small>пара · игра · восстановление</small>
+              <span>Starter stack</span>
+              <small>3 входа в базу</small>
             </div>
             {heroProducts.map((product) => {
               const price = getDisplayPrice(product)
@@ -689,6 +725,38 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
             <strong>Расчет до оплаты</strong>
             <p>В карточке видно цену от, формулу заказа и что менеджер уточнит перед финальным подтверждением.</p>
           </article>
+        </section>
+
+        <section className="editorial-index" aria-labelledby="editorial-index-title">
+          <div className="editorial-index__copy">
+            <p className="eyebrow">Игровой индекс</p>
+            <h2 id="editorial-index-title">Собирайте базу от задачи.</h2>
+            <p>
+              Пара для прыжка, защита, мяч для команды или восстановление после зала.
+              Так каталог работает как раздевалка перед тренировкой, а не как склад.
+            </p>
+          </div>
+          <div className="editorial-index__grid" aria-label="Быстрые входы в каталог">
+            {editorialIndex.map((item) => {
+              const EditorialIcon = item.icon
+
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => selectCategory(item.id)}
+                  aria-pressed={category === item.id}
+                >
+                  <span>
+                    <small>{item.code}</small>
+                    <strong>{item.title}</strong>
+                  </span>
+                  <em>{item.text}</em>
+                  <EditorialIcon aria-hidden="true" size={22} />
+                </button>
+              )
+            })}
+          </div>
         </section>
 
         <section className="catalog-shell" id="catalog" aria-labelledby="catalog-title">

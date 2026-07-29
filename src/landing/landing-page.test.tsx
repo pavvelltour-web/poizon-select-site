@@ -37,7 +37,12 @@ describe("LandingPage", () => {
     const user = userEvent.setup()
     render(<LandingPage configuredBotUsername={null} />)
 
-    await user.click(screen.getByRole("button", { name: /Волейбол/ }))
+    await user.click(
+      within(screen.getByRole("group", { name: "Категории" })).getByRole(
+        "button",
+        { name: /Волейбол/ },
+      ),
+    )
     expect(productButtons()).toHaveLength(23)
     expect(screen.getByText("Пары и экипировка под волейбольный зал")).toBeInTheDocument()
     expect(window.location.search).toBe("?category=volleyball")

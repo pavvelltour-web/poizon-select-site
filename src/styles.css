@@ -446,13 +446,13 @@ img {
   display: grid;
   gap: 0.55rem;
   align-self: end;
-  padding: 0.65rem;
+  padding: 0;
   border: 1px solid rgb(255 255 255 / 14%);
   border-radius: var(--radius);
   background:
-    linear-gradient(145deg, rgb(255 255 255 / 12%), rgb(255 255 255 / 5%)),
-    rgb(5 6 8 / 66%);
-  box-shadow: 0 22px 70px rgb(0 0 0 / 34%);
+    linear-gradient(145deg, rgb(255 255 255 / 10%), rgb(255 255 255 / 3%)),
+    rgb(5 6 8 / 42%);
+  box-shadow: 0 22px 70px rgb(0 0 0 / 26%);
   backdrop-filter: blur(18px) saturate(1.2);
   animation: board-enter 780ms 120ms cubic-bezier(.2, .8, .2, 1) both;
 }
@@ -586,11 +586,171 @@ img {
   font-size: 0.92rem;
 }
 
+.editorial-index {
+  width: min(100% - 2rem, 1380px);
+  display: grid;
+  grid-template-columns: minmax(0, 0.82fr) minmax(23rem, 1fr);
+  gap: clamp(1rem, 3vw, 2.25rem);
+  align-items: stretch;
+  margin: 0 auto clamp(1.4rem, 4vw, 2.4rem);
+}
+
+.editorial-index__copy {
+  position: relative;
+  min-height: 24rem;
+  padding: clamp(1.1rem, 3vw, 1.7rem);
+  overflow: hidden;
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-radius: var(--radius);
+  background:
+    linear-gradient(112deg, transparent 0 55%, rgb(215 255 79 / 28%) 55.1% 55.45%, transparent 55.58%),
+    linear-gradient(64deg, transparent 0 76%, rgb(43 115 255 / 22%) 76.04% 76.32%, transparent 76.42%),
+    linear-gradient(145deg, rgb(255 255 255 / 9%), rgb(255 255 255 / 3%)),
+    #0d1116;
+}
+
+.editorial-index__copy::after {
+  position: absolute;
+  right: -0.28em;
+  bottom: -0.16em;
+  color: rgb(255 255 255 / 4%);
+  content: "04";
+  font-size: clamp(8rem, 18vw, 18rem);
+  font-weight: 950;
+  line-height: 0.8;
+}
+
+.editorial-index__copy h2 {
+  position: relative;
+  z-index: 1;
+  max-width: 9ch;
+  margin: 0;
+  color: var(--ink);
+  font-size: clamp(2.25rem, 5.2vw, 5.8rem);
+  font-weight: 950;
+  line-height: 0.94;
+  letter-spacing: 0;
+}
+
+.editorial-index__copy p:not(.eyebrow) {
+  position: relative;
+  z-index: 1;
+  max-width: 35rem;
+  margin: 1rem 0 0;
+  color: rgb(255 255 255 / 74%);
+  font-size: 0.98rem;
+}
+
+.editorial-index__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  padding: 1px;
+  border: 1px solid rgb(255 255 255 / 12%);
+  border-radius: var(--radius);
+  background:
+    linear-gradient(135deg, rgb(215 255 79 / 22%), rgb(43 115 255 / 20%), rgb(255 85 56 / 22%));
+}
+
+.editorial-index__grid button {
+  position: relative;
+  display: grid;
+  min-height: 11.95rem;
+  align-content: space-between;
+  gap: 1rem;
+  padding: clamp(1rem, 2vw, 1.25rem);
+  overflow: hidden;
+  border: 0;
+  background:
+    linear-gradient(145deg, rgb(255 255 255 / 9%), rgb(255 255 255 / 3%)),
+    repeating-linear-gradient(135deg, rgb(255 255 255 / 3%) 0 1px, transparent 1px 1.2rem),
+    #0d1116;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background-color 170ms ease,
+    transform 170ms ease;
+}
+
+.editorial-index__grid button::before {
+  position: absolute;
+  inset: auto 1rem 1rem auto;
+  width: 3rem;
+  height: 0.22rem;
+  background: var(--signal);
+  content: "";
+  transform: rotate(-18deg);
+  transform-origin: right center;
+  transition: transform 190ms cubic-bezier(.2, .8, .2, 1);
+}
+
+.editorial-index__grid button:nth-child(2)::before {
+  background: var(--accent-pink);
+}
+
+.editorial-index__grid button:nth-child(3)::before {
+  background: var(--accent-orange);
+}
+
+.editorial-index__grid button:nth-child(4)::before {
+  background: var(--court-blue);
+}
+
+.editorial-index__grid button:hover,
+.editorial-index__grid button[aria-pressed="true"] {
+  transform: translateY(-2px);
+  background:
+    linear-gradient(145deg, rgb(215 255 79 / 10%), rgb(255 255 255 / 4%)),
+    #11171d;
+}
+
+.editorial-index__grid button:hover::before,
+.editorial-index__grid button[aria-pressed="true"]::before {
+  transform: rotate(-18deg) translateX(-0.8rem);
+}
+
+.editorial-index__grid span {
+  display: grid;
+  gap: 0.35rem;
+}
+
+.editorial-index__grid small {
+  color: var(--muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.editorial-index__grid strong {
+  max-width: 8ch;
+  color: var(--ink);
+  font-size: clamp(1.4rem, 2.4vw, 2.25rem);
+  font-weight: 950;
+  line-height: 0.98;
+}
+
+.editorial-index__grid em {
+  max-width: 20rem;
+  color: rgb(255 255 255 / 68%);
+  font-size: 0.86rem;
+  font-style: normal;
+  line-height: 1.36;
+}
+
+.editorial-index__grid svg {
+  position: absolute;
+  right: 1rem;
+  top: 1rem;
+  color: rgb(255 255 255 / 58%);
+}
+
 .hero-board__head {
   display: flex;
   justify-content: space-between;
   gap: 1rem;
-  padding: 0.2rem 0.25rem 0.45rem;
+  padding: 0.75rem 0.75rem 0.2rem;
   color: var(--ink);
   font-size: 0.78rem;
   font-weight: 900;
@@ -607,10 +767,12 @@ img {
   gap: 0.7rem;
   align-items: center;
   min-height: 5rem;
-  padding: 0.45rem;
-  border: 1px solid rgb(255 255 255 / 10%);
-  border-radius: var(--radius);
-  background: rgb(255 255 255 / 7%);
+  padding: 0.6rem 0.75rem;
+  border: 0;
+  border-top: 1px solid rgb(255 255 255 / 10%);
+  border-radius: 0;
+  background:
+    linear-gradient(90deg, rgb(255 255 255 / 7%), rgb(255 255 255 / 2%));
   color: var(--ink);
   text-align: left;
   cursor: pointer;
@@ -623,7 +785,8 @@ img {
 .hero-pick:hover {
   transform: translateX(-3px);
   border-color: rgb(215 255 79 / 44%);
-  background: rgb(255 255 255 / 11%);
+  background:
+    linear-gradient(90deg, rgb(215 255 79 / 12%), rgb(255 255 255 / 4%));
 }
 
 .hero-pick img {
@@ -1950,12 +2113,17 @@ img {
   .catalog-heading,
   .section-heading,
   .brand-system,
+  .editorial-index,
   .kb-footer {
     grid-template-columns: 1fr;
   }
 
   .brand-system article {
     min-height: 9rem;
+  }
+
+  .editorial-index__copy {
+    min-height: 18rem;
   }
 
   .scenario-grid {
@@ -2122,6 +2290,18 @@ img {
     align-items: flex-start;
     flex-direction: column;
     gap: 0.1rem;
+  }
+
+  .editorial-index {
+    width: min(100% - 1rem, 1380px);
+  }
+
+  .editorial-index__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .editorial-index__grid button {
+    min-height: 9.8rem;
   }
 
   .product-grid {
