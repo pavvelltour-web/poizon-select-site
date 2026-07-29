@@ -939,6 +939,12 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
                 const alternateImage = product.gallery[1]?.src ?? product.image
                 const cardGallery = product.gallery.slice(0, 5)
                 const productUse = getProductUse(product)
+                const productAccent =
+                  product.kind === "footwear"
+                    ? "Performance"
+                    : product.kind === "apparel"
+                      ? "Layer"
+                      : "Gear"
 
                 return (
                   <button
@@ -975,9 +981,7 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
                           event.currentTarget.src = product.fallbackImage
                         }}
                       />
-                      <span className="product-card__badge">
-                        {getProductBadge(product)}
-                      </span>
+                      <span className="product-card__badge">{productAccent}</span>
                       <span className="product-card__category">
                         {product.categoryLabel}
                       </span>
