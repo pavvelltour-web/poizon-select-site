@@ -103,6 +103,15 @@ describe("LandingPage", () => {
     expect((within(dock).getByRole("textbox") as HTMLTextAreaElement).value).toBe(
       "Nike FC Barcelona Ronaldinho number 10 Jersey\nРазмер: M",
     )
+    expect(
+      within(dock).queryByRole("link", { name: /Выбрать размер/ }),
+    ).toBeNull()
+    expect(
+      within(dock).getAllByRole("button", { name: "Скопировать запрос" }),
+    ).toHaveLength(1)
+    expect(window.location.search).toBe(
+      "?q=Ronaldinho&product=nike-barcelona-ronaldinho-jersey",
+    )
     expect(within(dock).getByText(/Ссылка на менеджера появится/)).toBeInTheDocument()
     expect(within(dock).queryByText(/VITE_BOT_USERNAME/)).toBeNull()
     expect(within(dock).queryByRole("link", { name: /Открыть @/ })).toBeNull()

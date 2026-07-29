@@ -135,11 +135,12 @@ function resolveAssetUrl(src: string): string {
   const normalizedSrc = src.replace(/^\/+/, "")
   if (typeof window === "undefined") return normalizedSrc
 
+  // This keeps catalog media working in Vite, a subdirectory deployment, and file previews.
   const currentPath = window.location.pathname || "/"
   const basePath = currentPath.endsWith("/")
     ? currentPath
     : currentPath.replace(/\/[^/]*$/, "/")
-  return `${basePath}${normalizedSrc}`
+  return new URL(`${basePath}${normalizedSrc}`, window.location.href).toString()
 }
 
 function setImageFallback(
@@ -1283,7 +1284,7 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
                           <em>{price.detail}</em>
                         </span>
                         <span className="product-card__cta">
-                          Подробнее
+                          Открыть
                           <ArrowUpRight aria-hidden="true" size={16} />
                         </span>
                       </span>
@@ -1401,7 +1402,7 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
             aria-label="Закрыть карточку товара"
           />
           <aside
-            className="product-sheet"
+            className="product-sheet product-sheet--rebuilt"
             role="dialog"
             aria-modal="true"
             aria-labelledby="product-sheet-title"
@@ -1417,7 +1418,7 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
             </button>
 
             <div
-              className="product-sheet__media"
+              className="product-sheet__media product-sheet__gallery"
               onTouchStart={(event) => {
                 galleryTouchStartX.current = event.touches[0]?.clientX ?? null
               }}
@@ -1500,14 +1501,20 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
               </div>
             </div>
 
-            <div className="product-sheet__content">
-              <p className="eyebrow">
-                {selectedProduct.sportPriority ? "Для зала" : kindLabels[selectedProduct.kind]}
-              </p>
+            <div
+              className="product-sheet__content"
+              data-testid="product-sheet-scroll"
+              tabIndex={0}
+              aria-label="Детали товара"
+            >
+              <div className="product-sheet__identity">
+                <span>{selectedProduct.sportPriority ? "Для зала" : kindLabels[selectedProduct.kind]}</span>
+                <span>{selectedProduct.categoryLabel}</span>
+              </div>
               <h2 id="product-sheet-title" ref={sheetHeadingRef} tabIndex={-1}>
                 {selectedProduct.brand} {selectedProduct.name}
               </h2>
-              <p>{selectedProduct.note}</p>
+              <p className="product-sheet__description">{selectedProduct.note}</p>
 
               <div className="product-size" aria-label="Выбор размера">
                 <span>
@@ -1538,25 +1545,26 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
                   <em>{selectedProductPrice?.detail}</em>
                 </span>
                 {botUrl ? (
-                  <a
-                    className="button button--primary"
-                    href={botUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-disabled={!selectedSize}
-                    onClick={(event) => {
-                      if (selectedSize) return
-                      event.preventDefault()
-                    }}
-                  >
-                    <Send aria-hidden="true" size={18} />
-                    {selectedSize ? "Заказать" : "Выберите размер"}
-                  </a>
+                  selectedSize ? (
+                    <a
+                      className="button button--primary"
+                      href={botUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Send aria-hidden="true" size={18} />
+                      Заказать в Telegram
+                    </a>
+                  ) : (
+                    <button className="button button--primary" type="button" disabled>
+                      Выберите размер выше
+                    </button>
+                  )
                 ) : (
-                  <a className="button button--primary" href="#catalog" onClick={closeProduct}>
-                    <ShoppingBag aria-hidden="true" size={18} />
-                    Выбрать размер
-                  </a>
+                  <button className="button button--primary" type="button" onClick={copyRequest}>
+                    <Copy aria-hidden="true" size={18} />
+                    Скопировать запрос
+                  </button>
                 )}
               </div>
 
@@ -1634,12 +1642,12 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
                 <textarea readOnly value={request} rows={3} />
               </label>
 
-              <div className="product-sheet__actions">
-                <button type="button" className="button button--quiet" onClick={copyRequest}>
-                  <Copy aria-hidden="true" size={18} />
-                  {copyState === "copied" ? "Запрос готов" : "Скопировать запрос"}
-                </button>
-                {botUrl ? (
+              {botUrl ? (
+                <div className="product-sheet__actions">
+                  <button type="button" className="button button--quiet" onClick={copyRequest}>
+                    <Copy aria-hidden="true" size={18} />
+                    {copyState === "copied" ? "Запрос готов" : "Скопировать запрос"}
+                  </button>
                   <a
                     className="button button--primary"
                     href={botUrl}
@@ -1649,12 +1657,12 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
                     <Send aria-hidden="true" size={18} />
                     Открыть @{botUsername}
                   </a>
-                ) : (
-                  <p className="product-sheet__demo">
-                    Ссылка на менеджера появится после подключения Telegram.
-                  </p>
-                )}
-              </div>
+                </div>
+              ) : (
+                <p className="product-sheet__demo">
+                  Ссылка на менеджера появится после подключения Telegram.
+                </p>
+              )}
 
               {copyState === "failed" ? (
                 <p className="product-sheet__feedback" role="alert">
