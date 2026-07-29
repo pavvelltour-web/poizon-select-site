@@ -1645,18 +1645,7 @@ const requestPriceGuides: Record<string, string> = {
 
 function withFallbackGallery(product: ProductSource): CatalogProduct {
   const fallbackImage = `catalog/${product.assetSlug ?? product.slug}.webp`
-  const fallbackGallery = projectGallery(product)
-  const providedGallery = product.gallery ?? []
-  const gallery =
-    providedGallery.length > 0
-      ? [
-          ...providedGallery,
-          ...fallbackGallery.filter(
-            (fallback) =>
-              !providedGallery.some((image) => image.src === fallback.src),
-          ),
-        ].slice(0, 5)
-      : fallbackGallery
+  const gallery = projectGallery(product)
   const orderQuote =
     product.chinaPriceYuan === undefined
       ? undefined

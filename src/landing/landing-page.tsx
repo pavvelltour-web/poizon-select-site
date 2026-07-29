@@ -44,7 +44,6 @@ import {
   copyOrderRequest,
   resolveBotUsername,
 } from "./order-request"
-import { MagicMarquee } from "./magic-marquee"
 
 type ActiveCategory = "all" | CatalogCategory
 
@@ -386,6 +385,7 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
     [],
   )
   const selectedGallery = selectedProduct?.gallery ?? []
+  const selectedVisibleGallery = selectedGallery.slice(0, 7)
   const selectedImage =
     selectedGallery[Math.min(selectedImageIndex, selectedGallery.length - 1)] ??
     null
@@ -721,7 +721,7 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
           </div>
         </section>
 
-        <MagicMarquee className="culture-ribbon" repeat={4} pauseOnHover>
+        <div className="culture-strip" aria-label="KICKSBASE catalog focus">
           <span>Заловая база</span>
           <span>Пары под прыжок</span>
           <span>Баскетбол для волейболистов</span>
@@ -729,7 +729,7 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
           <span>Мячи</span>
           <span>Recovery</span>
           <span>KICKSBASE</span>
-        </MagicMarquee>
+        </div>
 
         <section className="brand-system" aria-label="Система подбора KICKSBASE">
           <article>
@@ -914,6 +914,7 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
                 const price = getDisplayPrice(product)
                 const tags = getProductTags(product)
                 const alternateImage = product.gallery[1]?.src ?? product.image
+                const cardGallery = product.gallery.slice(0, 5)
                 const productUse = getProductUse(product)
 
                 return (
@@ -959,6 +960,23 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
                       </span>
                       <span className="product-card__price-chip" aria-hidden="true">
                         {price.value}
+                      </span>
+                      <span className="product-card__angle-strip" aria-hidden="true">
+                        {cardGallery.map((image, imageIndex) => (
+                          <span key={`${image.src}-${imageIndex}`}>
+                            <img
+                              src={image.src}
+                              width="120"
+                              height="90"
+                              loading="lazy"
+                              decoding="async"
+                              alt=""
+                              onError={(event) => {
+                                event.currentTarget.src = product.fallbackImage
+                              }}
+                            />
+                          </span>
+                        ))}
                       </span>
                     </span>
                     <span className="product-card__body">
@@ -1126,8 +1144,12 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
                   event.currentTarget.src = selectedProduct.fallbackImage
                 }}
               />
+              <div className="product-sheet__media-meta">
+                <span>{selectedVisibleGallery.length} ракурсов</span>
+                <strong>{selectedProduct.brand}</strong>
+              </div>
               <div className="product-sheet__thumbs" aria-label="Галерея товара">
-                {selectedGallery.slice(0, 7).map((image, index) => (
+                {selectedVisibleGallery.map((image, index) => (
                   <button
                     key={`${image.src}-${index}`}
                     type="button"
@@ -1156,6 +1178,30 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
                 {selectedProduct.brand} {selectedProduct.name}
               </h2>
               <p>{selectedProduct.note}</p>
+
+              <div className="product-sheet__purchase">
+                <span>
+                  <small>{selectedProductPrice?.label}</small>
+                  <strong>{selectedProductPrice?.value}</strong>
+                  <em>{selectedProductPrice?.detail}</em>
+                </span>
+                {botUrl ? (
+                  <a
+                    className="button button--primary"
+                    href={botUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <Send aria-hidden="true" size={18} />
+                    Заказать
+                  </a>
+                ) : (
+                  <a className="button button--primary" href="#catalog" onClick={closeProduct}>
+                    <ShoppingBag aria-hidden="true" size={18} />
+                    Выбрать размер
+                  </a>
+                )}
+              </div>
 
               <dl className="product-facts">
                 <div>

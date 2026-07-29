@@ -15,6 +15,7 @@
     "test:maintainer": "node scripts/run_maintainer_tests.mjs",
     "test:watch": "vitest",
     "lint": "oxlint",
+    "media:prompts": "node scripts/export_gpt_image_prompts.mjs",
     "verify:assets": "node scripts/verify_catalog_assets.mjs",
     "verify:boundaries": "node scripts/verify_site_boundaries.mjs",
     "verify:dist": "node scripts/verify_dist_portability.mjs",

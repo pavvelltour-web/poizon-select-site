@@ -29,11 +29,11 @@ const thirdPartyNotice = await readFile(
   "utf8",
 )
 if (
-  !thirdPartyNotice.includes("Copyright (c) Magic UI") ||
-  !thirdPartyNotice.includes("MIT License") ||
-  !thirdPartyNotice.includes("6378d12f6ac7b383bcbe25cbfcd21ad567d4726ff9979bf07991598a7bdef1ce")
+  !thirdPartyNotice.includes(
+    "No third-party UI components are bundled in the current site source.",
+  )
 ) {
-  fail("dist is missing the verified Magic UI attribution")
+  fail("dist is missing the current third-party notice")
 }
 const htmlReferences = [
   ...indexHtml.matchAll(/\b(?:href|src)="([^"]+)"/g),
