@@ -192,7 +192,7 @@ describe("LandingPage", () => {
       "price-asc",
     )
     expect(screen.getByTestId("order-dock")).toBeInTheDocument()
-    expect(screen.getByText(/В карточке показываем только итог/)).toBeInTheDocument()
+    expect(screen.getByText(/Итоговая цена фиксируется перед оплатой/)).toBeInTheDocument()
     expect(screen.getByRole("link", { name: "Открыть @SelectBuyerBot" })).toHaveAttribute(
       "href",
       "https://t.me/SelectBuyerBot",
@@ -284,6 +284,10 @@ describe("LandingPage", () => {
       "+79990000000",
     )
     await user.type(within(cart).getByLabelText("Email для чека"), "buyer@example.com")
+    await user.click(within(cart).getByRole("checkbox", { name: /публичной оферты/i }))
+    await user.click(
+      within(cart).getByRole("checkbox", { name: /обработку персональных данных/i }),
+    )
     await user.click(within(cart).getByRole("button", { name: "Оформить и перейти к оплате" }))
 
     await waitFor(() => {

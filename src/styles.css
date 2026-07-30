@@ -504,6 +504,7 @@ img {
 
 .hero-pick img {
   width: 68px;
+  height: auto;
   aspect-ratio: 4 / 3;
   border-radius: var(--kb-radius);
   object-fit: contain;
@@ -1707,8 +1708,11 @@ img {
 }
 
 .photo-lightbox img {
-  max-width: min(100%, 1280px);
-  max-height: 100%;
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: min(1280px, calc(100vw - 144px));
+  max-height: calc(100dvh - 164px);
   object-fit: contain;
   transition: transform 160ms var(--kb-ease);
   transform-origin: center;
@@ -1963,6 +1967,32 @@ img {
   color: var(--kb-muted);
   font-size: 0.84rem;
   line-height: 1.45;
+}
+
+.checkout-form__check {
+  grid-template-columns: 20px minmax(0, 1fr);
+  align-items: start;
+  gap: 10px !important;
+  cursor: pointer;
+}
+
+.checkout-form__check input {
+  width: 18px;
+  min-height: 18px;
+  margin: 2px 0 0;
+  accent-color: var(--kb-accent);
+}
+
+.checkout-form__check span {
+  color: var(--kb-text-soft) !important;
+  font-weight: 650 !important;
+  line-height: 1.45;
+}
+
+.checkout-form__check a {
+  color: var(--kb-text);
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .checkout-form__status[role="alert"] {
@@ -2276,6 +2306,11 @@ img {
 
   .photo-lightbox {
     padding: 64px 12px 84px;
+  }
+
+  .photo-lightbox img {
+    max-width: calc(100vw - 24px);
+    max-height: calc(100dvh - 148px);
   }
 
   .photo-lightbox__nav {

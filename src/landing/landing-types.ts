@@ -1,6 +1,11 @@
 import type { CatalogCategory, CatalogProduct, CatalogSort } from "../catalog/catalog"
 import type { RefObject } from "react"
-import type { CartLine, CheckoutCustomer, CheckoutResult } from "./cart"
+import type {
+  CartLine,
+  CheckoutConsents,
+  CheckoutCustomer,
+  CheckoutResult,
+} from "./cart"
 
 export type ActiveCategory = "all" | CatalogCategory
 
@@ -47,6 +52,7 @@ export interface StorefrontState {
   cartTotalRub: number
   isCartOpen: boolean
   checkoutCustomer: CheckoutCustomer
+  checkoutConsents: CheckoutConsents
   checkoutResult: CheckoutResult
   request: string
   copyState: CopyState
@@ -74,6 +80,7 @@ export interface StorefrontState {
   removeCartLine: (id: string) => void
   setCartLineQuantity: (id: string, quantity: number) => void
   updateCheckoutCustomer: (field: keyof CheckoutCustomer, value: string) => void
+  updateCheckoutConsent: (field: keyof CheckoutConsents, value: boolean) => void
   submitCartCheckout: () => Promise<void>
   copyRequest: () => Promise<void>
 }

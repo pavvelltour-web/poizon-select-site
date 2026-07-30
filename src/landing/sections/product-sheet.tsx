@@ -36,6 +36,21 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
     setLightboxZoom(1)
   }, [selectedImageSrcKey])
 
+  useEffect(() => {
+    if (!isLightboxOpen) return
+
+    const onLightboxKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault()
+        event.stopPropagation()
+        setLightboxOpen(false)
+      }
+    }
+
+    document.addEventListener("keydown", onLightboxKeyDown, true)
+    return () => document.removeEventListener("keydown", onLightboxKeyDown, true)
+  }, [isLightboxOpen])
+
   if (!product) return null
 
   const price = storefront.selectedProductPrice
@@ -246,8 +261,8 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
           </dl>
 
           <p className="product-sheet__fineprint">
-            Цена рассчитана с учетом выкупа, доставки до Москвы, УСН, резерва,
-            эквайринга и маржи KICKSBASE. В карточке показываем только итог.
+            Итоговая цена фиксируется перед оплатой после проверки размера, цвета,
+            продавца и наличия. Доставка СДЭК показывается отдельно.
           </p>
           <p className="product-sheet__order-proof">
             После заявки менеджер подтвердит размер, цвет, продавца, бирки,

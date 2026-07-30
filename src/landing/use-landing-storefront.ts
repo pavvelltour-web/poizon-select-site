@@ -15,6 +15,7 @@ import {
   saveCart,
   submitCheckout,
   updateCartQuantity,
+  type CheckoutConsents,
   type CheckoutCustomer,
   type CheckoutResult,
   type CartLine,
@@ -58,6 +59,10 @@ export function useLandingStorefront(
     fullName: "",
     phone: "",
     email: "",
+  })
+  const [checkoutConsents, setCheckoutConsents] = useState<CheckoutConsents>({
+    offerAccepted: false,
+    personalDataAccepted: false,
   })
   const [checkoutResult, setCheckoutResult] = useState<CheckoutResult>({
     status: "idle",
@@ -301,9 +306,24 @@ export function useLandingStorefront(
   ) => {
     setCheckoutCustomer((customer) => ({ ...customer, [field]: value }))
   }
+  const updateCheckoutConsent = (
+    field: keyof CheckoutConsents,
+    value: boolean,
+  ) => {
+    setCheckoutConsents((consents) => ({ ...consents, [field]: value }))
+  }
 
   const submitCartCheckout = async () => {
     if (cartLines.length === 0) return
+    if (!checkoutConsents.offerAccepted || !checkoutConsents.personalDataAccepted) {
+      setCheckoutResult({
+        status: "failed",
+        message: "Подтвердите условия оферты и обработку персональных данных.",
+        orderIds: [],
+        paymentUrl: null,
+      })
+      return
+    }
     setCheckoutResult({
       status: "submitting",
       message: "Создаём заказ и готовим оплату...",
@@ -311,7 +331,12 @@ export function useLandingStorefront(
       paymentUrl: null,
     })
     try {
-      const result = await submitCheckout(apiBaseUrl, cartLines, checkoutCustomer)
+      const result = await submitCheckout(
+        apiBaseUrl,
+        cartLines,
+        checkoutCustomer,
+        checkoutConsents,
+      )
       setCheckoutResult({
         status: "created",
         message: result.message,
@@ -361,6 +386,7 @@ export function useLandingStorefront(
     cartTotalRub: currentCartTotalRub,
     isCartOpen,
     checkoutCustomer,
+    checkoutConsents,
     checkoutResult,
     request,
     copyState,
@@ -384,6 +410,7 @@ export function useLandingStorefront(
     removeCartLine,
     setCartLineQuantity,
     updateCheckoutCustomer,
+    updateCheckoutConsent,
     submitCartCheckout,
     copyRequest,
   }

@@ -13,6 +13,11 @@ export interface CheckoutCustomer {
   email: string
 }
 
+export interface CheckoutConsents {
+  offerAccepted: boolean
+  personalDataAccepted: boolean
+}
+
 export interface CheckoutResult {
   status: "idle" | "submitting" | "created" | "failed"
   message: string
@@ -100,6 +105,7 @@ export function loadCart(products: readonly CatalogProduct[]): CartLine[] {
 export function buildCheckoutPayload(
   lines: readonly CartLine[],
   customer: CheckoutCustomer,
+  consents: CheckoutConsents,
 ) {
   return {
     customer: {
@@ -108,8 +114,8 @@ export function buildCheckoutPayload(
       email: customer.email || null,
     },
     consents: {
-      offer_accepted: true,
-      personal_data_accepted: true,
+      offer_accepted: consents.offerAccepted,
+      personal_data_accepted: consents.personalDataAccepted,
     },
     items: lines.map((line) => ({
       product_slug: line.product.slug,
@@ -128,13 +134,14 @@ export async function submitCheckout(
   apiBaseUrl: string,
   lines: readonly CartLine[],
   customer: CheckoutCustomer,
+  consents: CheckoutConsents,
 ): Promise<CheckoutResponse> {
   const endpoint = `${apiBaseUrl.replace(/\/$/, "")}/api/checkout/orders`
   const response = await fetch(endpoint, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "include",
-    body: JSON.stringify(buildCheckoutPayload(lines, customer)),
+    body: JSON.stringify(buildCheckoutPayload(lines, customer, consents)),
   })
   const body = (await response.json().catch(() => null)) as CheckoutResponse | null
   if (!response.ok || body === null) {

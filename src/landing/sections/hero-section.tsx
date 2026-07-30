@@ -52,45 +52,44 @@ export function HeroSection({ storefront }: HeroSectionProps) {
         </div>
       </div>
 
-      <div className="shop-hero__media" aria-hidden="true">
+      <div className="shop-hero__media">
         <div className="hero-product-stage hero-product-stage--atmosphere">
           <img src="brand/kicksbase-hero-court-v2.webp" width="1792" height="1024" alt="" />
         </div>
-      </div>
+        <div className="hero-board" aria-label="Быстрый выбор товара">
+          <div className="hero-board__head">
+            <span>Быстрый выбор</span>
+            <small>3 входа</small>
+          </div>
+          {storefront.heroProducts.map((product) => {
+            const price = getDisplayPrice(product)
 
-      <div className="hero-board" aria-label="Быстрый выбор товара">
-        <div className="hero-board__head">
-          <span>Быстрый выбор</span>
-          <small>3 входа</small>
+            return (
+              <button
+                className="hero-pick"
+                key={product.slug}
+                type="button"
+                onClick={(event) => storefront.openProduct(product, event.currentTarget)}
+              >
+                <img
+                  src={resolveAssetUrl(product.image)}
+                  width="1200"
+                  height="900"
+                  alt=""
+                  onError={(event) => setImageFallback(event, product.fallbackImage)}
+                />
+                <span>
+                  <small>{getProductBadge(product)}</small>
+                  <strong>
+                    {product.brand} {product.name}
+                  </strong>
+                  <em>{price.value}</em>
+                </span>
+                <MoveRight aria-hidden="true" size={18} />
+              </button>
+            )
+          })}
         </div>
-        {storefront.heroProducts.map((product) => {
-          const price = getDisplayPrice(product)
-
-          return (
-            <button
-              className="hero-pick"
-              key={product.slug}
-              type="button"
-              onClick={(event) => storefront.openProduct(product, event.currentTarget)}
-            >
-              <img
-                src={resolveAssetUrl(product.image)}
-                width="1200"
-                height="900"
-                alt=""
-                onError={(event) => setImageFallback(event, product.fallbackImage)}
-              />
-              <span>
-                <small>{getProductBadge(product)}</small>
-                <strong>
-                  {product.brand} {product.name}
-                </strong>
-                <em>{price.value}</em>
-              </span>
-              <MoveRight aria-hidden="true" size={18} />
-            </button>
-          )
-        })}
       </div>
     </section>
   )

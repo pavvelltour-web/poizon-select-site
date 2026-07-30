@@ -16,6 +16,8 @@ export function CartDrawer({ storefront }: CartDrawerProps) {
     storefront.cartLines.length > 0 &&
     storefront.checkoutCustomer.fullName.trim().length >= 2 &&
     storefront.checkoutCustomer.phone.trim().length >= 10 &&
+    storefront.checkoutConsents.offerAccepted &&
+    storefront.checkoutConsents.personalDataAccepted &&
     storefront.checkoutResult.status !== "submitting"
 
   return (
@@ -147,9 +149,32 @@ export function CartDrawer({ storefront }: CartDrawerProps) {
                 />
               </label>
 
+              <label className="checkout-form__check">
+                <input
+                  type="checkbox"
+                  checked={storefront.checkoutConsents.offerAccepted}
+                  onChange={(event) =>
+                    storefront.updateCheckoutConsent("offerAccepted", event.target.checked)
+                  }
+                />
+                <span>
+                  Принимаю условия <a href="#legal-offer">публичной оферты</a>.
+                </span>
+              </label>
+              <label className="checkout-form__check">
+                <input
+                  type="checkbox"
+                  checked={storefront.checkoutConsents.personalDataAccepted}
+                  onChange={(event) =>
+                    storefront.updateCheckoutConsent("personalDataAccepted", event.target.checked)
+                  }
+                />
+                <span>
+                  Даю согласие на <a href="#privacy-policy">обработку персональных данных</a>.
+                </span>
+              </label>
               <p className="checkout-form__consent">
-                Нажимая кнопку, вы соглашаетесь с публичной офертой и обработкой
-                персональных данных. Чек отправим на email или телефон после оплаты.
+                Чек отправим на email или телефон после оплаты.
               </p>
 
               <button className="button button--primary" type="submit" disabled={!canSubmit}>
