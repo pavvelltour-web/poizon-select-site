@@ -126,8 +126,14 @@ const browserFiles = await sourceFiles(path.join(siteRoot, "src"))
 const publicRoot = path.join(siteRoot, "public")
 const publicFiles = await sourceFiles(publicRoot)
 const publicEntries = await readdir(publicRoot, { withFileTypes: true })
+const allowedRootBinaryEntries = new Set([
+  "apple-touch-icon.png",
+  "favicon.ico",
+  "kicksbase-icon-64.webp",
+])
 const allowedPublicEntries = new Set([
   "THIRD_PARTY_NOTICES.md",
+  ...allowedRootBinaryEntries,
   "brand",
   "catalog",
   "favicon.svg",
@@ -177,6 +183,10 @@ for (const file of publicFiles) {
   }
   if (
     !auditedTextExtensions.has(extension) &&
+    !(
+      allowedRootBinaryEntries.has(relative) &&
+      [".ico", ".png", ".webp"].includes(extension)
+    ) &&
     !(relative.startsWith(`catalog${path.sep}`) && extension === ".webp") &&
     !(relative.startsWith(`brand${path.sep}`) && extension === ".webp")
   ) {
