@@ -96,16 +96,16 @@
       "file": "adidas-handball-spezial-core-black.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
+        "generator": "OpenAI GPT Image 2.0; product-specific photorealistic white-studio reference asset normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
         "generated_at": "2026-07-28T19:36:57+00:00"
       },
-      "output_bytes": 27408,
+      "output_bytes": 80208,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "a3123b8758b5a3cbfc5fab77a5bc8326fe09a66d9b12bef435865ef7be548f4f",
+      "output_sha256": "8425732b50f6b2e460599de72b0d8277ea26735473764312698c76a2485f3775",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
@@ -118,16 +118,16 @@
       "file": "adidas-harden-volume-9.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
+        "generator": "OpenAI GPT Image 2.0; product-specific photorealistic white-studio reference asset normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
         "generated_at": "2026-07-28T19:36:57+00:00"
       },
-      "output_bytes": 29452,
+      "output_bytes": 96390,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "96088da045126b86f6b6e908737e4b7b80b2a38eba19fca81605a630611a15cf",
+      "output_sha256": "6536feef4ab8e1d10d0f5a2f7884f6603773aeb281159f98a3cd5fc51bb69af3",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
@@ -184,16 +184,16 @@
       "file": "adidas-stabil-16-indoor.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
+        "generator": "OpenAI GPT Image 2.0; product-specific photorealistic white-studio reference asset normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
         "generated_at": "2026-07-28T19:36:57+00:00"
       },
-      "output_bytes": 28904,
+      "output_bytes": 99996,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "1fda2f95ebdbea92c6e1e8fc41e03863c2dd743864ebbc60b0d26e3d0b0329f8",
+      "output_sha256": "0f7182591c5cbd2446cc83bf40480e6bea5a946d52076dce11401960f02bf81a",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
@@ -250,16 +250,16 @@
       "file": "anta-kai-1.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
+        "generator": "OpenAI GPT Image 2.0; product-specific photorealistic white-studio reference asset normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
         "generated_at": "2026-07-28T19:36:57+00:00"
       },
-      "output_bytes": 32394,
+      "output_bytes": 116658,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "10871a2a59af7ea9f2978dcc83f858738b2521e69a85bdb6966f5681b7dc4e01",
+      "output_sha256": "85c4231018874645f38ebd025eb74d25f94c09161468a85937104cdd4ea78bac",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
@@ -338,16 +338,16 @@
       "file": "asics-gel-kayano-20-glacier-grey.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
+        "generator": "OpenAI GPT Image 2.0; product-specific photorealistic white-studio reference asset normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
         "generated_at": "2026-07-28T19:36:57+00:00"
       },
-      "output_bytes": 27072,
+      "output_bytes": 148076,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "39448d42447f0e5cd100c63007b25cd6ae5a97a6ad1f7fae8b88aff26265620e",
+      "output_sha256": "a1d728639c95f51675fa040036c2e82097a17475df6069f5d795c9d4d675e7cf",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
@@ -448,16 +448,16 @@
       "file": "asics-rote-japan-lyte-ff-3.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
+        "generator": "OpenAI GPT Image 2.0; product-specific photorealistic white-studio reference asset normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
         "generated_at": "2026-07-28T19:36:57+00:00"
       },
-      "output_bytes": 25402,
+      "output_bytes": 70512,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "15660f2971a8a42e60ce91ce8774c3399c60609f238c71fa3570f6ed2a496d2a",
+      "output_sha256": "c98edc43ab7e69863c6f01e42e6e9d14cf408c3548bd60728ea5772bffb0e7a8",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
@@ -514,16 +514,16 @@
       "file": "asics-upcourt-6.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
+        "generator": "OpenAI GPT Image 2.0; product-specific photorealistic white-studio reference asset normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
         "generated_at": "2026-07-28T19:36:57+00:00"
       },
-      "output_bytes": 29050,
+      "output_bytes": 101104,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "36b862ddcc393173b31aee7dfed0de4d191abefb31ab9f0c8b6d5aa9599d3d22",
+      "output_sha256": "7544ea13cdb653fb10cdfb759435fdd5c08d4de173c2a22e208cf2e93e925d41",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
@@ -756,16 +756,16 @@
       "file": "li-ning-wade-808-4-ultra.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
+        "generator": "OpenAI GPT Image 2.0; product-specific photorealistic white-studio reference asset normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
         "generated_at": "2026-07-28T19:36:57+00:00"
       },
-      "output_bytes": 28122,
+      "output_bytes": 118396,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "5c8bb193cae4afb6501f9f69c7474be8e2fec0d2f1577331ce4d5f3d4f6b7e55",
+      "output_sha256": "3eddf43d69ac14d8a94e5a4c9a9ab60ef1ed75d421ac9c4b65ebfa66517aebdb",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
@@ -822,16 +822,16 @@
       "file": "mikasa-v200w-volleyball.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
+        "generator": "OpenAI GPT Image 2.0; product-specific photorealistic white-studio reference asset normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
         "generated_at": "2026-07-28T19:36:57+00:00"
       },
-      "output_bytes": 56930,
+      "output_bytes": 81962,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "63e0a2dee4d3c9d48b6429969c2fdf4a46349ede72a69e44b0ced81230f37fbd",
+      "output_sha256": "e10953dad066986a093a24655f8af533c4e6090521c87c803ea81bfda1b83da3",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
@@ -866,16 +866,16 @@
       "file": "mizuno-cyclone-speed-5.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
+        "generator": "OpenAI GPT Image 2.0; product-specific photorealistic white-studio reference asset normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
         "generated_at": "2026-07-28T19:36:57+00:00"
       },
-      "output_bytes": 26816,
+      "output_bytes": 83796,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "a301f9abd97e5b6cbcd4f7b8e5e48b37c0df6c1a0dfc07d7b087708badb88491",
+      "output_sha256": "da3e13567acabb98f19020be614276b28cd59bda30737f6c0e80fe10168ff54b",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
@@ -998,16 +998,16 @@
       "file": "mizuno-wave-momentum-3.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
+        "generator": "OpenAI GPT Image 2.0; product-specific photorealistic white-studio reference asset normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
         "generated_at": "2026-07-28T19:36:57+00:00"
       },
-      "output_bytes": 31882,
+      "output_bytes": 70062,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "0a7d9b19efc935bda0be103171b66b322197b77339672b89bc13d8f76fd253d4",
+      "output_sha256": "d9b9afdead19d9d9cd4ccaf1bfea347b59fdb3096fe1a9fb7b2de8a7ced00248",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
@@ -1152,16 +1152,16 @@
       "file": "new-balance-1000-black.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
+        "generator": "OpenAI GPT Image 2.0; product-specific photorealistic white-studio reference asset normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
         "generated_at": "2026-07-28T19:36:57+00:00"
       },
-      "output_bytes": 30020,
+      "output_bytes": 118020,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "a97e731747ac3150c32675ea51b28e9c7cda6a456ebf9477db92c8fbaacbc83b",
+      "output_sha256": "8a142ec85f3b9715e2388d45cd473f819b1d774436b53371d17fe3467d83d2a3",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
@@ -1262,16 +1262,16 @@
       "file": "new-balance-two-wxy-v5.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
+        "generator": "OpenAI GPT Image 2.0; product-specific photorealistic white-studio reference asset normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
         "generated_at": "2026-07-28T19:36:57+00:00"
       },
-      "output_bytes": 28894,
+      "output_bytes": 127026,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "3502f29dd79f99ee548cc86e6acdd0e84d19fc481cfde417e0208cc28190bc8f",
+      "output_sha256": "628369fee467574b2eecee104557207c0147f08e5ec71aa5dfb6b06eb064a315",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
@@ -1350,16 +1350,16 @@
       "file": "nike-aone.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
+        "generator": "OpenAI GPT Image 2.0; product-specific photorealistic white-studio reference asset normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
         "generated_at": "2026-07-28T19:36:57+00:00"
       },
-      "output_bytes": 29516,
+      "output_bytes": 131560,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "e4456d61b2bee016fa42e3923b3e28cbfffe3a56475373bd1da7b4f827d6ec15",
+      "output_sha256": "7b55e100e8d133092022ef74f1e9ed82cccd7dc603907ddb7d8a7c1572a7daec",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
@@ -1526,16 +1526,16 @@
       "file": "nike-free-metcon-6.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
+        "generator": "OpenAI GPT Image 2.0; product-specific photorealistic white-studio reference asset normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
         "generated_at": "2026-07-28T19:36:57+00:00"
       },
-      "output_bytes": 26416,
+      "output_bytes": 116400,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "a57f6645fd9970327aea644cbf1ade23a0253ab199c65c600901af996b1ebf85",
+      "output_sha256": "9ef7e20ac0b439f9de0377f70d5995a7eec8492871006a363e068b21532c1c97",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
@@ -1944,16 +1944,16 @@
       "file": "puma-fuse-3.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
+        "generator": "OpenAI GPT Image 2.0; product-specific photorealistic white-studio reference asset normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
         "generated_at": "2026-07-28T19:36:57+00:00"
       },
-      "output_bytes": 26174,
+      "output_bytes": 93050,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "1d88a1c2e8ed27d62afbdf29990e6db4d9f923f0995fb96ceb6eef9ba4b8aa9b",
+      "output_sha256": "34ded2b8c2fa6e6cf783c162d4fd1872d2bf67109cd4f9d8407677c0535379ee",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
