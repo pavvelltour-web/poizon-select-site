@@ -1,19 +1,14 @@
 import { BadgeCheck } from "lucide-react"
 
-import { editorialIndex } from "../landing-data"
-import type { ActiveCategory } from "../landing-types"
-
 interface InfoSectionsProps {
-  category?: ActiveCategory
   mode?: "discovery" | "order"
-  selectCategory?: (category: ActiveCategory) => void
 }
 
 export function InfoSections({
-  category,
   mode = "discovery",
-  selectCategory,
 }: InfoSectionsProps) {
+  if (mode === "discovery") return null
+
   if (mode === "order") {
     return (
       <>
@@ -65,54 +60,7 @@ export function InfoSections({
     )
   }
 
-  return (
-    <>
-      <section className="brand-system" aria-label="Система подбора KICKSBASE">
-        <article>
-          <strong>Обувь для движения</strong>
-          <p>Пары для зала, тренировок, матчей и восстановления.</p>
-        </article>
-        <article>
-          <strong>Одежда для тренировок</strong>
-          <p>Футболки, шорты, худи и верхний слой.</p>
-        </article>
-        <article>
-          <strong>Прозрачная покупка</strong>
-          <p>Размер, цвет, наличие и срок подтверждаются перед оплатой.</p>
-        </article>
-      </section>
-
-      <section className="editorial-index" aria-labelledby="editorial-index-title">
-        <div className="editorial-index__copy">
-          <h2 id="editorial-index-title">Найдите свой вариант.</h2>
-          <p>
-            Для зала, матча, тренировки, восстановления или на каждый день.
-            Если товара нет, подберём альтернативу.
-          </p>
-        </div>
-        <div className="editorial-index__grid" aria-label="Быстрые входы в товары">
-          {editorialIndex.map((item) => {
-            const EditorialIcon = item.icon
-
-            return (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => selectCategory?.(item.id)}
-                aria-pressed={category === item.id}
-              >
-                <span>
-                  <strong>{item.title}</strong>
-                </span>
-                <em>{item.text}</em>
-                <EditorialIcon aria-hidden="true" size={22} />
-              </button>
-            )
-          })}
-        </div>
-      </section>
-    </>
-  )
+  return null
 }
 
 export function ProductTrustMarks() {

@@ -30,9 +30,7 @@ describe("LandingPage", () => {
     expect(
       screen.getByText(/Выберите модель, подтвердите размер/),
     ).toBeInTheDocument()
-    expect(
-      screen.getByText(/Размер, цвет, наличие/),
-    ).toBeInTheDocument()
+    expect(screen.getAllByText(/размер, цвет, наличие/).length).toBeGreaterThan(0)
   })
 
   it("filters, sorts and resets the catalog deterministically", async () => {

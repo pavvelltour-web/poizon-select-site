@@ -33,10 +33,6 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
 
       <main>
         <HeroSection storefront={storefront} />
-        <InfoSections
-          category={storefront.category}
-          selectCategory={storefront.selectCategory}
-        />
         <CatalogSection storefront={storefront} />
         <InfoSections mode="order" />
       </main>

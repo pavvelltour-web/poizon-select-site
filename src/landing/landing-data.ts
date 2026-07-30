@@ -2,11 +2,9 @@ import {
   BadgeCheck,
   CircleDot,
   Footprints,
-  Medal,
   Search,
   Shirt,
   Sparkles,
-  TimerReset,
   Trophy,
   Waves,
   Zap,
@@ -74,54 +72,6 @@ export const heroProductSlugs = [
   "asics-sky-elite-ff-3",
   "nike-kd-18",
   "hoka-ora-recovery-slide-3",
-] as const
-
-export const scenarioTiles = [
-  {
-    id: "court-shoes",
-    title: "Пара для зала",
-    text: "Для тренировок, перемещений и уверенной посадки.",
-    icon: Medal,
-  },
-  {
-    id: "basketball",
-    title: "Для движения",
-    text: "Пары для зала, быстрых перемещений и тренировок.",
-    icon: CircleDot,
-  },
-  {
-    id: "recovery",
-    title: "После зала",
-    text: "Мягкие пары на дорогу домой и восстановительный день.",
-    icon: TimerReset,
-  },
-] as const
-
-export const editorialIndex = [
-  {
-    id: "court-shoes",
-    title: "Пара под зал",
-    text: "Начните с покрытия и задачи. Менеджер проверит размер, цвет и наличие.",
-    icon: Zap,
-  },
-  {
-    id: "basketball",
-    title: "Для движения",
-    text: "Пары для зала, активных тренировок и матчей.",
-    icon: CircleDot,
-  },
-  {
-    id: "apparel",
-    title: "Одежда",
-    text: "Футболки, шорты, худи и верхний слой для тренировок.",
-    icon: Shirt,
-  },
-  {
-    id: "recovery",
-    title: "После зала",
-    text: "Слайды и мягкие пары для восстановления после нагрузки.",
-    icon: TimerReset,
-  },
 ] as const
 
 type QuickFilter = {
