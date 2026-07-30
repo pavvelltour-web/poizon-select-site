@@ -18,21 +18,20 @@ afterEach(() => {
 })
 
 describe("LandingPage", () => {
-  it("renders all items with a visible price floor", () => {
+  it("renders all items with readable prices", () => {
     render(<LandingPage configuredBotUsername={null} />)
 
     expect(screen.getByRole("heading", { name: "KICKSBASE" })).toBeInTheDocument()
     expect(productButtons()).toHaveLength(publicCatalogProducts.length)
     expect(screen.queryByText("по запросу")).toBeNull()
-    expect(screen.getAllByText("Цена")).toHaveLength(publicCatalogProducts.length)
-    expect(screen.getAllByText("от 24 500 ₽").length).toBeGreaterThan(0)
-    expect(screen.getAllByText("от 45 тыс. ₽").length).toBeGreaterThan(0)
-    expect(screen.getAllByText("от 4 тыс. ₽").length).toBeGreaterThan(0)
+    expect(screen.getAllByText("24 500 ₽").length).toBeGreaterThan(0)
+    expect(screen.getAllByText("45 тыс. ₽").length).toBeGreaterThan(0)
+    expect(screen.getAllByText("4 тыс. ₽").length).toBeGreaterThan(0)
     expect(
       screen.getByText(/Выберите модель, подтвердите размер/),
     ).toBeInTheDocument()
     expect(
-      screen.getByText(/Размер, продавец, бирки/),
+      screen.getByText(/Размер, цвет, наличие/),
     ).toBeInTheDocument()
   })
 
@@ -43,11 +42,11 @@ describe("LandingPage", () => {
     await user.click(
       within(screen.getByRole("group", { name: "Сценарии" })).getByRole(
         "button",
-        { name: /Игровой день/ },
+        { name: /На матч/ },
       ),
     )
     expect(productButtons()).toHaveLength(19)
-    expect(screen.getByText("Пары для игровых дней")).toBeInTheDocument()
+    expect(screen.getByText("Пары для матча и тренировки")).toBeInTheDocument()
     expect(window.location.search).toBe("?category=volleyball")
 
     await user.type(screen.getByRole("searchbox", { name: "Поиск по товарам" }), "nike")
@@ -162,11 +161,11 @@ describe("LandingPage", () => {
     render(<LandingPage configuredBotUsername={null} />)
 
     await user.type(
-      screen.getByRole("searchbox", { name: "Опишите задачу для подбора по задаче" }),
+      screen.getByRole("searchbox", { name: "Опишите задачу для подбора" }),
       "пара для зала и мягкое приземление",
     )
 
-    const finder = screen.getByLabelText("Подбор по задаче")
+    const finder = screen.getByLabelText("Помощь с выбором")
     expect(finder).toHaveTextContent(
       "подходит под зал",
     )
@@ -192,7 +191,7 @@ describe("LandingPage", () => {
       "price-asc",
     )
     expect(screen.getByTestId("order-dock")).toBeInTheDocument()
-    expect(screen.getByText(/Итоговая цена фиксируется перед оплатой/)).toBeInTheDocument()
+    expect(screen.getByText(/Размер, цвет и наличие подтверждаются перед оплатой/)).toBeInTheDocument()
     expect(screen.getByRole("link", { name: "Открыть @SelectBuyerBot" })).toHaveAttribute(
       "href",
       "https://t.me/SelectBuyerBot",
@@ -214,7 +213,7 @@ describe("LandingPage", () => {
     await user.click(
       within(screen.getByRole("group", { name: "Сценарии" })).getByRole(
         "button",
-        { name: /Защитная работа/ },
+        { name: /Для движения/ },
       ),
     )
     await user.type(screen.getByRole("searchbox", { name: "Поиск по товарам" }), "nike")
@@ -288,7 +287,7 @@ describe("LandingPage", () => {
     await user.click(
       within(cart).getByRole("checkbox", { name: /обработку персональных данных/i }),
     )
-    await user.click(within(cart).getByRole("button", { name: "Оформить и перейти к оплате" }))
+    await user.click(within(cart).getByRole("button", { name: "Оформить заказ" }))
 
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalledWith(

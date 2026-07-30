@@ -1,11 +1,10 @@
 import { MoveRight } from "lucide-react"
-import type { CSSProperties } from "react"
+import { useState, type CSSProperties } from "react"
 
 import type { CatalogProduct } from "../../catalog/catalog"
 import {
   getDisplayPrice,
-  getProductUse,
-  kindLabels,
+  getSourcingMode,
   resolveAssetUrl,
   setImageFallback,
 } from "../landing-data"
@@ -24,7 +23,7 @@ export function ProductCard({
   openProduct,
 }: ProductCardProps) {
   const price = getDisplayPrice(product)
-  const galleryPreview = product.gallery[1]?.src ?? product.fallbackImage
+  const [mediaReady, setMediaReady] = useState(false)
 
   return (
     <button
@@ -35,27 +34,17 @@ export function ProductCard({
       onClick={(event) => openProduct(product, event.currentTarget)}
       aria-label={`Открыть карточку: ${product.brand} ${product.name}`}
     >
-      <span className="product-card__visual">
+      <span className={`product-card__visual ${mediaReady ? "product-card__visual--ready" : ""}`}>
         <img
-          className="product-card__image product-card__image--primary"
+          className="product-card__image"
           src={resolveAssetUrl(product.image)}
           width="1200"
           height="900"
-          loading={index < 8 ? "eager" : "lazy"}
+          loading={index < 12 ? "eager" : "lazy"}
           decoding="async"
           alt=""
-          onError={(event) => {
-            setImageFallback(event, product.fallbackImage)
-          }}
-        />
-        <img
-          className="product-card__image product-card__image--alt"
-          src={resolveAssetUrl(galleryPreview)}
-          width="1200"
-          height="900"
-          loading="lazy"
-          decoding="async"
-          alt=""
+          fetchPriority={index < 4 ? "high" : "auto"}
+          onLoad={() => setMediaReady(true)}
           onError={(event) => {
             setImageFallback(event, product.fallbackImage)
           }}
@@ -64,18 +53,16 @@ export function ProductCard({
       <span className="product-card__body">
         <span className="product-card__topline">
           <span className="product-card__brand">{product.brand}</span>
-          <span className="product-card__kind">{kindLabels[product.kind]}</span>
+          <span className="product-card__mode">{getSourcingMode(product)}</span>
         </span>
         <strong>{product.name}</strong>
-        <span className="product-card__meta">{getProductUse(product)}</span>
         <span className="product-card__bottom">
           <span>
-            <small>{price.label}</small>
             <b>{price.value}</b>
             <em>{price.detail}</em>
           </span>
           <span className="product-card__cta">
-            Открыть
+            Смотреть
             <MoveRight aria-hidden="true" size={16} />
           </span>
         </span>

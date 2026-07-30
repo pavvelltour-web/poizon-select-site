@@ -1,11 +1,11 @@
 export const catalogCategories = [
   { id: "all", label: "Всё" },
   { id: "court-shoes", label: "Для зала" },
-  { id: "volleyball", label: "Игровой день" },
-  { id: "basketball", label: "Защитная работа" },
-  { id: "recovery", label: "После зала" },
+  { id: "volleyball", label: "На матч" },
+  { id: "basketball", label: "Для движения" },
+  { id: "recovery", label: "Восстановление" },
   { id: "apparel", label: "Одежда" },
-  { id: "sneakers", label: "База" },
+  { id: "sneakers", label: "Базовые пары" },
 ] as const
 
 export type CatalogCategory = Exclude<

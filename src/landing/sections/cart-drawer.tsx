@@ -179,8 +179,8 @@ export function CartDrawer({ storefront }: CartDrawerProps) {
 
               <button className="button button--primary" type="submit" disabled={!canSubmit}>
                 {storefront.checkoutResult.status === "submitting"
-                  ? "Создаём заказ..."
-                  : "Оформить и перейти к оплате"}
+                  ? "Отправляем заказ..."
+                  : "Оформить заказ"}
               </button>
 
               {storefront.checkoutResult.message ? (

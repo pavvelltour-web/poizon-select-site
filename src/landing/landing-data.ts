@@ -31,21 +31,21 @@ export const sortOptions: readonly { id: CatalogSort; label: string }[] = [
 ]
 
 export const categoryCopy: Record<ActiveCategory, string> = {
-  all: "Все опубликованные пары и одежда",
+  all: "Обувь и одежда для движения",
   "court-shoes": "Пары для зала и тренировок",
-  volleyball: "Пары для игровых дней",
-  basketball: "Пары для приема, защиты и боковой работы",
-  recovery: "Слайды и мягкие пары после зала",
+  volleyball: "Пары для матча и тренировки",
+  basketball: "Пары для зала и активного движения",
+  recovery: "Мягкая обувь после тренировки",
   apparel: "Одежда для тренировок и дороги",
   sneakers: "Базовые пары на каждый день",
 }
 
 export const categoryDetails: Record<ActiveCategory, string> = {
-  all: "Публичная витрина",
+  all: "Витрина",
   "court-shoes": "Зал и тренировки",
-  volleyball: "Матч и тренировка",
-  basketball: "Защитная работа",
-  recovery: "После зала",
+  volleyball: "На матч",
+  basketball: "Для движения",
+  recovery: "Восстановление",
   apparel: "Одежда",
   sneakers: "База",
 }
@@ -85,8 +85,8 @@ export const scenarioTiles = [
   },
   {
     id: "basketball",
-    title: "Защитная работа",
-    text: "Пары, которые берут для приема и резких смен направления.",
+    title: "Для движения",
+    text: "Пары для зала, быстрых перемещений и тренировок.",
     icon: CircleDot,
   },
   {
@@ -106,8 +106,8 @@ export const editorialIndex = [
   },
   {
     id: "basketball",
-    title: "Защитная работа",
-    text: "Пары для приема, боковых перемещений и плотной посадки.",
+    title: "Для движения",
+    text: "Пары для зала, активных тренировок и матчей.",
     icon: CircleDot,
   },
   {
@@ -141,14 +141,14 @@ export const quickFilters: readonly QuickFilter[] = [
     icon: Zap,
   },
   {
-    label: "Игровой день",
-    detail: "быстро выбрать пару",
+    label: "На матч",
+    detail: "на матч",
     category: "volleyball",
     icon: Trophy,
   },
   {
-    label: "Защитная работа",
-    detail: "прием и боковые движения",
+    label: "Для движения",
+    detail: "тренировка в зале",
     category: "basketball",
     icon: CircleDot,
   },
@@ -175,9 +175,9 @@ export const quickFilters: readonly QuickFilter[] = [
 
 export const taskChips = [
   "пара для зала",
-  "игровой день",
-  "защитная работа",
-  "восстановление после зала",
+  "на матч",
+  "на тренировку",
+  "после тренировки",
 ] as const
 
 export const kindLabels: Record<ProductKind, string> = {
@@ -187,9 +187,9 @@ export const kindLabels: Record<ProductKind, string> = {
 }
 
 const fallbackFromPrices: Record<ProductKind, string> = {
-  footwear: "от 22 тыс. ₽",
-  apparel: "от 4 тыс. ₽",
-  accessory: "от 3 тыс. ₽",
+  footwear: "22 тыс. ₽",
+  apparel: "4 тыс. ₽",
+  accessory: "3 тыс. ₽",
 }
 
 const footwearSizes = [
@@ -234,15 +234,15 @@ export function setImageFallback(
 function marketPriceToFrom(price: string): string {
   const firstNumber = price.match(/^\d+(?:[.,]\d+)?/)?.[0]
   if (!firstNumber) return price
-  return `от ${firstNumber.replace(".", ",")} тыс. ₽`
+  return `${firstNumber.replace(".", ",")} тыс. ₽`
 }
 
 export function getDisplayPrice(product: CatalogProduct): DisplayPrice {
   if (product.orderQuote) {
     return {
       label: "Цена",
-      value: `от ${formatRub(product.orderQuote.totalRub)}`,
-      detail: "итог до оплаты, СДЭК отдельно",
+      value: formatRub(product.orderQuote.totalRub),
+      detail: "доставка СДЭК отдельно",
     }
   }
 
@@ -267,8 +267,8 @@ export function getProductTags(product: CatalogProduct): string[] {
 
 export function getProductBadge(product: CatalogProduct): string {
   if (product.category === "recovery") return "После зала"
-  if (product.category === "basketball") return "Защитная работа"
-  if (product.category === "volleyball") return "Игровой день"
+  if (product.category === "basketball") return "Для движения"
+  if (product.category === "volleyball") return "На матч"
   if (product.category === "apparel") return "Одежда"
   if (product.category === "training") return "Тренировка"
   return product.kind === "footwear" ? "Пара" : kindLabels[product.kind]
@@ -277,15 +277,15 @@ export function getProductBadge(product: CatalogProduct): string {
 export function getProductUse(product: CatalogProduct): string {
   const note = product.note.toLowerCase()
   if (/roll|foam|recover|восстанов/.test(note)) return "Для восстановления после нагрузки"
-  if (product.category === "basketball") return "Для защитной работы и смен направления"
-  if (product.category === "volleyball") return "Для тренировок и игровых дней"
+  if (product.category === "basketball") return "Для движения в зале и тренировок"
+  if (product.category === "volleyball") return "Для матча и тренировки"
   if (product.kind === "apparel") return "Для тренировок, дороги и повседневного слоя"
   return product.note
 }
 
 export function getProductScenario(product: CatalogProduct): string {
-  if (product.category === "basketball") return "Защитная работа"
-  if (product.category === "volleyball") return "Игровой день"
+  if (product.category === "basketball") return "Для движения"
+  if (product.category === "volleyball") return "На матч"
   if (product.category === "recovery") return "После зала"
   if (product.category === "apparel") return "Одежда"
   if (product.category === "training") return "Тренировка"

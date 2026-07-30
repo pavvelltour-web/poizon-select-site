@@ -30,11 +30,11 @@ export function CatalogSection({ storefront }: CatalogSectionProps) {
     <section className="catalog-shell" id="catalog" aria-labelledby="catalog-title">
       <div className="catalog-heading">
         <div>
-          <h2 id="catalog-title">Выберите товар под задачу.</h2>
+          <h2 id="catalog-title">Выберите товар.</h2>
         </div>
         <p>
-          Сначала цель и покрытие, затем размер, модель, цвет и наличие.
-          Если нужного нет, опишите запрос менеджеру.
+          Откройте модель, выберите размер. Наличие и цвет подтвердим перед оплатой.
+          Если нужного нет — опишите, что ищете.
         </p>
       </div>
 
@@ -78,22 +78,22 @@ export function CatalogSection({ storefront }: CatalogSectionProps) {
 
 function TaskFinder({ storefront }: CatalogSectionProps) {
   return (
-    <div className="task-finder" aria-label="Подбор по задаче">
+    <div className="task-finder" aria-label="Помощь с выбором">
       <div className="task-finder__copy">
         <Search aria-hidden="true" size={22} />
         <span>
-          <strong>Подбор по задаче</strong>
-          <em>Опишите, для чего нужна пара. Поднимем подходящие товары.</em>
+          <strong>Поможем выбрать</strong>
+          <em>Опишите задачу — покажем подходящие пары.</em>
         </span>
       </div>
       <label className="task-finder__input">
-        <span className="sr-only">Опишите задачу для подбора по задаче</span>
+        <span className="sr-only">Опишите задачу для подбора</span>
         <Search aria-hidden="true" size={18} />
         <input
           type="search"
           value={storefront.taskInput}
           onChange={(event) => storefront.setTaskInput(event.target.value)}
-          placeholder="Например: пара для зала, игровой день, после тренировки..."
+          placeholder="Например: для зала, на матч или после тренировки"
           autoComplete="off"
         />
       </label>
