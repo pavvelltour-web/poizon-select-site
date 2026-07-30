@@ -7,7 +7,7 @@ interface HeaderProps {
 export function Header({ botUrl }: HeaderProps) {
   return (
     <header className="kb-header">
-      <a className="kb-brand" href="/" aria-label="KICKSBASE">
+      <a className="kb-brand" href="./" aria-label="KICKSBASE">
         <img src="brand/kicksbase-logo.webp" width="80" height="80" alt="" />
         <span>
           <strong>KICKSBASE</strong>
