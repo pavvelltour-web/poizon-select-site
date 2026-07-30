@@ -14,6 +14,7 @@ import { useEffect, useRef, useState } from "react"
 
 import {
   getProductScenario,
+  getProductUse,
   getSourcingMode,
   kindLabels,
   resolveAssetUrl,
@@ -199,7 +200,7 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
           <h2 id="product-sheet-title" ref={storefront.sheetHeadingRef} tabIndex={-1}>
             {product.brand} {product.name}
           </h2>
-          <p className="product-sheet__description">{product.note}</p>
+          <p className="product-sheet__description">{getProductUse(product)}</p>
 
           <div className="product-size" aria-label="Выбор размера">
             <span>

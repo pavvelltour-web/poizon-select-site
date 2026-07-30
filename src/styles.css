@@ -1962,7 +1962,7 @@ img {
 
 .cookie-notice {
   position: fixed;
-  z-index: 70;
+  z-index: 30;
   right: 18px;
   bottom: 18px;
   display: grid;
