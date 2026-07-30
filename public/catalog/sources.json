@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-07-28T19:36:57+00:00",
+  "generated_at": "2026-07-30T15:30:00+00:00",
   "notice": "All catalog visuals are project-generated originals, not official manufacturer photography and not proof of an exact product match. Brand names identify the requested search target; the manager must confirm the exact SKU, colour, size, availability and price.",
   "items": [
     {
@@ -10,7 +10,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 90336,
       "output_dimensions": [
@@ -22,7 +22,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: adidas-campus-00s-core-black",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -32,7 +32,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 103526,
       "output_dimensions": [
@@ -44,7 +44,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: adidas-crazyflight-6-mid",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -54,7 +54,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 41220,
       "output_dimensions": [
@@ -66,7 +66,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: adidas-crazyflight-shorts",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -76,7 +76,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 88206,
       "output_dimensions": [
@@ -88,7 +88,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: adidas-gazelle-indoor-green",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -96,9 +96,9 @@
       "file": "adidas-handball-spezial-core-black.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "OpenAI GPT Image 2.0; product-specific photorealistic white-studio reference asset normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 80208,
       "output_dimensions": [
@@ -110,7 +110,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: adidas-handball-spezial-core-black",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -118,9 +118,9 @@
       "file": "adidas-harden-volume-9.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "OpenAI GPT Image 2.0; product-specific photorealistic white-studio reference asset normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 96390,
       "output_dimensions": [
@@ -132,7 +132,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: adidas-harden-volume-9",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -142,7 +142,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 49674,
       "output_dimensions": [
@@ -154,7 +154,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: adidas-own-the-run-shorts",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -164,7 +164,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 78894,
       "output_dimensions": [
@@ -176,7 +176,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: adidas-samba-og-white-black",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -184,9 +184,9 @@
       "file": "adidas-stabil-16-indoor.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "OpenAI GPT Image 2.0; product-specific photorealistic white-studio reference asset normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 99996,
       "output_dimensions": [
@@ -198,7 +198,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: adidas-stabil-16-indoor",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -208,7 +208,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 159374,
       "output_dimensions": [
@@ -220,7 +220,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: adidas-tiro-league-duffel",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -230,7 +230,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 28898,
       "output_dimensions": [
@@ -242,7 +242,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: adidas-zne-track-jacket",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -250,9 +250,9 @@
       "file": "anta-kai-1.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "OpenAI GPT Image 2.0; product-specific photorealistic white-studio reference asset normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 116658,
       "output_dimensions": [
@@ -264,7 +264,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: anta-kai-1",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -274,7 +274,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 63154,
       "output_dimensions": [
@@ -286,7 +286,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: asics-actibreeze-match-top",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -296,7 +296,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 143408,
       "output_dimensions": [
@@ -308,7 +308,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: asics-gel-1130-black-pure-silver",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -318,7 +318,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 146082,
       "output_dimensions": [
@@ -330,7 +330,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: asics-gel-kayano-14-white-midnight",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -338,9 +338,9 @@
       "file": "asics-gel-kayano-20-glacier-grey.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "OpenAI GPT Image 2.0; product-specific photorealistic white-studio reference asset normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 148076,
       "output_dimensions": [
@@ -352,7 +352,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: asics-gel-kayano-20-glacier-grey",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -362,7 +362,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 104300,
       "output_dimensions": [
@@ -374,7 +374,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: asics-gel-nyc-cream-oyster-grey",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -384,7 +384,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 95252,
       "output_dimensions": [
@@ -396,7 +396,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: asics-gel-tactic-13",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -406,7 +406,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 100650,
       "output_dimensions": [
@@ -418,7 +418,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: asics-metarise-2",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -428,7 +428,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 113360,
       "output_dimensions": [
@@ -440,7 +440,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: asics-netburner-ballistic-ff-4",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -448,21 +448,21 @@
       "file": "asics-rote-japan-lyte-ff-3.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "OpenAI GPT Image 2.0; product-specific photorealistic white-studio reference asset normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
-      "output_bytes": 70512,
+      "output_bytes": 61346,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "c98edc43ab7e69863c6f01e42e6e9d14cf408c3548bd60728ea5772bffb0e7a8",
+      "output_sha256": "3d378131a0b58cf4520bd8a1869d6e902303b283d614e3e17e96303f5e817dc7",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: asics-rote-japan-lyte-ff-3",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -472,7 +472,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 94392,
       "output_dimensions": [
@@ -484,7 +484,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: asics-sky-elite-ff-3",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -494,7 +494,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 76998,
       "output_dimensions": [
@@ -506,7 +506,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: asics-sky-elite-ff-mt-3",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -514,9 +514,9 @@
       "file": "asics-upcourt-6.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "OpenAI GPT Image 2.0; product-specific photorealistic white-studio reference asset normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 101104,
       "output_dimensions": [
@@ -528,7 +528,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: asics-upcourt-6",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -538,7 +538,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 72536,
       "output_dimensions": [
@@ -550,7 +550,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: bauerfeind-sports-knee-support",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -560,7 +560,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 16610,
       "output_dimensions": [
@@ -572,7 +572,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: camelbak-podium-chill-bottle",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -582,7 +582,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 102400,
       "output_dimensions": [
@@ -594,7 +594,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: converse-chuck-70-high-black",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -604,7 +604,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 38480,
       "output_dimensions": [
@@ -616,7 +616,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: crocs-mellow-recovery-slide",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -626,7 +626,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 80028,
       "output_dimensions": [
@@ -638,7 +638,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: essentials-hoodie-light-oatmeal",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -648,7 +648,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 54498,
       "output_dimensions": [
@@ -660,7 +660,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: hoka-ora-recovery-slide-3",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -670,7 +670,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 38476,
       "output_dimensions": [
@@ -682,7 +682,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: hyperice-vyper-go-roller",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -692,7 +692,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 68402,
       "output_dimensions": [
@@ -704,7 +704,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: jordan-luka-4",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -714,7 +714,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 92446,
       "output_dimensions": [
@@ -726,7 +726,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: jordan-nigel-sylvester-bike-air-jersey",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -736,7 +736,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 75266,
       "output_dimensions": [
@@ -748,7 +748,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: kith-adidas-messi-tee",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -756,9 +756,9 @@
       "file": "li-ning-wade-808-4-ultra.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "OpenAI GPT Image 2.0; product-specific photorealistic white-studio reference asset normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 118396,
       "output_dimensions": [
@@ -770,7 +770,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: li-ning-wade-808-4-ultra",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -780,7 +780,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 56338,
       "output_dimensions": [
@@ -792,7 +792,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: mcdavid-hex-elbow-pads",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -802,7 +802,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 60034,
       "output_dimensions": [
@@ -814,7 +814,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: mcdavid-hex-knee-pads",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -822,21 +822,21 @@
       "file": "mikasa-v200w-volleyball.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "OpenAI GPT Image 2.0; product-specific photorealistic white-studio reference asset normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
-      "output_bytes": 81962,
+      "output_bytes": 102220,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "e10953dad066986a093a24655f8af533c4e6090521c87c803ea81bfda1b83da3",
+      "output_sha256": "2bd0b404e93bb073bdd5263b67416ce90247ea2fe97927f0f0c5abf25a5b56ff",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: mikasa-v200w-volleyball",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -846,7 +846,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 57266,
       "output_dimensions": [
@@ -858,7 +858,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: mizuno-arm-sleeves",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -866,9 +866,9 @@
       "file": "mizuno-cyclone-speed-5.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "OpenAI GPT Image 2.0; product-specific photorealistic white-studio reference asset normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 83796,
       "output_dimensions": [
@@ -880,7 +880,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: mizuno-cyclone-speed-5",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -890,7 +890,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 41578,
       "output_dimensions": [
@@ -902,7 +902,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: mizuno-volleyball-practice-tee",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -912,7 +912,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 123766,
       "output_dimensions": [
@@ -924,7 +924,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: mizuno-vs1-ultra-kneepad",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -934,7 +934,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 97816,
       "output_dimensions": [
@@ -946,7 +946,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: mizuno-wave-lightning-z8",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -956,7 +956,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 107284,
       "output_dimensions": [
@@ -968,7 +968,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: mizuno-wave-lightning-z8-mid",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -978,7 +978,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 98958,
       "output_dimensions": [
@@ -990,7 +990,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: mizuno-wave-luminous-3",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -998,9 +998,9 @@
       "file": "mizuno-wave-momentum-3.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "OpenAI GPT Image 2.0; product-specific photorealistic white-studio reference asset normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 70062,
       "output_dimensions": [
@@ -1012,7 +1012,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: mizuno-wave-momentum-3",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -1022,7 +1022,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 102852,
       "output_dimensions": [
@@ -1034,7 +1034,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: mizuno-wave-momentum-elite-mid",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -1044,7 +1044,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 86392,
       "output_dimensions": [
@@ -1056,7 +1056,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: mizuno-wave-momentum-pro",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -1066,7 +1066,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 109296,
       "output_dimensions": [
@@ -1078,7 +1078,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: mizuno-wave-voltage-2",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -1088,7 +1088,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 48494,
       "output_dimensions": [
@@ -1100,7 +1100,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: molten-v5m4500-volleyball",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -1110,7 +1110,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 88408,
       "output_dimensions": [
@@ -1122,7 +1122,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: molten-v5m5000-flistatec",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -1132,7 +1132,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 105404,
       "output_dimensions": [
@@ -1144,7 +1144,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: mueller-jumpers-knee-strap",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -1152,9 +1152,9 @@
       "file": "new-balance-1000-black.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "OpenAI GPT Image 2.0; product-specific photorealistic white-studio reference asset normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 118020,
       "output_dimensions": [
@@ -1166,7 +1166,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: new-balance-1000-black",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -1176,7 +1176,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 138568,
       "output_dimensions": [
@@ -1188,7 +1188,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: new-balance-1906r-silver-metallic",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -1198,7 +1198,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 126230,
       "output_dimensions": [
@@ -1210,7 +1210,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: new-balance-2002r-protection-pack",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -1220,7 +1220,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 98320,
       "output_dimensions": [
@@ -1232,7 +1232,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: new-balance-530-white-silver-navy",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -1242,7 +1242,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 124248,
       "output_dimensions": [
@@ -1254,7 +1254,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: new-balance-9060-rain-cloud",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -1262,9 +1262,9 @@
       "file": "new-balance-two-wxy-v5.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "OpenAI GPT Image 2.0; product-specific photorealistic white-studio reference asset normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 127026,
       "output_dimensions": [
@@ -1276,7 +1276,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: new-balance-two-wxy-v5",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -1286,7 +1286,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 133654,
       "output_dimensions": [
@@ -1298,7 +1298,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: new-era-yankees-59fifty-black",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -1308,7 +1308,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 48236,
       "output_dimensions": [
@@ -1320,7 +1320,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: nike-air-force-1-07-white",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -1330,7 +1330,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 89946,
       "output_dimensions": [
@@ -1342,7 +1342,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: nike-air-max-95-black-anthracite",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -1350,9 +1350,9 @@
       "file": "nike-aone.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "OpenAI GPT Image 2.0; product-specific photorealistic white-studio reference asset normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 131560,
       "output_dimensions": [
@@ -1364,7 +1364,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: nike-aone",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -1374,7 +1374,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 114154,
       "output_dimensions": [
@@ -1386,7 +1386,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: nike-barcelona-ronaldinho-jersey",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -1396,7 +1396,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 104144,
       "output_dimensions": [
@@ -1408,7 +1408,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: nike-brasilia-training-duffel",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -1418,7 +1418,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 36128,
       "output_dimensions": [
@@ -1430,7 +1430,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: nike-calm-slide",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -1440,7 +1440,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 66424,
       "output_dimensions": [
@@ -1452,7 +1452,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: nike-dri-fit-volleyball-jersey",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -1462,7 +1462,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 73350,
       "output_dimensions": [
@@ -1474,7 +1474,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: nike-dunk-low-panda",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -1484,7 +1484,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 156146,
       "output_dimensions": [
@@ -1496,7 +1496,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: nike-essential-volleyball-elbow-pads",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -1506,7 +1506,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 80978,
       "output_dimensions": [
@@ -1518,7 +1518,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: nike-everyday-cushion-crew-socks-6pk",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -1526,9 +1526,9 @@
       "file": "nike-free-metcon-6.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "OpenAI GPT Image 2.0; product-specific photorealistic white-studio reference asset normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 116400,
       "output_dimensions": [
@@ -1540,7 +1540,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: nike-free-metcon-6",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -1550,7 +1550,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 107942,
       "output_dimensions": [
@@ -1562,7 +1562,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: nike-gt-cut-academy",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -1572,7 +1572,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 58886,
       "output_dimensions": [
@@ -1584,7 +1584,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: nike-hoops-elite-backpack",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -1594,7 +1594,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 84590,
       "output_dimensions": [
@@ -1606,7 +1606,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: nike-hyperace-3-se",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -1616,7 +1616,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 17022,
       "output_dimensions": [
@@ -1628,7 +1628,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: nike-hyperfuel-water-bottle",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -1638,7 +1638,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 76000,
       "output_dimensions": [
@@ -1650,7 +1650,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: nike-ja-3",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -1660,7 +1660,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 111188,
       "output_dimensions": [
@@ -1672,7 +1672,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: nike-kd-18",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -1682,7 +1682,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 107178,
       "output_dimensions": [
@@ -1694,7 +1694,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: nike-lebron-nxxt-genisus",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -1704,7 +1704,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 52292,
       "output_dimensions": [
@@ -1716,7 +1716,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: nike-mind-001-slide-black",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -1726,7 +1726,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 44258,
       "output_dimensions": [
@@ -1738,7 +1738,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: nike-pro-compression-shorts",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -1748,7 +1748,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 100496,
       "output_dimensions": [
@@ -1760,7 +1760,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: nike-resistance-band-heavy",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -1770,7 +1770,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 101246,
       "output_dimensions": [
@@ -1782,7 +1782,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: nike-sabrina-3",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -1792,7 +1792,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 47434,
       "output_dimensions": [
@@ -1804,7 +1804,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: nike-therma-fit-training-hoodie",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -1814,7 +1814,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 113220,
       "output_dimensions": [
@@ -1826,7 +1826,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: nike-vapor-elite-volleyball-kneepads",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -1836,7 +1836,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 112058,
       "output_dimensions": [
@@ -1848,7 +1848,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: nike-zoom-hyperset-2",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -1858,7 +1858,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 108368,
       "output_dimensions": [
@@ -1870,7 +1870,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: nike-zoom-vomero-5-photon-dust",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -1880,7 +1880,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 54080,
       "output_dimensions": [
@@ -1892,7 +1892,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: north-face-1996-nuptse-black",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -1902,7 +1902,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 15222,
       "output_dimensions": [
@@ -1914,7 +1914,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: on-performance-tights",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -1924,7 +1924,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 51706,
       "output_dimensions": [
@@ -1936,7 +1936,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: oofos-ooahh-slide",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -1944,21 +1944,21 @@
       "file": "puma-fuse-3.webp",
       "provenance": {
         "kind": "project-generated-original",
-        "generator": "OpenAI GPT Image 2.0; product-specific photorealistic white-studio reference asset normalized to metadata-free 1200x900 WebP",
+        "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
-      "output_bytes": 93050,
+      "output_bytes": 80148,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "34ded2b8c2fa6e6cf783c162d4fd1872d2bf67109cd4f9d8407677c0535379ee",
+      "output_sha256": "f5f4810c59e5b4bb656a09a863100cfe7acbdbe90bbe2f91a626b8d5c464f51d",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: puma-fuse-3",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -1968,7 +1968,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 150854,
       "output_dimensions": [
@@ -1980,7 +1980,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: rocktape-kinesiology-tape-black",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -1990,7 +1990,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 63824,
       "output_dimensions": [
@@ -2002,7 +2002,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: salomon-xt-6-white-lunar-rock",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -2012,7 +2012,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 79582,
       "output_dimensions": [
@@ -2024,7 +2024,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: stance-icon-crew-socks",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -2034,7 +2034,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 54000,
       "output_dimensions": [
@@ -2046,7 +2046,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: supreme-mm6-zip-hoodie-black",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -2056,7 +2056,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 29110,
       "output_dimensions": [
@@ -2068,7 +2068,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: theraband-resistance-band-set",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -2078,7 +2078,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 124768,
       "output_dimensions": [
@@ -2090,7 +2090,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: timberland-field-boot-beef-broccoli",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -2100,7 +2100,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 43156,
       "output_dimensions": [
@@ -2112,7 +2112,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: triggerpoint-grid-foam-roller",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -2122,7 +2122,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 37956,
       "output_dimensions": [
@@ -2134,7 +2134,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: under-armour-heatgear-top",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -2144,7 +2144,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 69984,
       "output_dimensions": [
@@ -2156,7 +2156,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: vans-old-skool-36-black-white",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -2166,7 +2166,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 98522,
       "output_dimensions": [
@@ -2178,7 +2178,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: way-of-wade-all-city-12",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     },
     {
@@ -2188,7 +2188,7 @@
         "kind": "project-generated-original",
         "generator": "scripts/generate_catalog_art.py; project-generated product reference cutouts normalized to metadata-free 1200x900 WebP",
         "official_product_photo": false,
-        "generated_at": "2026-07-28T19:36:57+00:00"
+        "generated_at": "2026-07-30T15:30:00+00:00"
       },
       "output_bytes": 174302,
       "output_dimensions": [
@@ -2200,7 +2200,7 @@
       "rights": {
         "status": "owned",
         "license_reference": "SELECT project-generated visual asset record: wilson-evo-nxt-basketball",
-        "verified_at": "2026-07-28T19:36:57+00:00"
+        "verified_at": "2026-07-30T15:30:00+00:00"
       }
     }
   ]
