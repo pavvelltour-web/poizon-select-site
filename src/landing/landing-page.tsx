@@ -66,8 +66,9 @@ function CookieNotice() {
   return (
     <div className="cookie-notice" role="region" aria-label="Уведомление о cookies">
       <p>
-        Мы используем необходимые cookies для работы сайта. Подробнее в разделе
-        <a href="#privacy-policy"> персональных данных</a>.
+        Сайт использует необходимые файлы cookie для работы витрины и сохранения
+        корзины. Продолжая использование сайта, вы соглашаетесь с{" "}
+        <a href="#privacy-policy">Политикой обработки персональных данных</a>.
       </p>
       <button
         type="button"
@@ -77,7 +78,7 @@ function CookieNotice() {
           setVisible(false)
         }}
       >
-        Понятно
+        Закрыть
       </button>
     </div>
   )

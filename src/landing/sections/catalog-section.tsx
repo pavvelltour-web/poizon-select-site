@@ -33,8 +33,8 @@ export function CatalogSection({ storefront }: CatalogSectionProps) {
           <h2 id="catalog-title">Выберите товар.</h2>
         </div>
         <p>
-          Откройте модель, выберите размер. Наличие и цвет подтвердим перед оплатой.
-          Если нужного нет — опишите, что ищете.
+          Откройте модель и выберите размер. Цена попадёт в корзину без пересчёта
+          в браузере. Если нужного нет, опишите, что ищете.
         </p>
       </div>
 
@@ -83,7 +83,7 @@ function TaskFinder({ storefront }: CatalogSectionProps) {
         <Search aria-hidden="true" size={22} />
         <span>
           <strong>Поможем выбрать</strong>
-          <em>Опишите задачу — покажем подходящие пары.</em>
+          <em>Опишите задачу. Поиск покажет подходящие пары.</em>
         </span>
       </div>
       <label className="task-finder__input">

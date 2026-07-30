@@ -205,7 +205,7 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
           <div className="product-size" aria-label="Выбор размера">
             <span>
               <strong>Размер</strong>
-              <em>Выберите перед заявкой, менеджер проверит наличие.</em>
+              <em>Выберите размер для расчёта и оформления заказа.</em>
             </span>
             <div className="product-size__grid">
               {storefront.selectedSizeOptions.map((size) => (
@@ -262,15 +262,15 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
           </dl>
 
           <p className="product-sheet__fineprint">
-            Размер, цвет и наличие подтверждаются перед оплатой. Доставка СДЭК
-            рассчитывается отдельно.
+            Цена товара фиксируется в заказе. Доставка СДЭК рассчитывается
+            отдельно по адресу или пункту выдачи.
           </p>
           <p className="product-sheet__order-proof">
-            После заявки менеджер подтвердит размер, цвет, наличие и срок.
+            Заказ, сумма и статус оплаты автоматически появятся в CRM.
           </p>
 
           <label className="request-box">
-            <span>Запрос менеджеру</span>
+            <span>Запрос для Telegram-бота</span>
             <textarea readOnly value={storefront.request} rows={3} />
           </label>
 
@@ -300,7 +300,7 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
                 Открыть корзину
               </button>
               <p className="product-sheet__demo">
-                Ссылка на менеджера появится после подключения Telegram.
+                Telegram-бот временно недоступен. Оформите заказ через корзину.
               </p>
             </div>
           )}

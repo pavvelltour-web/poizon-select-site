@@ -13,6 +13,7 @@ import {
 import {
   catalogCategories,
   formatRub,
+  getCatalogPriceRub,
   type CatalogProduct,
   type CatalogSort,
   type ProductKind,
@@ -136,12 +137,6 @@ export const kindLabels: Record<ProductKind, string> = {
   accessory: "Экипировка",
 }
 
-const fallbackFromPrices: Record<ProductKind, string> = {
-  footwear: "22 тыс. ₽",
-  apparel: "4 тыс. ₽",
-  accessory: "3 тыс. ₽",
-}
-
 const footwearSizes = [
   "36",
   "37",
@@ -181,33 +176,11 @@ export function setImageFallback(
   event.currentTarget.src = fallbackUrl
 }
 
-function marketPriceToFrom(price: string): string {
-  const firstNumber = price.match(/^\d+(?:[.,]\d+)?/)?.[0]
-  if (!firstNumber) return price
-  return `${firstNumber.replace(".", ",")} тыс. ₽`
-}
-
 export function getDisplayPrice(product: CatalogProduct): DisplayPrice {
-  if (product.orderQuote) {
-    return {
-      label: "Цена",
-      value: formatRub(product.orderQuote.totalRub),
-      detail: "доставка СДЭК отдельно",
-    }
-  }
-
-  if (product.marketPrice) {
-    return {
-      label: "Цена",
-      value: marketPriceToFrom(product.marketPrice),
-      detail: product.priceBasis ?? "ориентир",
-    }
-  }
-
   return {
     label: "Цена",
-    value: fallbackFromPrices[product.kind],
-    detail: "уточним по размеру",
+    value: formatRub(getCatalogPriceRub(product)),
+    detail: "СДЭК рассчитывается отдельно",
   }
 }
 
@@ -225,12 +198,12 @@ export function getProductBadge(product: CatalogProduct): string {
 }
 
 export function getProductUse(product: CatalogProduct): string {
-  const note = product.note.toLowerCase()
-  if (/roll|foam|recover|восстанов/.test(note)) return "Для восстановления после нагрузки"
+  if (product.category === "recovery") return "Для отдыха после тренировки"
   if (product.category === "basketball") return "Для движения в зале и тренировок"
   if (product.category === "volleyball") return "Для матча и тренировки"
   if (product.kind === "apparel") return "Для тренировок, дороги и повседневного слоя"
-  return product.note
+  if (product.kind === "accessory") return "Для тренировки и дороги"
+  return "Для повседневного движения"
 }
 
 export function getProductScenario(product: CatalogProduct): string {
@@ -244,7 +217,7 @@ export function getProductScenario(product: CatalogProduct): string {
 }
 
 export function getSourcingMode(product: CatalogProduct): string {
-  return product.orderQuote ? "Из Китая до Москвы" : "Наличие уточнит менеджер"
+  return product.orderQuote ? "Из Китая до Москвы" : "Под заказ из Китая"
 }
 
 export function getSizeOptions(product: CatalogProduct): readonly string[] {
@@ -282,12 +255,10 @@ function scoreTaskProduct(product: CatalogProduct, task: string): TaskMatch | nu
   if (!normalizedTask.trim()) return null
 
   const haystack = productSearchText(product)
-  const reasons = new Set<string>()
   let score = 0
 
-  const add = (points: number, reason: string) => {
+  const add = (points: number) => {
     score += points
-    reasons.add(reason)
   }
 
   const asksRecovery = /recover|восстанов|после|slide|слайд/.test(normalizedTask)
@@ -301,25 +272,24 @@ function scoreTaskProduct(product: CatalogProduct, task: string): TaskMatch | nu
       product.sportPriority &&
       (asksRecovery || product.category !== "recovery")
     ) {
-      add(14, "подходит под зал")
+      add(14)
     }
-    if (product.category === "volleyball") add(5, "мягкое приземление")
-    if (product.category === "basketball") add(3, "боковая работа")
+    if (product.category === "volleyball") add(5)
+    if (product.category === "basketball") add(3)
   }
   if (/мягк|приземл|прыж/.test(normalizedTask) && product.category === "volleyball") {
-    add(14, "мягкое приземление")
+    add(14)
   }
   if (/баскет|защит|прием|приём|crossover|cut|аморт|контрол|боков/.test(normalizedTask)) {
     if (product.category === "basketball" || product.kind === "footwear") {
-      add(12, "защитная работа")
+      add(12)
     }
   }
   if (asksRecovery) {
-    if (product.category === "recovery") add(11, "после зала")
+    if (product.category === "recovery") add(11)
   }
   if (/бюджет|дешев|до\s?\d|недорог/.test(normalizedTask)) {
-    const price = product.orderQuote?.totalRub ?? Number.MAX_SAFE_INTEGER
-    if (price < 12_000) add(8, "ближе к низкому бюджету")
+    if (getCatalogPriceRub(product) < 12_000) add(8)
   }
 
   const stopWords = new Set(["для", "под", "пара", "пары", "нужна", "надо"])
@@ -327,11 +297,23 @@ function scoreTaskProduct(product: CatalogProduct, task: string): TaskMatch | nu
     .split(/[^a-zа-я0-9]+/i)
     .filter((word) => word.length >= 3 && !stopWords.has(word))
   for (const word of words) {
-    if (haystack.includes(word)) add(3, `совпадение: ${word}`)
+    if (haystack.includes(word)) add(3)
   }
 
   if (score <= 0) return null
-  return { product, score, reason: [...reasons].slice(0, 2).join(" + ") }
+  const reason =
+    product.category === "recovery"
+      ? "после тренировки"
+      : product.category === "volleyball"
+        ? "для матча и тренировки"
+        : product.category === "basketball"
+          ? "для движения в зале"
+          : product.kind === "apparel"
+            ? "одежда"
+            : product.kind === "footwear"
+              ? "для зала"
+              : "для тренировки"
+  return { product, score, reason }
 }
 
 export function findTaskMatches(
@@ -343,8 +325,8 @@ export function findTaskMatches(
     .filter((match): match is TaskMatch => match !== null)
     .sort((left, right) => {
       if (right.score !== left.score) return right.score - left.score
-      const leftPrice = left.product.orderQuote?.totalRub ?? Number.MAX_SAFE_INTEGER
-      const rightPrice = right.product.orderQuote?.totalRub ?? Number.MAX_SAFE_INTEGER
+      const leftPrice = getCatalogPriceRub(left.product)
+      const rightPrice = getCatalogPriceRub(right.product)
       return leftPrice - rightPrice
     })
 }

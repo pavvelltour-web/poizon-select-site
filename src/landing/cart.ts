@@ -1,4 +1,8 @@
-import type { CatalogProduct } from "../catalog/catalog"
+import {
+  CATALOG_PRICE_VERSION,
+  getCatalogPriceRub,
+  type CatalogProduct,
+} from "../catalog/catalog"
 
 export interface CartLine {
   id: string
@@ -28,7 +32,7 @@ export interface CheckoutResult {
 export interface CheckoutResponse {
   checkout_id: string
   order_ids: number[]
-  status: "manual_review" | "payment_ready" | "payment_failed"
+  status: "payment_ready" | "payment_unavailable" | "payment_failed"
   payment_url: string | null
   message: string
 }
@@ -70,7 +74,7 @@ export function updateCartQuantity(
 
 export function cartTotalRub(lines: readonly CartLine[]): number {
   return lines.reduce(
-    (sum, line) => sum + (line.product.orderQuote?.totalRub ?? 0) * line.quantity,
+    (sum, line) => sum + getCatalogPriceRub(line.product) * line.quantity,
     0,
   )
 }
@@ -123,7 +127,8 @@ export function buildCheckoutPayload(
       brand: line.product.brand,
       product_kind: line.product.kind,
       size_eu: line.size,
-      price_rub: line.product.orderQuote?.totalRub ?? 0,
+      price_rub: getCatalogPriceRub(line.product),
+      price_version: CATALOG_PRICE_VERSION,
       quantity: line.quantity,
       image_url: line.product.image,
     })),
@@ -143,9 +148,11 @@ export async function submitCheckout(
     credentials: "include",
     body: JSON.stringify(buildCheckoutPayload(lines, customer, consents)),
   })
-  const body = (await response.json().catch(() => null)) as CheckoutResponse | null
+  const body = (await response.json().catch(() => null)) as
+    | (CheckoutResponse & { detail?: string })
+    | null
   if (!response.ok || body === null) {
-    throw new Error(body?.message || "Не удалось создать заказ")
+    throw new Error(body?.detail || body?.message || "Не удалось создать заказ")
   }
   return body
 }

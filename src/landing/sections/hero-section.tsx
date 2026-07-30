@@ -34,16 +34,16 @@ export function HeroSection({ storefront }: HeroSectionProps) {
               rel="noopener noreferrer"
             >
               <Send aria-hidden="true" size={18} />
-              Написать менеджеру
+              Открыть Telegram
             </a>
           ) : null}
         </div>
         <div className="pavel-note">
           <Medal aria-hidden="true" size={18} />
-          <span>Выберите модель, подтвердите размер, оплатите и получите заказ.</span>
+          <span>Выберите модель и размер, оплатите заказ на защищённой странице.</span>
         </div>
         <div className="hero-marks" aria-label="Преимущества каталога">
-          {["Подбор под задачу", "Размер перед оплатой", "Оригинальность проверяем"].map((item) => (
+          {["Подбор под задачу", "Цена до оплаты", "Автоматический заказ"].map((item) => (
             <span key={item}>
               <BadgeCheck aria-hidden="true" size={16} />
               {item}
@@ -59,7 +59,7 @@ export function HeroSection({ storefront }: HeroSectionProps) {
         <div className="hero-board" aria-label="Быстрый выбор товара">
           <div className="hero-board__head">
             <span>Быстрый выбор</span>
-            <small>3 входа</small>
+            <small>3 товара</small>
           </div>
           {storefront.heroProducts.map((product) => {
             const price = getDisplayPrice(product)

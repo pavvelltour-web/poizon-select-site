@@ -33,6 +33,8 @@ export const MARKET_PRICE_BASIS =
 export const PRICE_FORMULA_BASIS =
   "УСН 6%, ракета до Москвы, резерв, эквайринг и маржа KICKSBASE"
 
+export const CATALOG_PRICE_VERSION = "2026-07-31-v1"
+
 export const PUBLIC_CATALOG_POLICY =
   "Публичная витрина показывает обувь и одежду. Защита, мячи, тейпы, сумки и прочие аксессуары скрыты до отдельного ассортимента."
 
@@ -730,12 +732,12 @@ const existingProducts: readonly ProductSource[] = [
   {
     slug: "new-balance-2002r-protection-pack",
     brand: "New Balance",
-    name: "2002R Protection Pack Rain Cloud",
+    name: "2002R Rain Cloud",
     category: "lifestyle",
     categoryLabel: "Лайфстайл · кроссовки",
     kind: "footwear",
     sportPriority: false,
-    query: "New Balance 2002R Protection Pack Rain Cloud M2002RDA",
+    query: "New Balance 2002R Rain Cloud M2002RDA",
     note: "Необработанные края · сложная фактура",
   },
   {
@@ -1746,6 +1748,23 @@ export function isPublicCatalogProduct(product: CatalogProduct): boolean {
   return true
 }
 
+function marketPriceCeilingRub(price: string): number | null {
+  const values = [...price.matchAll(/\d+(?:[,.]\d+)?/gu)]
+    .map((match) => Number.parseFloat(match[0].replace(",", ".")))
+    .filter((value) => Number.isFinite(value) && value > 0)
+  if (values.length === 0) return null
+  return Math.ceil(Math.max(...values) * 1000 / 500) * 500
+}
+
+export function getCatalogPriceRub(product: CatalogProduct): number {
+  if (product.orderQuote) return Math.round(product.orderQuote.totalRub)
+  if (product.marketPrice) {
+    const ceiling = marketPriceCeilingRub(product.marketPrice)
+    if (ceiling) return ceiling
+  }
+  return product.kind === "apparel" ? 12_000 : 18_000
+}
+
 export const publicCatalogProducts: readonly CatalogProduct[] =
   catalogProducts.filter(isPublicCatalogProduct)
 
@@ -1801,13 +1820,7 @@ function matchesCatalogCategory(
 }
 
 function priceRank(product: CatalogProduct): number {
-  if (product.orderQuote) return product.orderQuote.totalRub / 1000
-  if (!product.marketPrice) return Number.POSITIVE_INFINITY
-
-  const [rawValue] = product.marketPrice.match(/\d+(?:[,.]\d+)?/u) ?? []
-  if (!rawValue) return Number.POSITIVE_INFINITY
-
-  return Number.parseFloat(rawValue.replace(",", "."))
+  return getCatalogPriceRub(product) / 1000
 }
 
 export function sortCatalog(

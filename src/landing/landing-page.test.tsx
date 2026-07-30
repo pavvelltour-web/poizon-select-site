@@ -25,12 +25,12 @@ describe("LandingPage", () => {
     expect(productButtons()).toHaveLength(publicCatalogProducts.length)
     expect(screen.queryByText("по запросу")).toBeNull()
     expect(screen.getAllByText("24 500 ₽").length).toBeGreaterThan(0)
-    expect(screen.getAllByText("45 тыс. ₽").length).toBeGreaterThan(0)
-    expect(screen.getAllByText("4 тыс. ₽").length).toBeGreaterThan(0)
+    expect(screen.getAllByText("45 000 ₽").length).toBeGreaterThan(0)
+    expect(screen.getAllByText("5 000 ₽").length).toBeGreaterThan(0)
     expect(
-      screen.getByText(/Выберите модель, подтвердите размер/),
+      screen.getByText(/Выберите модель и размер, оплатите/),
     ).toBeInTheDocument()
-    expect(screen.getAllByText(/размер, цвет, наличие/).length).toBeGreaterThan(0)
+    expect(screen.queryByText(/менеджер/i)).toBeNull()
   })
 
   it("filters, sorts and resets the catalog deterministically", async () => {
@@ -112,7 +112,7 @@ describe("LandingPage", () => {
     expect(window.location.search).toBe(
       "?q=Ronaldinho&product=nike-barcelona-ronaldinho-jersey",
     )
-    expect(within(dock).getByText(/Ссылка на менеджера появится/)).toBeInTheDocument()
+    expect(within(dock).getByText(/Telegram-бот временно недоступен/)).toBeInTheDocument()
     expect(within(dock).queryByText(/VITE_BOT_USERNAME/)).toBeNull()
     expect(within(dock).queryByRole("link", { name: /Открыть @/ })).toBeNull()
   })
@@ -164,11 +164,9 @@ describe("LandingPage", () => {
     )
 
     const finder = screen.getByLabelText("Помощь с выбором")
-    expect(finder).toHaveTextContent(
-      "подходит под зал",
-    )
+    expect(finder).toHaveTextContent("для матча и тренировки")
     expect(
-      within(finder).getByRole("button", { name: /ASICS UPCOURT 6/ }),
+      within(finder).getByRole("button", { name: /Mizuno WAVE VOLTAGE 2/ }),
     ).toBeInTheDocument()
   })
 
@@ -189,7 +187,7 @@ describe("LandingPage", () => {
       "price-asc",
     )
     expect(screen.getByTestId("order-dock")).toBeInTheDocument()
-    expect(screen.getByText(/Размер, цвет и наличие подтверждаются перед оплатой/)).toBeInTheDocument()
+    expect(screen.getByText(/Цена товара фиксируется в заказе/)).toBeInTheDocument()
     expect(screen.getByRole("link", { name: "Открыть @SelectBuyerBot" })).toHaveAttribute(
       "href",
       "https://t.me/SelectBuyerBot",
@@ -257,7 +255,7 @@ describe("LandingPage", () => {
       json: async () => ({
         checkout_id: "web-test",
         order_ids: [101],
-        status: "manual_review",
+        status: "payment_unavailable",
         payment_url: null,
         message: "Заказ создан в CRM.",
       }),
@@ -285,7 +283,7 @@ describe("LandingPage", () => {
     await user.click(
       within(cart).getByRole("checkbox", { name: /обработку персональных данных/i }),
     )
-    await user.click(within(cart).getByRole("button", { name: "Оформить заказ" }))
+    await user.click(within(cart).getByRole("button", { name: "Оплатить 24 500 ₽" }))
 
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalledWith(
@@ -299,6 +297,8 @@ describe("LandingPage", () => {
       product_slug: "nike-gt-cut-academy",
       size_eu: "44",
       quantity: 1,
+      price_rub: 24500,
+      price_version: "2026-07-31-v1",
     })
     expect(within(cart).getByText("Заказ создан в CRM.")).toBeInTheDocument()
   })

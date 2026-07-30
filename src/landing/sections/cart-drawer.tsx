@@ -1,7 +1,7 @@
 import { Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react"
 import { motion } from "motion/react"
 
-import { formatRub } from "../../catalog/catalog"
+import { formatRub, getCatalogPriceRub } from "../../catalog/catalog"
 import { resolveAssetUrl } from "../landing-data"
 import type { StorefrontState } from "../landing-types"
 
@@ -70,7 +70,7 @@ export function CartDrawer({ storefront }: CartDrawerProps) {
                       {line.product.brand} {line.product.name}
                     </strong>
                     <span>EU {line.size}</span>
-                    <em>{formatRub(line.product.orderQuote?.totalRub ?? 0)}</em>
+                    <em>{formatRub(getCatalogPriceRub(line.product))}</em>
                   </div>
                   <div className="cart-line__controls" aria-label="Количество">
                     <button
@@ -170,7 +170,8 @@ export function CartDrawer({ storefront }: CartDrawerProps) {
                   }
                 />
                 <span>
-                  Даю согласие на <a href="#privacy-policy">обработку персональных данных</a>.
+                  Даю отдельное согласие на{" "}
+                  <a href="#personal-data-consent">обработку персональных данных</a>.
                 </span>
               </label>
               <p className="checkout-form__consent">
@@ -180,7 +181,7 @@ export function CartDrawer({ storefront }: CartDrawerProps) {
               <button className="button button--primary" type="submit" disabled={!canSubmit}>
                 {storefront.checkoutResult.status === "submitting"
                   ? "Отправляем заказ..."
-                  : "Оформить заказ"}
+                  : `Оплатить ${formatRub(storefront.cartTotalRub)}`}
               </button>
 
               {storefront.checkoutResult.message ? (

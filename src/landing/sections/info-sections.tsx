@@ -30,8 +30,8 @@ export function InfoSections({
             </li>
             <li>
               <span aria-hidden="true">3</span>
-              <h3>Подтвердите заказ</h3>
-              <p>Менеджер проверит размер, цвет, наличие и срок до оплаты.</p>
+              <h3>Оплатите заказ</h3>
+              <p>Сайт создаст заказ в CRM и откроет защищённую страницу оплаты.</p>
             </li>
           </ol>
         </section>
@@ -44,7 +44,7 @@ export function InfoSections({
           <div className="trust-grid">
             <article>
               <h3>Карточка товара</h3>
-              <p>Фото, размерная сетка и понятная цена — в одном месте.</p>
+              <p>Фото, размерная сетка и понятная цена находятся в одном месте.</p>
             </article>
             <article>
               <h3>Честный итог</h3>
@@ -65,7 +65,7 @@ export function InfoSections({
 
 export function ProductTrustMarks() {
   return (
-    <div className="product-trust-marks" aria-label="Что проверяет менеджер">
+    <div className="product-trust-marks" aria-label="Автоматическая проверка заказа">
       {["Размер", "Цвет", "Наличие", "Срок"].map((item) => (
         <span key={item}>
           <BadgeCheck aria-hidden="true" size={15} />
