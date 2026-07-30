@@ -1,5 +1,11 @@
+import { MotionConfig } from "motion/react"
+
 import { LandingPage } from "./landing/landing-page"
 
 export default function App() {
-  return <LandingPage />
+  return (
+    <MotionConfig reducedMotion="user">
+      <LandingPage />
+    </MotionConfig>
+  )
 }

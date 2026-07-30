@@ -154,16 +154,16 @@ describe("LandingPage", () => {
     expect(within(dock).getAllByRole("button", { name: /Показать фото/ })).toHaveLength(10)
   })
 
-  it("surfaces task-based AI matches from a plain-language need", async () => {
+  it("surfaces task-based matches from a plain-language need", async () => {
     const user = userEvent.setup()
     render(<LandingPage configuredBotUsername={null} />)
 
     await user.type(
-      screen.getByRole("searchbox", { name: "Опишите задачу для AI-подбора" }),
+      screen.getByRole("searchbox", { name: "Опишите задачу для подбора по задаче" }),
       "прыжок и мягкое приземление",
     )
 
-    const finder = screen.getByLabelText("AI-подбор под задачу")
+    const finder = screen.getByLabelText("Подбор по задаче")
     expect(finder).toHaveTextContent(
       "прыжок и сцепление",
     )
@@ -198,7 +198,9 @@ describe("LandingPage", () => {
     await user.click(
       screen.getAllByRole("button", { name: "Закрыть карточку товара" })[1],
     )
-    expect(screen.queryByTestId("order-dock")).not.toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.queryByTestId("order-dock")).not.toBeInTheDocument()
+    })
     expect(window.location.search).toBe("?category=basketball&q=nike&sort=price-asc")
   })
 
