@@ -12,7 +12,6 @@ import {
   getDisplayPrice,
   quickFilters,
   resolveAssetUrl,
-  scenarioTiles,
   setImageFallback,
   sortOptions,
   taskChips,
@@ -31,22 +30,20 @@ export function CatalogSection({ storefront }: CatalogSectionProps) {
     <section className="catalog-shell" id="catalog" aria-labelledby="catalog-title">
       <div className="catalog-heading">
         <div>
-          <p className="eyebrow">Каталог</p>
-          <h2 id="catalog-title">Выберите экипировку под свою игру.</h2>
+          <h2 id="catalog-title">Выберите товар под задачу.</h2>
         </div>
         <p>
-          Разделы собраны по реальным сценариям: прыжок, боковая работа,
-          защита коленей, тренировка и восстановление после зала.
+          Сначала цель и покрытие, затем размер, модель, цвет и наличие.
+          Если нужного нет, опишите запрос менеджеру.
         </p>
       </div>
 
       <TaskFinder storefront={storefront} />
-      <ScenarioGrid storefront={storefront} />
       <CatalogToolbar storefront={storefront} />
       <CategoryRow storefront={storefront} />
 
       <div className="catalog-status" aria-live="polite">
-        <strong>{storefront.filteredProducts.length} позиций</strong>
+        <strong>{storefront.filteredProducts.length} товаров</strong>
         <span>{categoryCopy[storefront.category]}</span>
       </div>
 
@@ -66,12 +63,12 @@ export function CatalogSection({ storefront }: CatalogSectionProps) {
         <div className="catalog-empty" role="status">
           <h3>Ничего не нашли по этому запросу.</h3>
           <p>
-            Попробуйте бренд, модель или категорию: ASICS, Mizuno, Nike,
-            баскетбол, recovery.
+            Попробуйте бренд, модель, размер или задачу: ASICS, Mizuno, Nike,
+            зал, игровой день, recovery.
           </p>
           <button type="button" className="button button--quiet" onClick={storefront.resetCatalog}>
             <RotateCcw aria-hidden="true" size={18} />
-            Показать всю подборку
+            Показать все товары
           </button>
         </div>
       )}
@@ -86,7 +83,7 @@ function TaskFinder({ storefront }: CatalogSectionProps) {
         <Search aria-hidden="true" size={22} />
         <span>
           <strong>Подбор по задаче</strong>
-          <em>Опишите игру, покрытие, боль или бюджет, а каталог поднимет подходящие позиции.</em>
+          <em>Опишите, для чего нужна пара. Поднимем подходящие товары.</em>
         </span>
       </div>
       <label className="task-finder__input">
@@ -96,7 +93,7 @@ function TaskFinder({ storefront }: CatalogSectionProps) {
           type="search"
           value={storefront.taskInput}
           onChange={(event) => storefront.setTaskInput(event.target.value)}
-          placeholder="Например: прыжок в волейболе, мягкое приземление, защита коленей..."
+          placeholder="Например: пара для зала, игровой день, после тренировки..."
           autoComplete="off"
         />
       </label>
@@ -138,7 +135,7 @@ function TaskFinder({ storefront }: CatalogSectionProps) {
               )
             })
           ) : (
-            <p>Не нашли точного совпадения. Попробуйте указать спорт, покрытие или бюджет.</p>
+            <p>Не нашли точного совпадения. Опишите покрытие, размер или модель.</p>
           )}
         </div>
       ) : null}
@@ -146,46 +143,17 @@ function TaskFinder({ storefront }: CatalogSectionProps) {
   )
 }
 
-function ScenarioGrid({ storefront }: CatalogSectionProps) {
-  return (
-    <div className="scenario-grid" aria-label="Сценарии выбора">
-      {scenarioTiles.map((tile) => {
-        const ScenarioIcon = tile.icon
-
-        return (
-          <button
-            key={tile.id}
-            type="button"
-            onClick={() => storefront.selectCategory(tile.id)}
-            aria-pressed={storefront.category === tile.id}
-          >
-            <span className="scenario-grid__icon" aria-hidden="true">
-              <ScenarioIcon size={22} />
-            </span>
-            <span>
-              <small>{categoryDetails[tile.id]}</small>
-              <strong>{tile.title}</strong>
-              <em>{tile.text}</em>
-            </span>
-            <MoveRight aria-hidden="true" size={18} />
-          </button>
-        )
-      })}
-    </div>
-  )
-}
-
 function CatalogToolbar({ storefront }: CatalogSectionProps) {
   return (
-    <div className="catalog-toolbar" aria-label="Фильтры каталога">
+    <div className="catalog-toolbar" aria-label="Фильтры товаров">
       <label className="catalog-search">
-        <span className="sr-only">Поиск по каталогу</span>
+        <span className="sr-only">Поиск по товарам</span>
         <Search aria-hidden="true" size={18} />
         <input
           type="search"
           value={storefront.search}
           onChange={(event) => storefront.setSearchValue(event.target.value)}
-          placeholder="Nike, ASICS, Mizuno, наколенники, мяч..."
+          placeholder="Nike, ASICS, Mizuno, размер, модель..."
           autoComplete="off"
         />
       </label>
@@ -242,7 +210,7 @@ function CategoryRow({ storefront }: CatalogSectionProps) {
         })}
       </div>
 
-      <div className="category-row" role="group" aria-label="Категории">
+      <div className="category-row" role="group" aria-label="Сценарии">
         {catalogCategories.map((item) => {
           const id = item.id as ActiveCategory
           const CategoryIcon = categoryIcons[id]

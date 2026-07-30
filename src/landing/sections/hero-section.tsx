@@ -1,6 +1,5 @@
 import { BadgeCheck, Medal, MoveRight, Send, ShoppingBag } from "lucide-react"
 
-import { catalogCategories, catalogProducts } from "../../catalog/catalog"
 import {
   getDisplayPrice,
   getProductBadge,
@@ -17,17 +16,15 @@ export function HeroSection({ storefront }: HeroSectionProps) {
   return (
     <section className="shop-hero" aria-labelledby="hero-title">
       <div className="shop-hero__copy">
-        <p className="eyebrow">POIZON sports edit · Moscow delivery</p>
         <h1 id="hero-title">KICKSBASE</h1>
         <p className="shop-hero__lead">
-          Спортивная витрина с расчетом до оплаты: игровые пары, защита, форма
-          и восстановление. Выбираете модель, менеджер подтверждает размер,
-          продавца, бирки и итог.
+          Оригинальная обувь и одежда для спортсменов, которым важны размер,
+          качество и понятная цена.
         </p>
         <div className="hero-actions">
           <a className="button button--primary" href="#catalog">
             <ShoppingBag aria-hidden="true" size={18} />
-            Открыть витрину
+            Выбрать товар
           </a>
           {storefront.botUrl ? (
             <a
@@ -43,46 +40,28 @@ export function HeroSection({ storefront }: HeroSectionProps) {
         </div>
         <div className="pavel-note">
           <Medal aria-hidden="true" size={18} />
-          <span>Сначала задача и покрытие. Потом модель, размер, продавец и цвет.</span>
+          <span>Выберите модель, подтвердите размер, оплатите и получите заказ.</span>
         </div>
         <div className="hero-marks" aria-label="Преимущества каталога">
-          {["Обувь под зал", "Расчёт до оплаты", "Бирки и упаковка"].map((item) => (
+          {["Подбор под задачу", "Размер перед оплатой", "Оригинальность проверяем"].map((item) => (
             <span key={item}>
               <BadgeCheck aria-hidden="true" size={16} />
               {item}
             </span>
           ))}
         </div>
-        <dl className="hero-stats" aria-label="Показатели каталога">
-          <div>
-            <dt>Позиций</dt>
-            <dd>{catalogProducts.length}</dd>
-          </div>
-          <div>
-            <dt>Ракурсов</dt>
-            <dd>{catalogProducts.length * 5}</dd>
-          </div>
-          <div>
-            <dt>Категорий</dt>
-            <dd>{catalogCategories.length - 1}</dd>
-          </div>
-        </dl>
       </div>
 
       <div className="shop-hero__media" aria-hidden="true">
         <div className="hero-product-stage hero-product-stage--atmosphere">
           <img src="brand/kicksbase-hero-court-v2.webp" width="1792" height="1024" alt="" />
-          <span className="hero-product-stage__caption">
-            <strong>COURT KIT</strong>
-            <em>Pair, protection, recovery</em>
-          </span>
         </div>
       </div>
 
-      <div className="hero-board" aria-label="Быстрый выбор экипировки">
+      <div className="hero-board" aria-label="Быстрый выбор товара">
         <div className="hero-board__head">
-          <span>Buyer’s edit</span>
-          <small>3 быстрых входа</small>
+          <span>Быстрый выбор</span>
+          <small>3 входа</small>
         </div>
         {storefront.heroProducts.map((product) => {
           const price = getDisplayPrice(product)

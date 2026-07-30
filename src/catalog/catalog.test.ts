@@ -5,8 +5,10 @@ import {
   filterCatalog,
   findProductBySlug,
   formatRub,
+  isPublicCatalogProduct,
   MARKET_PRICE_BASIS,
   PRICE_FORMULA_BASIS,
+  publicCatalogProducts,
   sortCatalog,
 } from "./catalog"
 
@@ -61,6 +63,16 @@ describe("catalogProducts", () => {
     )
   })
 
+  it("publishes only footwear and apparel to the public storefront", () => {
+    expect(publicCatalogProducts).toHaveLength(75)
+    expect(publicCatalogProducts).toEqual(
+      catalogProducts.filter(isPublicCatalogProduct),
+    )
+    expect(publicCatalogProducts.every((product) => product.kind !== "accessory")).toBe(
+      true,
+    )
+  })
+
   it("keeps every product field useful with consistent local gallery sets", () => {
     const imagePaths = new Set<string>()
 
@@ -110,34 +122,41 @@ describe("catalogProducts", () => {
       yuanRate: 13,
       paymentFeePercent: 2.5,
       internationalLogistics: 3000,
-      serviceFeePercent: 30,
-      marginTargetPercent: 30,
-      marginFloorPercent: 25,
+      serviceFeePercent: 35,
+      marginTargetPercent: 35,
+      marginFloorPercent: 30,
     })
-    expect(formatRub(gtCut?.orderQuote?.totalRub ?? 0)).toBe("22 100 ₽")
+    expect(formatRub(gtCut?.orderQuote?.totalRub ?? 0)).toBe("24 500 ₽")
   })
 
   it("filters by category and a case-insensitive search phrase", () => {
-    expect(filterCatalog(catalogProducts, "volleyball", "")).toHaveLength(23)
-    expect(filterCatalog(catalogProducts, "court-shoes", "")).toHaveLength(37)
-    expect(filterCatalog(catalogProducts, "sneakers", "")).toHaveLength(22)
-    expect(filterCatalog(catalogProducts, "protection", "")).toHaveLength(9)
-    expect(filterCatalog(catalogProducts, "balls", "")).toHaveLength(6)
-    expect(filterCatalog(catalogProducts, "all", "ronaldinho")).toHaveLength(1)
-    expect(filterCatalog(catalogProducts, "basketball", "NIKE")).toHaveLength(7)
-    expect(filterCatalog(catalogProducts, "recovery", "not-a-real-product")).toEqual(
-      [],
-    )
+    expect(filterCatalog(publicCatalogProducts, "volleyball", "")).toHaveLength(19)
+    expect(filterCatalog(publicCatalogProducts, "court-shoes", "")).toHaveLength(37)
+    expect(filterCatalog(publicCatalogProducts, "sneakers", "")).toHaveLength(22)
+    expect(filterCatalog(publicCatalogProducts, "apparel", "")).toHaveLength(16)
+    expect(filterCatalog(publicCatalogProducts, "all", "ronaldinho")).toHaveLength(1)
+    expect(filterCatalog(publicCatalogProducts, "basketball", "NIKE")).toHaveLength(7)
+    expect(
+      filterCatalog(publicCatalogProducts, "recovery", "not-a-real-product"),
+    ).toEqual([])
   })
 
   it("sorts deterministically with prices for every catalog item", () => {
-    const trainingNike = filterCatalog(catalogProducts, "training", "NIKE")
+    const courtNike = filterCatalog(publicCatalogProducts, "court-shoes", "NIKE")
 
-    expect(sortCatalog(trainingNike, "featured").map((product) => product.slug)).toEqual([
-      "nike-pro-compression-shorts",
+    expect(sortCatalog(courtNike, "featured").map((product) => product.slug)).toEqual([
+      "nike-zoom-hyperset-2",
+      "nike-hyperace-3-se",
+      "nike-gt-cut-academy",
+      "nike-sabrina-3",
+      "nike-lebron-nxxt-genisus",
+      "nike-kd-18",
+      "nike-calm-slide",
+      "anta-kai-1",
+      "nike-aone",
       "nike-free-metcon-6",
-      "nike-resistance-band-heavy",
-      "nike-hyperfuel-water-bottle",
+      "oofos-ooahh-slide",
+      "nike-ja-3",
     ])
     expect(sortCatalog(catalogProducts, "price-asc")[0].slug).toBe(
       "adidas-crazyflight-shorts",

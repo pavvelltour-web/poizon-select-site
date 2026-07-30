@@ -83,7 +83,7 @@ describe("standalone site runtime boundary", () => {
     const result = runVerifier(fixture)
 
     expect(result.status).not.toBe(0)
-    expect(result.stderr).toContain("forbidden runtime network call")
+    expect(result.stderr).toContain("non-checkout fetch call")
   })
 
   it("requires the named release-rights command", () => {

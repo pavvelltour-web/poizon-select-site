@@ -6,7 +6,9 @@ RUN npm ci --ignore-scripts
 COPY . .
 
 ARG VITE_BOT_USERNAME=""
+ARG VITE_API_BASE_URL=""
 ENV VITE_BOT_USERNAME=$VITE_BOT_USERNAME
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 
 FROM build-base AS demo-build
 RUN npm run build

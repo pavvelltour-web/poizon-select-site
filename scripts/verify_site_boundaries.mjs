@@ -3,7 +3,7 @@ import { fileURLToPath } from "node:url"
 import path from "node:path"
 
 const siteRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
-const allowedBrowserEnv = new Set(["VITE_BOT_USERNAME"])
+const allowedBrowserEnv = new Set(["VITE_API_BASE_URL", "VITE_BOT_USERNAME"])
 const auditedTextExtensions = new Set([
   ".css",
   ".html",
@@ -46,10 +46,11 @@ const envKeys = envExample
   .filter((line) => line && !line.startsWith("#"))
   .map((line) => line.split("=", 1)[0])
 if (
-  envKeys.length !== 1 ||
-  envKeys[0] !== "VITE_BOT_USERNAME"
+  envKeys.length !== 2 ||
+  envKeys[0] !== "VITE_BOT_USERNAME" ||
+  envKeys[1] !== "VITE_API_BASE_URL"
 ) {
-  fail(".env.example may contain only VITE_BOT_USERNAME")
+  fail(".env.example may contain only VITE_BOT_USERNAME and VITE_API_BASE_URL")
 }
 
 const dockerIgnore = await text(".dockerignore")
@@ -88,6 +89,7 @@ const dockerfile = await text("Dockerfile")
 for (const required of [
   "npm ci --ignore-scripts",
   'ARG VITE_BOT_USERNAME=""',
+  'ARG VITE_API_BASE_URL=""',
   "npm run build:production",
   "USER nginx",
   "EXPOSE 8080",
@@ -107,7 +109,7 @@ for (const image of ["node:24-alpine", "nginx:1.29-alpine"]) {
 const nginx = await text("nginx.conf")
 for (const required of [
   "default-src 'self'",
-  "connect-src 'none'",
+  "connect-src 'self' https://api.kicksbase.ru",
   "form-action 'none'",
   "frame-ancestors 'none'",
   "object-src 'none'",
@@ -215,13 +217,19 @@ for (const file of browserFiles) {
     fail(`${path.relative(siteRoot, file)} contains a dangerous browser sink`)
   }
   if (
-    /\bfetch\s*\(|\bXMLHttpRequest\b|\bWebSocket\s*\(|\bEventSource\s*\(|\bnavigator\s*\.\s*sendBeacon\s*\(/.test(
+    /\bXMLHttpRequest\b|\bWebSocket\s*\(|\bEventSource\s*\(|\bnavigator\s*\.\s*sendBeacon\s*\(/.test(
       source,
     )
   ) {
     fail(
       `${path.relative(siteRoot, file)} contains a forbidden runtime network call`,
     )
+  }
+  if (
+    /\bfetch\s*\(/.test(source) &&
+    !source.includes("/api/checkout/orders")
+  ) {
+    fail(`${path.relative(siteRoot, file)} contains a non-checkout fetch call`)
   }
 
   const envAccesses = [

@@ -1,15 +1,11 @@
 export const catalogCategories = [
   { id: "all", label: "Всё" },
-  { id: "court-shoes", label: "Заловая обувь" },
-  { id: "sneakers", label: "Кроссовки и кеды" },
-  { id: "volleyball", label: "Волейбол" },
-  { id: "basketball", label: "Баскетбол" },
+  { id: "court-shoes", label: "Для зала" },
+  { id: "volleyball", label: "Игровой день" },
+  { id: "basketball", label: "Защитная работа" },
+  { id: "recovery", label: "После зала" },
   { id: "apparel", label: "Одежда" },
-  { id: "protection", label: "Защита" },
-  { id: "balls", label: "Мячи" },
-  { id: "training", label: "Инвентарь" },
-  { id: "recovery", label: "Recovery" },
-  { id: "bags", label: "Сумки и мелочи" },
+  { id: "sneakers", label: "База" },
 ] as const
 
 export type CatalogCategory = Exclude<
@@ -32,10 +28,13 @@ export type ProductKind = "footwear" | "apparel" | "accessory"
 export type CatalogSort = "featured" | "price-asc" | "price-desc" | "name"
 
 export const MARKET_PRICE_BASIS =
-  "Редакционный ориентир · рынок РФ 28.07.2026"
+  "Редакционный ориентир · рынок РФ 30.07.2026"
 
 export const PRICE_FORMULA_BASIS =
-  "Расчет по текущей формуле заказа"
+  "УСН 6%, ракета до Москвы, резерв, эквайринг и маржа KICKSBASE"
+
+export const PUBLIC_CATALOG_POLICY =
+  "Публичная витрина показывает обувь и одежду. Защита, мячи, тейпы, сумки и прочие аксессуары скрыты до отдельного ассортимента."
 
 export interface CatalogImage {
   src: string
@@ -111,14 +110,14 @@ const pricingDefaults = {
   usnTaxPercent: 6,
   vatProfile: "vat_exempt" as const,
   vatPercent: 22,
-  roundToRub: 100,
+  roundToRub: 500,
   rfDelivery: 0,
 } as const
 
 const marginTiers = [
-  { max: 8_000, target: 40, floor: 35 },
-  { max: 20_000, target: 30, floor: 25 },
-  { max: Number.POSITIVE_INFINITY, target: 25, floor: 20 },
+  { max: 8_000, target: 45, floor: 35 },
+  { max: 20_000, target: 35, floor: 30 },
+  { max: Number.POSITIVE_INFINITY, target: 30, floor: 25 },
 ] as const
 
 function money(value: number): number {
@@ -1741,6 +1740,15 @@ export const catalogProducts: readonly CatalogProduct[] = catalogProductSource.m
     }),
 )
 
+export function isPublicCatalogProduct(product: CatalogProduct): boolean {
+  if (product.kind === "apparel") return true
+  if (product.kind !== "footwear") return false
+  return true
+}
+
+export const publicCatalogProducts: readonly CatalogProduct[] =
+  catalogProducts.filter(isPublicCatalogProduct)
+
 export function filterCatalog(
   products: readonly CatalogProduct[],
   category: "all" | CatalogCategory,
@@ -1769,10 +1777,6 @@ export function filterCatalog(
   })
 }
 
-function textIncludes(product: CatalogProduct, pattern: RegExp): boolean {
-  return pattern.test(`${product.brand} ${product.name} ${product.categoryLabel} ${product.note}`)
-}
-
 function matchesCatalogCategory(
   product: CatalogProduct,
   category: CatalogCategory,
@@ -1788,30 +1792,10 @@ function matchesCatalogCategory(
     category === "basketball" ||
     category === "recovery"
   ) {
-    return product.category === category
+    return product.kind === "footwear" && product.category === category
   }
   if (category === "apparel") {
     return product.kind === "apparel"
-  }
-  if (category === "protection") {
-    return (
-      product.category === "protection" ||
-      (product.kind === "accessory" &&
-        textIncludes(product, /наколен|налокот|sleeve|support|strap|tape|тейп/i))
-    )
-  }
-  if (category === "balls") {
-    return (
-      product.category === "balls" ||
-      (product.kind === "accessory" &&
-        textIncludes(product, /мяч|volleyball|basketball|molten|mikasa|wilson/i))
-    )
-  }
-  if (category === "training") {
-    return product.category === "training" || textIncludes(product, /resistance|band|bottle|резин/i)
-  }
-  if (category === "bags") {
-    return product.category === "bags" || textIncludes(product, /bag|backpack|duffel|нос|кепк|cap|сумк|рюкзак/i)
   }
   return false
 }
@@ -1862,4 +1846,10 @@ export function findProductBySlug(slug: string | null): CatalogProduct | null {
   if (!slug) return null
 
   return catalogProducts.find((product) => product.slug === slug) ?? null
+}
+
+export function findPublicProductBySlug(slug: string | null): CatalogProduct | null {
+  if (!slug) return null
+
+  return publicCatalogProducts.find((product) => product.slug === slug) ?? null
 }

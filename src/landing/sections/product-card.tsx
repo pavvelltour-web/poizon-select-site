@@ -3,9 +3,7 @@ import type { CSSProperties } from "react"
 
 import type { CatalogProduct } from "../../catalog/catalog"
 import {
-  getProductBadge,
   getDisplayPrice,
-  getProductTags,
   getProductUse,
   kindLabels,
   resolveAssetUrl,
@@ -26,7 +24,6 @@ export function ProductCard({
   openProduct,
 }: ProductCardProps) {
   const price = getDisplayPrice(product)
-  const tags = getProductTags(product)
   const galleryPreview = product.gallery[1]?.src ?? product.fallbackImage
 
   return (
@@ -63,9 +60,6 @@ export function ProductCard({
             setImageFallback(event, product.fallbackImage)
           }}
         />
-        <span className="product-card__badge">{getProductBadge(product)}</span>
-        <span className="product-card__category">{product.categoryLabel}</span>
-        <span className="product-card__price-chip">{price.value}</span>
       </span>
       <span className="product-card__body">
         <span className="product-card__topline">
@@ -74,11 +68,6 @@ export function ProductCard({
         </span>
         <strong>{product.name}</strong>
         <span className="product-card__meta">{getProductUse(product)}</span>
-        <span className="product-card__tags">
-          {tags.map((tag) => (
-            <span key={tag}>{tag}</span>
-          ))}
-        </span>
         <span className="product-card__bottom">
           <span>
             <small>{price.label}</small>

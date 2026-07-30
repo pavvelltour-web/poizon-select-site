@@ -1,9 +1,24 @@
-import { ChevronLeft, ChevronRight, Copy, Send, X } from "lucide-react"
+import {
+  ChevronLeft,
+  ChevronRight,
+  Copy,
+  Maximize2,
+  Send,
+  ShoppingCart,
+  X,
+  ZoomIn,
+  ZoomOut,
+} from "lucide-react"
 import { motion } from "motion/react"
-import { useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 
-import { formatRub } from "../../catalog/catalog"
-import { kindLabels, resolveAssetUrl, setImageFallback } from "../landing-data"
+import {
+  getProductScenario,
+  getSourcingMode,
+  kindLabels,
+  resolveAssetUrl,
+  setImageFallback,
+} from "../landing-data"
 import type { StorefrontState } from "../landing-types"
 
 interface ProductSheetProps {
@@ -12,12 +27,25 @@ interface ProductSheetProps {
 
 export function ProductSheet({ storefront }: ProductSheetProps) {
   const touchStartX = useRef<number | null>(null)
+  const [isLightboxOpen, setLightboxOpen] = useState(false)
+  const [lightboxZoom, setLightboxZoom] = useState(1)
   const product = storefront.selectedProduct
+  const selectedImageSrcKey = storefront.selectedImage?.src ?? ""
+
+  useEffect(() => {
+    setLightboxZoom(1)
+  }, [selectedImageSrcKey])
+
   if (!product) return null
 
   const price = storefront.selectedProductPrice
   const botUrl = storefront.botUrl
   const botUsername = storefront.botUsername
+  const selectedImageSrc = selectedImageSrcKey || product.fallbackImage
+  const selectedImageAlt = storefront.selectedImage?.alt ?? `${product.brand} ${product.name}`
+
+  const zoomIn = () => setLightboxZoom((zoom) => Math.min(zoom + 0.25, 2.5))
+  const zoomOut = () => setLightboxZoom((zoom) => Math.max(zoom - 0.25, 1))
 
   return (
     <>
@@ -67,16 +95,25 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
           }}
         >
           <motion.img
-            key={storefront.selectedImage?.src ?? product.fallbackImage}
-            src={resolveAssetUrl(storefront.selectedImage?.src ?? product.fallbackImage)}
+            key={selectedImageSrc}
+            src={resolveAssetUrl(selectedImageSrc)}
             width="1200"
             height="900"
-            alt={storefront.selectedImage?.alt ?? `${product.brand} ${product.name}`}
+            alt={selectedImageAlt}
             onError={(event) => setImageFallback(event, product.fallbackImage)}
             initial={{ opacity: 0.8, scale: 0.992 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.16 }}
+            onClick={() => setLightboxOpen(true)}
           />
+          <button
+            className="product-sheet__expand"
+            type="button"
+            onClick={() => setLightboxOpen(true)}
+            aria-label="Открыть фото на весь экран"
+          >
+            <Maximize2 aria-hidden="true" size={18} />
+          </button>
           <button
             className="product-sheet__nav product-sheet__nav--prev"
             type="button"
@@ -142,7 +179,7 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
         >
           <div className="product-sheet__identity">
             <span>{product.sportPriority ? "Для зала" : kindLabels[product.kind]}</span>
-            <span>{product.categoryLabel}</span>
+            <span>{getProductScenario(product)}</span>
           </div>
           <h2 id="product-sheet-title" ref={storefront.sheetHeadingRef} tabIndex={-1}>
             {product.brand} {product.name}
@@ -174,29 +211,21 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
               <strong>{price?.value}</strong>
               <em>{price?.detail}</em>
             </span>
-            {botUrl ? (
-              storefront.selectedSize ? (
-                <a className="button button--primary" href={botUrl} target="_blank" rel="noreferrer">
-                  <Send aria-hidden="true" size={18} />
-                  Заказать в Telegram
-                </a>
-              ) : (
-                <button className="button button--primary" type="button" disabled>
-                  Выберите размер выше
-                </button>
-              )
-            ) : (
-              <button className="button button--primary" type="button" onClick={storefront.copyRequest}>
-                <Copy aria-hidden="true" size={18} />
-                Скопировать запрос
-              </button>
-            )}
+            <button
+              className="button button--primary"
+              type="button"
+              onClick={storefront.addSelectedToCart}
+              disabled={!storefront.selectedSize}
+            >
+              <ShoppingCart aria-hidden="true" size={18} />
+              {storefront.selectedSize ? "Добавить в корзину" : "Выберите размер выше"}
+            </button>
           </div>
 
           <dl className="product-facts">
             <div>
-              <dt>Категория</dt>
-              <dd>{product.categoryLabel}</dd>
+              <dt>Сценарий</dt>
+              <dd>{getProductScenario(product)}</dd>
             </div>
             <div>
               <dt>Тип</dt>
@@ -207,55 +236,22 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
               <dd>{storefront.selectedSize ?? "Не выбран"}</dd>
             </div>
             <div>
+              <dt>Формат</dt>
+              <dd>{getSourcingMode(product)}, затем СДЭК</dd>
+            </div>
+            <div>
               <dt>{price?.label}</dt>
               <dd>{price?.value}</dd>
             </div>
           </dl>
 
-          {product.orderQuote ? (
-            <dl className="price-breakdown" aria-label="Расчет заказа">
-              <div>
-                <dt>Цена источника</dt>
-                <dd>¥{product.orderQuote.priceYuan}</dd>
-              </div>
-              <div>
-                <dt>Курс</dt>
-                <dd>{product.orderQuote.yuanRate} ₽/¥</dd>
-              </div>
-              <div>
-                <dt>Выкуп</dt>
-                <dd>{formatRub(product.orderQuote.purchaseRub)}</dd>
-              </div>
-              <div>
-                <dt>Оплата {product.orderQuote.paymentFeePercent}%</dt>
-                <dd>{formatRub(product.orderQuote.paymentFee)}</dd>
-              </div>
-              <div>
-                <dt>Логистика</dt>
-                <dd>{formatRub(product.orderQuote.internationalLogistics)}</dd>
-              </div>
-              <div>
-                <dt>Сервис {product.orderQuote.serviceFeePercent}%</dt>
-                <dd>{formatRub(product.orderQuote.serviceFee)}</dd>
-              </div>
-              <div>
-                <dt>РФ доставка</dt>
-                <dd>{formatRub(product.orderQuote.rfDelivery)}</dd>
-              </div>
-              <div>
-                <dt>Итого</dt>
-                <dd>{formatRub(product.orderQuote.totalRub)}</dd>
-              </div>
-            </dl>
-          ) : null}
-
           <p className="product-sheet__fineprint">
-            Цена, размер, цвет, наличие, бирки и упаковка подтверждаются по
-            конкретному товару перед оплатой.
+            Цена рассчитана с учетом выкупа, доставки до Москвы, УСН, резерва,
+            эквайринга и маржи KICKSBASE. В карточке показываем только итог.
           </p>
           <p className="product-sheet__order-proof">
-            После заявки пришлем расчет, фото или скрин товара, доступный размер,
-            продавца, бирки и финальную сумму перед оплатой.
+            После заявки менеджер подтвердит размер, цвет, продавца, бирки,
+            упаковку и доступность перед оплатой.
           </p>
 
           <label className="request-box">
@@ -269,15 +265,29 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
                 <Copy aria-hidden="true" size={18} />
                 {storefront.copyState === "copied" ? "Запрос готов" : "Скопировать запрос"}
               </button>
+              <button type="button" className="button button--quiet" onClick={storefront.openCart}>
+                <ShoppingCart aria-hidden="true" size={18} />
+                Открыть корзину
+              </button>
               <a className="button button--primary" href={botUrl} target="_blank" rel="noreferrer">
                 <Send aria-hidden="true" size={18} />
                 Открыть @{botUsername}
               </a>
             </div>
           ) : (
-            <p className="product-sheet__demo">
-              Ссылка на менеджера появится после подключения Telegram.
-            </p>
+            <div className="product-sheet__actions">
+              <button type="button" className="button button--quiet" onClick={storefront.copyRequest}>
+                <Copy aria-hidden="true" size={18} />
+                {storefront.copyState === "copied" ? "Запрос готов" : "Скопировать запрос"}
+              </button>
+              <button type="button" className="button button--primary" onClick={storefront.openCart}>
+                <ShoppingCart aria-hidden="true" size={18} />
+                Открыть корзину
+              </button>
+              <p className="product-sheet__demo">
+                Ссылка на менеджера появится после подключения Telegram.
+              </p>
+            </div>
           )}
 
           {storefront.copyState === "failed" ? (
@@ -293,6 +303,65 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
           </p>
         </div>
       </motion.aside>
+      {isLightboxOpen ? (
+        <motion.div
+          className="photo-lightbox"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Просмотр фото товара"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onWheel={(event) => {
+            if (event.deltaY < 0) zoomIn()
+            else zoomOut()
+          }}
+        >
+          <button
+            className="photo-lightbox__close"
+            type="button"
+            onClick={() => setLightboxOpen(false)}
+            aria-label="Закрыть фото"
+          >
+            <X aria-hidden="true" size={22} />
+          </button>
+          <button
+            className="photo-lightbox__nav photo-lightbox__nav--prev"
+            type="button"
+            onClick={storefront.showPreviousProductImage}
+            disabled={storefront.selectedVisibleGallery.length <= 1}
+            aria-label="Предыдущее фото товара"
+          >
+            <ChevronLeft aria-hidden="true" size={28} />
+          </button>
+          <img
+            src={resolveAssetUrl(selectedImageSrc)}
+            width="1200"
+            height="900"
+            alt={selectedImageAlt}
+            style={{ transform: `scale(${lightboxZoom})` }}
+            onError={(event) => setImageFallback(event, product.fallbackImage)}
+          />
+          <button
+            className="photo-lightbox__nav photo-lightbox__nav--next"
+            type="button"
+            onClick={storefront.showNextProductImage}
+            disabled={storefront.selectedVisibleGallery.length <= 1}
+            aria-label="Следующее фото товара"
+          >
+            <ChevronRight aria-hidden="true" size={28} />
+          </button>
+          <div className="photo-lightbox__tools" aria-label="Масштаб фото">
+            <button type="button" onClick={zoomOut} aria-label="Уменьшить фото">
+              <ZoomOut aria-hidden="true" size={18} />
+            </button>
+            <span>{Math.round(lightboxZoom * 100)}%</span>
+            <button type="button" onClick={zoomIn} aria-label="Увеличить фото">
+              <ZoomIn aria-hidden="true" size={18} />
+            </button>
+          </div>
+        </motion.div>
+      ) : null}
     </>
   )
 }

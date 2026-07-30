@@ -1,13 +1,24 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 
 import {
-  catalogProducts,
+  publicCatalogProducts,
   filterCatalog,
-  findProductBySlug,
+  findPublicProductBySlug,
   sortCatalog,
   type CatalogSort,
   type CatalogProduct,
 } from "../catalog/catalog"
+import {
+  addOrIncrementCartLine,
+  cartTotalRub,
+  loadCart,
+  saveCart,
+  submitCheckout,
+  updateCartQuantity,
+  type CheckoutCustomer,
+  type CheckoutResult,
+  type CartLine,
+} from "./cart"
 import {
   buildOrderRequest,
   buildTelegramBotUrl,
@@ -41,6 +52,19 @@ export function useLandingStorefront(
   const [selectedSize, setSelectedSizeState] = useState<string | null>(null)
   const [copyState, setCopyState] = useState<"idle" | "copied" | "failed">("idle")
   const [taskInput, setTaskInputState] = useState("")
+  const [cartLines, setCartLines] = useState<CartLine[]>([])
+  const [isCartOpen, setCartOpen] = useState(false)
+  const [checkoutCustomer, setCheckoutCustomer] = useState<CheckoutCustomer>({
+    fullName: "",
+    phone: "",
+    email: "",
+  })
+  const [checkoutResult, setCheckoutResult] = useState<CheckoutResult>({
+    status: "idle",
+    message: "",
+    orderIds: [],
+    paymentUrl: null,
+  })
   const productTriggerRef = useRef<HTMLButtonElement | null>(null)
   const sheetHeadingRef = useRef<HTMLHeadingElement | null>(null)
 
@@ -48,8 +72,9 @@ export function useLandingStorefront(
     configuredBotUsername ?? import.meta.env.VITE_BOT_USERNAME,
   )
   const botUrl = buildTelegramBotUrl(botUsername)
+  const apiBaseUrl = String(import.meta.env.VITE_API_BASE_URL || "").trim() || ""
 
-  const selectedProduct = findProductBySlug(selectedSlug)
+  const selectedProduct = findPublicProductBySlug(selectedSlug)
   const selectedVisibleGallery = selectedProduct?.gallery.slice(0, 5) ?? []
   const selectedImage =
     selectedVisibleGallery[selectedImageIndex] ??
@@ -64,13 +89,13 @@ export function useLandingStorefront(
   const selectedImageDisplayIndex =
     selectedVisibleGallery.length === 0 ? 0 : selectedImageIndex + 1
   const filteredProducts = useMemo(
-    () => sortCatalog(filterCatalog(catalogProducts, category, search), sort),
+    () => sortCatalog(filterCatalog(publicCatalogProducts, category, search), sort),
     [category, search, sort],
   )
   const heroProducts = useMemo(
     () =>
       heroProductSlugs
-        .map((slug) => catalogProducts.find((product) => product.slug === slug))
+        .map((slug) => publicCatalogProducts.find((product) => product.slug === slug))
         .filter((product): product is CatalogProduct => product !== undefined),
     [],
   )
@@ -78,9 +103,11 @@ export function useLandingStorefront(
     ? buildOrderRequest(selectedProduct, selectedSize ?? undefined)
     : ""
   const taskMatches = useMemo(
-    () => findTaskMatches(catalogProducts, taskInput).slice(0, 3),
+    () => findTaskMatches(publicCatalogProducts, taskInput).slice(0, 3),
     [taskInput],
   )
+  const cartCount = cartLines.reduce((sum, line) => sum + line.quantity, 0)
+  const currentCartTotalRub = cartTotalRub(cartLines)
 
   const writeUrl = (
     nextState: Partial<UrlState>,
@@ -151,6 +178,14 @@ export function useLandingStorefront(
       document.removeEventListener("keydown", onKeyDown)
     }
   }, [selectedProduct, selectedVisibleGallery.length])
+
+  useEffect(() => {
+    setCartLines(loadCart(publicCatalogProducts))
+  }, [])
+
+  useEffect(() => {
+    saveCart(cartLines)
+  }, [cartLines])
 
   const selectCategory = (nextCategory: ActiveCategory) => {
     setCategory(nextCategory)
@@ -238,6 +273,67 @@ export function useLandingStorefront(
     setCopyState("idle")
   }
 
+  const addSelectedToCart = () => {
+    if (!selectedProduct || !selectedSize) return
+    setCartLines((lines) =>
+      addOrIncrementCartLine(lines, selectedProduct, selectedSize),
+    )
+    setCheckoutResult({
+      status: "idle",
+      message: "",
+      orderIds: [],
+      paymentUrl: null,
+    })
+    setCartOpen(true)
+  }
+
+  const openCart = () => setCartOpen(true)
+  const closeCart = () => setCartOpen(false)
+  const removeCartLine = (id: string) => {
+    setCartLines((lines) => lines.filter((line) => line.id !== id))
+  }
+  const setCartLineQuantity = (id: string, quantity: number) => {
+    setCartLines((lines) => updateCartQuantity(lines, id, quantity))
+  }
+  const updateCheckoutCustomer = (
+    field: keyof CheckoutCustomer,
+    value: string,
+  ) => {
+    setCheckoutCustomer((customer) => ({ ...customer, [field]: value }))
+  }
+
+  const submitCartCheckout = async () => {
+    if (cartLines.length === 0) return
+    setCheckoutResult({
+      status: "submitting",
+      message: "Создаём заказ и готовим оплату...",
+      orderIds: [],
+      paymentUrl: null,
+    })
+    try {
+      const result = await submitCheckout(apiBaseUrl, cartLines, checkoutCustomer)
+      setCheckoutResult({
+        status: "created",
+        message: result.message,
+        orderIds: result.order_ids,
+        paymentUrl: result.payment_url,
+      })
+      if (result.payment_url) {
+        window.location.assign(result.payment_url)
+      }
+    } catch (error) {
+      setCheckoutResult({
+        status: "failed",
+        message:
+          error instanceof Error
+            ? error.message
+            : "Не удалось создать заказ. Попробуйте ещё раз.",
+        orderIds: [],
+        paymentUrl: null,
+      })
+    }
+  }
+
   const copyRequest = async () => {
     const copied = await copyOrderRequest(request)
     setCopyState(copied ? "copied" : "failed")
@@ -260,6 +356,12 @@ export function useLandingStorefront(
     selectedSize,
     selectedSizeOptions,
     selectedProductPrice,
+    cartLines,
+    cartCount,
+    cartTotalRub: currentCartTotalRub,
+    isCartOpen,
+    checkoutCustomer,
+    checkoutResult,
     request,
     copyState,
     taskMatches,
@@ -276,6 +378,13 @@ export function useLandingStorefront(
     showPreviousProductImage,
     showNextProductImage,
     setSelectedSize,
+    addSelectedToCart,
+    openCart,
+    closeCart,
+    removeCartLine,
+    setCartLineQuantity,
+    updateCheckoutCustomer,
+    submitCartCheckout,
     copyRequest,
   }
 }

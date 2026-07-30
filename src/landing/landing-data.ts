@@ -1,13 +1,9 @@
 import {
-  ArrowUpRight,
   BadgeCheck,
-  Backpack,
   CircleDot,
-  Dumbbell,
   Footprints,
   Medal,
   Search,
-  ShieldCheck,
   Shirt,
   Sparkles,
   TimerReset,
@@ -35,87 +31,68 @@ export const sortOptions: readonly { id: CatalogSort; label: string }[] = [
 ]
 
 export const categoryCopy: Record<ActiveCategory, string> = {
-  all: "Вся витрина",
-  "court-shoes": "Волейбол, баскетбол и заловая работа",
-  sneakers: "Кроссовки, кеды и пары на каждый день",
-  volleyball: "Пары и экипировка под волейбольный зал",
-  basketball: "Баскетбольные пары, которые берут для зала",
-  apparel: "Форма, компрессия, худи и верхний слой",
-  protection: "Наколенники, налокотники, тейпы и поддержка",
-  balls: "Волейбольные и баскетбольные мячи",
-  training: "Резина, бутылки и функциональная база",
-  recovery: "Слайды, роллы и восстановление после зала",
-  bags: "Сумки, рюкзаки, носки и мелкие вещи",
+  all: "Все опубликованные пары и одежда",
+  "court-shoes": "Пары для зала и тренировок",
+  volleyball: "Пары для игровых дней",
+  basketball: "Пары для приема, защиты и боковой работы",
+  recovery: "Слайды и мягкие пары после зала",
+  apparel: "Одежда для тренировок и дороги",
+  sneakers: "Базовые пары на каждый день",
 }
 
 export const categoryDetails: Record<ActiveCategory, string> = {
-  all: "Полная база",
-  "court-shoes": "Сцепление и стабильность",
-  sneakers: "Кроссовки и кеды",
-  volleyball: "Прыжок и боковая работа",
-  basketball: "Амортизация и контроль",
-  apparel: "Форма и слои",
-  protection: "Колени, локти, тейпы",
-  balls: "Для игры и команды",
-  training: "ОФП и база",
-  recovery: "После нагрузки",
-  bags: "То, что берут с собой",
+  all: "Публичная витрина",
+  "court-shoes": "Зал и тренировки",
+  volleyball: "Матч и тренировка",
+  basketball: "Защитная работа",
+  recovery: "После зала",
+  apparel: "Одежда",
+  sneakers: "База",
 }
 
 export const categoryTone: Record<ActiveCategory, string> = {
   all: "gear",
-  "court-shoes": "jump",
+  "court-shoes": "court",
   sneakers: "street",
-  volleyball: "jump",
+  volleyball: "court",
   basketball: "court",
   apparel: "kit",
-  protection: "guard",
-  balls: "ball",
-  training: "train",
   recovery: "reset",
-  bags: "carry",
 }
 
 export const categoryIcons: Record<ActiveCategory, LucideIcon> = {
   all: Sparkles,
   "court-shoes": Zap,
-  sneakers: Footprints,
   volleyball: Trophy,
   basketball: CircleDot,
-  apparel: Shirt,
-  protection: ShieldCheck,
-  balls: CircleDot,
-  training: Dumbbell,
   recovery: Waves,
-  bags: Backpack,
+  apparel: Shirt,
+  sneakers: Footprints,
 }
 
 export const heroProductSlugs = [
   "asics-sky-elite-ff-3",
   "nike-kd-18",
-  "triggerpoint-grid-foam-roller",
+  "hoka-ora-recovery-slide-3",
 ] as const
 
 export const scenarioTiles = [
   {
     id: "court-shoes",
-    title: "Игровой день",
-    text: "Пары со сцеплением, стабильной боковой работой и мягким приземлением.",
-    metric: "37 пар",
+    title: "Пара для зала",
+    text: "Для тренировок, перемещений и уверенной посадки.",
     icon: Medal,
   },
   {
-    id: "protection",
-    title: "Контакт и защита",
-    text: "Наколенники, налокотники, тейпы и поддержка для плотных тренировок.",
-    metric: "9 позиций",
-    icon: ShieldCheck,
+    id: "basketball",
+    title: "Защитная работа",
+    text: "Пары, которые берут для приема и резких смен направления.",
+    icon: CircleDot,
   },
   {
     id: "recovery",
     title: "После зала",
-    text: "Слайды, роллы и восстановление, чтобы следующая тренировка не начиналась с боли.",
-    metric: "10 позиций",
+    text: "Мягкие пары на дорогу домой и восстановительный день.",
     icon: TimerReset,
   },
 ] as const
@@ -123,79 +100,83 @@ export const scenarioTiles = [
 export const editorialIndex = [
   {
     id: "court-shoes",
-    code: "Shoes",
     title: "Пара под зал",
-    text: "Волейбольные и баскетбольные модели для прыжка, сцепления и боковой работы.",
+    text: "Начните с покрытия и задачи. Менеджер проверит размер, цвет и наличие.",
     icon: Zap,
   },
   {
-    id: "protection",
-    code: "Guard",
-    title: "Защита",
-    text: "Колени, локти, тейпы и поддержка для плотных тренировок без лишнего риска.",
-    icon: ShieldCheck,
-  },
-  {
-    id: "balls",
-    code: "Team",
-    title: "Мячи",
-    text: "Волейбольные и баскетбольные мячи для команды, зала и регулярной игры.",
+    id: "basketball",
+    title: "Защитная работа",
+    text: "Пары для приема, боковых перемещений и плотной посадки.",
     icon: CircleDot,
   },
   {
+    id: "apparel",
+    title: "Одежда",
+    text: "Футболки, шорты, худи и верхний слой для тренировок.",
+    icon: Shirt,
+  },
+  {
     id: "recovery",
-    code: "Reset",
-    title: "Восстановление",
-    text: "Слайды, роллы и база после нагрузки, чтобы быстрее вернуться в игру.",
+    title: "После зала",
+    text: "Слайды и мягкие пары для восстановления после нагрузки.",
     icon: TimerReset,
   },
 ] as const
 
-export const quickFilters = [
+type QuickFilter = {
+  label: string
+  detail: string
+  category: ActiveCategory
+  search?: string
+  sort?: CatalogSort
+  icon: LucideIcon
+}
+
+export const quickFilters: readonly QuickFilter[] = [
   {
-    label: "Обувь для прыжка",
-    detail: "волейбол + зал",
+    label: "Пара для зала",
+    detail: "тренировки и игры",
     category: "court-shoes",
     icon: Zap,
   },
   {
-    label: "Баскетбол для зала",
-    detail: "мягкость и контроль",
+    label: "Игровой день",
+    detail: "быстро выбрать пару",
+    category: "volleyball",
+    icon: Trophy,
+  },
+  {
+    label: "Защитная работа",
+    detail: "прием и боковые движения",
     category: "basketball",
     icon: CircleDot,
   },
   {
-    label: "Защита колена",
-    detail: "наколенники и поддержка",
-    category: "protection",
-    search: "колен",
-    icon: ShieldCheck,
+    label: "После зала",
+    detail: "слайды и мягкие пары",
+    category: "recovery",
+    icon: Waves,
   },
   {
-    label: "Мячи",
-    detail: "игра и команда",
-    category: "balls",
-    icon: CircleDot,
-  },
-  {
-    label: "До 10 тыс.",
+    label: "До 15 тыс.",
     detail: "сначала доступное",
     category: "all",
     sort: "price-asc",
     icon: BadgeCheck,
   },
   {
-    label: "Сумка и база",
-    detail: "то, что берут с собой",
-    category: "bags",
-    icon: Backpack,
+    label: "Одежда",
+    detail: "верх и шорты",
+    category: "apparel",
+    icon: Shirt,
   },
-] as const
+]
 
 export const taskChips = [
-  "прыжок и мягкое приземление",
-  "защита коленей",
-  "мяч для команды",
+  "пара для зала",
+  "игровой день",
+  "защитная работа",
   "восстановление после зала",
 ] as const
 
@@ -259,64 +240,61 @@ function marketPriceToFrom(price: string): string {
 export function getDisplayPrice(product: CatalogProduct): DisplayPrice {
   if (product.orderQuote) {
     return {
-      label: "Цена от",
+      label: "Цена",
       value: `от ${formatRub(product.orderQuote.totalRub)}`,
-      detail: "расчет до оплаты",
+      detail: "итог до оплаты, СДЭК отдельно",
     }
   }
 
   if (product.marketPrice) {
     return {
-      label: "Цена от",
+      label: "Цена",
       value: marketPriceToFrom(product.marketPrice),
       detail: product.priceBasis ?? "ориентир",
     }
   }
 
   return {
-    label: "Цена от",
+    label: "Цена",
     value: fallbackFromPrices[product.kind],
     detail: "уточним по размеру",
   }
 }
 
 export function getProductTags(product: CatalogProduct): string[] {
-  const tags: string[] = []
-  const note = product.note.toLowerCase()
-
-  if (product.sportPriority) tags.push("спорт")
-  if (product.category === "volleyball") tags.push("волейбол")
-  if (product.category === "basketball") tags.push("баскетбол для зала")
-  if (product.category === "training") tags.push("ОФП")
-  if (product.category === "recovery") tags.push("recovery")
-  if (product.category === "lifestyle") tags.push("lifestyle")
-  if (/колен|knee|защит/.test(note)) tags.push("защита")
-  if (/прыж|jump|bounce/.test(note)) tags.push("прыжок")
-  if (/мяч|ball/.test(note)) tags.push("игра")
-  if (tags.length < 2) tags.push(kindLabels[product.kind].toLowerCase())
-
-  return [...new Set(tags)].slice(0, 3)
+  return [getProductBadge(product), kindLabels[product.kind]]
 }
 
 export function getProductBadge(product: CatalogProduct): string {
-  const note = product.note.toLowerCase()
   if (product.category === "recovery") return "После зала"
-  if (product.category === "basketball") return "Контроль"
-  if (product.category === "volleyball") return /прыж|jump/.test(note) ? "Прыжок" : "Зал"
-  if (product.category === "protection") return "Защита"
-  if (product.category === "balls") return "Команда"
-  return product.sportPriority ? "Спорт" : "Lifestyle"
+  if (product.category === "basketball") return "Защитная работа"
+  if (product.category === "volleyball") return "Игровой день"
+  if (product.category === "apparel") return "Одежда"
+  if (product.category === "training") return "Тренировка"
+  return product.kind === "footwear" ? "Пара" : kindLabels[product.kind]
 }
 
 export function getProductUse(product: CatalogProduct): string {
   const note = product.note.toLowerCase()
-  if (/колен|knee/.test(note)) return "Для защиты коленей и контакта"
-  if (/мяч|ball/.test(note)) return "Для игры, команды и регулярного зала"
   if (/roll|foam|recover|восстанов/.test(note)) return "Для восстановления после нагрузки"
-  if (/bag|сумк|backpack/.test(note)) return "Для формы, обуви и мелочей"
-  if (product.category === "basketball") return "Для резких смен направления"
+  if (product.category === "basketball") return "Для защитной работы и смен направления"
   if (product.category === "volleyball") return "Для тренировок и игровых дней"
+  if (product.kind === "apparel") return "Для тренировок, дороги и повседневного слоя"
   return product.note
+}
+
+export function getProductScenario(product: CatalogProduct): string {
+  if (product.category === "basketball") return "Защитная работа"
+  if (product.category === "volleyball") return "Игровой день"
+  if (product.category === "recovery") return "После зала"
+  if (product.category === "apparel") return "Одежда"
+  if (product.category === "training") return "Тренировка"
+  if (product.category === "lifestyle") return "Базовая пара"
+  return kindLabels[product.kind]
+}
+
+export function getSourcingMode(product: CatalogProduct): string {
+  return product.orderQuote ? "Из Китая до Москвы" : "Наличие уточнит менеджер"
 }
 
 export function getSizeOptions(product: CatalogProduct): readonly string[] {
@@ -362,41 +340,44 @@ function scoreTaskProduct(product: CatalogProduct, task: string): TaskMatch | nu
     reasons.add(reason)
   }
 
-  const words = normalizedTask
-    .split(/[^a-zа-я0-9]+/i)
-    .filter((word) => word.length >= 3)
-  for (const word of words) {
-    if (haystack.includes(word)) add(3, `совпадение: ${word}`)
-  }
+  const asksRecovery = /recover|восстанов|после|slide|слайд/.test(normalizedTask)
+  const asksHall = /волей|пара|зал|трениров|матч|игров|приземл/.test(
+    normalizedTask,
+  )
 
-  if (/волей|прыж|jump|зал|сцеп|приземл/.test(normalizedTask)) {
-    if (product.category === "volleyball" || product.kind === "footwear") {
-      add(14, "прыжок и сцепление")
+  if (asksHall) {
+    if (
+      product.kind === "footwear" &&
+      product.sportPriority &&
+      (asksRecovery || product.category !== "recovery")
+    ) {
+      add(14, "подходит под зал")
     }
+    if (product.category === "volleyball") add(5, "мягкое приземление")
+    if (product.category === "basketball") add(3, "боковая работа")
   }
-  if (/баскет|crossover|cut|аморт|контрол/.test(normalizedTask)) {
+  if (/мягк|приземл|прыж/.test(normalizedTask) && product.category === "volleyball") {
+    add(14, "мягкое приземление")
+  }
+  if (/баскет|защит|прием|приём|crossover|cut|аморт|контрол|боков/.test(normalizedTask)) {
     if (product.category === "basketball" || product.kind === "footwear") {
-      add(12, "амортизация и контроль")
+      add(12, "защитная работа")
     }
   }
-  if (/колен|локт|защит|сустав|contact/.test(normalizedTask)) {
-    if (product.category === "protection") add(12, "защита суставов")
-  }
-  if (/мяч|команд|игр|ball/.test(normalizedTask)) {
-    if (product.category === "balls") add(10, "инвентарь для игры")
-  }
-  if (/recover|восстанов|после|ролл|slide/.test(normalizedTask)) {
-    if (product.category === "recovery") add(11, "восстановление после зала")
-  }
-  if (/резин|бутыл|трениров|офп/.test(normalizedTask)) {
-    if (product.category === "training") add(9, "тренировочная база")
-  }
-  if (/сумк|рюкзак|носок|bag/.test(normalizedTask)) {
-    if (product.category === "bags") add(9, "сумка и мелочи")
+  if (asksRecovery) {
+    if (product.category === "recovery") add(11, "после зала")
   }
   if (/бюджет|дешев|до\s?\d|недорог/.test(normalizedTask)) {
     const price = product.orderQuote?.totalRub ?? Number.MAX_SAFE_INTEGER
     if (price < 12_000) add(8, "ближе к низкому бюджету")
+  }
+
+  const stopWords = new Set(["для", "под", "пара", "пары", "нужна", "надо"])
+  const words = normalizedTask
+    .split(/[^a-zа-я0-9]+/i)
+    .filter((word) => word.length >= 3 && !stopWords.has(word))
+  for (const word of words) {
+    if (haystack.includes(word)) add(3, `совпадение: ${word}`)
   }
 
   if (score <= 0) return null
@@ -445,9 +426,9 @@ export function readUrlState(): UrlState {
 
 export const productAccentLabel = (product: CatalogProduct) =>
   product.kind === "footwear"
-    ? "Performance"
+    ? "Пара"
     : product.kind === "apparel"
-      ? "Layer"
-      : "Gear"
+      ? "Одежда"
+      : "Товар"
 
-export { ArrowUpRight, Search }
+export { Search }
