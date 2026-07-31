@@ -42,17 +42,16 @@ if (htmlReferences.length < 3) fail("index.html has too few asset references")
 
 for (const reference of htmlReferences) {
   if (
-    reference.startsWith("/") ||
     reference.startsWith("//") ||
     /^[a-z][a-z0-9+.-]*:/i.test(reference)
   ) {
-    fail(`index.html contains a non-portable asset reference: ${reference}`)
+    fail(`index.html contains an external asset reference: ${reference}`)
   }
-  const mounted = new URL(reference, "https://example.test/demo/index.html")
-  if (!mounted.pathname.startsWith("/demo/")) {
-    fail(`asset escapes a /demo/ subpath: ${reference}`)
+  if (!reference.startsWith("/")) {
+    fail(`index.html asset must be root-absolute for nested SPA routes: ${reference}`)
   }
-  const relative = decodeURIComponent(mounted.pathname.slice("/demo/".length))
+  const mounted = new URL(reference, "https://example.test")
+  const relative = decodeURIComponent(mounted.pathname.slice(1))
   await access(path.join(distRoot, relative))
 }
 
@@ -125,5 +124,5 @@ for (const file of catalogFiles) {
 }
 
 console.log(
-  `Built site verified: relative assets, /demo/ compatible, ${expectedCatalogFiles} local catalog images, ${expectedGalleryFiles} gallery images, third-party notice, no source maps`,
+  `Built site verified: root-hosted nested SPA assets, ${expectedCatalogFiles} local catalog images, ${expectedGalleryFiles} gallery images, third-party notice, no source maps`,
 )
