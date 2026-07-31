@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 
 import {
   publicCatalogProducts,
+  CATALOG_PRICE_VERSION,
   filterCatalog,
   findPublicProductBySlug,
   sortCatalog,
@@ -14,6 +15,7 @@ import {
   loadCart,
   saveCart,
   submitCheckout,
+  isCheckoutApiError,
   updateCartQuantity,
   type CheckoutConsents,
   type CheckoutCustomer,
@@ -36,6 +38,180 @@ import {
   readUrlState,
 } from "./landing-data"
 import type { ActiveCategory, StorefrontState, UrlState } from "./landing-types"
+
+type CatalogPriceParseResult = {
+  lookup: Record<string, number>
+  version: string | null
+}
+function createCheckoutIdempotencyKey(): string {
+  if (typeof globalThis.crypto?.randomUUID === "function") {
+    return globalThis.crypto.randomUUID()
+  }
+  const randomPart = Math.random().toString(36).slice(2, 14)
+  return "checkout-" + Date.now().toString(36) + "-" + randomPart
+}
+function checkoutIntentSignature(
+  lines: readonly CartLine[],
+  customer: CheckoutCustomer,
+): string {
+  return JSON.stringify({
+    customer: {
+      fullName: customer.fullName.trim(),
+      phone: customer.phone.trim(),
+      email: customer.email.trim().toLowerCase(),
+    },
+    lines: lines.map((line) => ({
+      id: line.id,
+      quantity: line.quantity,
+    })),
+  })
+}
+function parseCatalogPricePayload(payload: unknown): CatalogPriceParseResult | null {
+  if (!payload || typeof payload !== "object") return null
+
+  const candidate =
+    "prices" in payload && payload.prices && typeof payload.prices === "object"
+      ? payload.prices
+      : payload
+
+  const dataRows =
+    !Array.isArray(candidate) &&
+    candidate !== null &&
+    "data" in candidate &&
+    Array.isArray((candidate as { data?: unknown }).data)
+      ? (candidate as { data: unknown[] }).data
+      : null
+
+  if (dataRows) {
+    const lookup = extractPriceMap(
+      dataRows as Array<{
+        product_slug?: string
+        slug?: string
+        code?: string
+        price?: unknown
+        price_rub?: unknown
+        priceRub?: unknown
+        amount?: unknown
+      }>,
+    )
+    if (!Object.keys(lookup).length) return null
+    return {
+      lookup,
+      version:
+        "version" in payload && typeof (payload as { version?: unknown }).version === "string"
+          ? (payload as { version: string }).version
+          : null,
+    }
+  }
+
+  if (Array.isArray(candidate)) {
+    const lookup = extractPriceMap(
+      candidate as Array<{
+        product_slug?: string
+        slug?: string
+        code?: string
+        price?: unknown
+        price_rub?: unknown
+        priceRub?: unknown
+        amount?: unknown
+      }>,
+    )
+    if (!Object.keys(lookup).length) return null
+    return {
+      lookup,
+      version:
+        "version" in payload && typeof (payload as { version?: unknown }).version === "string"
+          ? (payload as { version: string }).version
+          : null,
+    }
+  }
+
+  if (candidate === null || typeof candidate !== "object") return null
+  const lookup = extractPriceMap(Object.entries(candidate as Record<string, unknown>))
+  if (!Object.keys(lookup).length) return null
+  return {
+    lookup,
+    version:
+      "version" in payload && typeof (payload as { version?: unknown }).version === "string"
+        ? (payload as { version: string }).version
+        : null,
+  }
+}
+
+function extractPriceMap(
+  rows:
+    | Array<{
+        product_slug?: string
+        slug?: string
+        code?: string
+        price?: unknown
+        price_rub?: unknown
+        priceRub?: unknown
+        amount?: unknown
+      }>
+    | Array<[string, unknown]>,
+): Record<string, number> {
+  const lookup: Record<string, number> = {}
+  for (const item of rows) {
+    if (Array.isArray(item)) {
+      const [slug, value] = item
+      if (typeof slug !== "string" || !slug.trim()) continue
+      const amount = typeof value === "number" ? value : Number(value)
+      if (Number.isFinite(amount) && amount > 0) lookup[slug.trim()] = amount
+      continue
+    }
+
+    const candidate = item
+    const slug =
+      candidate.product_slug ??
+      candidate.slug ??
+      candidate.code ??
+      ""
+    const priceCandidate =
+      candidate.price ??
+      candidate.price_rub ??
+      candidate.priceRub ??
+      candidate.amount
+    if (!slug) continue
+    const amount = typeof priceCandidate === "number" ? priceCandidate : Number(priceCandidate)
+    if (Number.isFinite(amount) && amount > 0) lookup[slug] = amount
+  }
+  return lookup
+}
+
+function buildPriceCatalogUrls(apiBaseUrl: string): string[] {
+  const endpoint = `${apiBaseUrl || ""}`.replace(/\/$/, "")
+  return endpoint
+    ? [`${endpoint}/api/checkout/prices`, `${endpoint}/api/checkout/orders?mode=prices`]
+    : ["/api/checkout/prices", "/api/checkout/orders?mode=prices"]
+}
+
+async function loadCatalogPricesFromApi(
+  apiBaseUrl: string,
+  cancelled: () => boolean,
+): Promise<CatalogPriceParseResult | null> {
+  const requestedUrls = buildPriceCatalogUrls(apiBaseUrl)
+
+  for (const pricesUrl of requestedUrls) {
+    if (cancelled()) return null
+    try {
+      const response = await fetch(pricesUrl, { credentials: "include" })
+      if (!response.ok) continue
+      const payload = await response.json().catch(() => null)
+      const parsed = parseCatalogPricePayload(payload)
+      if (!parsed) continue
+      if (Object.keys(parsed.lookup).length === 0) continue
+      return {
+        lookup: parsed.lookup,
+        version: parsed.version || CATALOG_PRICE_VERSION,
+      }
+    } catch {
+      // Keep local fallback until a valid price response arrives.
+    }
+  }
+
+  return null
+}
 
 export type LandingStorefront = StorefrontState
 
@@ -70,8 +246,13 @@ export function useLandingStorefront(
     orderIds: [],
     paymentUrl: null,
   })
+  const [catalogPriceState, setCatalogPriceState] = useState({
+    lookup: null as Record<string, number> | null,
+    version: CATALOG_PRICE_VERSION,
+  })
   const productTriggerRef = useRef<HTMLButtonElement | null>(null)
   const sheetHeadingRef = useRef<HTMLHeadingElement | null>(null)
+  const checkoutAttemptRef = useRef<{ signature: string; key: string } | null>(null)
 
   const botUsername = resolveBotUsername(
     configuredBotUsername ?? import.meta.env.VITE_BOT_USERNAME,
@@ -88,7 +269,7 @@ export function useLandingStorefront(
       ? { src: selectedProduct.fallbackImage, alt: selectedProduct.name }
       : null)
   const selectedProductPrice = selectedProduct
-    ? getDisplayPrice(selectedProduct)
+    ? getDisplayPrice(selectedProduct, catalogPriceState.lookup)
     : null
   const selectedSizeOptions = selectedProduct ? getSizeOptions(selectedProduct) : []
   const selectedImageDisplayIndex =
@@ -108,11 +289,15 @@ export function useLandingStorefront(
     ? buildOrderRequest(selectedProduct, selectedSize ?? undefined)
     : ""
   const taskMatches = useMemo(
-    () => findTaskMatches(publicCatalogProducts, taskInput).slice(0, 3),
-    [taskInput],
+    () =>
+      findTaskMatches(publicCatalogProducts, taskInput, catalogPriceState.lookup).slice(
+        0,
+        3,
+      ),
+    [taskInput, catalogPriceState.lookup],
   )
   const cartCount = cartLines.reduce((sum, line) => sum + line.quantity, 0)
-  const currentCartTotalRub = cartTotalRub(cartLines)
+  const currentCartTotalRub = cartTotalRub(cartLines, catalogPriceState.lookup)
 
   const writeUrl = (
     nextState: Partial<UrlState>,
@@ -143,6 +328,20 @@ export function useLandingStorefront(
 
     if (mode === "push") window.history.pushState(null, "", nextHref)
     else window.history.replaceState(null, "", nextHref)
+  }
+
+  const refreshCatalogPrices = async (options: { isCancelled?: () => boolean } = {}) => {
+    const nextPriceState = await loadCatalogPricesFromApi(
+      apiBaseUrl,
+      options.isCancelled ?? (() => false),
+    )
+    if (!nextPriceState) return null
+    if (options.isCancelled?.()) return null
+    setCatalogPriceState({
+      lookup: nextPriceState.lookup,
+      version: nextPriceState.version || CATALOG_PRICE_VERSION,
+    })
+    return nextPriceState
   }
 
   useEffect(() => {
@@ -187,6 +386,15 @@ export function useLandingStorefront(
   useEffect(() => {
     setCartLines(loadCart(publicCatalogProducts))
   }, [])
+
+  useEffect(() => {
+    let cancelled = false
+    const loadCatalogPrices = async () => refreshCatalogPrices({ isCancelled: () => cancelled })
+    void loadCatalogPrices()
+    return () => {
+      cancelled = true
+    }
+  }, [apiBaseUrl])
 
   useEffect(() => {
     saveCart(cartLines)
@@ -318,7 +526,7 @@ export function useLandingStorefront(
     if (!checkoutConsents.offerAccepted || !checkoutConsents.personalDataAccepted) {
       setCheckoutResult({
         status: "failed",
-        message: "Подтвердите условия оферты и обработку персональных данных.",
+        message: "Подтвердите условия оферты и обработки персональных данных.",
         orderIds: [],
         paymentUrl: null,
       })
@@ -330,23 +538,91 @@ export function useLandingStorefront(
       orderIds: [],
       paymentUrl: null,
     })
-    try {
-      const result = await submitCheckout(
+
+    const intentSignature = checkoutIntentSignature(cartLines, checkoutCustomer)
+    if (
+      checkoutAttemptRef.current === null ||
+      checkoutAttemptRef.current.signature !== intentSignature
+    ) {
+      checkoutAttemptRef.current = {
+        signature: intentSignature,
+        key: createCheckoutIdempotencyKey(),
+      }
+    }
+    const idempotencyKey = checkoutAttemptRef.current.key
+
+    const trySubmit = async (lookup: Record<string, number> | null, version: string) =>
+      submitCheckout(
         apiBaseUrl,
         cartLines,
         checkoutCustomer,
         checkoutConsents,
+        idempotencyKey,
+        lookup,
+        version,
+      )
+
+    try {
+      const firstResult = await trySubmit(
+        catalogPriceState.lookup,
+        catalogPriceState.version,
       )
       setCheckoutResult({
         status: "created",
-        message: result.message,
-        orderIds: result.order_ids,
-        paymentUrl: result.payment_url,
+        message: firstResult.message,
+        orderIds: firstResult.order_ids,
+        paymentUrl: firstResult.payment_url,
       })
-      if (result.payment_url) {
-        window.location.assign(result.payment_url)
+      if (firstResult.payment_url) {
+        window.location.assign(firstResult.payment_url)
       }
     } catch (error) {
+      if (isCheckoutApiError(error) && error.status === 409) {
+        const refreshed = await refreshCatalogPrices()
+        if (!refreshed) {
+          setCheckoutResult({
+            status: "failed",
+            message: error.message || "Цена обновилась. Обновите страницу и повторите попытку.",
+            orderIds: [],
+            paymentUrl: null,
+          })
+          return
+        }
+        const fallbackLookup = refreshed?.lookup ?? catalogPriceState.lookup
+        const fallbackVersion = refreshed?.version || catalogPriceState.version
+        setCheckoutResult({
+          status: "submitting",
+          message: "Цена обновлена, повторно отправляем заказ...",
+          orderIds: [],
+          paymentUrl: null,
+        })
+
+        try {
+          const retryResult = await trySubmit(fallbackLookup, fallbackVersion)
+          setCheckoutResult({
+            status: "created",
+            message: retryResult.message,
+            orderIds: retryResult.order_ids,
+            paymentUrl: retryResult.payment_url,
+          })
+          if (retryResult.payment_url) {
+            window.location.assign(retryResult.payment_url)
+          }
+          return
+        } catch (retryError) {
+          setCheckoutResult({
+            status: "failed",
+            message:
+              retryError instanceof Error
+                ? retryError.message
+                : "Не удалось создать заказ. Попробуйте ещё раз.",
+            orderIds: [],
+            paymentUrl: null,
+          })
+          return
+        }
+      }
+
       setCheckoutResult({
         status: "failed",
         message:
@@ -372,6 +648,7 @@ export function useLandingStorefront(
     sort,
     taskInput,
     heroProducts,
+    catalogPriceState,
     filteredProducts,
     selectedProduct,
     selectedImage,

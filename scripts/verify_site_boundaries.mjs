@@ -227,7 +227,11 @@ for (const file of browserFiles) {
   }
   if (
     /\bfetch\s*\(/.test(source) &&
-    !source.includes("/api/checkout/orders")
+    !source.includes("/api/checkout/orders") &&
+    !(
+      source.includes("/api/auth/sms/request") &&
+      source.includes("/api/auth/sms/verify")
+    )
   ) {
     fail(`${path.relative(siteRoot, file)} contains a non-checkout fetch call`)
   }

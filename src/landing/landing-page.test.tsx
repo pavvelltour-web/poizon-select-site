@@ -31,6 +31,26 @@ describe("LandingPage", () => {
       screen.getByText(/Выберите модель и размер, оплатите/),
     ).toBeInTheDocument()
     expect(screen.queryByText(/менеджер/i)).toBeNull()
+    const paymentMethods = screen.getByLabelText("Способы оплаты")
+    for (const method of ["МИР", "СБП", "Visa", "Mastercard"]) {
+      expect(within(paymentMethods).getByText(method)).toBeInTheDocument()
+    }
+  })
+
+  it.each([
+    ["/offer", "Публичная оферта"],
+    ["/privacy", "Политика обработки персональных данных"],
+    ["/personal-data-consent", "Согласие на обработку персональных данных"],
+    ["/cookies", "Уведомление о cookie"],
+    ["/contacts", "Контакты"],
+    ["/delivery-returns", "Доставка и возврат"],
+  ])("renders dedicated storefront route %s", (path, heading) => {
+    window.history.replaceState(null, "", path)
+    render(<LandingPage configuredBotUsername={null} />)
+
+    expect(screen.getByRole("heading", { level: 1, name: heading })).toBeInTheDocument()
+    expect(screen.getByRole("link", { name: "На главную" })).toHaveAttribute("href", "/")
+    expect(screen.queryByRole("button", { name: /Открыть карточку:/ })).toBeNull()
   })
 
   it("filters, sorts and resets the catalog deterministically", async () => {
@@ -38,7 +58,7 @@ describe("LandingPage", () => {
     render(<LandingPage configuredBotUsername={null} />)
 
     await user.click(
-      within(screen.getByRole("group", { name: "Сценарии" })).getByRole(
+      within(screen.getByRole("group", { name: "Категории товара" })).getByRole(
         "button",
         { name: /На матч/ },
       ),
@@ -112,7 +132,7 @@ describe("LandingPage", () => {
     expect(window.location.search).toBe(
       "?q=Ronaldinho&product=nike-barcelona-ronaldinho-jersey",
     )
-    expect(within(dock).getByText(/Telegram-бот временно недоступен/)).toBeInTheDocument()
+    expect(within(dock).getByText(/Оформление и оплата доступны в корзине сайта/)).toBeInTheDocument()
     expect(within(dock).queryByText(/VITE_BOT_USERNAME/)).toBeNull()
     expect(within(dock).queryByRole("link", { name: /Открыть @/ })).toBeNull()
   })
@@ -207,7 +227,7 @@ describe("LandingPage", () => {
     render(<LandingPage configuredBotUsername={null} />)
 
     await user.click(
-      within(screen.getByRole("group", { name: "Сценарии" })).getByRole(
+      within(screen.getByRole("group", { name: "Категории товара" })).getByRole(
         "button",
         { name: /Для движения/ },
       ),
@@ -267,9 +287,9 @@ describe("LandingPage", () => {
       screen.getByRole("button", { name: /Открыть карточку: Nike G.T. Cut Academy/ }),
     )
     await user.click(screen.getByRole("button", { name: "44" }))
-    await user.click(screen.getByRole("button", { name: "Добавить в корзину" }))
+    await user.click(screen.getByRole("button", { name: "Добавить в заказ" }))
 
-    const cart = screen.getByRole("dialog", { name: "Корзина" })
+    const cart = screen.getByRole("dialog", { name: "Заказ" })
     expect(within(cart).getByText(/Nike G.T. Cut Academy/)).toBeInTheDocument()
     expect(within(cart).getByText("Итого")).toBeInTheDocument()
 
@@ -285,20 +305,27 @@ describe("LandingPage", () => {
     )
     await user.click(within(cart).getByRole("button", { name: "Оплатить 24 500 ₽" }))
 
-    await waitFor(() => {
-      expect(fetchMock).toHaveBeenCalledWith(
-        "/api/checkout/orders",
-        expect.objectContaining({ method: "POST" }),
+    const lastOrderCall = await waitFor(() => {
+      const postCall = fetchMock.mock.calls.find(
+        (call) => call[1]?.method === "POST",
       )
+      expect(postCall).toBeDefined()
+      return postCall as [
+        unknown,
+        { body?: string; headers?: Record<string, string> },
+      ]
     })
-    const body = JSON.parse(fetchMock.mock.calls[0][1].body)
+    const body = JSON.parse(lastOrderCall[1].body as string)
+    expect(lastOrderCall[1].headers?.["Idempotency-Key"]).toMatch(
+      /^[\x21-\x7e]{8,128}$/,
+    )
     expect(body.customer.full_name).toBe("Павел Шустров")
     expect(body.items[0]).toMatchObject({
       product_slug: "nike-gt-cut-academy",
       size_eu: "44",
       quantity: 1,
       price_rub: 24500,
-      price_version: "2026-07-31-v1",
+      price_version: "2026-07-31-v2",
     })
     expect(within(cart).getByText("Заказ создан в CRM.")).toBeInTheDocument()
   })

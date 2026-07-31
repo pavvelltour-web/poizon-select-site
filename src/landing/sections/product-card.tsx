@@ -2,6 +2,7 @@ import { MoveRight } from "lucide-react"
 import { useState, type CSSProperties } from "react"
 
 import type { CatalogProduct } from "../../catalog/catalog"
+import type { CatalogPriceMap } from "../cart"
 import {
   getDisplayPrice,
   getSourcingMode,
@@ -13,16 +14,17 @@ interface ProductCardProps {
   featured: boolean
   index: number
   product: CatalogProduct
+  catalogPriceLookup: CatalogPriceMap | null
   openProduct: (product: CatalogProduct, trigger: HTMLButtonElement) => void
 }
-
 export function ProductCard({
   featured,
   index,
   product,
+  catalogPriceLookup,
   openProduct,
 }: ProductCardProps) {
-  const price = getDisplayPrice(product)
+  const price = getDisplayPrice(product, catalogPriceLookup)
   const [mediaReady, setMediaReady] = useState(false)
 
   return (

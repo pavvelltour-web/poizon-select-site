@@ -1,11 +1,11 @@
 export const catalogCategories = [
   { id: "all", label: "Всё" },
   { id: "court-shoes", label: "Для зала" },
-  { id: "volleyball", label: "На матч" },
-  { id: "basketball", label: "Для движения" },
+  { id: "volleyball", label: "Волейбол" },
+  { id: "basketball", label: "Баскетбол" },
   { id: "recovery", label: "Восстановление" },
   { id: "apparel", label: "Одежда" },
-  { id: "sneakers", label: "Базовые пары" },
+  { id: "sneakers", label: "Базовый стиль" },
 ] as const
 
 export type CatalogCategory = Exclude<
@@ -33,7 +33,7 @@ export const MARKET_PRICE_BASIS =
 export const PRICE_FORMULA_BASIS =
   "УСН 6%, ракета до Москвы, резерв, эквайринг и маржа KICKSBASE"
 
-export const CATALOG_PRICE_VERSION = "2026-07-31-v1"
+export const CATALOG_PRICE_VERSION = "2026-07-31-v2"
 
 export const PUBLIC_CATALOG_POLICY =
   "Публичная витрина показывает обувь и одежду. Защита, мячи, тейпы, сумки и прочие аксессуары скрыты до отдельного ассортимента."
@@ -485,7 +485,7 @@ const sportProducts: readonly ProductSource[] = [
     kind: "footwear",
     sportPriority: true,
     query: "Reebok NANO X5 training",
-    note: "Функциональный тренинг · широкий сценарий",
+    note: "Функциональный тренинг для многоразовых нагрузок",
     marketPrice: "10–13,5 тыс. ₽",
     priceBasis: MARKET_PRICE_BASIS,
   },
@@ -524,7 +524,7 @@ const sportProducts: readonly ProductSource[] = [
     kind: "footwear",
     sportPriority: true,
     query: "HOKA ORA RECOVERY SLIDE 3",
-    note: "После тренировки · мягкий recovery-сценарий",
+    note: "Для восстановления после интенсивной сессии",
     marketPrice: "5,5–7,7 тыс. ₽",
     priceBasis: MARKET_PRICE_BASIS,
   },
@@ -1198,7 +1198,7 @@ const expandedProducts: readonly ProductSource[] = [
     kind: "footwear",
     sportPriority: true,
     query: "Crocs Mellow Recovery Slide",
-    note: "Массовый recovery-сценарий · мягкая пена и понятный размерный спрос",
+    note: "Универсальная модель для восстановления и повседневного комфорта",
     marketPrice: "4,5–8 тыс. ₽",
     priceBasis: MARKET_PRICE_BASIS,
     chinaPriceYuan: 260,

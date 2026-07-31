@@ -18,6 +18,7 @@ import {
   type CatalogSort,
   type ProductKind,
 } from "../catalog/catalog"
+import type { CatalogPriceMap } from "./cart"
 import type { ActiveCategory, DisplayPrice, TaskMatch, UrlState } from "./landing-types"
 import type { LucideIcon } from "lucide-react"
 import type { SyntheticEvent } from "react"
@@ -30,23 +31,22 @@ export const sortOptions: readonly { id: CatalogSort; label: string }[] = [
 ]
 
 export const categoryCopy: Record<ActiveCategory, string> = {
-  all: "Обувь и одежда для движения",
-  "court-shoes": "Пары для зала и тренировок",
+  all: "Весь ассортимент",
+  "court-shoes": "Для зала и тренировки",
   volleyball: "Пары для матча и тренировки",
-  basketball: "Пары для зала и активного движения",
-  recovery: "Мягкая обувь после тренировки",
-  apparel: "Одежда для тренировок и дороги",
-  sneakers: "Базовые пары на каждый день",
+  basketball: "Баскетбол",
+  recovery: "Восстановление",
+  apparel: "Одежда для тренировок",
+  sneakers: "Базовые пары",
 }
-
 export const categoryDetails: Record<ActiveCategory, string> = {
-  all: "Витрина",
-  "court-shoes": "Зал и тренировки",
-  volleyball: "На матч",
-  basketball: "Для движения",
+  all: "Обувь и одежда",
+  "court-shoes": "Тренировки",
+  volleyball: "Турниры и отработка",
+  basketball: "Турниры и отработка",
   recovery: "Восстановление",
   apparel: "Одежда",
-  sneakers: "База",
+  sneakers: "Базовые",
 }
 
 export const categoryTone: Record<ActiveCategory, string> = {
@@ -86,26 +86,26 @@ type QuickFilter = {
 
 export const quickFilters: readonly QuickFilter[] = [
   {
-    label: "Пара для зала",
-    detail: "тренировки и игры",
+    label: "Кроссовки для зала",
+    detail: "тренировки и матчевые дни",
     category: "court-shoes",
     icon: Zap,
   },
   {
-    label: "На матч",
-    detail: "на матч",
+    label: "Волейбольные пары",
+    detail: "бег и смена направления",
     category: "volleyball",
     icon: Trophy,
   },
   {
-    label: "Для движения",
-    detail: "тренировка в зале",
+    label: "Баскетбольные пары",
+    detail: "для динамики и ускорения",
     category: "basketball",
     icon: CircleDot,
   },
   {
-    label: "После зала",
-    detail: "слайды и мягкие пары",
+    label: "Для восстановления",
+    detail: "после сессии и слайдов",
     category: "recovery",
     icon: Waves,
   },
@@ -125,8 +125,8 @@ export const quickFilters: readonly QuickFilter[] = [
 ]
 
 export const taskChips = [
-  "пара для зала",
-  "на матч",
+  "для зала",
+  "для волейбола",
   "на тренировку",
   "после тренировки",
 ] as const
@@ -175,11 +175,22 @@ export function setImageFallback(
   if (event.currentTarget.getAttribute("src") === fallbackUrl) return
   event.currentTarget.src = fallbackUrl
 }
-
-export function getDisplayPrice(product: CatalogProduct): DisplayPrice {
+function getCatalogLinePrice(
+  product: CatalogProduct,
+  catalogPriceLookup: CatalogPriceMap | null = null,
+): number {
+  if (!catalogPriceLookup) return getCatalogPriceRub(product)
+  const override = catalogPriceLookup[product.slug]
+  if (!Number.isFinite(override) || override <= 0) return getCatalogPriceRub(product)
+  return override
+}
+export function getDisplayPrice(
+  product: CatalogProduct,
+  catalogPriceLookup: CatalogPriceMap | null = null,
+): DisplayPrice {
   return {
     label: "Цена",
-    value: formatRub(getCatalogPriceRub(product)),
+    value: formatRub(getCatalogLinePrice(product, catalogPriceLookup)),
     detail: "СДЭК рассчитывается отдельно",
   }
 }
@@ -204,16 +215,6 @@ export function getProductUse(product: CatalogProduct): string {
   if (product.kind === "apparel") return "Для тренировок, дороги и повседневного слоя"
   if (product.kind === "accessory") return "Для тренировки и дороги"
   return "Для повседневного движения"
-}
-
-export function getProductScenario(product: CatalogProduct): string {
-  if (product.category === "basketball") return "Для движения"
-  if (product.category === "volleyball") return "На матч"
-  if (product.category === "recovery") return "После зала"
-  if (product.category === "apparel") return "Одежда"
-  if (product.category === "training") return "Тренировка"
-  if (product.category === "lifestyle") return "Базовая пара"
-  return kindLabels[product.kind]
 }
 
 export function getSourcingMode(product: CatalogProduct): string {
@@ -250,7 +251,11 @@ function productSearchText(product: CatalogProduct): string {
   )
 }
 
-function scoreTaskProduct(product: CatalogProduct, task: string): TaskMatch | null {
+function scoreTaskProduct(
+  product: CatalogProduct,
+  task: string,
+  catalogPriceLookup: CatalogPriceMap | null = null,
+): TaskMatch | null {
   const normalizedTask = normalizedText(task)
   if (!normalizedTask.trim()) return null
 
@@ -289,7 +294,8 @@ function scoreTaskProduct(product: CatalogProduct, task: string): TaskMatch | nu
     if (product.category === "recovery") add(11)
   }
   if (/бюджет|дешев|до\s?\d|недорог/.test(normalizedTask)) {
-    if (getCatalogPriceRub(product) < 12_000) add(8)
+    const price = getCatalogLinePrice(product, catalogPriceLookup)
+    if (price < 12_000) add(8)
   }
 
   const stopWords = new Set(["для", "под", "пара", "пары", "нужна", "надо"])
@@ -303,11 +309,11 @@ function scoreTaskProduct(product: CatalogProduct, task: string): TaskMatch | nu
   if (score <= 0) return null
   const reason =
     product.category === "recovery"
-      ? "после тренировки"
+      ? "для восстановления"
       : product.category === "volleyball"
         ? "для матча и тренировки"
         : product.category === "basketball"
-          ? "для движения в зале"
+          ? "для баскетбола"
           : product.kind === "apparel"
             ? "одежда"
             : product.kind === "footwear"
@@ -319,14 +325,15 @@ function scoreTaskProduct(product: CatalogProduct, task: string): TaskMatch | nu
 export function findTaskMatches(
   products: readonly CatalogProduct[],
   task: string,
+  catalogPriceLookup: CatalogPriceMap | null = null,
 ): TaskMatch[] {
   return products
-    .map((product) => scoreTaskProduct(product, task))
+    .map((product) => scoreTaskProduct(product, task, catalogPriceLookup))
     .filter((match): match is TaskMatch => match !== null)
     .sort((left, right) => {
       if (right.score !== left.score) return right.score - left.score
-      const leftPrice = getCatalogPriceRub(left.product)
-      const rightPrice = getCatalogPriceRub(right.product)
+      const leftPrice = getCatalogLinePrice(left.product, catalogPriceLookup)
+      const rightPrice = getCatalogLinePrice(right.product, catalogPriceLookup)
       return leftPrice - rightPrice
     })
 }

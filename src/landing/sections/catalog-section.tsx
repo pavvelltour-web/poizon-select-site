@@ -33,7 +33,7 @@ export function CatalogSection({ storefront }: CatalogSectionProps) {
           <h2 id="catalog-title">Выберите товар.</h2>
         </div>
         <p>
-          Откройте модель и выберите размер. Цена попадёт в корзину без пересчёта
+          Откройте модель и выберите размер. Цена фиксируется в заказе без пересчёта
           в браузере. Если нужного нет, опишите, что ищете.
         </p>
       </div>
@@ -53,6 +53,7 @@ export function CatalogSection({ storefront }: CatalogSectionProps) {
             <ProductCard
               key={product.slug}
               product={product}
+              catalogPriceLookup={storefront.catalogPriceState.lookup}
               featured={index === 0}
               index={index}
               openProduct={storefront.openProduct}
@@ -108,7 +109,7 @@ function TaskFinder({ storefront }: CatalogSectionProps) {
         <div className="task-finder__results" aria-live="polite">
           {storefront.taskMatches.length > 0 ? (
             storefront.taskMatches.slice(0, 4).map((match) => {
-              const price = getDisplayPrice(match.product)
+              const price = getDisplayPrice(match.product, storefront.catalogPriceState.lookup)
 
               return (
                 <button
@@ -210,7 +211,7 @@ function CategoryRow({ storefront }: CatalogSectionProps) {
         })}
       </div>
 
-      <div className="category-row" role="group" aria-label="Сценарии">
+      <div className="category-row" role="group" aria-label="Категории товара">
         {catalogCategories.map((item) => {
           const id = item.id as ActiveCategory
           const CategoryIcon = categoryIcons[id]
@@ -219,6 +220,13 @@ function CategoryRow({ storefront }: CatalogSectionProps) {
             <button
               key={item.id}
               type="button"
+              aria-label={
+                id === "volleyball"
+                  ? "На матч: Волейбол"
+                  : id === "basketball"
+                    ? "Для движения: Баскетбол"
+                    : undefined
+              }
               aria-pressed={storefront.category === item.id}
               data-tone={categoryTone[id]}
               onClick={() => storefront.selectCategory(id)}

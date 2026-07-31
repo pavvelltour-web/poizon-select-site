@@ -36,6 +36,34 @@ export interface CheckoutResponse {
   payment_url: string | null
   message: string
 }
+export interface CheckoutApiError extends Error {
+  status: number
+  detail?: string | null
+}
+export function isCheckoutApiError(error: unknown): error is CheckoutApiError {
+  return (
+    !!error &&
+    typeof error === "object" &&
+    "status" in error &&
+    typeof (error as { status?: unknown }).status === "number"
+  )
+}
+interface CheckoutFailureBody {
+  detail?: string
+  message?: string
+}
+
+export type CatalogPriceMap = Record<string, number>
+
+export function getEffectiveLinePrice(
+  product: CatalogProduct,
+  catalogPrices: CatalogPriceMap | null,
+): number {
+  if (!catalogPrices) return getCatalogPriceRub(product)
+  const override = catalogPrices[product.slug]
+  if (!Number.isFinite(override) || override <= 0) return getCatalogPriceRub(product)
+  return override
+}
 
 export const cartStorageKey = "kicksbase-cart-v1"
 
@@ -72,9 +100,12 @@ export function updateCartQuantity(
   )
 }
 
-export function cartTotalRub(lines: readonly CartLine[]): number {
+export function cartTotalRub(
+  lines: readonly CartLine[],
+  catalogPrices: CatalogPriceMap | null = null,
+): number {
   return lines.reduce(
-    (sum, line) => sum + getCatalogPriceRub(line.product) * line.quantity,
+    (sum, line) => sum + getEffectiveLinePrice(line.product, catalogPrices) * line.quantity,
     0,
   )
 }
@@ -110,6 +141,8 @@ export function buildCheckoutPayload(
   lines: readonly CartLine[],
   customer: CheckoutCustomer,
   consents: CheckoutConsents,
+  catalogPrices: CatalogPriceMap | null = null,
+  priceVersion: string = CATALOG_PRICE_VERSION,
 ) {
   return {
     customer: {
@@ -127,8 +160,8 @@ export function buildCheckoutPayload(
       brand: line.product.brand,
       product_kind: line.product.kind,
       size_eu: line.size,
-      price_rub: getCatalogPriceRub(line.product),
-      price_version: CATALOG_PRICE_VERSION,
+      price_rub: getEffectiveLinePrice(line.product, catalogPrices),
+      price_version: priceVersion || CATALOG_PRICE_VERSION,
       quantity: line.quantity,
       image_url: line.product.image,
     })),
@@ -140,19 +173,34 @@ export async function submitCheckout(
   lines: readonly CartLine[],
   customer: CheckoutCustomer,
   consents: CheckoutConsents,
+  idempotencyKey: string,
+  catalogPrices: CatalogPriceMap | null = null,
+  priceVersion: string = CATALOG_PRICE_VERSION,
 ): Promise<CheckoutResponse> {
+  if (!/^[\x21-\x7e]{8,128}$/.test(idempotencyKey)) {
+    throw new Error("Некорректный ключ безопасного повтора заказа")
+  }
   const endpoint = `${apiBaseUrl.replace(/\/$/, "")}/api/checkout/orders`
   const response = await fetch(endpoint, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      "Idempotency-Key": idempotencyKey,
+    },
     credentials: "include",
-    body: JSON.stringify(buildCheckoutPayload(lines, customer, consents)),
+    body: JSON.stringify(
+      buildCheckoutPayload(lines, customer, consents, catalogPrices, priceVersion),
+    ),
   })
   const body = (await response.json().catch(() => null)) as
-    | (CheckoutResponse & { detail?: string })
+    | (CheckoutResponse & CheckoutFailureBody)
     | null
   if (!response.ok || body === null) {
-    throw new Error(body?.detail || body?.message || "Не удалось создать заказ")
+    const message = body?.detail || body?.message || "Не удалось создать заказ"
+    const error = new Error(message) as CheckoutApiError
+    error.status = response.status
+    error.detail = body?.detail || body?.message
+    throw error
   }
   return body
 }

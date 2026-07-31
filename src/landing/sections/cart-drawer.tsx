@@ -1,21 +1,24 @@
 import { Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react"
 import { motion } from "motion/react"
 
-import { formatRub, getCatalogPriceRub } from "../../catalog/catalog"
+import { formatRub } from "../../catalog/catalog"
 import { resolveAssetUrl } from "../landing-data"
+import { getEffectiveLinePrice } from "../cart"
 import type { StorefrontState } from "../landing-types"
 
 interface CartDrawerProps {
   storefront: StorefrontState
 }
-
 export function CartDrawer({ storefront }: CartDrawerProps) {
   if (!storefront.isCartOpen) return null
 
+  const email = storefront.checkoutCustomer.email.trim()
+  const emailIsValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
   const canSubmit =
     storefront.cartLines.length > 0 &&
     storefront.checkoutCustomer.fullName.trim().length >= 2 &&
     storefront.checkoutCustomer.phone.trim().length >= 10 &&
+    emailIsValid &&
     storefront.checkoutConsents.offerAccepted &&
     storefront.checkoutConsents.personalDataAccepted &&
     storefront.checkoutResult.status !== "submitting"
@@ -26,7 +29,7 @@ export function CartDrawer({ storefront }: CartDrawerProps) {
         className="cart-scrim"
         type="button"
         onClick={storefront.closeCart}
-        aria-label="Закрыть корзину"
+        aria-label="Закрыть заказ"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -44,24 +47,24 @@ export function CartDrawer({ storefront }: CartDrawerProps) {
         <div className="cart-drawer__head">
           <span>
             <ShoppingBag aria-hidden="true" size={22} />
-            <strong id="cart-title">Корзина</strong>
+            <strong id="cart-title">Заказ</strong>
           </span>
-          <button type="button" onClick={storefront.closeCart} aria-label="Закрыть корзину">
+          <button type="button" onClick={storefront.closeCart} aria-label="Закрыть заказ">
             <X aria-hidden="true" size={20} />
           </button>
         </div>
 
         {storefront.cartLines.length === 0 ? (
           <div className="cart-empty">
-            <h3>Корзина пустая.</h3>
-            <p>Выберите товар, размер и добавьте его в корзину.</p>
+            <h3>Заказ пуст.</h3>
+            <p>Выберите товар и размер, добавьте в заказ.</p>
             <button type="button" className="button button--primary" onClick={storefront.closeCart}>
               Вернуться к товарам
             </button>
           </div>
         ) : (
           <>
-            <div className="cart-lines" aria-label="Товары в корзине">
+            <div className="cart-lines" aria-label="Товары в заказе">
               {storefront.cartLines.map((line) => (
                 <article className="cart-line" key={line.id}>
                   <img src={resolveAssetUrl(line.product.image)} width="96" height="72" alt="" />
@@ -70,7 +73,11 @@ export function CartDrawer({ storefront }: CartDrawerProps) {
                       {line.product.brand} {line.product.name}
                     </strong>
                     <span>EU {line.size}</span>
-                    <em>{formatRub(getCatalogPriceRub(line.product))}</em>
+                    <em>
+                      {formatRub(
+                        getEffectiveLinePrice(line.product, storefront.catalogPriceState.lookup),
+                      )}
+                    </em>
                   </div>
                   <div className="cart-line__controls" aria-label="Количество">
                     <button
@@ -93,7 +100,7 @@ export function CartDrawer({ storefront }: CartDrawerProps) {
                     className="cart-line__remove"
                     type="button"
                     onClick={() => storefront.removeCartLine(line.id)}
-                    aria-label="Удалить товар из корзины"
+                    aria-label="Удалить товар из заказа"
                   >
                     <Trash2 aria-hidden="true" size={16} />
                   </button>
@@ -139,6 +146,8 @@ export function CartDrawer({ storefront }: CartDrawerProps) {
               <label>
                 <span>Email для чека</span>
                 <input
+                  aria-label="Email для чека"
+                  aria-describedby="checkout-email-help"
                   value={storefront.checkoutCustomer.email}
                   onChange={(event) =>
                     storefront.updateCheckoutCustomer("email", event.target.value)
@@ -146,7 +155,11 @@ export function CartDrawer({ storefront }: CartDrawerProps) {
                   autoComplete="email"
                   inputMode="email"
                   type="email"
+                  required
                 />
+                <small id="checkout-email-help">
+                  На этот адрес придёт электронный чек. Пример: name@example.ru
+                </small>
               </label>
 
               <label className="checkout-form__check">
@@ -158,7 +171,7 @@ export function CartDrawer({ storefront }: CartDrawerProps) {
                   }
                 />
                 <span>
-                  Принимаю условия <a href="#legal-offer">публичной оферты</a>.
+                  Принимаю условия <a href="/offer">публичной оферты</a>.
                 </span>
               </label>
               <label className="checkout-form__check">
@@ -171,7 +184,7 @@ export function CartDrawer({ storefront }: CartDrawerProps) {
                 />
                 <span>
                   Даю отдельное согласие на{" "}
-                  <a href="#personal-data-consent">обработку персональных данных</a>.
+                  <a href="/personal-data-consent">обработку персональных данных</a>.
                 </span>
               </label>
               <p className="checkout-form__consent">

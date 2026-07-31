@@ -5,6 +5,7 @@ import type {
   CheckoutConsents,
   CheckoutCustomer,
   CheckoutResult,
+  CatalogPriceMap,
 } from "./cart"
 
 export type ActiveCategory = "all" | CatalogCategory
@@ -20,6 +21,11 @@ export interface DisplayPrice {
   label: string
   value: string
   detail: string
+}
+
+export interface CatalogPriceState {
+  lookup: CatalogPriceMap | null
+  version: string
 }
 
 export interface TaskMatch {
@@ -47,6 +53,7 @@ export interface StorefrontState {
   selectedSize: string | null
   selectedSizeOptions: readonly string[]
   selectedProductPrice: DisplayPrice | null
+  catalogPriceState: CatalogPriceState
   cartLines: CartLine[]
   cartCount: number
   cartTotalRub: number

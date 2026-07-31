@@ -13,7 +13,6 @@ import { motion } from "motion/react"
 import { useEffect, useRef, useState } from "react"
 
 import {
-  getProductScenario,
   getProductUse,
   getSourcingMode,
   kindLabels,
@@ -53,12 +52,29 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
         event.preventDefault()
         event.stopPropagation()
         setLightboxOpen(false)
+        return
+      }
+      if (event.key === "ArrowLeft") {
+        event.preventDefault()
+        storefront.showPreviousProductImage()
+      } else if (event.key === "ArrowRight") {
+        event.preventDefault()
+        storefront.showNextProductImage()
+      } else if (event.key === "+" || event.key === "=") {
+        event.preventDefault()
+        setLightboxZoom((zoom) => Math.min(zoom + 0.25, 2.5))
+      } else if (event.key === "-") {
+        event.preventDefault()
+        setLightboxZoom((zoom) => Math.max(zoom - 0.25, 1))
+      } else if (event.key === "0") {
+        event.preventDefault()
+        setLightboxZoom(1)
       }
     }
 
     document.addEventListener("keydown", onLightboxKeyDown, true)
     return () => document.removeEventListener("keydown", onLightboxKeyDown, true)
-  }, [isLightboxOpen])
+  }, [isLightboxOpen, storefront])
 
   if (!product) return null
 
@@ -219,7 +235,6 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
         >
           <div className="product-sheet__identity">
             <span>{product.sportPriority ? "Для зала" : kindLabels[product.kind]}</span>
-              <span>{getProductScenario(product)}</span>
           </div>
           <h2 id="product-sheet-title" ref={storefront.sheetHeadingRef} tabIndex={-1}>
             {product.brand} {product.name}
@@ -231,7 +246,7 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
               <strong>Размер</strong>
               <em>Выберите размер для покупки и сравнения.</em>
             </span>
-            <div className="product-size__grid">
+            <div className="product-size__grid" aria-label="Размеры на выбор">
               {storefront.selectedSizeOptions.map((size) => (
                 <button
                   key={size}
@@ -258,15 +273,11 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
               disabled={!storefront.selectedSize}
             >
               <ShoppingCart aria-hidden="true" size={18} />
-              {storefront.selectedSize ? "Добавить в корзину" : "Выберите размер выше"}
+              {storefront.selectedSize ? "Добавить в заказ" : "Выберите размер выше"}
             </button>
           </div>
 
           <dl className="product-facts">
-            <div>
-              <dt>Сценарий</dt>
-              <dd>{getProductScenario(product)}</dd>
-            </div>
             <div>
               <dt>Направление</dt>
               <dd>{kindLabels[product.kind]}</dd>
@@ -276,8 +287,8 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
               <dd>{storefront.selectedSize ?? "Не выбран"}</dd>
             </div>
             <div>
-              <dt>Источники</dt>
-              <dd>{getSourcingMode(product)}, склад Шанхай</dd>
+              <dt>Отправка</dt>
+              <dd>{getSourcingMode(product)}</dd>
             </div>
             <div>
               <dt>{price?.label}</dt>
@@ -286,15 +297,14 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
           </dl>
 
           <p className="product-sheet__fineprint">
-            Цена товара фиксируется в заказе. Доставка и обработка рассчитывается
-            отдельно.
+            Цена товара фиксируется в заказе. Стоимость доставки показывается до оплаты.
           </p>
           <p className="product-sheet__order-proof">
-            Заказ и статус обработки автоматически отправляются в CRM, затем в Telegram-бот.
+            Заказ создаётся на сайте. После оформления откроется доступный способ оплаты.
           </p>
 
           <label className="request-box">
-            <span>Текст для Telegram-бота</span>
+            <span>Запрос для Telegram</span>
             <textarea readOnly value={storefront.request} rows={3} />
           </label>
 
@@ -306,7 +316,7 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
               </button>
               <button type="button" className="button button--quiet" onClick={storefront.openCart}>
                 <ShoppingCart aria-hidden="true" size={18} />
-                Открыть корзину
+                Открыть заказ
               </button>
               <a className="button button--primary" href={botUrl} target="_blank" rel="noreferrer">
                 <Send aria-hidden="true" size={18} />
@@ -321,10 +331,10 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
               </button>
               <button type="button" className="button button--primary" onClick={storefront.openCart}>
                 <ShoppingCart aria-hidden="true" size={18} />
-                Открыть корзину
+                Открыть заказ
               </button>
               <p className="product-sheet__demo">
-                Telegram-бот временно недоступен. Отправьте заявку через корзину или копируйте вручную.
+                Оформление и оплата доступны в корзине сайта.
               </p>
             </div>
           )}

@@ -1,4 +1,4 @@
-import { BadgeCheck, Medal, MoveRight, Send, ShoppingBag } from "lucide-react"
+import { ArrowUpRight, BadgeCheck, Send, ShoppingBag } from "lucide-react"
 
 import {
   getDisplayPrice,
@@ -16,15 +16,19 @@ export function HeroSection({ storefront }: HeroSectionProps) {
   return (
     <section className="shop-hero" aria-labelledby="hero-title">
       <div className="shop-hero__copy">
-        <h1 id="hero-title">KICKSBASE</h1>
+        <span className="shop-hero__eyebrow">Оригинальная экипировка</span>
+        <h1 id="hero-title">
+          <span>KICKS</span>
+          <span>BASE</span>
+        </h1>
         <p className="shop-hero__lead">
-          Оригинальная обувь и одежда для спортсменов, которым важны размер,
-          качество и понятная цена.
+          Выберите модель и размер, оплатите на сайте и получите заказ. Цена и условия
+          известны до оплаты.
         </p>
         <div className="hero-actions">
           <a className="button button--primary" href="#catalog">
             <ShoppingBag aria-hidden="true" size={18} />
-            Выбрать товар
+            Перейти к товарам
           </a>
           {storefront.botUrl ? (
             <a
@@ -34,35 +38,29 @@ export function HeroSection({ storefront }: HeroSectionProps) {
               rel="noopener noreferrer"
             >
               <Send aria-hidden="true" size={18} />
-              Открыть Telegram
+              Подбор в Telegram
             </a>
           ) : null}
         </div>
-        <div className="pavel-note">
-          <Medal aria-hidden="true" size={18} />
-          <span>Выберите модель и размер, оплатите заказ на защищённой странице.</span>
-        </div>
-        <div className="hero-marks" aria-label="Преимущества каталога">
-          {["Подбор под задачу", "Цена до оплаты", "Автоматический заказ"].map((item) => (
-            <span key={item}>
-              <BadgeCheck aria-hidden="true" size={16} />
-              {item}
-            </span>
-          ))}
-        </div>
+        <p className="shop-hero__note">
+          <BadgeCheck aria-hidden="true" size={18} />
+          Подлинность проверяется до отправки
+        </p>
       </div>
 
-      <div className="shop-hero__media">
-        <div className="hero-product-stage hero-product-stage--atmosphere">
-          <img src="brand/kicksbase-hero-court-v2.webp" width="1792" height="1024" alt="" />
-        </div>
-        <div className="hero-board" aria-label="Быстрый выбор товара">
-          <div className="hero-board__head">
+      <div className="hero-commerce" aria-label="Популярные товары">
+        <div className="hero-commerce__head">
+          <div>
             <span>Быстрый выбор</span>
-            <small>3 товара</small>
+            <h2>Популярные модели</h2>
           </div>
+          <a href="#catalog">
+            Все товары <ArrowUpRight size={17} aria-hidden="true" />
+          </a>
+        </div>
+        <div className="hero-commerce__grid">
           {storefront.heroProducts.map((product) => {
-            const price = getDisplayPrice(product)
+            const price = getDisplayPrice(product, storefront.catalogPriceState.lookup)
 
             return (
               <button
@@ -71,21 +69,22 @@ export function HeroSection({ storefront }: HeroSectionProps) {
                 type="button"
                 onClick={(event) => storefront.openProduct(product, event.currentTarget)}
               >
-                <img
-                  src={resolveAssetUrl(product.image)}
-                  width="1200"
-                  height="900"
-                  alt=""
-                  onError={(event) => setImageFallback(event, product.fallbackImage)}
-                />
-                <span>
-                  <small>{getProductBadge(product)}</small>
+                <span className="hero-pick__image">
+                  <img
+                    src={resolveAssetUrl(product.image)}
+                    width="1200"
+                    height="900"
+                    alt=""
+                    onError={(event) => setImageFallback(event, product.fallbackImage)}
+                  />
+                </span>
+                <span className="hero-pick__body">
+                  <span>{getProductBadge(product)}</span>
                   <strong>
                     {product.brand} {product.name}
                   </strong>
-                  <em>{price.value}</em>
+                  <small>{price.value}</small>
                 </span>
-                <MoveRight aria-hidden="true" size={18} />
               </button>
             )
           })}

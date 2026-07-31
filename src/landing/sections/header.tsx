@@ -1,4 +1,5 @@
-import { Send, ShoppingBag, ShoppingCart } from "lucide-react"
+import { LogIn, Send, ShoppingBag, ShoppingCart, X } from "lucide-react"
+import { useEffect, useState } from "react"
 
 interface HeaderProps {
   botUrl: string | null
@@ -7,9 +8,99 @@ interface HeaderProps {
 }
 
 export function Header({ botUrl, cartCount, openCart }: HeaderProps) {
+  const [loginOpen, setLoginOpen] = useState(false)
+  const [phone, setPhone] = useState("")
+  const [code, setCode] = useState("")
+  const [challengeId, setChallengeId] = useState("")
+  const [personalDataAccepted, setPersonalDataAccepted] = useState(false)
+  const [loginStatus, setLoginStatus] = useState<"idle" | "loading" | "error" | "verified">("idle")
+  const [loginMessage, setLoginMessage] = useState("")
+  const [retryAfter, setRetryAfter] = useState(0)
+
+  useEffect(() => {
+    if (!loginOpen) return
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setLoginOpen(false)
+    }
+    document.addEventListener("keydown", closeOnEscape)
+    return () => document.removeEventListener("keydown", closeOnEscape)
+  }, [loginOpen])
+
+  useEffect(() => {
+    if (retryAfter <= 0) return
+    const timer = window.setInterval(() => setRetryAfter((value) => Math.max(0, value - 1)), 1000)
+    return () => window.clearInterval(timer)
+  }, [retryAfter])
+
+  const requestCode = async () => {
+    if (!personalDataAccepted || phone.trim().length < 10) {
+      setLoginStatus("error")
+      setLoginMessage("Укажите телефон и подтвердите обработку персональных данных.")
+      return
+    }
+    setLoginStatus("loading")
+    setLoginMessage("")
+    try {
+      const response = await fetch("/api/auth/sms/request", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          phone: phone.trim(),
+          personal_data_accepted: true,
+          consent_version: "2026-07-31",
+        }),
+      })
+      const payload = (await response.json().catch(() => ({}))) as {
+        challenge_id?: string
+        message?: string
+        detail?: string
+        retry_after_seconds?: number
+      }
+      if (response.status !== 202 || !payload.challenge_id) {
+        throw new Error(payload.detail || payload.message || "Не удалось отправить код. Попробуйте позже.")
+      }
+      setChallengeId(payload.challenge_id)
+      setRetryAfter(payload.retry_after_seconds || 0)
+      setLoginStatus("idle")
+      setLoginMessage(payload.message || "Код отправлен.")
+    } catch (error) {
+      setLoginStatus("error")
+      setLoginMessage(error instanceof Error ? error.message : "Сервис входа временно недоступен.")
+    }
+  }
+
+  const verifyCode = async () => {
+    if (!challengeId || code.trim().length < 4) return
+    setLoginStatus("loading")
+    setLoginMessage("")
+    try {
+      const response = await fetch("/api/auth/sms/verify", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ challenge_id: challengeId, code: code.trim() }),
+      })
+      const payload = (await response.json().catch(() => ({}))) as {
+        authenticated?: boolean
+        message?: string
+        detail?: string
+      }
+      if (!response.ok || payload.authenticated !== true) {
+        throw new Error(payload.detail || payload.message || "Неверный или просроченный код.")
+      }
+      setLoginStatus("verified")
+      setLoginMessage("Вход выполнен.")
+    } catch (error) {
+      setLoginStatus("error")
+      setLoginMessage(error instanceof Error ? error.message : "Не удалось проверить код.")
+    }
+  }
+
   return (
+    <>
     <header className="kb-header">
-      <a className="kb-brand" href="./" aria-label="KICKSBASE">
+      <a className="kb-brand" href="/" aria-label="KICKSBASE">
         <img src="brand/kicksbase-logo.webp" width="80" height="80" alt="" />
         <span>
           <strong>KICKSBASE</strong>
@@ -18,15 +109,19 @@ export function Header({ botUrl, cartCount, openCart }: HeaderProps) {
       </a>
 
       <nav className="kb-nav" aria-label="Основная навигация">
-        <a href="#catalog">Товары</a>
-        <a href="#how-it-works">Заказ</a>
-        <a href="#trust">Условия</a>
+        <a href="/#catalog">Товары</a>
+        <a href="/#how-it-works">Заказ</a>
+        <a href="/#trust">Условия</a>
       </nav>
 
       <div className="kb-header__actions">
+        <button className="kb-header__login" type="button" onClick={() => setLoginOpen(true)}>
+          <LogIn aria-hidden="true" size={17} />
+          Войти
+        </button>
         <button className="kb-header__cart" type="button" onClick={openCart}>
           <ShoppingCart aria-hidden="true" size={17} />
-          Корзина
+          Заказ
           {cartCount > 0 ? <span>{cartCount}</span> : null}
         </button>
         {botUrl ? (
@@ -40,12 +135,87 @@ export function Header({ botUrl, cartCount, openCart }: HeaderProps) {
             Telegram
           </a>
         ) : (
-          <a className="kb-header__cta" href="#catalog">
+          <a className="kb-header__cta" href="/#catalog">
             <ShoppingBag aria-hidden="true" size={17} />
             Выбрать
           </a>
         )}
       </div>
     </header>
+    {loginOpen ? (
+      <div className="sms-login" role="dialog" aria-modal="true" aria-labelledby="sms-login-title">
+        <button className="sms-login__scrim" type="button" onClick={() => setLoginOpen(false)} aria-label="Закрыть вход" />
+        <form
+          className="sms-login__panel"
+          onSubmit={(event) => {
+            event.preventDefault()
+            void (challengeId ? verifyCode() : requestCode())
+          }}
+        >
+          <div className="sms-login__head">
+            <div>
+              <small>Личный кабинет</small>
+              <h2 id="sms-login-title">Вход по SMS</h2>
+            </div>
+            <button type="button" onClick={() => setLoginOpen(false)} aria-label="Закрыть вход">
+              <X aria-hidden="true" size={20} />
+            </button>
+          </div>
+          <label>
+            <span>Телефон</span>
+            <input
+              type="tel"
+              inputMode="tel"
+              autoComplete="tel"
+              value={phone}
+              onChange={(event) => setPhone(event.target.value)}
+              disabled={Boolean(challengeId) || loginStatus === "verified"}
+              placeholder="+7 999 000-00-00"
+              required
+            />
+          </label>
+          {!challengeId ? (
+            <label className="sms-login__consent">
+              <input
+                type="checkbox"
+                checked={personalDataAccepted}
+                onChange={(event) => setPersonalDataAccepted(event.target.checked)}
+              />
+              <span>
+                Согласен на обработку телефона для сервисного SMS-входа.{" "}
+                <a href="/personal-data-consent">Условия согласия</a>.
+              </span>
+            </label>
+          ) : (
+            <label>
+              <span>Код из SMS</span>
+              <input
+                type="text"
+                inputMode="numeric"
+                autoComplete="one-time-code"
+                value={code}
+                onChange={(event) => setCode(event.target.value.replace(/\D/g, "").slice(0, 8))}
+                required
+                autoFocus
+              />
+            </label>
+          )}
+          <button className="button button--primary" type="submit" disabled={loginStatus === "loading" || loginStatus === "verified"}>
+            {loginStatus === "loading" ? "Подождите..." : challengeId ? "Подтвердить код" : "Получить код"}
+          </button>
+          {challengeId && loginStatus !== "verified" ? (
+            <button className="sms-login__resend" type="button" onClick={() => void requestCode()} disabled={loginStatus === "loading" || retryAfter > 0}>
+              {retryAfter > 0 ? "Повторить через " + retryAfter + " с" : "Отправить код ещё раз"}
+            </button>
+          ) : null}
+          {loginMessage ? (
+            <p className={"sms-login__message sms-login__message--" + loginStatus} role={loginStatus === "error" ? "alert" : "status"}>
+              {loginMessage}
+            </p>
+          ) : null}
+        </form>
+      </div>
+    ) : null}
+    </>
   )
 }
