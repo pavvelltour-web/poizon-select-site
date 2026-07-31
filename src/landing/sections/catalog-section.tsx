@@ -10,6 +10,7 @@ import {
   categoryIcons,
   categoryTone,
   getDisplayPrice,
+  getProductPath,
   quickFilters,
   resolveAssetUrl,
   setImageFallback,
@@ -33,8 +34,8 @@ export function CatalogSection({ storefront }: CatalogSectionProps) {
           <h2 id="catalog-title">Выберите товар.</h2>
         </div>
         <p>
-          Откройте модель и выберите размер. Цена фиксируется в заказе без пересчёта
-          в браузере. Если нужного нет, опишите, что ищете.
+          Откройте модель, посмотрите фотографии и выберите размер. Если нужного
+          товара нет, введите бренд, модель или задачу в поиске.
         </p>
       </div>
 
@@ -56,7 +57,6 @@ export function CatalogSection({ storefront }: CatalogSectionProps) {
               catalogPriceLookup={storefront.catalogPriceState.lookup}
               featured={index === 0}
               index={index}
-              openProduct={storefront.openProduct}
             />
           ))}
         </div>
@@ -65,7 +65,7 @@ export function CatalogSection({ storefront }: CatalogSectionProps) {
           <h3>Ничего не нашли по этому запросу.</h3>
           <p>
             Попробуйте бренд, модель, размер или задачу: ASICS, Mizuno, Nike,
-            зал, игровой день, recovery.
+            зал, игровой день, восстановление.
           </p>
           <button type="button" className="button button--quiet" onClick={storefront.resetCatalog}>
             <RotateCcw aria-hidden="true" size={18} />
@@ -94,7 +94,7 @@ function TaskFinder({ storefront }: CatalogSectionProps) {
           type="search"
           value={storefront.taskInput}
           onChange={(event) => storefront.setTaskInput(event.target.value)}
-          placeholder="Например: для зала, на матч или после тренировки"
+          placeholder="Бренд, модель, задача, размер, цвет и бюджет"
           autoComplete="off"
         />
       </label>
@@ -112,10 +112,10 @@ function TaskFinder({ storefront }: CatalogSectionProps) {
               const price = getDisplayPrice(match.product, storefront.catalogPriceState.lookup)
 
               return (
-                <button
+                <a
                   key={match.product.slug}
-                  type="button"
-                  onClick={(event) => storefront.openProduct(match.product, event.currentTarget)}
+                  href={getProductPath(match.product)}
+                  aria-label={`Открыть товар: ${match.product.brand} ${match.product.name}`}
                 >
                   <img
                     src={resolveAssetUrl(match.product.image)}
@@ -132,11 +132,11 @@ function TaskFinder({ storefront }: CatalogSectionProps) {
                     <em>{price.value}</em>
                   </span>
                   <MoveRight aria-hidden="true" size={18} />
-                </button>
+                </a>
               )
             })
           ) : (
-            <p>Не нашли точного совпадения. Опишите покрытие, размер или модель.</p>
+            <p>Не нашли точного совпадения. Укажите задачу, размер или модель.</p>
           )}
         </div>
       ) : null}

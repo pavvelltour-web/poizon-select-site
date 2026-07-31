@@ -42,6 +42,7 @@ export interface CatalogImage {
   src: string
   alt: string
   source?: string
+  contentSignal?: string
 }
 
 export interface PriceQuote {
@@ -248,6 +249,56 @@ function nikeGallery(name: string, urls: readonly string[]): CatalogImage[] {
   }))
 }
 
+const auditedDuplicatePrimaryFrames = new Set([
+  "asics-metarise-2",
+  "asics-netburner-ballistic-ff-4",
+  "asics-sky-elite-ff-3",
+  "asics-sky-elite-ff-mt-3",
+  "hoka-ora-recovery-slide-3",
+  "jordan-luka-4",
+  "mizuno-wave-luminous-3",
+  "mizuno-wave-voltage-2",
+  "nike-ja-3",
+  "nike-sabrina-3",
+  "nike-zoom-hyperset-2",
+])
+
+export function canonicalCatalogMediaUrl(src: string): string {
+  const trimmed = src.trim()
+  if (!/^https?:\/\//iu.test(trimmed)) return trimmed.replace(/^\/+/, "")
+
+  try {
+    const url = new URL(trimmed)
+    const host = url.hostname.toLowerCase()
+    const pathParts = url.pathname.split("/").filter(Boolean)
+
+    if (host === "static.nike.com" && pathParts.length >= 2) {
+      return `${host}/${pathParts.slice(-2).join("/")}`
+    }
+
+    const ignoredParams = /^(?:utm_.+|f_auto|q_auto|wid|hei|w|h|fit|fmt)$/iu
+    const params = [...url.searchParams.entries()]
+      .filter(([key]) => !ignoredParams.test(key))
+      .sort(([left], [right]) => left.localeCompare(right))
+    const query = new URLSearchParams(params).toString()
+    return `${host}${url.pathname}${query ? `?${query}` : ""}`
+  } catch {
+    return trimmed
+  }
+}
+
+export function dedupeCatalogGallery(images: readonly CatalogImage[]): CatalogImage[] {
+  const seen = new Set<string>()
+  return images.filter((image) => {
+    const key = image.contentSignal?.trim()
+      ? `content:${image.contentSignal.trim()}`
+      : `url:${canonicalCatalogMediaUrl(image.src)}`
+    if (seen.has(key)) return false
+    seen.add(key)
+    return true
+  })
+}
+
 function projectGallery(product: ProductSource): CatalogImage[] {
   const assetSlug = product.assetSlug ?? product.slug
   const frames = [
@@ -258,11 +309,17 @@ function projectGallery(product: ProductSource): CatalogImage[] {
     `catalog/gallery/${assetSlug}-5.webp`,
   ]
 
-  return frames.map((src, index) => ({
-    src,
-    alt: `${product.brand} ${product.name} · ракурс ${index + 1}`,
-    source: "Project-generated studio reference",
-  }))
+  return dedupeCatalogGallery(
+    frames.map((src, index) => ({
+      src,
+      alt: `${product.brand} ${product.name} · ракурс ${index + 1}`,
+      source: "Project-generated studio reference",
+      contentSignal:
+        index === 1 && auditedDuplicatePrimaryFrames.has(assetSlug)
+          ? `${assetSlug}:0`
+          : `${assetSlug}:${index}`,
+    })),
+  )
 }
 
 const sportProducts: readonly ProductSource[] = [
@@ -1718,8 +1775,43 @@ function withFallbackGallery(product: ProductSource): CatalogProduct {
       ? undefined
       : calculateOrderQuote(product.chinaPriceYuan, product.kind)
 
+  const publicCopy =
+    product.kind === "apparel"
+      ? {
+          categoryLabel: "Одежда",
+          note: "Для тренировок и повседневной носки.",
+        }
+      : product.kind === "footwear" && product.category === "volleyball"
+        ? {
+            categoryLabel: "Для матча",
+            note: "Для тренировок и матчевых дней в зале.",
+          }
+        : product.kind === "footwear" && product.category === "basketball"
+          ? {
+              categoryLabel: "Для движения",
+              note: "Для тренировок и игр в зале.",
+            }
+          : product.kind === "footwear" && product.category === "recovery"
+            ? {
+                categoryLabel: "После тренировки",
+                note: "Для отдыха после тренировки.",
+              }
+            : product.kind === "footwear" && product.category === "training"
+              ? {
+                  categoryLabel: "Для зала",
+                  note: "Для регулярных тренировок в зале.",
+                }
+              : product.kind === "footwear"
+                ? {
+                    categoryLabel: "На каждый день",
+                    note: "Для города и повседневной носки.",
+                  }
+                : null
+
   return {
     ...product,
+    categoryLabel: publicCopy?.categoryLabel ?? product.categoryLabel,
+    note: publicCopy?.note ?? product.note,
     fallbackImage,
     formulaBasis: product.chinaPriceYuan ? PRICE_FORMULA_BASIS : undefined,
     gallery,

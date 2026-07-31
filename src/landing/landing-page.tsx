@@ -1,13 +1,16 @@
 import { AnimatePresence } from "motion/react"
 import { useEffect, useState, type ReactNode } from "react"
 
+import { findPublicProductBySlug } from "../catalog/catalog"
 import { CatalogSection } from "./sections/catalog-section"
+import { CheckoutOutcomePage } from "./checkout-outcome-page"
 import { CartDrawer } from "./sections/cart-drawer"
 import { Footer } from "./sections/footer"
 import { Header } from "./sections/header"
 import { HeroSection } from "./sections/hero-section"
 import { InfoSections } from "./sections/info-sections"
 import { ProductSheet } from "./sections/product-sheet"
+import { ProductDetailPage } from "./sections/product-detail-page"
 import { useLandingStorefront } from "./use-landing-storefront"
 
 interface LandingPageProps {
@@ -26,6 +29,23 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
   const storefront = useLandingStorefront(configuredBotUsername)
   const pathname = typeof window === "undefined" ? "/" : window.location.pathname
   const routeName = pathname.replace(/^\/|\/$/g, "")
+  const productRouteMatch = pathname.match(/^\/product\/([^/]+)\/?$/u)
+  let productRouteSlug: string | null = null
+  if (productRouteMatch?.[1]) {
+    try {
+      productRouteSlug = decodeURIComponent(productRouteMatch[1])
+    } catch {
+      productRouteSlug = null
+    }
+  }
+  const productRoute = productRouteMatch !== null
+  const routeProduct = findPublicProductBySlug(productRouteSlug)
+  const checkoutOutcome =
+    pathname === "/checkout/success"
+      ? "success"
+      : pathname === "/checkout/fail"
+        ? "fail"
+        : null
   const staticRoute: StaticRoute | null =
     routeName === "contacts" ||
     routeName === "delivery-returns" ||
@@ -40,19 +60,37 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
     <div
       className={`kb-page ${storefront.selectedProduct ? "kb-page--sheet-open" : ""}`}
     >
-      <a className="skip-link" href={staticRoute ? "#route-main" : "#catalog"}>
-        {staticRoute ? "Перейти к содержанию" : "Перейти к каталогу"}
+      <a
+        className="skip-link"
+        href={staticRoute || checkoutOutcome || productRoute ? "#route-main" : "#catalog"}
+      >
+        {staticRoute || checkoutOutcome || productRoute
+          ? "Перейти к содержанию"
+          : "Перейти к товарам"}
       </a>
 
       <Header
         botUrl={storefront.botUrl}
         cartCount={storefront.cartCount}
         openCart={storefront.openCart}
+        personalDataConsentVersion={
+          storefront.catalogPriceState.personalDataConsentVersion
+        }
+        refreshPersonalDataConsentVersion={
+          storefront.refreshPersonalDataConsentVersion
+        }
       />
 
       <main>
-        {staticRoute ? (
+        {checkoutOutcome ? (
+          <CheckoutOutcomePage
+            outcome={checkoutOutcome}
+            botUrl={storefront.botUrl}
+          />
+        ) : staticRoute ? (
           <StaticRoutePage route={staticRoute} />
+        ) : productRoute ? (
+          <ProductDetailPage product={routeProduct} storefront={storefront} />
         ) : (
           <>
             <HeroSection storefront={storefront} />
@@ -66,7 +104,7 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
       <CookieNotice />
 
       <AnimatePresence>
-        {storefront.selectedProduct ? (
+        {!productRoute && storefront.selectedProduct ? (
           <ProductSheet key="product-sheet" storefront={storefront} />
         ) : null}
       </AnimatePresence>
@@ -123,7 +161,7 @@ function StaticRoutePage({ route }: { route: StaticRoute }) {
           <h2>Доставка</h2>
           <p>
             Местонахождение товара и срок показываются в карточке. Заказы из Китая
-            в среднем поступают в Москву за 10–18 дней. Затем заказ передаётся
+            в среднем поступают в Москву за 10-18 дней. Затем заказ передаётся
             в СДЭК, ТК «Ракета» или Яндекс Доставку в зависимости от доступного
             маршрута. Это ориентировочный срок, точный вариант и стоимость
             показываются до оплаты.
@@ -227,7 +265,7 @@ function OfferPage() {
         <h2>5. Доставка</h2>
         <p>
           Способ, стоимость и ориентировочный срок зависят от местонахождения товара.
-          Заказы из Китая в среднем поступают в Москву за 10–18 дней, затем могут
+          Заказы из Китая в среднем поступают в Москву за 10-18 дней, затем могут
           передаваться в СДЭК, ТК «Ракета» или Яндекс Доставку. Срок является оценкой
           и может меняться из-за перевозки, таможни и обстоятельств вне контроля
           продавца. Покупатель проверяет упаковку, пломбы и комплектность при получении.

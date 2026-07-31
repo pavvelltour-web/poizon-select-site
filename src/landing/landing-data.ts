@@ -105,7 +105,7 @@ export const quickFilters: readonly QuickFilter[] = [
   },
   {
     label: "Для восстановления",
-    detail: "после сессии и слайдов",
+    detail: "после тренировки и для отдыха",
     category: "recovery",
     icon: Waves,
   },
@@ -160,11 +160,7 @@ export function resolveAssetUrl(src: string): string {
   const normalizedSrc = src.replace(/^\/+/, "")
   if (typeof window === "undefined") return normalizedSrc
 
-  const currentPath = window.location.pathname || "/"
-  const basePath = currentPath.endsWith("/")
-    ? currentPath
-    : currentPath.replace(/\/[^/]*$/, "/")
-  return new URL(`${basePath}${normalizedSrc}`, window.location.href).toString()
+  return new URL(`/${normalizedSrc}`, window.location.origin).toString()
 }
 
 export function setImageFallback(
@@ -233,6 +229,16 @@ export function getSizeOptions(product: CatalogProduct): readonly string[] {
   return footwearSizes
 }
 
+export function getSizeRangeLabel(product: CatalogProduct): string {
+  const sizes = getSizeOptions(product)
+  if (sizes.length === 1) return sizes[0] ?? "Один размер"
+  return `${sizes[0]}-${sizes.at(-1)}`
+}
+
+export function getProductPath(product: CatalogProduct): string {
+  return `/product/${encodeURIComponent(product.slug)}`
+}
+
 function normalizedText(value: string): string {
   return value.toLowerCase().replace(/ё/g, "е")
 }
@@ -293,9 +299,29 @@ function scoreTaskProduct(
   if (asksRecovery) {
     if (product.category === "recovery") add(11)
   }
-  if (/бюджет|дешев|до\s?\d|недорог/.test(normalizedTask)) {
+  const budgetMatch = normalizedTask.match(
+    /(?:бюджет(?:ом)?|до)\s*([1-9]\d{3,5})/u,
+  )
+  const budgetRub = budgetMatch?.[1]
+    ? Number.parseInt(budgetMatch[1], 10)
+    : null
+  if (budgetRub) {
+    const price = getCatalogLinePrice(product, catalogPriceLookup)
+    if (price <= budgetRub) add(10)
+    else add(-8)
+  } else if (/бюджет|дешев|недорог/.test(normalizedTask)) {
     const price = getCatalogLinePrice(product, catalogPriceLookup)
     if (price < 12_000) add(8)
+  }
+
+  const requestedSize = normalizedTask.match(/(?:^|\s)(3[5-9]|4[0-8])(?:[.,]5)?(?:\s|$)/u)?.[1]
+  if (requestedSize && getSizeOptions(product).includes(requestedSize)) add(5)
+
+  if (/бел(?:ый|ая|ое|ые|ого|ую)|white/u.test(normalizedTask)) {
+    if (/white|бел/u.test(haystack)) add(7)
+  }
+  if (/черн|black/u.test(normalizedTask)) {
+    if (/black|черн/u.test(haystack)) add(7)
   }
 
   const stopWords = new Set(["для", "под", "пара", "пары", "нужна", "надо"])
@@ -303,7 +329,7 @@ function scoreTaskProduct(
     .split(/[^a-zа-я0-9]+/i)
     .filter((word) => word.length >= 3 && !stopWords.has(word))
   for (const word of words) {
-    if (haystack.includes(word)) add(3)
+    if (haystack.includes(word)) add(word.length >= 5 ? 5 : 3)
   }
 
   if (score <= 0) return null

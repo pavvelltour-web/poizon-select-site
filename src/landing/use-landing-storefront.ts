@@ -42,6 +42,14 @@ import type { ActiveCategory, StorefrontState, UrlState } from "./landing-types"
 type CatalogPriceParseResult = {
   lookup: Record<string, number>
   version: string | null
+  personalDataConsentVersion: string | null
+}
+
+function readPersonalDataConsentVersion(payload: object): string | null {
+  if (!("personal_data_consent_version" in payload)) return null
+  const value = (payload as { personal_data_consent_version?: unknown })
+    .personal_data_consent_version
+  return typeof value === "string" && value.trim() ? value.trim() : null
 }
 function createCheckoutIdempotencyKey(): string {
   if (typeof globalThis.crypto?.randomUUID === "function") {
@@ -101,6 +109,7 @@ function parseCatalogPricePayload(payload: unknown): CatalogPriceParseResult | n
         "version" in payload && typeof (payload as { version?: unknown }).version === "string"
           ? (payload as { version: string }).version
           : null,
+      personalDataConsentVersion: readPersonalDataConsentVersion(payload),
     }
   }
 
@@ -123,6 +132,7 @@ function parseCatalogPricePayload(payload: unknown): CatalogPriceParseResult | n
         "version" in payload && typeof (payload as { version?: unknown }).version === "string"
           ? (payload as { version: string }).version
           : null,
+      personalDataConsentVersion: readPersonalDataConsentVersion(payload),
     }
   }
 
@@ -135,6 +145,7 @@ function parseCatalogPricePayload(payload: unknown): CatalogPriceParseResult | n
       "version" in payload && typeof (payload as { version?: unknown }).version === "string"
         ? (payload as { version: string }).version
         : null,
+    personalDataConsentVersion: readPersonalDataConsentVersion(payload),
   }
 }
 
@@ -204,6 +215,7 @@ async function loadCatalogPricesFromApi(
       return {
         lookup: parsed.lookup,
         version: parsed.version || CATALOG_PRICE_VERSION,
+        personalDataConsentVersion: parsed.personalDataConsentVersion,
       }
     } catch {
       // Keep local fallback until a valid price response arrives.
@@ -229,8 +241,14 @@ export function useLandingStorefront(
   const [selectedSize, setSelectedSizeState] = useState<string | null>(null)
   const [copyState, setCopyState] = useState<"idle" | "copied" | "failed">("idle")
   const [taskInput, setTaskInputState] = useState("")
+  const [remoteTaskMatches, setRemoteTaskMatches] = useState<
+    StorefrontState["taskMatches"] | null
+  >(null)
   const [cartLines, setCartLines] = useState<CartLine[]>([])
-  const [isCartOpen, setCartOpen] = useState(false)
+  const [isCartOpen, setCartOpen] = useState(() => {
+    if (typeof window === "undefined") return false
+    return new URLSearchParams(window.location.search).get("cart") === "1"
+  })
   const [checkoutCustomer, setCheckoutCustomer] = useState<CheckoutCustomer>({
     fullName: "",
     phone: "",
@@ -249,6 +267,7 @@ export function useLandingStorefront(
   const [catalogPriceState, setCatalogPriceState] = useState({
     lookup: null as Record<string, number> | null,
     version: CATALOG_PRICE_VERSION,
+    personalDataConsentVersion: null as string | null,
   })
   const productTriggerRef = useRef<HTMLButtonElement | null>(null)
   const sheetHeadingRef = useRef<HTMLHeadingElement | null>(null)
@@ -288,7 +307,7 @@ export function useLandingStorefront(
   const request = selectedProduct
     ? buildOrderRequest(selectedProduct, selectedSize ?? undefined)
     : ""
-  const taskMatches = useMemo(
+  const localTaskMatches = useMemo(
     () =>
       findTaskMatches(publicCatalogProducts, taskInput, catalogPriceState.lookup).slice(
         0,
@@ -296,6 +315,7 @@ export function useLandingStorefront(
       ),
     [taskInput, catalogPriceState.lookup],
   )
+  const taskMatches = remoteTaskMatches ?? localTaskMatches
   const cartCount = cartLines.reduce((sum, line) => sum + line.quantity, 0)
   const currentCartTotalRub = cartTotalRub(cartLines, catalogPriceState.lookup)
 
@@ -340,8 +360,14 @@ export function useLandingStorefront(
     setCatalogPriceState({
       lookup: nextPriceState.lookup,
       version: nextPriceState.version || CATALOG_PRICE_VERSION,
+      personalDataConsentVersion: nextPriceState.personalDataConsentVersion,
     })
     return nextPriceState
+  }
+
+  const refreshPersonalDataConsentVersion = async () => {
+    const nextState = await refreshCatalogPrices()
+    return nextState?.personalDataConsentVersion ?? null
   }
 
   useEffect(() => {
@@ -395,6 +421,57 @@ export function useLandingStorefront(
       cancelled = true
     }
   }, [apiBaseUrl])
+
+  useEffect(() => {
+    const query = taskInput.trim()
+    if (query.length < 2) {
+      setRemoteTaskMatches(null)
+      return
+    }
+
+    setRemoteTaskMatches(null)
+    const controller = new AbortController()
+    const timer = window.setTimeout(async () => {
+      try {
+        const endpoint = `${apiBaseUrl || ""}`.replace(/\/$/, "")
+        const response = await fetch(`${endpoint}/api/catalog/recommendations`, {
+          method: "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ query, limit: 4 }),
+          signal: controller.signal,
+        })
+        if (!response.ok) return
+        const payload = (await response.json().catch(() => null)) as {
+          items?: unknown
+        } | null
+        if (!payload || !Array.isArray(payload.items)) return
+        const matches = payload.items
+          .slice(0, 4)
+          .map((item, index) => {
+            if (!item || typeof item !== "object") return null
+            const slug = "slug" in item && typeof item.slug === "string" ? item.slug : ""
+            const reason =
+              "reason" in item && typeof item.reason === "string"
+                ? item.reason.slice(0, 80)
+                : "Подходит под запрос"
+            const product = findPublicProductBySlug(slug)
+            return product ? { product, reason, score: 100 - index } : null
+          })
+          .filter(
+            (match): match is StorefrontState["taskMatches"][number] => match !== null,
+          )
+        if (matches.length > 0) setRemoteTaskMatches(matches)
+      } catch {
+        // The deterministic in-browser matcher remains available offline.
+      }
+    }, 350)
+
+    return () => {
+      window.clearTimeout(timer)
+      controller.abort()
+    }
+  }, [apiBaseUrl, taskInput])
 
   useEffect(() => {
     saveCart(cartLines)
@@ -486,10 +563,9 @@ export function useLandingStorefront(
     setCopyState("idle")
   }
 
-  const addSelectedToCart = () => {
-    if (!selectedProduct || !selectedSize) return
+  const addProductToCart = (product: CatalogProduct, size: string) => {
     setCartLines((lines) =>
-      addOrIncrementCartLine(lines, selectedProduct, selectedSize),
+      addOrIncrementCartLine(lines, product, size),
     )
     setCheckoutResult({
       status: "idle",
@@ -498,6 +574,11 @@ export function useLandingStorefront(
       paymentUrl: null,
     })
     setCartOpen(true)
+  }
+
+  const addSelectedToCart = () => {
+    if (!selectedProduct || !selectedSize) return
+    addProductToCart(selectedProduct, selectedSize)
   }
 
   const openCart = () => setCartOpen(true)
@@ -681,6 +762,7 @@ export function useLandingStorefront(
     showPreviousProductImage,
     showNextProductImage,
     setSelectedSize,
+    addProductToCart,
     addSelectedToCart,
     openCart,
     closeCart,
@@ -689,6 +771,7 @@ export function useLandingStorefront(
     updateCheckoutCustomer,
     updateCheckoutConsent,
     submitCartCheckout,
+    refreshPersonalDataConsentVersion,
     copyRequest,
   }
 }

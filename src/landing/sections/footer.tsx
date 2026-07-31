@@ -3,7 +3,7 @@ export function Footer() {
     <footer className="kb-footer">
       <div className="kb-footer__intro">
         <a className="kb-brand" href="/" aria-label="KICKSBASE">
-          <img src="brand/kicksbase-logo.webp" width="80" height="80" alt="" />
+          <img src="/brand/kicksbase-logo.webp" width="80" height="80" alt="" />
           <span>
             <strong>KICKSBASE</strong>
             <small>Обувь и одежда</small>
@@ -158,7 +158,7 @@ export function Footer() {
             <span aria-label="Оплата картой Mastercard">Mastercard</span>
           </div>
           <p>
-            Все товарные знаки принадлежат их владельцам. KICKSBASE — независимый
+            Все товарные знаки принадлежат их владельцам. KICKSBASE является независимым
             магазин и сервис и не является официальным представителем брендов.
             Итоговая сумма и доступный способ оплаты показываются до перехода к
             платёжному партнёру.

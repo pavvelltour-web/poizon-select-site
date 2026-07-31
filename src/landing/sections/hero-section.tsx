@@ -2,7 +2,7 @@ import { ArrowUpRight, BadgeCheck, Send, ShoppingBag } from "lucide-react"
 
 import {
   getDisplayPrice,
-  getProductBadge,
+  getProductPath,
   resolveAssetUrl,
   setImageFallback,
 } from "../landing-data"
@@ -16,7 +16,7 @@ export function HeroSection({ storefront }: HeroSectionProps) {
   return (
     <section className="shop-hero" aria-labelledby="hero-title">
       <div className="shop-hero__copy">
-        <span className="shop-hero__eyebrow">Оригинальная экипировка</span>
+        <span className="shop-hero__eyebrow">Обувь и одежда для спорта</span>
         <h1 id="hero-title">
           <span>KICKS</span>
           <span>BASE</span>
@@ -63,11 +63,11 @@ export function HeroSection({ storefront }: HeroSectionProps) {
             const price = getDisplayPrice(product, storefront.catalogPriceState.lookup)
 
             return (
-              <button
+              <a
                 className="hero-pick"
                 key={product.slug}
-                type="button"
-                onClick={(event) => storefront.openProduct(product, event.currentTarget)}
+                href={getProductPath(product)}
+                aria-label={`Открыть товар: ${product.brand} ${product.name}`}
               >
                 <span className="hero-pick__image">
                   <img
@@ -79,13 +79,12 @@ export function HeroSection({ storefront }: HeroSectionProps) {
                   />
                 </span>
                 <span className="hero-pick__body">
-                  <span>{getProductBadge(product)}</span>
                   <strong>
                     {product.brand} {product.name}
                   </strong>
                   <small>{price.value}</small>
                 </span>
-              </button>
+              </a>
             )
           })}
         </div>

@@ -26,6 +26,7 @@ export interface DisplayPrice {
 export interface CatalogPriceState {
   lookup: CatalogPriceMap | null
   version: string
+  personalDataConsentVersion: string | null
 }
 
 export interface TaskMatch {
@@ -81,6 +82,7 @@ export interface StorefrontState {
   showPreviousProductImage: () => void
   showNextProductImage: () => void
   setSelectedSize: (size: string) => void
+  addProductToCart: (product: CatalogProduct, size: string) => void
   addSelectedToCart: () => void
   openCart: () => void
   closeCart: () => void
@@ -89,5 +91,6 @@ export interface StorefrontState {
   updateCheckoutCustomer: (field: keyof CheckoutCustomer, value: string) => void
   updateCheckoutConsent: (field: keyof CheckoutConsents, value: boolean) => void
   submitCartCheckout: () => Promise<void>
+  refreshPersonalDataConsentVersion: () => Promise<string | null>
   copyRequest: () => Promise<void>
 }

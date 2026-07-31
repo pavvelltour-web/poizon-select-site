@@ -15,7 +15,7 @@ export function InfoSections({
         <section className="how-section" id="how-it-works" aria-labelledby="how-title">
           <div className="section-heading">
             <p className="eyebrow">Как заказать</p>
-            <h2 id="how-title">Заказ без лишней переписки.</h2>
+            <h2 id="how-title">Три шага до заказа.</h2>
           </div>
           <ol className="steps">
             <li>
@@ -31,7 +31,7 @@ export function InfoSections({
             <li>
               <span aria-hidden="true">3</span>
               <h3>Оплатите заказ</h3>
-              <p>Сайт подготовит заказ и откроет защищённую страницу оплаты.</p>
+              <p>Перейдите к оплате на защищённой странице банка.</p>
             </li>
           </ol>
         </section>
@@ -39,7 +39,7 @@ export function InfoSections({
         <section className="trust-section" id="trust" aria-labelledby="trust-title">
           <div className="section-heading">
             <p className="eyebrow">Перед оплатой</p>
-            <h2 id="trust-title">Перед оплатой всё должно быть понятно.</h2>
+            <h2 id="trust-title">Всё важное видно до оплаты.</h2>
           </div>
           <div className="trust-grid">
             <article>
@@ -47,12 +47,12 @@ export function InfoSections({
               <p>Фото, размерная сетка и понятная цена находятся в одном месте.</p>
             </article>
             <article>
-              <h3>Честный итог</h3>
-              <p>Цена товара показана в карточке; доставку СДЭК сообщим отдельно.</p>
+              <h3>Цена и доставка</h3>
+              <p>Цена товара указана в карточке. Доставка рассчитывается отдельно.</p>
             </article>
             <article>
               <h3>Подбор</h3>
-              <p>Подберём модель под зал, матч, баскетбол или восстановление.</p>
+              <p>Опишите задачу: поиск покажет подходящие модели.</p>
             </article>
           </div>
         </section>

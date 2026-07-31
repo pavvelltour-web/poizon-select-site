@@ -5,10 +5,21 @@ interface HeaderProps {
   botUrl: string | null
   cartCount: number
   openCart: () => void
+  personalDataConsentVersion: string | null
+  refreshPersonalDataConsentVersion: () => Promise<string | null>
 }
 
-export function Header({ botUrl, cartCount, openCart }: HeaderProps) {
-  const [loginOpen, setLoginOpen] = useState(false)
+export function Header({
+  botUrl,
+  cartCount,
+  openCart,
+  personalDataConsentVersion,
+  refreshPersonalDataConsentVersion,
+}: HeaderProps) {
+  const [loginOpen, setLoginOpen] = useState(() => {
+    if (typeof window === "undefined") return false
+    return new URLSearchParams(window.location.search).get("login") === "1"
+  })
   const [phone, setPhone] = useState("")
   const [code, setCode] = useState("")
   const [challengeId, setChallengeId] = useState("")
@@ -41,6 +52,12 @@ export function Header({ botUrl, cartCount, openCart }: HeaderProps) {
     setLoginStatus("loading")
     setLoginMessage("")
     try {
+      const consentVersion =
+        personalDataConsentVersion ||
+        (await refreshPersonalDataConsentVersion())
+      if (!consentVersion) {
+        throw new Error("Сервис входа временно недоступен. Попробуйте позже.")
+      }
       const response = await fetch("/api/auth/sms/request", {
         method: "POST",
         credentials: "same-origin",
@@ -48,7 +65,7 @@ export function Header({ botUrl, cartCount, openCart }: HeaderProps) {
         body: JSON.stringify({
           phone: phone.trim(),
           personal_data_accepted: true,
-          consent_version: "2026-07-31",
+          consent_version: consentVersion,
         }),
       })
       const payload = (await response.json().catch(() => ({}))) as {
@@ -101,7 +118,7 @@ export function Header({ botUrl, cartCount, openCart }: HeaderProps) {
     <>
     <header className="kb-header">
       <a className="kb-brand" href="/" aria-label="KICKSBASE">
-        <img src="brand/kicksbase-logo.webp" width="80" height="80" alt="" />
+        <img src="/brand/kicksbase-logo.webp" width="80" height="80" alt="" />
         <span>
           <strong>KICKSBASE</strong>
           <small>Обувь и одежда</small>

@@ -233,9 +233,6 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
           tabIndex={0}
           aria-label="Данные товара"
         >
-          <div className="product-sheet__identity">
-            <span>{product.sportPriority ? "Для зала" : kindLabels[product.kind]}</span>
-          </div>
           <h2 id="product-sheet-title" ref={storefront.sheetHeadingRef} tabIndex={-1}>
             {product.brand} {product.name}
           </h2>
@@ -244,7 +241,7 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
           <div className="product-size" aria-label="Выбор размера">
             <span>
               <strong>Размер</strong>
-              <em>Выберите размер для покупки и сравнения.</em>
+              <em>Выберите размер, чтобы добавить товар в заказ.</em>
             </span>
             <div className="product-size__grid" aria-label="Размеры на выбор">
               {storefront.selectedSizeOptions.map((size) => (
@@ -297,10 +294,10 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
           </dl>
 
           <p className="product-sheet__fineprint">
-            Цена товара фиксируется в заказе. Стоимость доставки показывается до оплаты.
+            В карточке указана цена товара. Доставка рассчитывается перед оплатой.
           </p>
           <p className="product-sheet__order-proof">
-            Заказ создаётся на сайте. После оформления откроется доступный способ оплаты.
+            Оплата проходит на защищённой странице банка.
           </p>
 
           <label className="request-box">
