@@ -30,12 +30,20 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
   const touchStartX = useRef<number | null>(null)
   const [isLightboxOpen, setLightboxOpen] = useState(false)
   const [lightboxZoom, setLightboxZoom] = useState(1)
+  const [selectedMediaReady, setSelectedMediaReady] = useState(false)
+  const [thumbsReady, setThumbsReady] = useState<Record<string, boolean>>({})
   const product = storefront.selectedProduct
   const selectedImageSrcKey = storefront.selectedImage?.src ?? ""
 
   useEffect(() => {
     setLightboxZoom(1)
+    setSelectedMediaReady(false)
   }, [selectedImageSrcKey])
+
+  useEffect(() => {
+    setSelectedMediaReady(false)
+    setThumbsReady({})
+  }, [product?.slug])
 
   useEffect(() => {
     if (!isLightboxOpen) return
@@ -95,7 +103,7 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
         </button>
 
         <div
-          className="product-sheet__media product-sheet__gallery"
+          className={`product-sheet__media product-sheet__gallery ${selectedMediaReady ? "product-sheet__media--ready" : ""}`}
           onTouchStart={(event) => {
             touchStartX.current = event.touches[0]?.clientX ?? null
           }}
@@ -116,7 +124,14 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
             width="1200"
             height="900"
             alt={selectedImageAlt}
-            onError={(event) => setImageFallback(event, product.fallbackImage)}
+            className={`product-sheet__media-image ${
+              selectedMediaReady ? "product-sheet__media-image--ready" : ""
+            }`}
+            onLoad={() => setSelectedMediaReady(true)}
+            onError={(event) => {
+              setImageFallback(event, product.fallbackImage)
+              setSelectedMediaReady(true)
+            }}
             initial={{ opacity: 0.8, scale: 0.992 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.16 }}
@@ -126,7 +141,7 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
             className="product-sheet__expand"
             type="button"
             onClick={() => setLightboxOpen(true)}
-            aria-label="Открыть фото на весь экран"
+            aria-label="Открыть фото в полном размере"
           >
             <Maximize2 aria-hidden="true" size={18} />
           </button>
@@ -155,7 +170,7 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
             </span>
             <strong>{product.brand}</strong>
           </div>
-          <div className="product-sheet__dots" aria-label="Фото товара">
+          <div className="product-sheet__dots" aria-label="Переключение фото">
             {storefront.selectedVisibleGallery.map((image, index) => (
               <button
                 key={`dot-${image.src}-${index}`}
@@ -166,10 +181,13 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
               />
             ))}
           </div>
-          <div className="product-sheet__thumbs" aria-label="Галерея товара">
+          <div className="product-sheet__thumbs" aria-label="Миниатюры фото">
             {storefront.selectedVisibleGallery.map((image, index) => (
               <button
                 key={`${image.src}-${index}`}
+                className={`product-sheet__thumb ${
+                  thumbsReady[`${image.src}-${index}`] ? "product-sheet__thumb--ready" : ""
+                }`}
                 type="button"
                 aria-label={`Показать фото ${index + 1}`}
                 aria-current={index === storefront.selectedImageIndex}
@@ -180,7 +198,13 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
                   width="120"
                   height="90"
                   alt=""
-                  onError={(event) => setImageFallback(event, product.fallbackImage)}
+                  onLoad={() =>
+                    setThumbsReady((ready) => ({ ...ready, [`${image.src}-${index}`]: true }))
+                  }
+                  onError={(event) => {
+                    setImageFallback(event, product.fallbackImage)
+                    setThumbsReady((ready) => ({ ...ready, [`${image.src}-${index}`]: true }))
+                  }}
                 />
               </button>
             ))}
@@ -191,11 +215,11 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
           className="product-sheet__content"
           data-testid="product-sheet-scroll"
           tabIndex={0}
-          aria-label="Детали товара"
+          aria-label="Данные товара"
         >
           <div className="product-sheet__identity">
             <span>{product.sportPriority ? "Для зала" : kindLabels[product.kind]}</span>
-            <span>{getProductScenario(product)}</span>
+              <span>{getProductScenario(product)}</span>
           </div>
           <h2 id="product-sheet-title" ref={storefront.sheetHeadingRef} tabIndex={-1}>
             {product.brand} {product.name}
@@ -205,7 +229,7 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
           <div className="product-size" aria-label="Выбор размера">
             <span>
               <strong>Размер</strong>
-              <em>Выберите размер для расчёта и оформления заказа.</em>
+              <em>Выберите размер для покупки и сравнения.</em>
             </span>
             <div className="product-size__grid">
               {storefront.selectedSizeOptions.map((size) => (
@@ -244,7 +268,7 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
               <dd>{getProductScenario(product)}</dd>
             </div>
             <div>
-              <dt>Тип</dt>
+              <dt>Направление</dt>
               <dd>{kindLabels[product.kind]}</dd>
             </div>
             <div>
@@ -252,8 +276,8 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
               <dd>{storefront.selectedSize ?? "Не выбран"}</dd>
             </div>
             <div>
-              <dt>Формат</dt>
-              <dd>{getSourcingMode(product)}, затем СДЭК</dd>
+              <dt>Источники</dt>
+              <dd>{getSourcingMode(product)}, склад Шанхай</dd>
             </div>
             <div>
               <dt>{price?.label}</dt>
@@ -262,15 +286,15 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
           </dl>
 
           <p className="product-sheet__fineprint">
-            Цена товара фиксируется в заказе. Доставка СДЭК рассчитывается
-            отдельно по адресу или пункту выдачи.
+            Цена товара фиксируется в заказе. Доставка и обработка рассчитывается
+            отдельно.
           </p>
           <p className="product-sheet__order-proof">
-            Заказ, сумма и статус оплаты автоматически появятся в CRM.
+            Заказ и статус обработки автоматически отправляются в CRM, затем в Telegram-бот.
           </p>
 
           <label className="request-box">
-            <span>Запрос для Telegram-бота</span>
+            <span>Текст для Telegram-бота</span>
             <textarea readOnly value={storefront.request} rows={3} />
           </label>
 
@@ -300,15 +324,14 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
                 Открыть корзину
               </button>
               <p className="product-sheet__demo">
-                Telegram-бот временно недоступен. Оформите заказ через корзину.
+                Telegram-бот временно недоступен. Отправьте заявку через корзину или копируйте вручную.
               </p>
             </div>
           )}
 
           {storefront.copyState === "failed" ? (
             <p className="product-sheet__feedback" role="alert">
-              Не удалось скопировать автоматически. Выделите текст выше и
-              скопируйте его вручную.
+              Не удалось скопировать автоматически. Выделите текст выше и скопируйте его вручную.
             </p>
           ) : null}
           <p className="sr-only" aria-live="polite">
@@ -323,7 +346,7 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
           className="photo-lightbox"
           role="dialog"
           aria-modal="true"
-          aria-label="Просмотр фото товара"
+          aria-label="Показ фото товара"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -345,7 +368,7 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
             type="button"
             onClick={storefront.showPreviousProductImage}
             disabled={storefront.selectedVisibleGallery.length <= 1}
-            aria-label="Предыдущее фото товара"
+            aria-label="Предыдущее фото"
           >
             <ChevronLeft aria-hidden="true" size={28} />
           </button>
@@ -362,11 +385,11 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
             type="button"
             onClick={storefront.showNextProductImage}
             disabled={storefront.selectedVisibleGallery.length <= 1}
-            aria-label="Следующее фото товара"
+            aria-label="Следующее фото"
           >
             <ChevronRight aria-hidden="true" size={28} />
           </button>
-          <div className="photo-lightbox__tools" aria-label="Масштаб фото">
+          <div className="photo-lightbox__tools" aria-label="Инструменты фото">
             <button type="button" onClick={zoomOut} aria-label="Уменьшить фото">
               <ZoomOut aria-hidden="true" size={18} />
             </button>

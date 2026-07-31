@@ -47,6 +47,7 @@ export function ProductCard({
           onLoad={() => setMediaReady(true)}
           onError={(event) => {
             setImageFallback(event, product.fallbackImage)
+            setMediaReady(true)
           }}
         />
       </span>

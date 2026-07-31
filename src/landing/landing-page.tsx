@@ -22,7 +22,7 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
       className={`kb-page ${storefront.selectedProduct ? "kb-page--sheet-open" : ""}`}
     >
       <a className="skip-link" href="#catalog">
-        Перейти к товарам
+        Перейти к каталогу
       </a>
 
       <Header
@@ -64,10 +64,10 @@ function CookieNotice() {
   if (!isVisible) return null
 
   return (
-    <div className="cookie-notice" role="region" aria-label="Уведомление о cookies">
+    <div className="cookie-notice" role="region" aria-label="Согласие на использование cookie">
       <p>
-        Сайт использует необходимые файлы cookie для работы витрины и сохранения
-        корзины. Продолжая использование сайта, вы соглашаетесь с{" "}
+        Сайт использует необходимые файлы cookie для работы витрины и сохранения корзины.
+        Продолжая использование сайта, вы соглашаетесь с{" "}
         <a href="#privacy-policy">Политикой обработки персональных данных</a>.
       </p>
       <button
@@ -78,7 +78,7 @@ function CookieNotice() {
           setVisible(false)
         }}
       >
-        Закрыть
+        Понятно
       </button>
     </div>
   )
