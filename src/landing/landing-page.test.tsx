@@ -355,7 +355,7 @@ describe("LandingPage", () => {
     expect(within(finder).getByText("16 000 ₽")).toBeInTheDocument()
   })
 
-  it("hides unconfirmed fallback prices when the API is temporarily offline", async () => {
+  it("keeps published catalog prices readable when the API is temporarily offline", async () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("offline")))
     render(<LandingPage configuredBotUsername={null} />)
 
@@ -364,8 +364,8 @@ describe("LandingPage", () => {
     })
 
     const firstCard = productLinks()[0]
-    expect(within(firstCard).getByText("—")).toBeInTheDocument()
-    expect(within(firstCard).queryByText("34 500 ₽")).toBeNull()
+    expect(within(firstCard).getByText("34 500 ₽")).toBeInTheDocument()
+    expect(within(firstCard).queryByText("—")).toBeNull()
   })
 
   it("maps a legacy product query to the canonical product page", async () => {

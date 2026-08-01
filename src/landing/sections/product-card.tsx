@@ -30,9 +30,7 @@ export function ProductCard({
   const price = getDisplayPrice(product, catalogPriceLookup)
   const [mediaReady, setMediaReady] = useState(false)
   const variant = getProductVariantLabel(product)
-  const priceIsPublished =
-    catalogStatus === "ready" && publishedOffer?.availability === "catalog_listed"
-  const displayPrice = priceIsPublished || catalogStatus === "loading" ? price.value : "—"
+  const displayPrice = price.value
   const exceptionalStatus =
     catalogStatus === "failed"
       ? { text: "Заказ временно недоступен", tone: "alert" }

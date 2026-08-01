@@ -24,10 +24,7 @@ export function HeroSection({ storefront }: HeroSectionProps) {
   const featuredPriceIsPublished =
     storefront.catalogPriceState.status === "ready" &&
     featuredOffer?.availability === "catalog_listed"
-  const featuredPriceValue =
-    featuredPriceIsPublished || storefront.catalogPriceState.status === "loading"
-      ? featuredPrice?.value
-      : "—"
+  const featuredPriceValue = featuredPrice?.value ?? ""
   const featuredPriceNote = storefront.catalogPriceState.status === "loading"
     ? "Проверяем цену и наличие"
     : featuredPriceIsPublished
