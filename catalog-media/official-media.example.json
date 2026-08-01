@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "items": [
+    {
+      "slug": "example-footwear-model",
+      "product_type": "footwear",
+      "identifiers": {
+        "spu": "REPLACE-WITH-OFFICIAL-SPU",
+        "sku": "REPLACE-WITH-OFFICIAL-SKU"
+      },
+      "source": {
+        "provider": "dewu-poizon-official-export",
+        "asset_url": "https://media.partner.example/products/example-side.jpg",
+        "product_url": "https://partner.example/products/example",
+        "observed_at": "2026-08-01T00:00:00+03:00",
+        "local_file": "example-footwear-model/example-side.jpg",
+        "sha256": "0000000000000000000000000000000000000000000000000000000000000000"
+      },
+      "rights": {
+        "status": "supplier-api",
+        "evidence_reference": "REPLACE-WITH-CONTRACT-OR-API-GRANT",
+        "verified_by": "REPLACE-WITH-REVIEWER",
+        "verified_at": "2026-08-01T00:00:00+03:00",
+        "permitted_uses": ["storefront"]
+      },
+      "media": {
+        "role": "primary",
+        "angle": "side",
+        "orientation": "toe-right",
+        "mime_type": "image/jpeg"
+      },
+      "qa": {
+        "status": "approved",
+        "product_match_verified": true,
+        "source_not_cropped": true,
+        "logos_and_text_readable": true,
+        "orientation_verified": true,
+        "subject_scale_verified": true,
+        "reviewer": "REPLACE-WITH-REVIEWER",
+        "reviewed_at": "2026-08-01T00:00:00+03:00",
+        "notes": "Template only. It cannot pass until the official file, real hash, identifiers and rights evidence are supplied."
+      }
+    }
+  ]
+}

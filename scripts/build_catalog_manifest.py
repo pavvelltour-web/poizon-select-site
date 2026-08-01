@@ -63,7 +63,7 @@ def build(generated_at: str) -> dict[str, object]:
                 "output_sha256": sha256(path),
                 "usage": (
                     "original visual reference; exact product, colour, size, "
-                    "availability and price must be confirmed before order"
+                    "availability and price must pass server-side catalog validation before order"
                 ),
                 "rights": {
                     "status": "owned",
@@ -79,8 +79,8 @@ def build(generated_at: str) -> dict[str, object]:
         "notice": (
             "All catalog visuals are project-generated originals, not official "
             "manufacturer photography and not proof of an exact product match. "
-            "Brand names identify the requested search target; the manager must "
-            "confirm the exact SKU, colour, size, availability and price."
+            "Brand names identify the requested search target; ordering is enabled "
+            "only for a server-published SKU, size, availability and price."
         ),
         "items": items,
     }

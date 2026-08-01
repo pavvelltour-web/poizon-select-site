@@ -9,6 +9,7 @@ __pycache__/
 .codex/
 coverage/
 generated/
+catalog-media/staging/
 graphify-out/
 .playwright-cli/
 playwright-report/

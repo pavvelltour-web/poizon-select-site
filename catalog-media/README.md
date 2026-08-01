@@ -1,9 +1,61 @@
-# Product Media Regeneration
+# Product media operations
 
-This folder is the committed control plane for replacing weak generated catalog
-references with stricter GPT Image 2.0+ ecommerce packshots.
+## Official Poizon/Dewu or supplier originals
 
-## Workflow
+`scripts/official_media_pipeline.py` is the only safe path for future official
+product media. It is offline and non-destructive by design: it does not download
+from arbitrary URLs and it has no command that writes to `public/catalog`.
+
+Before intake, obtain the original file through an approved official Poizon/Dewu
+merchant integration or a supplier export whose contract explicitly permits
+storefront use. Record the product URL, direct asset URL, SPU and/or SKU, access
+time, source SHA-256 and the rights evidence in a batch manifest. Use
+`official-media.schema.json`; copy `official-media.example.json` outside the
+repository and replace every placeholder with real evidence.
+
+Signal Studio acceptance rules:
+
+- footwear primary: clean side view, toe points left in the source, matching the Open Design direction;
+- apparel primary: front view at a consistent source scale;
+- 8% minimum composition safe area on the normalized 4:3 canvas;
+- whole source remains visible; no crop and no background-removal crop;
+- no horizontal mirror because it reverses logos and printed text;
+- an exact hash may occupy only one media slot in a batch;
+- human review must confirm product match, uncropped source, legible marks,
+  orientation and consistent subject scale before staging.
+
+The script only scales uniformly and pads the complete source onto a white
+1600x1200 canvas. It rejects unverified rights, missing identifiers, hash
+mismatches, duplicate source files, unsafe paths, wrong primary orientation and
+mirrored EXIF orientation.
+
+```powershell
+# Audit the current 500 files. Read-only except for the JSON report.
+npm run media:official:audit
+
+# Validate an intake batch and its local files without creating derivatives.
+npm run media:official:validate -- `
+  --manifest C:\secure-intake\batch.json `
+  --source-root C:\secure-intake\originals
+
+# Create a review-only batch under catalog-media/staging.
+npm run media:official:stage -- `
+  --manifest C:\secure-intake\batch.json `
+  --source-root C:\secure-intake\originals
+```
+
+Review `staged-manifest.json` and the images manually. Promotion into the public
+catalog is a separate release decision and is intentionally not automated. The
+existing 500 images must not be replaced until official provenance and reuse
+rights are confirmed.
+
+## Generated reference regeneration (legacy)
+
+The files below describe the older generated-reference workflow. Generated
+packshots are not Poizon originals and must never be labelled as official
+product photography.
+
+### Workflow
 
 1. Review `regeneration-queue.json`.
    - Each item must exist in `src/catalog/catalog.ts`.
@@ -36,7 +88,7 @@ references with stricter GPT Image 2.0+ ecommerce packshots.
    npm run check
    ```
 
-## Acceptance
+### Acceptance
 
 - Product only, no props, no model, no watermark, no UI chrome.
 - Pure white studio background with realistic contact shadow.

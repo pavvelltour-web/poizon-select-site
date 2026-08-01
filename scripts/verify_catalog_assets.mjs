@@ -102,7 +102,7 @@ if (
   typeof manifest.notice !== "string" ||
   !manifest.notice.includes("project-generated originals") ||
   !manifest.notice.includes("not official manufacturer photography") ||
-  !manifest.notice.includes("confirm the exact SKU")
+  !manifest.notice.includes("server-published SKU")
 ) {
   fail("manifest must retain the generated-reference caveat")
 }
@@ -175,7 +175,7 @@ for (const item of manifest.items) {
   }
   if (
     item.usage !==
-    "original visual reference; exact product, colour, size, availability and price must be confirmed before order"
+    "original visual reference; exact product, colour, size, availability and price must pass server-side catalog validation before order"
   ) {
     fail(`${item.slug} must retain the generated-reference usage marker`)
   }
