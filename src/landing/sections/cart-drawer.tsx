@@ -1,24 +1,37 @@
-import { Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react"
+import { AlertCircle, Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react"
 import { motion } from "motion/react"
 
 import { formatRub } from "../../catalog/catalog"
-import { resolveAssetUrl } from "../landing-data"
 import { getEffectiveLinePrice } from "../cart"
+import { resolveAssetUrl } from "../landing-data"
 import type { StorefrontState } from "../landing-types"
 
 interface CartDrawerProps {
   storefront: StorefrontState
 }
+
 export function CartDrawer({ storefront }: CartDrawerProps) {
   if (!storefront.isCartOpen) return null
 
   const email = storefront.checkoutCustomer.email.trim()
-  const emailIsValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+  const delivery = storefront.checkoutDelivery
+  const destinationIsValid = delivery.method === "cdek_pvz"
+    ? delivery.pvzCode.trim().length > 0
+    : delivery.address.trim().length > 0
+  const deliveryIsValid =
+    delivery.city.trim().length >= 2 &&
+    /^\d{6}$/.test(delivery.postalCode.trim()) &&
+    destinationIsValid
+  const catalogIsReady = storefront.catalogPriceState.status === "ready"
+  const hasInvalidLines = storefront.cartLines.some((line) => line.validation !== "valid")
   const canSubmit =
+    catalogIsReady &&
+    !hasInvalidLines &&
     storefront.cartLines.length > 0 &&
     storefront.checkoutCustomer.fullName.trim().length >= 2 &&
-    storefront.checkoutCustomer.phone.trim().length >= 10 &&
-    emailIsValid &&
+    storefront.checkoutCustomer.phone.replace(/\D/g, "").length >= 10 &&
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) &&
+    deliveryIsValid &&
     storefront.checkoutConsents.offerAccepted &&
     storefront.checkoutConsents.personalDataAccepted &&
     storefront.checkoutResult.status !== "submitting"
@@ -56,8 +69,13 @@ export function CartDrawer({ storefront }: CartDrawerProps) {
 
         {storefront.cartLines.length === 0 ? (
           <div className="cart-empty">
-            <h3>Заказ пуст.</h3>
-            <p>Выберите товар и размер, добавьте в заказ.</p>
+            {storefront.checkoutResult.message ? (
+              <p className="checkout-form__status" role="alert">
+                {storefront.checkoutResult.message}
+              </p>
+            ) : null}
+            <h3>В заказе пока нет товаров.</h3>
+            <p>Выберите товар и размер.</p>
             <button type="button" className="button button--primary" onClick={storefront.closeCart}>
               Вернуться к товарам
             </button>
@@ -65,19 +83,44 @@ export function CartDrawer({ storefront }: CartDrawerProps) {
         ) : (
           <>
             <div className="cart-lines" aria-label="Товары в заказе">
+              <p
+                className={`cart-catalog-status cart-catalog-status--${storefront.catalogPriceState.status}`}
+                role={storefront.catalogPriceState.status === "failed" ? "alert" : "status"}
+              >
+                <AlertCircle aria-hidden="true" size={17} />
+                {storefront.catalogPriceState.status === "ready"
+                  ? "Цена и размеры сверены с опубликованным каталогом. Это не подтверждение живого остатка Poizon."
+                  : storefront.catalogPriceState.status === "loading"
+                    ? "Проверяем цену и размеры на сервере. До проверки оформить заказ нельзя."
+                    : "Серверный каталог недоступен. Оформление заказа временно заблокировано."}
+              </p>
+
               {storefront.cartLines.map((line) => (
-                <article className="cart-line" key={line.id}>
-                  <img src={resolveAssetUrl(line.product.image)} width="96" height="72" alt="" />
+                <article
+                  className={`cart-line cart-line--${line.validation}`}
+                  key={line.id}
+                >
+                  <img
+                    src={resolveAssetUrl(line.product.image)}
+                    width="96"
+                    height="72"
+                    alt=""
+                    loading="lazy"
+                  />
                   <div>
-                    <strong>
-                      {line.product.brand} {line.product.name}
-                    </strong>
+                    <strong>{line.product.brand} {line.product.name}</strong>
                     <span>EU {line.size}</span>
                     <em>
                       {formatRub(
                         getEffectiveLinePrice(line.product, storefront.catalogPriceState.lookup),
                       )}
+                      {catalogIsReady ? "" : " · предварительно"}
                     </em>
+                    {line.validation === "invalid" ? (
+                      <small className="cart-line__error">
+                        Товар или размер отсутствует в опубликованном каталоге. Удалите позицию.
+                      </small>
+                    ) : null}
                   </div>
                   <div className="cart-line__controls" aria-label="Количество">
                     <button
@@ -116,17 +159,16 @@ export function CartDrawer({ storefront }: CartDrawerProps) {
               }}
             >
               <div className="checkout-form__total">
-                <span>Итого</span>
+                <span>Товары сейчас</span>
                 <strong>{formatRub(storefront.cartTotalRub)}</strong>
+                <small>Доставка СДЭК рассчитывается и оплачивается отдельно после прибытия.</small>
               </div>
 
               <label>
                 <span>ФИО получателя</span>
                 <input
                   value={storefront.checkoutCustomer.fullName}
-                  onChange={(event) =>
-                    storefront.updateCheckoutCustomer("fullName", event.target.value)
-                  }
+                  onChange={(event) => storefront.updateCheckoutCustomer("fullName", event.target.value)}
                   autoComplete="name"
                   required
                 />
@@ -135,9 +177,7 @@ export function CartDrawer({ storefront }: CartDrawerProps) {
                 <span>Телефон для связи и СДЭК</span>
                 <input
                   value={storefront.checkoutCustomer.phone}
-                  onChange={(event) =>
-                    storefront.updateCheckoutCustomer("phone", event.target.value)
-                  }
+                  onChange={(event) => storefront.updateCheckoutCustomer("phone", event.target.value)}
                   autoComplete="tel"
                   inputMode="tel"
                   required
@@ -149,61 +189,154 @@ export function CartDrawer({ storefront }: CartDrawerProps) {
                   aria-label="Email для чека"
                   aria-describedby="checkout-email-help"
                   value={storefront.checkoutCustomer.email}
-                  onChange={(event) =>
-                    storefront.updateCheckoutCustomer("email", event.target.value)
-                  }
+                  onChange={(event) => storefront.updateCheckoutCustomer("email", event.target.value)}
                   autoComplete="email"
                   inputMode="email"
                   type="email"
                   required
                 />
-                <small id="checkout-email-help">
-                  На этот адрес придёт электронный чек. Пример: name@example.ru
-                </small>
+                <small id="checkout-email-help">На этот адрес придёт электронный чек.</small>
               </label>
+
+              <fieldset className="checkout-delivery">
+                <legend>Доставка СДЭК</legend>
+                <div className="checkout-delivery__methods">
+                  <label>
+                    <input
+                      type="radio"
+                      name="delivery-method"
+                      value="cdek_pvz"
+                      checked={delivery.method === "cdek_pvz"}
+                      onChange={(event) => storefront.updateCheckoutDelivery("method", event.target.value)}
+                    />
+                    <span>В пункт выдачи</span>
+                  </label>
+                  <label>
+                    <input
+                      type="radio"
+                      name="delivery-method"
+                      value="cdek_courier"
+                      checked={delivery.method === "cdek_courier"}
+                      onChange={(event) => storefront.updateCheckoutDelivery("method", event.target.value)}
+                    />
+                    <span>Курьером</span>
+                  </label>
+                </div>
+                <div className="checkout-delivery__grid">
+                  <label>
+                    <span>Город</span>
+                    <input
+                      value={delivery.city}
+                      onChange={(event) => storefront.updateCheckoutDelivery("city", event.target.value)}
+                      autoComplete="address-level2"
+                      required
+                    />
+                  </label>
+                  <label>
+                    <span>Почтовый индекс</span>
+                    <input
+                      value={delivery.postalCode}
+                      onChange={(event) => storefront.updateCheckoutDelivery("postalCode", event.target.value.replace(/\D/g, "").slice(0, 6))}
+                      autoComplete="postal-code"
+                      inputMode="numeric"
+                      pattern="[0-9]{6}"
+                      maxLength={6}
+                      required
+                    />
+                  </label>
+                </div>
+                {delivery.method === "cdek_pvz" ? (
+                  <label>
+                    <span>Код ПВЗ СДЭК из карточки пункта</span>
+                    <input
+                      value={delivery.pvzCode}
+                      onChange={(event) => storefront.updateCheckoutDelivery("pvzCode", event.target.value)}
+                      placeholder="Например, MSK123"
+                      autoComplete="off"
+                      required
+                    />
+                  </label>
+                ) : (
+                  <label>
+                    <span>Адрес доставки</span>
+                    <input
+                      value={delivery.address}
+                      onChange={(event) => storefront.updateCheckoutDelivery("address", event.target.value)}
+                      autoComplete="street-address"
+                      required
+                    />
+                  </label>
+                )}
+              </fieldset>
 
               <label className="checkout-form__check">
                 <input
                   type="checkbox"
                   checked={storefront.checkoutConsents.offerAccepted}
-                  onChange={(event) =>
-                    storefront.updateCheckoutConsent("offerAccepted", event.target.checked)
-                  }
+                  onChange={(event) => storefront.updateCheckoutConsent("offerAccepted", event.target.checked)}
                 />
-                <span>
-                  Принимаю условия <a href="/offer">публичной оферты</a>.
-                </span>
+                <span>Принимаю условия <a href="/offer">публичной оферты</a>.</span>
               </label>
               <label className="checkout-form__check">
                 <input
                   type="checkbox"
                   checked={storefront.checkoutConsents.personalDataAccepted}
-                  onChange={(event) =>
-                    storefront.updateCheckoutConsent("personalDataAccepted", event.target.checked)
-                  }
+                  onChange={(event) => storefront.updateCheckoutConsent("personalDataAccepted", event.target.checked)}
                 />
                 <span>
-                  Даю отдельное согласие на{" "}
-                  <a href="/personal-data-consent">обработку персональных данных</a>.
+                  Даю отдельное согласие на <a href="/personal-data-consent">обработку персональных данных</a>.
                 </span>
               </label>
-              <p className="checkout-form__consent">
-                Чек отправим на email или телефон после оплаты.
-              </p>
 
               <button className="button button--primary" type="submit" disabled={!canSubmit}>
                 {storefront.checkoutResult.status === "submitting"
-                  ? "Отправляем заказ..."
-                  : `Оплатить ${formatRub(storefront.cartTotalRub)}`}
+                  ? "Создаём заказ…"
+                  : catalogIsReady
+                    ? `Оплатить товары ${formatRub(storefront.cartTotalRub)}`
+                    : "Проверяем каталог…"}
               </button>
 
               {storefront.checkoutResult.message ? (
-                <p
+                <div
                   className="checkout-form__status"
                   role={storefront.checkoutResult.status === "failed" ? "alert" : "status"}
                 >
-                  {storefront.checkoutResult.message}
-                </p>
+                  <p>{storefront.checkoutResult.message}</p>
+                  {storefront.checkoutResult.orderNumber ? (
+                    <strong>Заказ {storefront.checkoutResult.orderNumber}</strong>
+                  ) : null}
+                  {storefront.checkoutResult.amounts && storefront.checkoutResult.delivery ? (
+                    <>
+                      <dl className="checkout-result-amounts">
+                        <div>
+                          <dt>Товары сейчас</dt>
+                          <dd>{formatRub(storefront.checkoutResult.amounts.payableNowRub)}</dd>
+                        </div>
+                        <div>
+                          <dt>Доставка отдельно</dt>
+                          <dd>{formatRub(storefront.checkoutResult.amounts.deliveryDueLaterRub)}</dd>
+                        </div>
+                        <div>
+                          <dt>Расчёт доставки</dt>
+                          <dd>
+                            {storefront.checkoutResult.delivery.quoteStatus === "live"
+                              ? "актуальный"
+                              : "предварительный"}
+                          </dd>
+                        </div>
+                      </dl>
+                      {storefront.checkoutResult.paymentUrl ? (
+                        <a
+                          className="button button--primary checkout-result__pay"
+                          href={storefront.checkoutResult.paymentUrl}
+                          rel="noopener noreferrer"
+                        >
+                          Перейти к оплате
+                        </a>
+                      ) : null}
+                    </>
+                  ) : null}
+                </div>
               ) : null}
             </form>
           </>

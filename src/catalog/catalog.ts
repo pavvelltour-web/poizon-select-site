@@ -1915,6 +1915,24 @@ function priceRank(product: CatalogProduct): number {
   return getCatalogPriceRub(product) / 1000
 }
 
+const featuredProductOrder = [
+  "nike-kd-18",
+  "nike-gt-cut-academy",
+  "nike-sabrina-3",
+  "asics-sky-elite-ff-3",
+  "mizuno-wave-lightning-z8",
+  "adidas-crazyflight-shorts",
+  "hoka-ora-recovery-slide-3",
+] as const
+
+const featuredProductRanks = new Map<string, number>(
+  featuredProductOrder.map((slug, index) => [slug, index]),
+)
+
+function featuredRank(product: CatalogProduct, fallback: number): number {
+  return featuredProductRanks.get(product.slug) ?? featuredProductOrder.length + fallback
+}
+
 export function sortCatalog(
   products: readonly CatalogProduct[],
   sort: CatalogSort,
@@ -1922,7 +1940,9 @@ export function sortCatalog(
   const indexedProducts = products.map((product, index) => ({ product, index }))
 
   indexedProducts.sort((left, right) => {
-    if (sort === "featured") return left.index - right.index
+    if (sort === "featured") {
+      return featuredRank(left.product, left.index) - featuredRank(right.product, right.index)
+    }
     if (sort === "name") {
       const byBrand = left.product.brand.localeCompare(right.product.brand, "ru")
       if (byBrand !== 0) return byBrand

@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react"
+import { render, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
@@ -11,6 +11,30 @@ afterEach(() => {
 })
 
 describe("Header SMS login", () => {
+  it("keeps the primary storefront destinations available in the navigation landmark", () => {
+    render(
+      <Header
+        cartCount={0}
+        openCart={vi.fn()}
+        personalDataConsentVersion="pd-2026-08"
+        refreshPersonalDataConsentVersion={vi.fn()}
+      />,
+    )
+
+    const navigation = screen.getByRole("navigation", { name: "Основная навигация" })
+    expect(within(navigation).getByRole("link", { name: "Каталог" })).toHaveAttribute(
+      "href",
+      "/#catalog",
+    )
+    expect(within(navigation).getByRole("link", { name: "Подобрать" })).toHaveAttribute(
+      "href",
+      "/#selection",
+    )
+    expect(
+      within(navigation).getByRole("link", { name: "Доставка и возврат" }),
+    ).toHaveAttribute("href", "/delivery-returns")
+  })
+
   it("sends the public consent version supplied by the backend", async () => {
     const user = userEvent.setup()
     const fetchMock = vi.fn().mockResolvedValue({
@@ -21,7 +45,6 @@ describe("Header SMS login", () => {
 
     render(
       <Header
-        botUrl={null}
         cartCount={0}
         openCart={vi.fn()}
         personalDataConsentVersion="pd-2026-08"
@@ -52,7 +75,6 @@ describe("Header SMS login", () => {
 
     render(
       <Header
-        botUrl={null}
         cartCount={0}
         openCart={vi.fn()}
         personalDataConsentVersion={null}

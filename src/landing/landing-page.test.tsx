@@ -12,6 +12,29 @@ function productLinks() {
     .filter((link) => link.classList.contains("product-card__link"))
 }
 
+function checkoutCatalogPayload(sizes = ["36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46"]) {
+  return {
+    version: "2026-07-31-v2",
+    personal_data_consent_version: "pd-2026-08",
+    items: [
+      {
+        slug: "nike-gt-cut-academy",
+        name: "G.T. Cut Academy",
+        brand: "Nike",
+        product_kind: "footwear",
+        sizes,
+        price_rub: 24500,
+        image_url: "https://kicksbase.ru/catalog/nike-gt-cut-academy.webp",
+        fulfillment_mode: "made_to_order",
+        availability: "catalog_listed",
+        eta_min_days: 10,
+        eta_max_days: 18,
+        live_provider_verified: false,
+      },
+    ],
+  }
+}
+
 afterEach(() => {
   vi.restoreAllMocks()
   vi.unstubAllGlobals()
@@ -29,10 +52,15 @@ describe("LandingPage", () => {
     expect(screen.getAllByText("24 500 ₽").length).toBeGreaterThan(0)
     expect(screen.getAllByText("45 000 ₽").length).toBeGreaterThan(0)
     expect(screen.getAllByText("5 000 ₽").length).toBeGreaterThan(0)
+    const firstCard = productLinks()[0]
+    expect(firstCard).toHaveAccessibleName(/Nike KD 18/)
+    expect(within(firstCard).getByText("Баскетбольные кроссовки")).toBeInTheDocument()
+    expect(within(firstCard).getByRole("heading", { name: "Nike KD 18" })).toBeInTheDocument()
     expect(
       screen.getByText(/Выберите модель и размер, оплатите/),
     ).toBeInTheDocument()
     expect(screen.queryByText(/менеджер/i)).toBeNull()
+    expect(screen.getAllByText("Предварительные данные").length).toBeGreaterThan(0)
     expect(document.body.textContent).not.toMatch(/[–—]/u)
     expect(screen.getByLabelText("Согласие на использование cookie")).toHaveTextContent(
       "Сайт использует необходимые файлы cookie для работы витрины и сохранения корзины. Продолжая использование сайта, вы соглашаетесь с Политикой обработки персональных данных.",
@@ -186,14 +214,42 @@ describe("LandingPage", () => {
     )
     expect(screen.getByText("2/4")).toBeInTheDocument()
 
-    await user.click(screen.getByRole("button", { name: "Открыть фото в полном размере" }))
+    const openPhotoButton = screen.getByRole("button", {
+      name: "Открыть фото в полном размере",
+    })
+    await user.click(openPhotoButton)
     const lightbox = screen.getByRole("dialog", { name: "Полноэкранное фото товара" })
     expect(within(lightbox).getByText("100%")).toBeInTheDocument()
-    await user.click(within(lightbox).getByRole("button", { name: "Увеличить фото" }))
-    expect(within(lightbox).getByText("125%")).toBeInTheDocument()
-    await user.click(within(lightbox).getByRole("button", { name: "Закрыть фото" }))
+    const closePhotoButton = within(lightbox).getByRole("button", { name: "Закрыть фото" })
+    await waitFor(() => expect(closePhotoButton).toHaveFocus())
+
+    await user.click(within(lightbox).getByRole("img", { name: /ASICS SKY ELITE FF 3/ }))
+    expect(within(lightbox).getByText("200%")).toBeInTheDocument()
+    await user.keyboard("{Escape}")
+    expect(screen.queryByRole("dialog", { name: "Полноэкранное фото товара" })).toBeNull()
+    await waitFor(() => expect(openPhotoButton).toHaveFocus())
 
     expect(screen.getAllByRole("button", { name: /Показать фото/ })).toHaveLength(4)
+  })
+
+  it("reserves eager high-priority loading for the first hero image", () => {
+    render(<LandingPage configuredBotUsername={null} />)
+
+    const heroImages = Array.from(
+      document.querySelectorAll<HTMLImageElement>(".hero-pick img"),
+    )
+    expect(heroImages.length).toBeGreaterThan(1)
+    expect(heroImages[0]).toHaveAttribute("loading", "eager")
+    expect(heroImages[0]).toHaveAttribute("fetchpriority", "high")
+    heroImages.slice(1).forEach((image) => {
+      expect(image).toHaveAttribute("loading", "lazy")
+      expect(image).toHaveAttribute("fetchpriority", "auto")
+    })
+
+    document.querySelectorAll<HTMLImageElement>(".product-card__image").forEach((image) => {
+      expect(image).toHaveAttribute("loading", "lazy")
+      expect(image).toHaveAttribute("fetchpriority", "auto")
+    })
   })
 
   it("surfaces task-based matches from a plain-language need", async () => {
@@ -295,7 +351,7 @@ describe("LandingPage", () => {
       "price-asc",
     )
     expect(screen.getByTestId("order-dock")).toBeInTheDocument()
-    expect(screen.getByText(/В карточке указана цена товара/)).toBeInTheDocument()
+    expect(screen.getByText(/Товары оплачиваются сейчас/)).toBeInTheDocument()
     expect(screen.getByRole("link", { name: "Открыть @SelectBuyerBot" })).toHaveAttribute(
       "href",
       "https://t.me/SelectBuyerBot",
@@ -347,26 +403,49 @@ describe("LandingPage", () => {
 
   it("adds a selected product to the site cart and submits checkout", async () => {
     const user = userEvent.setup()
-    const fetchMock = vi.fn().mockResolvedValue({
+    const fetchMock = vi.fn(async (_url: string, options?: RequestInit) => ({
       ok: true,
-      json: async () => ({
-        checkout_id: "web-test",
-        order_ids: [101],
-        status: "payment_unavailable",
-        payment_url: null,
-        message: "Заказ создан в CRM.",
-      }),
-    })
+      status: options?.method === "POST" ? 201 : 200,
+      json: async () => options?.method === "POST"
+        ? {
+            checkout_id: "web-test",
+            order_number: "KB-20260801-TEST",
+            order_ids: [101],
+            amounts: {
+              merchandise_rub: 24500,
+              payable_now_rub: 24500,
+              delivery_due_later_rub: 880,
+              currency: "RUB",
+            },
+            delivery: {
+              method: "cdek_courier",
+              provider: "cdek",
+              city: "Москва",
+              postal_code: "119607",
+              address: "ул. Лобачевского, 100",
+              pvz_code: null,
+              amount_rub: 880,
+              quote_status: "estimated",
+              min_days: null,
+              max_days: null,
+              payment_timing: "separate_after_arrival",
+            },
+            status: "payment_ready",
+            payment_url: "https://securepay.tbank.ru/test",
+            message: "Заказ создан.",
+          }
+        : checkoutCatalogPayload(),
+    }))
     vi.stubGlobal("fetch", fetchMock)
     window.history.replaceState(null, "", "/product/nike-gt-cut-academy")
     render(<LandingPage configuredBotUsername={null} />)
 
-    await user.click(screen.getByRole("button", { name: "44" }))
+    await user.click(await screen.findByRole("button", { name: "44" }))
     await user.click(screen.getByRole("button", { name: /Добавить в заказ/ }))
 
     const cart = screen.getByRole("dialog", { name: "Заказ" })
     expect(within(cart).getByText(/Nike G.T. Cut Academy/)).toBeInTheDocument()
-    expect(within(cart).getByText("Итого")).toBeInTheDocument()
+    expect(within(cart).getByText("Товары сейчас")).toBeInTheDocument()
 
     await user.type(within(cart).getByLabelText("ФИО получателя"), "Павел Шустров")
     await user.type(
@@ -374,11 +453,14 @@ describe("LandingPage", () => {
       "+79990000000",
     )
     await user.type(within(cart).getByLabelText("Email для чека"), "buyer@example.com")
+    await user.type(within(cart).getByLabelText("Город"), "Москва")
+    await user.type(within(cart).getByLabelText("Почтовый индекс"), "119607")
+    await user.type(within(cart).getByLabelText("Адрес доставки"), "ул. Лобачевского, 100")
     await user.click(within(cart).getByRole("checkbox", { name: /публичной оферты/i }))
     await user.click(
       within(cart).getByRole("checkbox", { name: /обработку персональных данных/i }),
     )
-    await user.click(within(cart).getByRole("button", { name: "Оплатить 24 500 ₽" }))
+    await user.click(within(cart).getByRole("button", { name: "Оплатить товары 24 500 ₽" }))
 
     const lastOrderCall = await waitFor(() => {
       const postCall = fetchMock.mock.calls.find(
@@ -392,7 +474,7 @@ describe("LandingPage", () => {
     })
     const body = JSON.parse(lastOrderCall[1].body as string)
     expect(lastOrderCall[1].headers?.["Idempotency-Key"]).toMatch(
-      /^[\x21-\x7e]{8,128}$/,
+      /^[\x21-\x7e]{8,80}$/,
     )
     expect(body.customer.full_name).toBe("Павел Шустров")
     expect(body.items[0]).toMatchObject({
@@ -402,6 +484,53 @@ describe("LandingPage", () => {
       price_rub: 24500,
       price_version: "2026-07-31-v2",
     })
-    expect(within(cart).getByText("Заказ создан в CRM.")).toBeInTheDocument()
+    expect(body.delivery).toEqual({
+      method: "cdek_courier",
+      city: "Москва",
+      postal_code: "119607",
+      address: "ул. Лобачевского, 100",
+      pvz_code: null,
+    })
+    expect(within(cart).getByText("Заказ KB-20260801-TEST")).toBeInTheDocument()
+    expect(within(cart).getByText("880 ₽")).toBeInTheDocument()
+    expect(within(cart).getByText("предварительный")).toBeInTheDocument()
+    expect(within(cart).getByRole("link", { name: "Перейти к оплате" })).toHaveAttribute(
+      "href",
+      "https://securepay.tbank.ru/test",
+    )
+  })
+
+  it("flags a persisted size that is absent from the server catalogue", async () => {
+    localStorage.setItem(
+      "kicksbase-cart-v1",
+      JSON.stringify([{ slug: "nike-gt-cut-academy", size: "99", quantity: 1 }]),
+    )
+    const fetchMock = vi.fn(async (_url: string, _options?: RequestInit) => ({
+      ok: true,
+      status: 200,
+      json: async () => checkoutCatalogPayload(),
+    }))
+    vi.stubGlobal("fetch", fetchMock)
+    window.history.replaceState(null, "", "/?cart=1")
+
+    render(<LandingPage configuredBotUsername={null} />)
+
+    const cart = await screen.findByRole("dialog", { name: "Заказ" })
+    expect(
+      await within(cart).findByText(/Товар или размер отсутствует в опубликованном каталоге/),
+    ).toBeInTheDocument()
+    expect(within(cart).getByRole("button", { name: /Оплатить товары/ })).toBeDisabled()
+    expect(fetchMock.mock.calls.some((call) => call[1]?.method === "POST")).toBe(false)
+  })
+
+  it("states the v10 split-payment terms on the offer and delivery pages", () => {
+    window.history.replaceState(null, "", "/offer")
+    const view = render(<LandingPage configuredBotUsername={null} />)
+    expect(screen.getByText(/оплачивается отдельно после прибытия товара/i)).toBeInTheDocument()
+
+    view.unmount()
+    window.history.replaceState(null, "", "/delivery-returns")
+    render(<LandingPage configuredBotUsername={null} />)
+    expect(screen.getByText(/оплачивается отдельно после прибытия товара/i)).toBeInTheDocument()
   })
 })

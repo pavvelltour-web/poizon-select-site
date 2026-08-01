@@ -55,6 +55,8 @@ export function CatalogSection({ storefront }: CatalogSectionProps) {
               key={product.slug}
               product={product}
               catalogPriceLookup={storefront.catalogPriceState.lookup}
+              catalogStatus={storefront.catalogPriceState.status}
+              publishedOffer={storefront.catalogPriceState.items[product.slug] ?? null}
               featured={index === 0}
               index={index}
             />
@@ -79,7 +81,7 @@ export function CatalogSection({ storefront }: CatalogSectionProps) {
 
 function TaskFinder({ storefront }: CatalogSectionProps) {
   return (
-    <div className="task-finder" aria-label="Помощь с выбором">
+    <div className="task-finder" id="selection" aria-label="Помощь с выбором">
       <div className="task-finder__copy">
         <Search aria-hidden="true" size={22} />
         <span>

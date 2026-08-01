@@ -70,9 +70,9 @@ export const categoryIcons: Record<ActiveCategory, LucideIcon> = {
 }
 
 export const heroProductSlugs = [
-  "asics-sky-elite-ff-3",
   "nike-kd-18",
-  "hoka-ora-recovery-slide-3",
+  "asics-sky-elite-ff-3",
+  "adidas-crazyflight-shorts",
 ] as const
 
 type QuickFilter = {
@@ -205,16 +205,60 @@ export function getProductBadge(product: CatalogProduct): string {
 }
 
 export function getProductUse(product: CatalogProduct): string {
-  if (product.category === "recovery") return "Для отдыха после тренировки"
-  if (product.category === "basketball") return "Для движения в зале и тренировок"
-  if (product.category === "volleyball") return "Для матча и тренировки"
-  if (product.kind === "apparel") return "Для тренировок, дороги и повседневного слоя"
-  if (product.kind === "accessory") return "Для тренировки и дороги"
-  return "Для повседневного движения"
+  if (product.category === "recovery") {
+    return "Для отдыха после тренировки и повседневной носки."
+  }
+  if (product.category === "basketball") {
+    return "Баскетбольная модель для игры и тренировок в зале."
+  }
+  if (product.category === "volleyball") {
+    return "Волейбольная модель для тренировок и матчей в зале."
+  }
+  if (product.kind === "apparel") {
+    return "Спортивная одежда для тренировок и повседневного комплекта."
+  }
+  if (product.kind === "accessory") return "Экипировка для тренировок и восстановления."
+  return "Повседневная модель для города."
+}
+
+export function getProductTypeLabel(product: CatalogProduct): string {
+  const name = `${product.name} ${product.query}`.toLowerCase()
+
+  if (product.kind === "footwear") {
+    if (product.category === "volleyball") return "Волейбольные кроссовки"
+    if (product.category === "basketball") return "Баскетбольные кроссовки"
+    if (product.category === "recovery") return "Слайды для восстановления"
+    if (product.category === "training") return "Кроссовки для тренировок"
+    return "Повседневные кроссовки"
+  }
+
+  if (product.kind === "apparel") {
+    if (/short|шорт/u.test(name)) return "Спортивные шорты"
+    if (/jersey|футбол/u.test(name)) return "Игровая футболка"
+    if (/tee|top|майк/u.test(name)) return "Спортивная футболка"
+    if (/hoodie|худи/u.test(name)) return "Худи"
+    if (/jacket|куртк/u.test(name)) return "Спортивная куртка"
+    if (/tight|тайтс/u.test(name)) return "Спортивные тайтсы"
+    return "Спортивная одежда"
+  }
+
+  if (/roller|ролл/u.test(name)) return "Массажный ролл"
+  if (/knee|наколен/u.test(name)) return "Наколенники"
+  if (/elbow|налокот/u.test(name)) return "Налокотники"
+  if (/ball|мяч/u.test(name)) return "Спортивный мяч"
+  if (/bag|duffel|сумк/u.test(name)) return "Спортивная сумка"
+  if (/bottle|бутыл/u.test(name)) return "Спортивная бутылка"
+  return "Спортивная экипировка"
 }
 
 export function getSourcingMode(product: CatalogProduct): string {
-  return product.orderQuote ? "Из Китая до Москвы" : "Под заказ из Китая"
+  return product.orderQuote ? "Под заказ из Китая" : "Наличие уточняется"
+}
+
+export function getSourcingDetail(product: CatalogProduct): string {
+  return product.orderQuote
+    ? "Обычно 10-18 дней до Москвы"
+    : "Точный срок показывается перед оплатой"
 }
 
 export function getSizeOptions(product: CatalogProduct): readonly string[] {

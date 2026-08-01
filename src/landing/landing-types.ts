@@ -2,10 +2,12 @@ import type { CatalogCategory, CatalogProduct, CatalogSort } from "../catalog/ca
 import type { RefObject } from "react"
 import type {
   CartLine,
+  CheckoutDelivery,
   CheckoutConsents,
   CheckoutCustomer,
   CheckoutResult,
   CatalogPriceMap,
+  PublishedCatalogMap,
 } from "./cart"
 
 export type ActiveCategory = "all" | CatalogCategory
@@ -24,9 +26,12 @@ export interface DisplayPrice {
 }
 
 export interface CatalogPriceState {
+  status: "loading" | "ready" | "failed"
   lookup: CatalogPriceMap | null
+  items: PublishedCatalogMap
   version: string
   personalDataConsentVersion: string | null
+  error: string | null
 }
 
 export interface TaskMatch {
@@ -60,6 +65,7 @@ export interface StorefrontState {
   cartTotalRub: number
   isCartOpen: boolean
   checkoutCustomer: CheckoutCustomer
+  checkoutDelivery: CheckoutDelivery
   checkoutConsents: CheckoutConsents
   checkoutResult: CheckoutResult
   request: string
@@ -89,6 +95,7 @@ export interface StorefrontState {
   removeCartLine: (id: string) => void
   setCartLineQuantity: (id: string, quantity: number) => void
   updateCheckoutCustomer: (field: keyof CheckoutCustomer, value: string) => void
+  updateCheckoutDelivery: (field: keyof CheckoutDelivery, value: string) => void
   updateCheckoutConsent: (field: keyof CheckoutConsents, value: boolean) => void
   submitCartCheckout: () => Promise<void>
   refreshPersonalDataConsentVersion: () => Promise<string | null>

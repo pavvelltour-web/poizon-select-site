@@ -13,13 +13,14 @@ import { motion } from "motion/react"
 import { useEffect, useRef, useState } from "react"
 
 import {
+  getProductTypeLabel,
   getProductUse,
-  getSourcingMode,
   kindLabels,
   resolveAssetUrl,
   setImageFallback,
 } from "../landing-data"
 import type { StorefrontState } from "../landing-types"
+import { useProductLightbox } from "../use-product-lightbox"
 
 interface ProductSheetProps {
   storefront: StorefrontState
@@ -27,15 +28,18 @@ interface ProductSheetProps {
 
 export function ProductSheet({ storefront }: ProductSheetProps) {
   const touchStartX = useRef<number | null>(null)
-  const [isLightboxOpen, setLightboxOpen] = useState(false)
-  const [lightboxZoom, setLightboxZoom] = useState(1)
+  const expandButtonRef = useRef<HTMLButtonElement>(null)
   const [selectedMediaReady, setSelectedMediaReady] = useState(false)
   const [thumbsReady, setThumbsReady] = useState<Record<string, boolean>>({})
   const product = storefront.selectedProduct
   const selectedImageSrcKey = storefront.selectedImage?.src ?? ""
+  const lightbox = useProductLightbox({
+    imageKey: selectedImageSrcKey,
+    previousImage: storefront.showPreviousProductImage,
+    nextImage: storefront.showNextProductImage,
+  })
 
   useEffect(() => {
-    setLightboxZoom(1)
     setSelectedMediaReady(false)
   }, [selectedImageSrcKey])
 
@@ -44,38 +48,6 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
     setThumbsReady({})
   }, [product?.slug])
 
-  useEffect(() => {
-    if (!isLightboxOpen) return
-
-    const onLightboxKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        event.preventDefault()
-        event.stopPropagation()
-        setLightboxOpen(false)
-        return
-      }
-      if (event.key === "ArrowLeft") {
-        event.preventDefault()
-        storefront.showPreviousProductImage()
-      } else if (event.key === "ArrowRight") {
-        event.preventDefault()
-        storefront.showNextProductImage()
-      } else if (event.key === "+" || event.key === "=") {
-        event.preventDefault()
-        setLightboxZoom((zoom) => Math.min(zoom + 0.25, 2.5))
-      } else if (event.key === "-") {
-        event.preventDefault()
-        setLightboxZoom((zoom) => Math.max(zoom - 0.25, 1))
-      } else if (event.key === "0") {
-        event.preventDefault()
-        setLightboxZoom(1)
-      }
-    }
-
-    document.addEventListener("keydown", onLightboxKeyDown, true)
-    return () => document.removeEventListener("keydown", onLightboxKeyDown, true)
-  }, [isLightboxOpen, storefront])
-
   if (!product) return null
 
   const price = storefront.selectedProductPrice
@@ -83,9 +55,17 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
   const botUsername = storefront.botUsername
   const selectedImageSrc = selectedImageSrcKey || product.fallbackImage
   const selectedImageAlt = storefront.selectedImage?.alt ?? `${product.brand} ${product.name}`
-
-  const zoomIn = () => setLightboxZoom((zoom) => Math.min(zoom + 0.25, 2.5))
-  const zoomOut = () => setLightboxZoom((zoom) => Math.max(zoom - 0.25, 1))
+  const publishedOffer = storefront.catalogPriceState.items[product.slug]
+  const catalogReady =
+    storefront.catalogPriceState.status === "ready" &&
+    publishedOffer?.availability === "catalog_listed"
+  const sourcingMode = publishedOffer
+    ? publishedOffer.fulfillmentMode === "in_stock"
+      ? "В наличии в России"
+      : "Под заказ из Китая"
+    : storefront.catalogPriceState.status === "loading"
+      ? "Проверяем данные"
+      : "Недоступно для заказа"
 
   return (
     <>
@@ -151,12 +131,13 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
             initial={{ opacity: 0.8, scale: 0.992 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.16 }}
-            onClick={() => setLightboxOpen(true)}
+            onClick={() => lightbox.open(expandButtonRef.current)}
           />
           <button
+            ref={expandButtonRef}
             className="product-sheet__expand"
             type="button"
-            onClick={() => setLightboxOpen(true)}
+            onClick={(event) => lightbox.open(event.currentTarget)}
             aria-label="Открыть фото в полном размере"
           >
             <Maximize2 aria-hidden="true" size={18} />
@@ -233,6 +214,7 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
           tabIndex={0}
           aria-label="Данные товара"
         >
+          <p className="product-sheet__type">{getProductTypeLabel(product)}</p>
           <h2 id="product-sheet-title" ref={storefront.sheetHeadingRef} tabIndex={-1}>
             {product.brand} {product.name}
           </h2>
@@ -267,10 +249,14 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
               className="button button--primary"
               type="button"
               onClick={storefront.addSelectedToCart}
-              disabled={!storefront.selectedSize}
+              disabled={!storefront.selectedSize || !catalogReady}
             >
               <ShoppingCart aria-hidden="true" size={18} />
-              {storefront.selectedSize ? "Добавить в заказ" : "Выберите размер выше"}
+              {!catalogReady
+                ? "Проверяем каталог"
+                : storefront.selectedSize
+                  ? "Добавить в заказ"
+                  : "Выберите размер выше"}
             </button>
           </div>
 
@@ -285,7 +271,7 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
             </div>
             <div>
               <dt>Отправка</dt>
-              <dd>{getSourcingMode(product)}</dd>
+              <dd>{sourcingMode}</dd>
             </div>
             <div>
               <dt>{price?.label}</dt>
@@ -294,7 +280,8 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
           </dl>
 
           <p className="product-sheet__fineprint">
-            В карточке указана цена товара. Доставка рассчитывается перед оплатой.
+            Опубликованный каталог не подтверждает живой остаток Poizon. Товары оплачиваются
+            сейчас, доставка СДЭК — отдельно после прибытия.
           </p>
           <p className="product-sheet__order-proof">
             Оплата проходит на защищённой странице банка.
@@ -348,8 +335,9 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
           </p>
         </div>
       </motion.aside>
-      {isLightboxOpen ? (
+      {lightbox.isOpen ? (
         <motion.div
+          ref={lightbox.dialogRef}
           className="photo-lightbox"
           role="dialog"
           aria-modal="true"
@@ -357,15 +345,13 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          onWheel={(event) => {
-            if (event.deltaY < 0) zoomIn()
-            else zoomOut()
-          }}
+          onWheel={lightbox.onWheel}
         >
           <button
+            ref={lightbox.closeButtonRef}
             className="photo-lightbox__close"
             type="button"
-            onClick={() => setLightboxOpen(false)}
+            onClick={lightbox.close}
             aria-label="Закрыть фото"
           >
             <X aria-hidden="true" size={22} />
@@ -373,35 +359,45 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
           <button
             className="photo-lightbox__nav photo-lightbox__nav--prev"
             type="button"
-            onClick={storefront.showPreviousProductImage}
+            onClick={lightbox.showPreviousImage}
             disabled={storefront.selectedVisibleGallery.length <= 1}
             aria-label="Предыдущее фото"
           >
             <ChevronLeft aria-hidden="true" size={28} />
           </button>
-          <img
-            src={resolveAssetUrl(selectedImageSrc)}
-            width="1200"
-            height="900"
-            alt={selectedImageAlt}
-            style={{ transform: `scale(${lightboxZoom})` }}
-            onError={(event) => setImageFallback(event, product.fallbackImage)}
-          />
+          <div
+            className="photo-lightbox__canvas"
+            onPointerDown={lightbox.onPointerDown}
+            onPointerMove={lightbox.onPointerMove}
+            onPointerUp={lightbox.onPointerUp}
+            onPointerCancel={lightbox.onPointerCancel}
+          >
+            <img
+              src={resolveAssetUrl(selectedImageSrc)}
+              width="1200"
+              height="900"
+              alt={selectedImageAlt}
+              draggable="false"
+              style={{ transform: lightbox.transform }}
+              onClick={lightbox.onImageClick}
+              onError={(event) => setImageFallback(event, product.fallbackImage)}
+            />
+          </div>
           <button
             className="photo-lightbox__nav photo-lightbox__nav--next"
             type="button"
-            onClick={storefront.showNextProductImage}
+            onClick={lightbox.showNextImage}
             disabled={storefront.selectedVisibleGallery.length <= 1}
             aria-label="Следующее фото"
           >
             <ChevronRight aria-hidden="true" size={28} />
           </button>
           <div className="photo-lightbox__tools" aria-label="Инструменты фото">
-            <button type="button" onClick={zoomOut} aria-label="Уменьшить фото">
+            <button type="button" onClick={lightbox.zoomOut} aria-label="Уменьшить фото">
               <ZoomOut aria-hidden="true" size={18} />
             </button>
-            <span>{Math.round(lightboxZoom * 100)}%</span>
-            <button type="button" onClick={zoomIn} aria-label="Увеличить фото">
+            <span>{Math.round(lightbox.zoom * 100)}%</span>
+            <button type="button" onClick={lightbox.zoomIn} aria-label="Увеличить фото">
               <ZoomIn aria-hidden="true" size={18} />
             </button>
           </div>

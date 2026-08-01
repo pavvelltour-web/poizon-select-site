@@ -1,13 +1,12 @@
-import { MoveRight } from "lucide-react"
 import { useState, type CSSProperties } from "react"
 
 import type { CatalogProduct } from "../../catalog/catalog"
-import type { CatalogPriceMap } from "../cart"
+import type { CatalogPriceMap, PublishedCatalogItem } from "../cart"
 import {
   getDisplayPrice,
   getProductPath,
+  getProductTypeLabel,
   getSizeRangeLabel,
-  getSourcingMode,
   resolveAssetUrl,
   setImageFallback,
 } from "../landing-data"
@@ -17,21 +16,36 @@ interface ProductCardProps {
   index: number
   product: CatalogProduct
   catalogPriceLookup: CatalogPriceMap | null
+  catalogStatus: "loading" | "ready" | "failed"
+  publishedOffer: PublishedCatalogItem | null
 }
 export function ProductCard({
   featured,
   index,
   product,
   catalogPriceLookup,
+  catalogStatus,
+  publishedOffer,
 }: ProductCardProps) {
   const price = getDisplayPrice(product, catalogPriceLookup)
   const [mediaReady, setMediaReady] = useState(false)
+  const sizeLabel = publishedOffer
+    ? `${publishedOffer.sizes[0]}–${publishedOffer.sizes.at(-1)}`
+    : getSizeRangeLabel(product)
+  const sourcingMode = publishedOffer?.availability === "catalog_listed"
+    ? publishedOffer.fulfillmentMode === "in_stock"
+      ? "В наличии в России"
+      : "Под заказ из Китая"
+    : catalogStatus === "loading"
+      ? "Предварительные данные"
+      : "Недоступно для заказа"
 
   return (
     <article
       className={`product-card ${featured ? "product-card--feature" : ""}`}
       data-category={product.category}
-      style={{ "--card-index": index } as CSSProperties}
+      data-kind={product.kind}
+      style={{ "--card-index": Math.min(index, 12) } as CSSProperties}
     >
       <a
         className="product-card__link"
@@ -44,10 +58,10 @@ export function ProductCard({
             src={resolveAssetUrl(product.image)}
             width="1200"
             height="900"
-            loading={index < 12 ? "eager" : "lazy"}
+            loading="lazy"
             decoding="async"
             alt={`${product.brand} ${product.name}`}
-            fetchPriority={index < 4 ? "high" : "auto"}
+            fetchPriority="auto"
             onLoad={() => setMediaReady(true)}
             onError={(event) => {
               setImageFallback(event, product.fallbackImage)
@@ -56,20 +70,14 @@ export function ProductCard({
           />
         </span>
         <span className="product-card__body">
-          <span className="product-card__topline">
-            <span className="product-card__brand">{product.brand}</span>
-            <span className="product-card__mode">{getSourcingMode(product)}</span>
-          </span>
-          <h3>{product.name}</h3>
-          <span className="product-card__sizes">Размеры {getSizeRangeLabel(product)}</span>
+          <span className="product-card__type">{getProductTypeLabel(product)}</span>
+          <h3>{product.brand} {product.name}</h3>
+          <span className="product-card__sizes">Размеры: {sizeLabel}</span>
+          <span className="product-card__mode">{sourcingMode}</span>
           <span className="product-card__bottom">
             <span>
               <b>{price.value}</b>
               <em>{price.detail}</em>
-            </span>
-            <span className="product-card__cta">
-              Подробнее
-              <MoveRight aria-hidden="true" size={16} />
             </span>
           </span>
         </span>

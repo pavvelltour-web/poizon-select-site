@@ -1,8 +1,7 @@
-import { LogIn, Send, ShoppingBag, ShoppingCart, X } from "lucide-react"
+import { LogIn, Search, ShoppingCart, X } from "lucide-react"
 import { useEffect, useState } from "react"
 
 interface HeaderProps {
-  botUrl: string | null
   cartCount: number
   openCart: () => void
   personalDataConsentVersion: string | null
@@ -10,7 +9,6 @@ interface HeaderProps {
 }
 
 export function Header({
-  botUrl,
   cartCount,
   openCart,
   personalDataConsentVersion,
@@ -126,37 +124,25 @@ export function Header({
       </a>
 
       <nav className="kb-nav" aria-label="Основная навигация">
-        <a href="/#catalog">Товары</a>
-        <a href="/#how-it-works">Заказ</a>
-        <a href="/#trust">Условия</a>
+        <a href="/#catalog">Каталог</a>
+        <a href="/#selection">Подобрать</a>
+        <a href="/delivery-returns">Доставка и возврат</a>
       </nav>
 
       <div className="kb-header__actions">
+        <a className="kb-header__search" href="/#catalog" aria-label="Поиск">
+          <Search aria-hidden="true" size={17} />
+          <span>Поиск</span>
+        </a>
         <button className="kb-header__login" type="button" onClick={() => setLoginOpen(true)}>
           <LogIn aria-hidden="true" size={17} />
-          Войти
+          <span>Войти</span>
         </button>
         <button className="kb-header__cart" type="button" onClick={openCart}>
           <ShoppingCart aria-hidden="true" size={17} />
-          Заказ
-          {cartCount > 0 ? <span>{cartCount}</span> : null}
+          <span>Корзина</span>
+          {cartCount > 0 ? <span className="kb-header__count">{cartCount}</span> : null}
         </button>
-        {botUrl ? (
-          <a
-            className="kb-header__cta"
-            href={botUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Send aria-hidden="true" size={17} />
-            Telegram
-          </a>
-        ) : (
-          <a className="kb-header__cta" href="/#catalog">
-            <ShoppingBag aria-hidden="true" size={17} />
-            Выбрать
-          </a>
-        )}
       </div>
     </header>
     {loginOpen ? (

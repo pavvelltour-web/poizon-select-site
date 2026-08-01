@@ -204,12 +204,12 @@ describe("catalogProducts", () => {
     const courtNike = filterCatalog(publicCatalogProducts, "court-shoes", "NIKE")
 
     expect(sortCatalog(courtNike, "featured").map((product) => product.slug)).toEqual([
-      "nike-zoom-hyperset-2",
-      "nike-hyperace-3-se",
+      "nike-kd-18",
       "nike-gt-cut-academy",
       "nike-sabrina-3",
+      "nike-zoom-hyperset-2",
+      "nike-hyperace-3-se",
       "nike-lebron-nxxt-genisus",
-      "nike-kd-18",
       "nike-calm-slide",
       "nike-aone",
       "nike-free-metcon-6",

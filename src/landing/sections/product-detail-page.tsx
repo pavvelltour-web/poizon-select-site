@@ -15,14 +15,14 @@ import { useEffect, useRef, useState } from "react"
 import type { CatalogProduct } from "../../catalog/catalog"
 import {
   getDisplayPrice,
+  getProductTypeLabel,
   getProductUse,
-  getSizeOptions,
-  getSourcingMode,
   kindLabels,
   resolveAssetUrl,
   setImageFallback,
 } from "../landing-data"
 import type { StorefrontState } from "../landing-types"
+import { useProductLightbox } from "../use-product-lightbox"
 
 interface ProductDetailPageProps {
   product: CatalogProduct | null
@@ -33,8 +33,6 @@ export function ProductDetailPage({ product, storefront }: ProductDetailPageProp
   const touchStartX = useRef<number | null>(null)
   const [imageIndex, setImageIndex] = useState(0)
   const [selectedSize, setSelectedSize] = useState<string | null>(null)
-  const [lightboxOpen, setLightboxOpen] = useState(false)
-  const [zoom, setZoom] = useState(1)
 
   const gallery = product?.gallery.slice(0, 6) ?? []
   const currentImage = gallery[imageIndex] ?? gallery[0] ?? null
@@ -49,27 +47,16 @@ export function ProductDetailPage({ product, storefront }: ProductDetailPageProp
     setImageIndex((index) => (index + 1 >= gallery.length ? 0 : index + 1))
   }
 
+  const lightbox = useProductLightbox({
+    imageKey: currentImage?.src ?? product?.fallbackImage ?? "",
+    previousImage,
+    nextImage,
+  })
+
   useEffect(() => {
     setImageIndex(0)
     setSelectedSize(null)
-    setZoom(1)
   }, [product?.slug])
-
-  useEffect(() => {
-    if (!lightboxOpen) return
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setLightboxOpen(false)
-      else if (event.key === "ArrowLeft") previousImage()
-      else if (event.key === "ArrowRight") nextImage()
-      else if (event.key === "+" || event.key === "=") {
-        setZoom((value) => Math.min(2.5, value + 0.25))
-      } else if (event.key === "-") {
-        setZoom((value) => Math.max(1, value - 0.25))
-      } else if (event.key === "0") setZoom(1)
-    }
-    document.addEventListener("keydown", onKeyDown)
-    return () => document.removeEventListener("keydown", onKeyDown)
-  }, [lightboxOpen, gallery.length])
 
   if (!product) {
     return (
@@ -84,7 +71,21 @@ export function ProductDetailPage({ product, storefront }: ProductDetailPageProp
   }
 
   const price = getDisplayPrice(product, storefront.catalogPriceState.lookup)
-  const sizeOptions = getSizeOptions(product)
+  const publishedOffer = storefront.catalogPriceState.items[product.slug]
+  const catalogReady =
+    storefront.catalogPriceState.status === "ready" &&
+    publishedOffer?.availability === "catalog_listed"
+  const sizeOptions = catalogReady ? publishedOffer.sizes : []
+  const sourcingMode = publishedOffer
+    ? publishedOffer.fulfillmentMode === "in_stock"
+      ? "В наличии в России"
+      : "Под заказ из Китая"
+    : storefront.catalogPriceState.status === "loading"
+      ? "Проверяем данные"
+      : "Недоступно для заказа"
+  const eta = publishedOffer?.etaMinDays && publishedOffer.etaMaxDays
+    ? `${publishedOffer.etaMinDays}–${publishedOffer.etaMaxDays} дней до Москвы`
+    : "Срок будет показан после серверной проверки"
   const imageSrc = currentImage?.src ?? product.fallbackImage
   const imageAlt = currentImage?.alt ?? `${product.brand} ${product.name}`
 
@@ -117,7 +118,7 @@ export function ProductDetailPage({ product, storefront }: ProductDetailPageProp
             <button
               className="pdp-gallery__main"
               type="button"
-              onClick={() => setLightboxOpen(true)}
+              onClick={(event) => lightbox.open(event.currentTarget)}
               aria-label="Открыть фото в полном размере"
             >
               <img
@@ -180,16 +181,16 @@ export function ProductDetailPage({ product, storefront }: ProductDetailPageProp
         </section>
 
         <section className="pdp-buybox" aria-label="Информация о товаре">
-          <p className="pdp-buybox__brand">{product.brand}</p>
-          <h1 id="pdp-title">{product.name}</h1>
+          <p className="pdp-buybox__brand">{getProductTypeLabel(product)}</p>
+          <h1 id="pdp-title">{product.brand} {product.name}</h1>
           <p className="pdp-buybox__use">{getProductUse(product)}</p>
 
           <div className="pdp-buybox__availability">
             <span>
               <Truck aria-hidden="true" size={18} />
-              <strong>{getSourcingMode(product)}</strong>
+              <strong>{sourcingMode}</strong>
             </span>
-            <small>Срок и стоимость доставки показываются до оплаты.</small>
+            <small>{eta}. Опубликованный каталог не подтверждает живой остаток Poizon.</small>
           </div>
 
           <div className="pdp-buybox__price">
@@ -220,13 +221,17 @@ export function ProductDetailPage({ product, storefront }: ProductDetailPageProp
           <button
             className="button button--primary pdp-buybox__cta"
             type="button"
-            disabled={!selectedSize}
+            disabled={!selectedSize || !catalogReady}
             onClick={() => {
               if (selectedSize) storefront.addProductToCart(product, selectedSize)
             }}
           >
             <ShoppingBag aria-hidden="true" size={19} />
-            {selectedSize ? `Добавить в заказ · ${price.value}` : "Выберите размер"}
+            {!catalogReady
+              ? "Проверяем каталог"
+              : selectedSize
+                ? `Добавить в заказ · ${price.value}`
+                : "Выберите размер"}
           </button>
 
           <dl className="pdp-facts">
@@ -236,7 +241,7 @@ export function ProductDetailPage({ product, storefront }: ProductDetailPageProp
             </div>
             <div>
               <dt>Получение</dt>
-              <dd>{getSourcingMode(product)}</dd>
+              <dd>{sourcingMode}</dd>
             </div>
           </dl>
 
@@ -262,22 +267,20 @@ export function ProductDetailPage({ product, storefront }: ProductDetailPageProp
         </section>
       </div>
 
-      {lightboxOpen ? (
+      {lightbox.isOpen ? (
         <div
+          ref={lightbox.dialogRef}
           className="photo-lightbox"
           role="dialog"
           aria-modal="true"
           aria-label="Полноэкранное фото товара"
-          onWheel={(event) => {
-            setZoom((value) =>
-              event.deltaY < 0 ? Math.min(2.5, value + 0.25) : Math.max(1, value - 0.25),
-            )
-          }}
+          onWheel={lightbox.onWheel}
         >
           <button
+            ref={lightbox.closeButtonRef}
             className="photo-lightbox__close"
             type="button"
-            onClick={() => setLightboxOpen(false)}
+            onClick={lightbox.close}
             aria-label="Закрыть фото"
           >
             <X aria-hidden="true" size={22} />
@@ -285,24 +288,34 @@ export function ProductDetailPage({ product, storefront }: ProductDetailPageProp
           <button
             className="photo-lightbox__nav photo-lightbox__nav--prev"
             type="button"
-            onClick={previousImage}
+            onClick={lightbox.showPreviousImage}
             disabled={gallery.length <= 1}
             aria-label="Предыдущее фото"
           >
             <ChevronLeft aria-hidden="true" size={28} />
           </button>
-          <img
-            src={resolveAssetUrl(imageSrc)}
-            width="1200"
-            height="900"
-            alt={imageAlt}
-            style={{ transform: `scale(${zoom})` }}
-            onError={(event) => setImageFallback(event, product.fallbackImage)}
-          />
+          <div
+            className="photo-lightbox__canvas"
+            onPointerDown={lightbox.onPointerDown}
+            onPointerMove={lightbox.onPointerMove}
+            onPointerUp={lightbox.onPointerUp}
+            onPointerCancel={lightbox.onPointerCancel}
+          >
+            <img
+              src={resolveAssetUrl(imageSrc)}
+              width="1200"
+              height="900"
+              alt={imageAlt}
+              draggable="false"
+              style={{ transform: lightbox.transform }}
+              onClick={lightbox.onImageClick}
+              onError={(event) => setImageFallback(event, product.fallbackImage)}
+            />
+          </div>
           <button
             className="photo-lightbox__nav photo-lightbox__nav--next"
             type="button"
-            onClick={nextImage}
+            onClick={lightbox.showNextImage}
             disabled={gallery.length <= 1}
             aria-label="Следующее фото"
           >
@@ -311,15 +324,15 @@ export function ProductDetailPage({ product, storefront }: ProductDetailPageProp
           <div className="photo-lightbox__tools" aria-label="Масштаб фотографии">
             <button
               type="button"
-              onClick={() => setZoom((value) => Math.max(1, value - 0.25))}
+              onClick={lightbox.zoomOut}
               aria-label="Уменьшить фото"
             >
               <ZoomOut aria-hidden="true" size={16} />
             </button>
-            <span>{Math.round(zoom * 100)}%</span>
+            <span>{Math.round(lightbox.zoom * 100)}%</span>
             <button
               type="button"
-              onClick={() => setZoom((value) => Math.min(2.5, value + 0.25))}
+              onClick={lightbox.zoomIn}
               aria-label="Увеличить фото"
             >
               <ZoomIn aria-hidden="true" size={18} />

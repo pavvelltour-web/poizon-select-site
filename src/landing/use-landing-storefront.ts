@@ -12,15 +12,20 @@ import {
 import {
   addOrIncrementCartLine,
   cartTotalRub,
+  fetchCatalogRecommendations,
+  fetchCheckoutCatalog,
   loadCart,
+  reconcileCartLines,
   saveCart,
   submitCheckout,
   isCheckoutApiError,
   updateCartQuantity,
   type CheckoutConsents,
   type CheckoutCustomer,
+  type CheckoutDelivery,
   type CheckoutResult,
   type CartLine,
+  type PublishedCatalogMap,
 } from "./cart"
 import {
   buildOrderRequest,
@@ -31,7 +36,6 @@ import {
 import {
   findTaskMatches,
   getDisplayPrice,
-  getSizeOptions,
   heroProductSlugs,
   isCategory,
   isSort,
@@ -39,18 +43,6 @@ import {
 } from "./landing-data"
 import type { ActiveCategory, StorefrontState, UrlState } from "./landing-types"
 
-type CatalogPriceParseResult = {
-  lookup: Record<string, number>
-  version: string | null
-  personalDataConsentVersion: string | null
-}
-
-function readPersonalDataConsentVersion(payload: object): string | null {
-  if (!("personal_data_consent_version" in payload)) return null
-  const value = (payload as { personal_data_consent_version?: unknown })
-    .personal_data_consent_version
-  return typeof value === "string" && value.trim() ? value.trim() : null
-}
 function createCheckoutIdempotencyKey(): string {
   if (typeof globalThis.crypto?.randomUUID === "function") {
     return globalThis.crypto.randomUUID()
@@ -61,6 +53,7 @@ function createCheckoutIdempotencyKey(): string {
 function checkoutIntentSignature(
   lines: readonly CartLine[],
   customer: CheckoutCustomer,
+  delivery: CheckoutDelivery,
 ): string {
   return JSON.stringify({
     customer: {
@@ -72,157 +65,8 @@ function checkoutIntentSignature(
       id: line.id,
       quantity: line.quantity,
     })),
+    delivery,
   })
-}
-function parseCatalogPricePayload(payload: unknown): CatalogPriceParseResult | null {
-  if (!payload || typeof payload !== "object") return null
-
-  const candidate =
-    "prices" in payload && payload.prices && typeof payload.prices === "object"
-      ? payload.prices
-      : payload
-
-  const dataRows =
-    !Array.isArray(candidate) &&
-    candidate !== null &&
-    "data" in candidate &&
-    Array.isArray((candidate as { data?: unknown }).data)
-      ? (candidate as { data: unknown[] }).data
-      : null
-
-  if (dataRows) {
-    const lookup = extractPriceMap(
-      dataRows as Array<{
-        product_slug?: string
-        slug?: string
-        code?: string
-        price?: unknown
-        price_rub?: unknown
-        priceRub?: unknown
-        amount?: unknown
-      }>,
-    )
-    if (!Object.keys(lookup).length) return null
-    return {
-      lookup,
-      version:
-        "version" in payload && typeof (payload as { version?: unknown }).version === "string"
-          ? (payload as { version: string }).version
-          : null,
-      personalDataConsentVersion: readPersonalDataConsentVersion(payload),
-    }
-  }
-
-  if (Array.isArray(candidate)) {
-    const lookup = extractPriceMap(
-      candidate as Array<{
-        product_slug?: string
-        slug?: string
-        code?: string
-        price?: unknown
-        price_rub?: unknown
-        priceRub?: unknown
-        amount?: unknown
-      }>,
-    )
-    if (!Object.keys(lookup).length) return null
-    return {
-      lookup,
-      version:
-        "version" in payload && typeof (payload as { version?: unknown }).version === "string"
-          ? (payload as { version: string }).version
-          : null,
-      personalDataConsentVersion: readPersonalDataConsentVersion(payload),
-    }
-  }
-
-  if (candidate === null || typeof candidate !== "object") return null
-  const lookup = extractPriceMap(Object.entries(candidate as Record<string, unknown>))
-  if (!Object.keys(lookup).length) return null
-  return {
-    lookup,
-    version:
-      "version" in payload && typeof (payload as { version?: unknown }).version === "string"
-        ? (payload as { version: string }).version
-        : null,
-    personalDataConsentVersion: readPersonalDataConsentVersion(payload),
-  }
-}
-
-function extractPriceMap(
-  rows:
-    | Array<{
-        product_slug?: string
-        slug?: string
-        code?: string
-        price?: unknown
-        price_rub?: unknown
-        priceRub?: unknown
-        amount?: unknown
-      }>
-    | Array<[string, unknown]>,
-): Record<string, number> {
-  const lookup: Record<string, number> = {}
-  for (const item of rows) {
-    if (Array.isArray(item)) {
-      const [slug, value] = item
-      if (typeof slug !== "string" || !slug.trim()) continue
-      const amount = typeof value === "number" ? value : Number(value)
-      if (Number.isFinite(amount) && amount > 0) lookup[slug.trim()] = amount
-      continue
-    }
-
-    const candidate = item
-    const slug =
-      candidate.product_slug ??
-      candidate.slug ??
-      candidate.code ??
-      ""
-    const priceCandidate =
-      candidate.price ??
-      candidate.price_rub ??
-      candidate.priceRub ??
-      candidate.amount
-    if (!slug) continue
-    const amount = typeof priceCandidate === "number" ? priceCandidate : Number(priceCandidate)
-    if (Number.isFinite(amount) && amount > 0) lookup[slug] = amount
-  }
-  return lookup
-}
-
-function buildPriceCatalogUrls(apiBaseUrl: string): string[] {
-  const endpoint = `${apiBaseUrl || ""}`.replace(/\/$/, "")
-  return endpoint
-    ? [`${endpoint}/api/checkout/prices`, `${endpoint}/api/checkout/orders?mode=prices`]
-    : ["/api/checkout/prices", "/api/checkout/orders?mode=prices"]
-}
-
-async function loadCatalogPricesFromApi(
-  apiBaseUrl: string,
-  cancelled: () => boolean,
-): Promise<CatalogPriceParseResult | null> {
-  const requestedUrls = buildPriceCatalogUrls(apiBaseUrl)
-
-  for (const pricesUrl of requestedUrls) {
-    if (cancelled()) return null
-    try {
-      const response = await fetch(pricesUrl, { credentials: "include" })
-      if (!response.ok) continue
-      const payload = await response.json().catch(() => null)
-      const parsed = parseCatalogPricePayload(payload)
-      if (!parsed) continue
-      if (Object.keys(parsed.lookup).length === 0) continue
-      return {
-        lookup: parsed.lookup,
-        version: parsed.version || CATALOG_PRICE_VERSION,
-        personalDataConsentVersion: parsed.personalDataConsentVersion,
-      }
-    } catch {
-      // Keep local fallback until a valid price response arrives.
-    }
-  }
-
-  return null
 }
 
 export type LandingStorefront = StorefrontState
@@ -254,6 +98,13 @@ export function useLandingStorefront(
     phone: "",
     email: "",
   })
+  const [checkoutDelivery, setCheckoutDelivery] = useState<CheckoutDelivery>({
+    method: "cdek_courier",
+    city: "",
+    postalCode: "",
+    address: "",
+    pvzCode: "",
+  })
   const [checkoutConsents, setCheckoutConsents] = useState<CheckoutConsents>({
     offerAccepted: false,
     personalDataAccepted: false,
@@ -261,13 +112,19 @@ export function useLandingStorefront(
   const [checkoutResult, setCheckoutResult] = useState<CheckoutResult>({
     status: "idle",
     message: "",
+    orderNumber: null,
     orderIds: [],
     paymentUrl: null,
+    amounts: null,
+    delivery: null,
   })
   const [catalogPriceState, setCatalogPriceState] = useState({
+    status: "loading" as "loading" | "ready" | "failed",
     lookup: null as Record<string, number> | null,
+    items: {} as PublishedCatalogMap,
     version: CATALOG_PRICE_VERSION,
     personalDataConsentVersion: null as string | null,
+    error: null as string | null,
   })
   const productTriggerRef = useRef<HTMLButtonElement | null>(null)
   const sheetHeadingRef = useRef<HTMLHeadingElement | null>(null)
@@ -290,7 +147,11 @@ export function useLandingStorefront(
   const selectedProductPrice = selectedProduct
     ? getDisplayPrice(selectedProduct, catalogPriceState.lookup)
     : null
-  const selectedSizeOptions = selectedProduct ? getSizeOptions(selectedProduct) : []
+  const selectedSizeOptions = selectedProduct
+    ? catalogPriceState.items[selectedProduct.slug]?.availability === "catalog_listed"
+      ? catalogPriceState.items[selectedProduct.slug]?.sizes ?? []
+      : []
+    : []
   const selectedImageDisplayIndex =
     selectedVisibleGallery.length === 0 ? 0 : selectedImageIndex + 1
   const filteredProducts = useMemo(
@@ -350,19 +211,31 @@ export function useLandingStorefront(
     else window.history.replaceState(null, "", nextHref)
   }
 
-  const refreshCatalogPrices = async (options: { isCancelled?: () => boolean } = {}) => {
-    const nextPriceState = await loadCatalogPricesFromApi(
-      apiBaseUrl,
-      options.isCancelled ?? (() => false),
-    )
-    if (!nextPriceState) return null
-    if (options.isCancelled?.()) return null
-    setCatalogPriceState({
-      lookup: nextPriceState.lookup,
-      version: nextPriceState.version || CATALOG_PRICE_VERSION,
-      personalDataConsentVersion: nextPriceState.personalDataConsentVersion,
-    })
-    return nextPriceState
+  const refreshCatalogPrices = async (signal?: AbortSignal) => {
+    try {
+      const nextPriceState = await fetchCheckoutCatalog(apiBaseUrl, signal)
+      setCatalogPriceState({
+        status: "ready",
+        lookup: nextPriceState.lookup,
+        items: nextPriceState.items,
+        version: nextPriceState.version,
+        personalDataConsentVersion: nextPriceState.personalDataConsentVersion,
+        error: null,
+      })
+      setCartLines((lines) => reconcileCartLines(lines, nextPriceState.items))
+      return nextPriceState
+    } catch (error) {
+      if (signal?.aborted) return null
+      setCatalogPriceState((current) => ({
+        ...current,
+        status: "failed",
+        lookup: null,
+        items: {},
+        error: error instanceof Error ? error.message : "Каталог заказа недоступен.",
+      }))
+      setCartLines((lines) => lines.map((line) => ({ ...line, validation: "pending" })))
+      return null
+    }
   }
 
   const refreshPersonalDataConsentVersion = async () => {
@@ -414,12 +287,9 @@ export function useLandingStorefront(
   }, [])
 
   useEffect(() => {
-    let cancelled = false
-    const loadCatalogPrices = async () => refreshCatalogPrices({ isCancelled: () => cancelled })
-    void loadCatalogPrices()
-    return () => {
-      cancelled = true
-    }
+    const controller = new AbortController()
+    void refreshCatalogPrices(controller.signal)
+    return () => controller.abort()
   }, [apiBaseUrl])
 
   useEffect(() => {
@@ -433,21 +303,12 @@ export function useLandingStorefront(
     const controller = new AbortController()
     const timer = window.setTimeout(async () => {
       try {
-        const endpoint = `${apiBaseUrl || ""}`.replace(/\/$/, "")
-        const response = await fetch(`${endpoint}/api/catalog/recommendations`, {
-          method: "POST",
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ query, limit: 4 }),
-          signal: controller.signal,
-        })
-        if (!response.ok) return
-        const payload = (await response.json().catch(() => null)) as {
-          items?: unknown
-        } | null
-        if (!payload || !Array.isArray(payload.items)) return
-        const matches = payload.items
-          .slice(0, 4)
+        const recommendations = await fetchCatalogRecommendations(
+          apiBaseUrl,
+          query,
+          controller.signal,
+        )
+        const matches = recommendations
           .map((item, index) => {
             if (!item || typeof item !== "object") return null
             const slug = "slug" in item && typeof item.slug === "string" ? item.slug : ""
@@ -563,16 +424,40 @@ export function useLandingStorefront(
     setCopyState("idle")
   }
 
+  const emptyCheckoutResult = (
+    status: CheckoutResult["status"],
+    message: string,
+  ): CheckoutResult => ({
+    status,
+    message,
+    orderNumber: null,
+    orderIds: [],
+    paymentUrl: null,
+    amounts: null,
+    delivery: null,
+  })
+
   const addProductToCart = (product: CatalogProduct, size: string) => {
-    setCartLines((lines) =>
-      addOrIncrementCartLine(lines, product, size),
-    )
-    setCheckoutResult({
-      status: "idle",
-      message: "",
-      orderIds: [],
-      paymentUrl: null,
-    })
+    const offer = catalogPriceState.items[product.slug]
+    if (
+      catalogPriceState.status !== "ready" ||
+      !offer ||
+      offer.availability !== "catalog_listed" ||
+      !offer.sizes.includes(size)
+    ) {
+      setCheckoutResult(
+        emptyCheckoutResult(
+          "failed",
+          catalogPriceState.status === "loading"
+            ? "Проверяем цену и размеры на сервере. Добавление станет доступно после загрузки каталога."
+            : "Этот товар или размер сейчас не опубликован для заказа.",
+        ),
+      )
+      setCartOpen(true)
+      return
+    }
+    setCartLines((lines) => addOrIncrementCartLine(lines, product, size, "valid"))
+    setCheckoutResult(emptyCheckoutResult("idle", ""))
     setCartOpen(true)
   }
 
@@ -592,35 +477,66 @@ export function useLandingStorefront(
   const updateCheckoutCustomer = (
     field: keyof CheckoutCustomer,
     value: string,
+  ) => setCheckoutCustomer((customer) => ({ ...customer, [field]: value }))
+  const updateCheckoutDelivery = (
+    field: keyof CheckoutDelivery,
+    value: string,
   ) => {
-    setCheckoutCustomer((customer) => ({ ...customer, [field]: value }))
+    setCheckoutDelivery((delivery) => ({ ...delivery, [field]: value }))
+    checkoutAttemptRef.current = null
   }
   const updateCheckoutConsent = (
     field: keyof CheckoutConsents,
     value: boolean,
-  ) => {
-    setCheckoutConsents((consents) => ({ ...consents, [field]: value }))
-  }
+  ) => setCheckoutConsents((consents) => ({ ...consents, [field]: value }))
 
   const submitCartCheckout = async () => {
     if (cartLines.length === 0) return
-    if (!checkoutConsents.offerAccepted || !checkoutConsents.personalDataAccepted) {
-      setCheckoutResult({
-        status: "failed",
-        message: "Подтвердите условия оферты и обработки персональных данных.",
-        orderIds: [],
-        paymentUrl: null,
-      })
+    if (
+      catalogPriceState.status !== "ready" ||
+      cartLines.some((line) => line.validation !== "valid")
+    ) {
+      setCheckoutResult(
+        emptyCheckoutResult(
+          "failed",
+          "Заказ заблокирован: цена, товар и размер должны быть подтверждены серверным каталогом.",
+        ),
+      )
       return
     }
-    setCheckoutResult({
-      status: "submitting",
-      message: "Создаём заказ и готовим оплату...",
-      orderIds: [],
-      paymentUrl: null,
-    })
+    if (!checkoutConsents.offerAccepted || !checkoutConsents.personalDataAccepted) {
+      setCheckoutResult(
+        emptyCheckoutResult(
+          "failed",
+          "Подтвердите условия оферты и обработку персональных данных.",
+        ),
+      )
+      return
+    }
 
-    const intentSignature = checkoutIntentSignature(cartLines, checkoutCustomer)
+    const city = checkoutDelivery.city.trim()
+    const postalCode = checkoutDelivery.postalCode.trim()
+    const destination = checkoutDelivery.method === "cdek_pvz"
+      ? checkoutDelivery.pvzCode.trim()
+      : checkoutDelivery.address.trim()
+    if (city.length < 2 || !/^\d{6}$/.test(postalCode) || !destination) {
+      setCheckoutResult(
+        emptyCheckoutResult(
+          "failed",
+          checkoutDelivery.method === "cdek_pvz"
+            ? "Укажите город, шестизначный индекс и код пункта СДЭК."
+            : "Укажите город, шестизначный индекс и адрес доставки.",
+        ),
+      )
+      return
+    }
+
+    setCheckoutResult(emptyCheckoutResult("submitting", "Создаём заказ и рассчитываем СДЭК…"))
+    const intentSignature = checkoutIntentSignature(
+      cartLines,
+      checkoutCustomer,
+      checkoutDelivery,
+    )
     if (
       checkoutAttemptRef.current === null ||
       checkoutAttemptRef.current.signature !== intentSignature
@@ -630,89 +546,40 @@ export function useLandingStorefront(
         key: createCheckoutIdempotencyKey(),
       }
     }
-    const idempotencyKey = checkoutAttemptRef.current.key
 
-    const trySubmit = async (lookup: Record<string, number> | null, version: string) =>
-      submitCheckout(
+    try {
+      const result = await submitCheckout(
         apiBaseUrl,
         cartLines,
         checkoutCustomer,
         checkoutConsents,
-        idempotencyKey,
-        lookup,
-        version,
-      )
-
-    try {
-      const firstResult = await trySubmit(
-        catalogPriceState.lookup,
+        checkoutDelivery,
+        checkoutAttemptRef.current.key,
+        catalogPriceState.items,
         catalogPriceState.version,
       )
       setCheckoutResult({
         status: "created",
-        message: firstResult.message,
-        orderIds: firstResult.order_ids,
-        paymentUrl: firstResult.payment_url,
+        message: result.message,
+        orderNumber: result.orderNumber,
+        orderIds: result.orderIds,
+        paymentUrl: result.paymentUrl,
+        amounts: result.amounts,
+        delivery: result.delivery,
       })
-      if (firstResult.payment_url) {
-        window.location.assign(firstResult.payment_url)
-      }
     } catch (error) {
       if (isCheckoutApiError(error) && error.status === 409) {
-        const refreshed = await refreshCatalogPrices()
-        if (!refreshed) {
-          setCheckoutResult({
-            status: "failed",
-            message: error.message || "Цена обновилась. Обновите страницу и повторите попытку.",
-            orderIds: [],
-            paymentUrl: null,
-          })
-          return
-        }
-        const fallbackLookup = refreshed?.lookup ?? catalogPriceState.lookup
-        const fallbackVersion = refreshed?.version || catalogPriceState.version
-        setCheckoutResult({
-          status: "submitting",
-          message: "Цена обновлена, повторно отправляем заказ...",
-          orderIds: [],
-          paymentUrl: null,
-        })
-
-        try {
-          const retryResult = await trySubmit(fallbackLookup, fallbackVersion)
-          setCheckoutResult({
-            status: "created",
-            message: retryResult.message,
-            orderIds: retryResult.order_ids,
-            paymentUrl: retryResult.payment_url,
-          })
-          if (retryResult.payment_url) {
-            window.location.assign(retryResult.payment_url)
-          }
-          return
-        } catch (retryError) {
-          setCheckoutResult({
-            status: "failed",
-            message:
-              retryError instanceof Error
-                ? retryError.message
-                : "Не удалось создать заказ. Попробуйте ещё раз.",
-            orderIds: [],
-            paymentUrl: null,
-          })
-          return
-        }
+        await refreshCatalogPrices()
+        checkoutAttemptRef.current = null
       }
-
-      setCheckoutResult({
-        status: "failed",
-        message:
+      setCheckoutResult(
+        emptyCheckoutResult(
+          "failed",
           error instanceof Error
             ? error.message
-            : "Не удалось создать заказ. Попробуйте ещё раз.",
-        orderIds: [],
-        paymentUrl: null,
-      })
+            : "Не удалось создать заказ. Проверьте данные и попробуйте ещё раз.",
+        ),
+      )
     }
   }
 
@@ -744,6 +611,7 @@ export function useLandingStorefront(
     cartTotalRub: currentCartTotalRub,
     isCartOpen,
     checkoutCustomer,
+    checkoutDelivery,
     checkoutConsents,
     checkoutResult,
     request,
@@ -769,6 +637,7 @@ export function useLandingStorefront(
     removeCartLine,
     setCartLineQuantity,
     updateCheckoutCustomer,
+    updateCheckoutDelivery,
     updateCheckoutConsent,
     submitCartCheckout,
     refreshPersonalDataConsentVersion,

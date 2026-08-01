@@ -3,6 +3,7 @@ import { ArrowUpRight, BadgeCheck, Send, ShoppingBag } from "lucide-react"
 import {
   getDisplayPrice,
   getProductPath,
+  getProductTypeLabel,
   resolveAssetUrl,
   setImageFallback,
 } from "../landing-data"
@@ -59,7 +60,7 @@ export function HeroSection({ storefront }: HeroSectionProps) {
           </a>
         </div>
         <div className="hero-commerce__grid">
-          {storefront.heroProducts.map((product) => {
+          {storefront.heroProducts.map((product, index) => {
             const price = getDisplayPrice(product, storefront.catalogPriceState.lookup)
 
             return (
@@ -72,13 +73,17 @@ export function HeroSection({ storefront }: HeroSectionProps) {
                 <span className="hero-pick__image">
                   <img
                     src={resolveAssetUrl(product.image)}
-                    width="1200"
-                    height="900"
-                    alt=""
-                    onError={(event) => setImageFallback(event, product.fallbackImage)}
+                     width="1200"
+                     height="900"
+                     alt=""
+                     loading={index === 0 ? "eager" : "lazy"}
+                     decoding="async"
+                     fetchPriority={index === 0 ? "high" : "auto"}
+                     onError={(event) => setImageFallback(event, product.fallbackImage)}
                   />
                 </span>
                 <span className="hero-pick__body">
+                  <span>{getProductTypeLabel(product)}</span>
                   <strong>
                     {product.brand} {product.name}
                   </strong>
