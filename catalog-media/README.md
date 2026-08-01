@@ -15,7 +15,7 @@ repository and replace every placeholder with real evidence.
 
 Signal Studio acceptance rules:
 
-- footwear primary: clean side view, toe points right in the source, matching the validated intake contract;
+- footwear primary: clean side view, toe points left in the source, matching the Open Design direction and intake contract;
 - apparel primary: front view at a consistent source scale;
 - 8% minimum composition safe area on the normalized 4:3 canvas;
 - whole source remains visible; no crop and no background-removal crop;
