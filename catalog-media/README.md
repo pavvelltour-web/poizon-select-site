@@ -15,7 +15,7 @@ repository and replace every placeholder with real evidence.
 
 Signal Studio acceptance rules:
 
-- footwear primary: clean side view, toe points left in the source, matching the Open Design direction;
+- footwear primary: clean side view, toe points right in the source, matching the validated intake contract;
 - apparel primary: front view at a consistent source scale;
 - 8% minimum composition safe area on the normalized 4:3 canvas;
 - whole source remains visible; no crop and no background-removal crop;
@@ -94,5 +94,5 @@ product photography.
 - Pure white studio background with realistic contact shadow.
 - No vector/illustration look, detached fragments, distorted panels, fake labels
   or cropped product edges.
-- The generated asset is still a visual reference: manager verification of exact
-  SKU, color, size, tags, packaging, seller and availability remains mandatory.
+- A generated asset is only a visual reference. A catalog reviewer must verify
+  the exact SKU, color and permitted use before it can enter a public release.
