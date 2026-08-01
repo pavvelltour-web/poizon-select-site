@@ -12,6 +12,7 @@ const CLICK_ZOOM = 2
 
 type Point = { x: number; y: number }
 type Offset = { x: number; y: number }
+type Size = { width: number; height: number }
 
 interface LightboxOptions {
   imageKey: string
@@ -31,10 +32,24 @@ function clampZoom(value: number): number {
   return Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, value))
 }
 
-function clampOffset(offset: Offset, zoom: number): Offset {
-  if (zoom <= MIN_ZOOM || typeof window === "undefined") return { x: 0, y: 0 }
-  const maxX = ((zoom - 1) * window.innerWidth) / 2
-  const maxY = ((zoom - 1) * window.innerHeight) / 2
+export function getClampedLightboxOffset(
+  offset: Offset,
+  zoom: number,
+  canvas: Size,
+  image: Size,
+): Offset {
+  if (
+    zoom <= MIN_ZOOM ||
+    canvas.width <= 0 ||
+    canvas.height <= 0 ||
+    image.width <= 0 ||
+    image.height <= 0
+  ) {
+    return { x: 0, y: 0 }
+  }
+
+  const maxX = Math.max(0, (image.width * zoom - canvas.width) / 2)
+  const maxY = Math.max(0, (image.height * zoom - canvas.height) / 2)
   return {
     x: Math.min(maxX, Math.max(-maxX, offset.x)),
     y: Math.min(maxY, Math.max(-maxY, offset.y)),
@@ -51,6 +66,8 @@ export function useProductLightbox({
   const [offset, setOffset] = useState<Offset>({ x: 0, y: 0 })
   const dialogRef = useRef<HTMLDivElement>(null)
   const closeButtonRef = useRef<HTMLButtonElement>(null)
+  const canvasRef = useRef<HTMLDivElement>(null)
+  const imageRef = useRef<HTMLImageElement>(null)
   const returnFocusRef = useRef<HTMLElement | null>(null)
   const previousImageRef = useRef(previousImage)
   const nextImageRef = useRef(nextImage)
@@ -66,17 +83,39 @@ export function useProductLightbox({
   })
   const lastTouchTapRef = useRef(0)
   const lastPointerTypeRef = useRef("")
+  const zoomRef = useRef(zoom)
 
   previousImageRef.current = previousImage
   nextImageRef.current = nextImage
+  zoomRef.current = zoom
+
+  const clampOffset = (nextOffset: Offset, nextZoom: number): Offset => {
+    const canvas = canvasRef.current
+    const image = imageRef.current
+    return getClampedLightboxOffset(
+      nextOffset,
+      nextZoom,
+      {
+        width: canvas?.clientWidth ?? 0,
+        height: canvas?.clientHeight ?? 0,
+      },
+      {
+        width: image?.clientWidth ?? 0,
+        height: image?.clientHeight ?? 0,
+      },
+    )
+  }
 
   const resetTransform = () => {
+    zoomRef.current = MIN_ZOOM
     setZoom(MIN_ZOOM)
     setOffset({ x: 0, y: 0 })
   }
 
   const open = (trigger: HTMLElement | null) => {
-    returnFocusRef.current = trigger
+    returnFocusRef.current =
+      trigger ??
+      (document.activeElement instanceof HTMLElement ? document.activeElement : null)
     resetTransform()
     setOpen(true)
   }
@@ -89,14 +128,15 @@ export function useProductLightbox({
 
   const updateZoom = (nextZoom: number) => {
     const clampedZoom = clampZoom(nextZoom)
+    zoomRef.current = clampedZoom
     setZoom(clampedZoom)
     setOffset((current) => clampOffset(current, clampedZoom))
   }
 
-  const zoomIn = () => updateZoom(zoom + 0.25)
-  const zoomOut = () => updateZoom(zoom - 0.25)
+  const zoomIn = () => updateZoom(zoomRef.current + 0.25)
+  const zoomOut = () => updateZoom(zoomRef.current - 0.25)
   const toggleZoom = () => {
-    if (zoom > MIN_ZOOM) resetTransform()
+    if (zoomRef.current > MIN_ZOOM) resetTransform()
     else updateZoom(CLICK_ZOOM)
   }
 
@@ -134,10 +174,10 @@ export function useProductLightbox({
         showNextImage()
       } else if (event.key === "+" || event.key === "=") {
         event.preventDefault()
-        setZoom((value) => clampZoom(value + 0.25))
+        updateZoom(zoomRef.current + 0.25)
       } else if (event.key === "-") {
         event.preventDefault()
-        setZoom((value) => clampZoom(value - 0.25))
+        updateZoom(zoomRef.current - 0.25)
       } else if (event.key === "0") {
         event.preventDefault()
         resetTransform()
@@ -167,6 +207,27 @@ export function useProductLightbox({
       pointersRef.current.clear()
     }
   }, [isOpen])
+
+  useEffect(() => {
+    if (!isOpen) return
+
+    const reclamp = () => {
+      setOffset((current) => clampOffset(current, zoomRef.current))
+    }
+    const canvas = canvasRef.current
+    const image = imageRef.current
+    const resizeObserver = typeof ResizeObserver === "undefined"
+      ? null
+      : new ResizeObserver(reclamp)
+
+    if (canvas) resizeObserver?.observe(canvas)
+    if (image) resizeObserver?.observe(image)
+    window.addEventListener("resize", reclamp)
+    return () => {
+      resizeObserver?.disconnect()
+      window.removeEventListener("resize", reclamp)
+    }
+  }, [isOpen, imageKey])
 
   const beginGesture = () => {
     const points = [...pointersRef.current.values()]
@@ -211,6 +272,7 @@ export function useProductLightbox({
       const center = midpoint(first, second)
       gesture.moved = true
       gesture.usedPinch = true
+      zoomRef.current = nextZoom
       setZoom(nextZoom)
       setOffset(
         clampOffset(
@@ -227,11 +289,11 @@ export function useProductLightbox({
     const deltaX = first.x - gesture.startPoint.x
     const deltaY = first.y - gesture.startPoint.y
     if (Math.hypot(deltaX, deltaY) > 6) gesture.moved = true
-    if (zoom > MIN_ZOOM) {
+    if (zoomRef.current > MIN_ZOOM) {
       setOffset(
         clampOffset(
           { x: gesture.startOffset.x + deltaX, y: gesture.startOffset.y + deltaY },
-          zoom,
+          zoomRef.current,
         ),
       )
     }
@@ -239,11 +301,27 @@ export function useProductLightbox({
 
   const endPointer = (event: ReactPointerEvent<HTMLDivElement>) => {
     const gesture = gestureRef.current
+    const finalPoint = { x: event.clientX, y: event.clientY }
+    pointersRef.current.set(event.pointerId, finalPoint)
+    const isSingleTouch =
+      event.pointerType === "touch" && pointersRef.current.size === 1
+    const deltaX = finalPoint ? finalPoint.x - gesture.startPoint.x : 0
+    const deltaY = finalPoint ? finalPoint.y - gesture.startPoint.y : 0
+    const isGallerySwipe =
+      isSingleTouch &&
+      !gesture.usedPinch &&
+      zoomRef.current <= MIN_ZOOM &&
+      Math.abs(deltaX) >= 48 &&
+      Math.abs(deltaX) > Math.abs(deltaY) * 1.2
     const isTouchTap =
       event.pointerType === "touch" && !gesture.moved && !gesture.usedPinch
     pointersRef.current.delete(event.pointerId)
 
-    if (isTouchTap) {
+    if (isGallerySwipe) {
+      lastTouchTapRef.current = 0
+      if (deltaX > 0) showPreviousImage()
+      else showNextImage()
+    } else if (isTouchTap) {
       const now = Date.now()
       if (now - lastTouchTapRef.current < 320) {
         toggleZoom()
@@ -256,13 +334,19 @@ export function useProductLightbox({
     if (pointersRef.current.size > 0) beginGesture()
   }
 
+  const cancelPointer = (event: ReactPointerEvent<HTMLDivElement>) => {
+    pointersRef.current.delete(event.pointerId)
+    lastTouchTapRef.current = 0
+    if (pointersRef.current.size > 0) beginGesture()
+  }
+
   const onImageClick = () => {
     if (lastPointerTypeRef.current !== "touch" && !gestureRef.current.moved) toggleZoom()
   }
 
   const onWheel = (event: ReactWheelEvent<HTMLDivElement>) => {
     event.preventDefault()
-    updateZoom(zoom + (event.deltaY < 0 ? 0.25 : -0.25))
+    updateZoom(zoomRef.current + (event.deltaY < 0 ? 0.25 : -0.25))
   }
 
   return {
@@ -271,6 +355,8 @@ export function useProductLightbox({
     transform: `translate3d(${offset.x}px, ${offset.y}px, 0) scale(${zoom})`,
     dialogRef,
     closeButtonRef,
+    canvasRef,
+    imageRef,
     open,
     close,
     zoomIn,
@@ -280,7 +366,7 @@ export function useProductLightbox({
     onPointerDown,
     onPointerMove,
     onPointerUp: endPointer,
-    onPointerCancel: endPointer,
+    onPointerCancel: cancelPointer,
     onImageClick,
     onWheel,
   }

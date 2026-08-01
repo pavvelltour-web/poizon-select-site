@@ -251,6 +251,35 @@ export function getProductTypeLabel(product: CatalogProduct): string {
   return "Спортивная экипировка"
 }
 
+const productColorWords = [
+  "Black",
+  "White",
+  "Grey",
+  "Gray",
+  "Silver",
+  "Navy",
+  "Green",
+  "Blue",
+  "Pink",
+  "Oatmeal",
+  "Beef & Broccoli",
+] as const
+
+/**
+ * Показывает вариант только тогда, когда он уже является частью утверждённого
+ * названия. Не придумываем цвет по фотографии до привязки supplier variant ID.
+ */
+export function getProductVariantLabel(product: CatalogProduct): string | null {
+  const firstColorIndex = productColorWords.reduce<number | null>((best, color) => {
+    const index = product.name.toLowerCase().indexOf(color.toLowerCase())
+    if (index < 0) return best
+    return best === null || index < best ? index : best
+  }, null)
+
+  if (firstColorIndex === null) return null
+  return product.name.slice(firstColorIndex).trim() || null
+}
+
 export function getSourcingMode(product: CatalogProduct): string {
   return product.orderQuote ? "Под заказ из Китая" : "Наличие уточняется"
 }

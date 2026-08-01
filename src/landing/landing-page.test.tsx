@@ -1,8 +1,7 @@
-import { render, screen, waitFor, within } from "@testing-library/react"
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
-import * as orderRequest from "./order-request"
 import { LandingPage } from "./landing-page"
 import { publicCatalogProducts } from "../catalog/catalog"
 
@@ -46,7 +45,9 @@ describe("LandingPage", () => {
   it("renders all items with readable prices", () => {
     render(<LandingPage configuredBotUsername={null} />)
 
-    expect(screen.getByRole("heading", { name: "KICKSBASE" })).toBeInTheDocument()
+    expect(
+      screen.getByRole("heading", { name: "Выберите модель. Остальное видно сразу." }),
+    ).toBeInTheDocument()
     expect(productLinks()).toHaveLength(publicCatalogProducts.length)
     expect(screen.queryByText("по запросу")).toBeNull()
     expect(screen.getAllByText("24 500 ₽").length).toBeGreaterThan(0)
@@ -57,10 +58,10 @@ describe("LandingPage", () => {
     expect(within(firstCard).getByText("Баскетбольные кроссовки")).toBeInTheDocument()
     expect(within(firstCard).getByRole("heading", { name: "Nike KD 18" })).toBeInTheDocument()
     expect(
-      screen.getByText(/Выберите модель и размер, оплатите/),
+      screen.getByText(/Цена, доступные размеры и срок доставки/),
     ).toBeInTheDocument()
     expect(screen.queryByText(/менеджер/i)).toBeNull()
-    expect(screen.getAllByText("Предварительные данные").length).toBeGreaterThan(0)
+    expect(screen.queryByText("Предварительные данные")).toBeNull()
     expect(document.body.textContent).not.toMatch(/[–—]/u)
     expect(screen.getByLabelText("Согласие на использование cookie")).toHaveTextContent(
       "Сайт использует необходимые файлы cookie для работы витрины и сохранения корзины. Продолжая использование сайта, вы соглашаетесь с Политикой обработки персональных данных.",
@@ -223,6 +224,30 @@ describe("LandingPage", () => {
     const closePhotoButton = within(lightbox).getByRole("button", { name: "Закрыть фото" })
     await waitFor(() => expect(closePhotoButton).toHaveFocus())
 
+    const canvas = within(lightbox).getByRole("group", { name: /Фото 2 из 4/ })
+    fireEvent.pointerDown(canvas, {
+      pointerId: 1,
+      pointerType: "touch",
+      clientX: 280,
+      clientY: 180,
+    })
+    fireEvent.pointerMove(canvas, {
+      pointerId: 1,
+      pointerType: "touch",
+      clientX: 180,
+      clientY: 184,
+    })
+    fireEvent.pointerUp(canvas, {
+      pointerId: 1,
+      pointerType: "touch",
+      clientX: 180,
+      clientY: 184,
+    })
+    expect(
+      within(lightbox).getByRole("group", { name: /Фото 3 из 4/ }),
+    ).toBeInTheDocument()
+    expect(within(lightbox).getByText("100%")).toBeInTheDocument()
+
     await user.click(within(lightbox).getByRole("img", { name: /ASICS SKY ELITE FF 3/ }))
     expect(within(lightbox).getByText("200%")).toBeInTheDocument()
     await user.keyboard("{Escape}")
@@ -236,15 +261,11 @@ describe("LandingPage", () => {
     render(<LandingPage configuredBotUsername={null} />)
 
     const heroImages = Array.from(
-      document.querySelectorAll<HTMLImageElement>(".hero-pick img"),
+      document.querySelectorAll<HTMLImageElement>(".hero-feature__stage img"),
     )
-    expect(heroImages.length).toBeGreaterThan(1)
+    expect(heroImages).toHaveLength(1)
     expect(heroImages[0]).toHaveAttribute("loading", "eager")
     expect(heroImages[0]).toHaveAttribute("fetchpriority", "high")
-    heroImages.slice(1).forEach((image) => {
-      expect(image).toHaveAttribute("loading", "lazy")
-      expect(image).toHaveAttribute("fetchpriority", "auto")
-    })
 
     document.querySelectorAll<HTMLImageElement>(".product-card__image").forEach((image) => {
       expect(image).toHaveAttribute("loading", "lazy")
@@ -334,8 +355,7 @@ describe("LandingPage", () => {
     expect(within(finder).getByText("16 000 ₽")).toBeInTheDocument()
   })
 
-  it("hydrates a product dialog from a URL and browser back restores catalog context", async () => {
-    const user = userEvent.setup()
+  it("maps a legacy product query to the canonical product page", async () => {
     window.history.replaceState(
       null,
       "",
@@ -344,26 +364,18 @@ describe("LandingPage", () => {
 
     render(<LandingPage configuredBotUsername="@SelectBuyerBot" />)
 
-    expect(screen.getByRole("searchbox", { name: "Поиск по товарам" })).toHaveValue(
-      "nike",
-    )
-    expect(screen.getByRole("combobox", { name: "Сортировка" })).toHaveValue(
-      "price-asc",
-    )
-    expect(screen.getByTestId("order-dock")).toBeInTheDocument()
-    expect(screen.getByText(/Товары оплачиваются сейчас/)).toBeInTheDocument()
-    expect(screen.getByRole("link", { name: "Открыть @SelectBuyerBot" })).toHaveAttribute(
+    expect(
+      screen.getByRole("heading", { level: 1, name: /Nike G\.T\. Cut Academy/ }),
+    ).toBeInTheDocument()
+    expect(screen.queryByTestId("order-dock")).not.toBeInTheDocument()
+    expect(screen.getByRole("link", { name: "Задать вопрос в Telegram" })).toHaveAttribute(
       "href",
       "https://t.me/SelectBuyerBot",
     )
-
-    await user.click(
-      screen.getAllByRole("button", { name: "Закрыть карточку товара" })[1],
-    )
     await waitFor(() => {
-      expect(screen.queryByTestId("order-dock")).not.toBeInTheDocument()
+      expect(window.location.pathname).toBe("/product/nike-gt-cut-academy")
+      expect(window.location.search).toBe("")
     })
-    expect(window.location.search).toBe("?category=basketball&q=nike&sort=price-asc")
   })
 
   it("keeps product URLs clean while filters stay on the catalog URL", async () => {
@@ -388,17 +400,14 @@ describe("LandingPage", () => {
     expect(window.location.search).toBe("?category=basketball&q=nike")
   })
 
-  it("shows a visible manual fallback when copying fails", async () => {
-    const user = userEvent.setup()
-    vi.spyOn(orderRequest, "copyOrderRequest").mockResolvedValueOnce(false)
-    window.history.replaceState(null, "", "/?product=asics-sky-elite-ff-3")
+  it("keeps invalid legacy product links on an accessible canonical not-found page", async () => {
+    window.history.replaceState(null, "", "/?product=not-a-real-product")
     render(<LandingPage configuredBotUsername={null} />)
 
-    await user.click(screen.getByRole("button", { name: "Скопировать запрос" }))
-
-    expect(screen.getByRole("alert")).toHaveTextContent(
-      "Выделите текст выше и скопируйте его вручную.",
-    )
+    expect(screen.getByRole("heading", { name: "Такой страницы нет." })).toBeInTheDocument()
+    await waitFor(() => {
+      expect(window.location.pathname).toBe("/product/not-a-real-product")
+    })
   })
 
   it("adds a selected product to the site cart and submits checkout", async () => {
@@ -441,7 +450,11 @@ describe("LandingPage", () => {
     render(<LandingPage configuredBotUsername={null} />)
 
     await user.click(await screen.findByRole("button", { name: "44" }))
-    await user.click(screen.getByRole("button", { name: /Добавить в заказ/ }))
+    const purchaseButton = screen.getByRole("button", { name: /Добавить в заказ/ })
+    expect(purchaseButton).toHaveAttribute("data-selected-size", "44")
+    expect(purchaseButton).toHaveAttribute("data-display-price", "24 500 ₽")
+    expect(purchaseButton).toHaveAccessibleDescription(/Выбран размер 44/)
+    await user.click(purchaseButton)
 
     const cart = screen.getByRole("dialog", { name: "Заказ" })
     expect(within(cart).getByText(/Nike G.T. Cut Academy/)).toBeInTheDocument()

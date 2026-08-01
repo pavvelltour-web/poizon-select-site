@@ -9,7 +9,6 @@ import { Footer } from "./sections/footer"
 import { Header } from "./sections/header"
 import { HeroSection } from "./sections/hero-section"
 import { InfoSections } from "./sections/info-sections"
-import { ProductSheet } from "./sections/product-sheet"
 import { ProductDetailPage } from "./sections/product-detail-page"
 import { useLandingStorefront } from "./use-landing-storefront"
 
@@ -28,18 +27,31 @@ type StaticRoute =
 export function LandingPage({ configuredBotUsername }: LandingPageProps) {
   const storefront = useLandingStorefront(configuredBotUsername)
   const pathname = typeof window === "undefined" ? "/" : window.location.pathname
+  const searchParams = readSearchParams()
   const routeName = pathname.replace(/^\/|\/$/g, "")
   const productRouteMatch = pathname.match(/^\/product\/([^/]+)\/?$/u)
+  const legacyProductSlug = productRouteMatch
+    ? null
+    : searchParams.get("product")
   let productRouteSlug: string | null = null
-  if (productRouteMatch?.[1]) {
+  const encodedProductRouteSlug = productRouteMatch?.[1] ?? legacyProductSlug
+  if (encodedProductRouteSlug) {
     try {
-      productRouteSlug = decodeURIComponent(productRouteMatch[1])
+      productRouteSlug = productRouteMatch?.[1]
+        ? decodeURIComponent(encodedProductRouteSlug)
+        : encodedProductRouteSlug
     } catch {
       productRouteSlug = null
     }
   }
-  const productRoute = productRouteMatch !== null
+  const productRoute = productRouteMatch !== null || legacyProductSlug !== null
   const routeProduct = findPublicProductBySlug(productRouteSlug)
+
+  useEffect(() => {
+    if (!legacyProductSlug || productRouteMatch) return
+    const canonicalPath = `/product/${encodeURIComponent(legacyProductSlug)}`
+    window.history.replaceState(window.history.state, "", canonicalPath)
+  }, [legacyProductSlug, productRouteMatch !== null])
   const checkoutOutcome =
     pathname === "/checkout/success"
       ? "success"
@@ -57,9 +69,7 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
       : null
 
   return (
-    <div
-      className={`kb-page ${storefront.selectedProduct ? "kb-page--sheet-open" : ""}`}
-    >
+    <div className="kb-page">
       <a
         className="skip-link"
         href={staticRoute || checkoutOutcome || productRoute ? "#route-main" : "#catalog"}
@@ -103,17 +113,17 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
       <CookieNotice />
 
       <AnimatePresence>
-        {!productRoute && storefront.selectedProduct ? (
-          <ProductSheet key="product-sheet" storefront={storefront} />
-        ) : null}
-      </AnimatePresence>
-      <AnimatePresence>
         {storefront.isCartOpen ? (
           <CartDrawer key="cart-drawer" storefront={storefront} />
         ) : null}
       </AnimatePresence>
     </div>
   )
+}
+
+function readSearchParams(): URLSearchParams {
+  if (typeof window === "undefined") return new URLSearchParams()
+  return new URLSearchParams(window.location.search)
 }
 
 function StaticRoutePage({ route }: { route: StaticRoute }) {

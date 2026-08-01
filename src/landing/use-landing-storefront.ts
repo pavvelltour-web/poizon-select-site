@@ -263,26 +263,6 @@ export function useLandingStorefront(
   }, [selectedSlug])
 
   useEffect(() => {
-    if (!selectedProduct) return
-
-    const previousOverflow = document.body.style.overflow
-    document.body.style.overflow = "hidden"
-    sheetHeadingRef.current?.focus()
-
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") closeProduct()
-      if (event.key === "ArrowLeft") showPreviousProductImage()
-      if (event.key === "ArrowRight") showNextProductImage()
-    }
-
-    document.addEventListener("keydown", onKeyDown)
-    return () => {
-      document.body.style.overflow = previousOverflow
-      document.removeEventListener("keydown", onKeyDown)
-    }
-  }, [selectedProduct, selectedVisibleGallery.length])
-
-  useEffect(() => {
     setCartLines(loadCart(publicCatalogProducts))
   }, [])
 

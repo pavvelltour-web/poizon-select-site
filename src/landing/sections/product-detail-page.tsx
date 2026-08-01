@@ -193,7 +193,7 @@ export function ProductDetailPage({ product, storefront }: ProductDetailPageProp
             <small>{eta}. Опубликованный каталог не подтверждает живой остаток Poizon.</small>
           </div>
 
-          <div className="pdp-buybox__price">
+          <div className="pdp-buybox__price" id="pdp-price">
             <span>{price.label}</span>
             <strong>{price.value}</strong>
             <small>{price.detail}</small>
@@ -221,6 +221,10 @@ export function ProductDetailPage({ product, storefront }: ProductDetailPageProp
           <button
             className="button button--primary pdp-buybox__cta"
             type="button"
+            data-selected-size={selectedSize ?? ""}
+            data-display-price={price.value}
+            data-catalog-ready={catalogReady ? "true" : "false"}
+            aria-describedby="pdp-price pdp-selection-status"
             disabled={!selectedSize || !catalogReady}
             onClick={() => {
               if (selectedSize) storefront.addProductToCart(product, selectedSize)
@@ -233,6 +237,11 @@ export function ProductDetailPage({ product, storefront }: ProductDetailPageProp
                 ? `Добавить в заказ · ${price.value}`
                 : "Выберите размер"}
           </button>
+          <span className="sr-only" id="pdp-selection-status" aria-live="polite">
+            {selectedSize
+              ? `Выбран размер ${selectedSize}. Цена товара ${price.value}.`
+              : `Размер не выбран. Цена товара ${price.value}.`}
+          </span>
 
           <dl className="pdp-facts">
             <div>
@@ -274,6 +283,7 @@ export function ProductDetailPage({ product, storefront }: ProductDetailPageProp
           role="dialog"
           aria-modal="true"
           aria-label="Полноэкранное фото товара"
+          tabIndex={-1}
           onWheel={lightbox.onWheel}
         >
           <button
@@ -295,13 +305,17 @@ export function ProductDetailPage({ product, storefront }: ProductDetailPageProp
             <ChevronLeft aria-hidden="true" size={28} />
           </button>
           <div
+            ref={lightbox.canvasRef}
             className="photo-lightbox__canvas"
+            role="group"
+            aria-label={`Фото ${imageIndex + 1} из ${gallery.length}. Смахните влево или вправо при масштабе 100%.`}
             onPointerDown={lightbox.onPointerDown}
             onPointerMove={lightbox.onPointerMove}
             onPointerUp={lightbox.onPointerUp}
             onPointerCancel={lightbox.onPointerCancel}
           >
             <img
+              ref={lightbox.imageRef}
               src={resolveAssetUrl(imageSrc)}
               width="1200"
               height="900"
@@ -321,7 +335,11 @@ export function ProductDetailPage({ product, storefront }: ProductDetailPageProp
           >
             <ChevronRight aria-hidden="true" size={28} />
           </button>
-          <div className="photo-lightbox__tools" aria-label="Масштаб фотографии">
+          <div
+            className="photo-lightbox__tools"
+            aria-label="Масштаб фотографии"
+            aria-live="polite"
+          >
             <button
               type="button"
               onClick={lightbox.zoomOut}

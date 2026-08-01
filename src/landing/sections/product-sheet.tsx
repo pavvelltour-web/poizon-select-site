@@ -342,6 +342,7 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
           role="dialog"
           aria-modal="true"
           aria-label="Показ фото товара"
+          tabIndex={-1}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
@@ -366,13 +367,17 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
             <ChevronLeft aria-hidden="true" size={28} />
           </button>
           <div
+            ref={lightbox.canvasRef}
             className="photo-lightbox__canvas"
+            role="group"
+            aria-label={`Фото ${storefront.selectedImageDisplayIndex} из ${storefront.selectedVisibleGallery.length}. Смахните влево или вправо при масштабе 100%.`}
             onPointerDown={lightbox.onPointerDown}
             onPointerMove={lightbox.onPointerMove}
             onPointerUp={lightbox.onPointerUp}
             onPointerCancel={lightbox.onPointerCancel}
           >
             <img
+              ref={lightbox.imageRef}
               src={resolveAssetUrl(selectedImageSrc)}
               width="1200"
               height="900"
@@ -392,7 +397,11 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
           >
             <ChevronRight aria-hidden="true" size={28} />
           </button>
-          <div className="photo-lightbox__tools" aria-label="Инструменты фото">
+          <div
+            className="photo-lightbox__tools"
+            aria-label="Инструменты фото"
+            aria-live="polite"
+          >
             <button type="button" onClick={lightbox.zoomOut} aria-label="Уменьшить фото">
               <ZoomOut aria-hidden="true" size={18} />
             </button>

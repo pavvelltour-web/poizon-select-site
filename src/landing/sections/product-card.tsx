@@ -6,7 +6,7 @@ import {
   getDisplayPrice,
   getProductPath,
   getProductTypeLabel,
-  getSizeRangeLabel,
+  getProductVariantLabel,
   resolveAssetUrl,
   setImageFallback,
 } from "../landing-data"
@@ -29,16 +29,18 @@ export function ProductCard({
 }: ProductCardProps) {
   const price = getDisplayPrice(product, catalogPriceLookup)
   const [mediaReady, setMediaReady] = useState(false)
-  const sizeLabel = publishedOffer
-    ? `${publishedOffer.sizes[0]}–${publishedOffer.sizes.at(-1)}`
-    : getSizeRangeLabel(product)
-  const sourcingMode = publishedOffer?.availability === "catalog_listed"
-    ? publishedOffer.fulfillmentMode === "in_stock"
-      ? "В наличии в России"
-      : "Под заказ из Китая"
-    : catalogStatus === "loading"
-      ? "Предварительные данные"
-      : "Недоступно для заказа"
+  const variant = getProductVariantLabel(product)
+  const priceIsPublished =
+    catalogStatus === "ready" && publishedOffer?.availability === "catalog_listed"
+  const displayPrice = priceIsPublished || catalogStatus === "loading" ? price.value : "—"
+  const exceptionalStatus =
+    catalogStatus === "failed"
+      ? { text: "Цена временно недоступна", tone: "alert" }
+      : catalogStatus === "loading"
+        ? { text: "Предварительная цена", tone: "muted" }
+        : !publishedOffer || publishedOffer.availability !== "catalog_listed"
+          ? { text: "Нет в продаже", tone: "alert" }
+          : null
 
   return (
     <article
@@ -72,12 +74,17 @@ export function ProductCard({
         <span className="product-card__body">
           <span className="product-card__type">{getProductTypeLabel(product)}</span>
           <h3>{product.brand} {product.name}</h3>
-          <span className="product-card__sizes">Размеры: {sizeLabel}</span>
-          <span className="product-card__mode">{sourcingMode}</span>
+          <span className="product-card__variant" aria-hidden={variant ? undefined : true}>
+            {variant ?? "\u00a0"}
+          </span>
+          {exceptionalStatus ? (
+            <span className="product-card__status" data-tone={exceptionalStatus.tone}>
+              {exceptionalStatus.text}
+            </span>
+          ) : null}
           <span className="product-card__bottom">
             <span>
-              <b>{price.value}</b>
-              <em>{price.detail}</em>
+              <b>{displayPrice}</b>
             </span>
           </span>
         </span>

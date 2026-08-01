@@ -1,4 +1,4 @@
-import { ArrowUpRight, BadgeCheck, Send, ShoppingBag } from "lucide-react"
+import { ArrowUpRight, ShoppingBag } from "lucide-react"
 
 import {
   getDisplayPrice,
@@ -14,86 +14,76 @@ interface HeroSectionProps {
 }
 
 export function HeroSection({ storefront }: HeroSectionProps) {
+  const featuredProduct = storefront.heroProducts[0] ?? null
+  const featuredPrice = featuredProduct
+    ? getDisplayPrice(featuredProduct, storefront.catalogPriceState.lookup)
+    : null
+  const featuredOffer = featuredProduct
+    ? storefront.catalogPriceState.items[featuredProduct.slug]
+    : null
+  const featuredPriceIsPublished =
+    storefront.catalogPriceState.status === "ready" &&
+    featuredOffer?.availability === "catalog_listed"
+  const featuredPriceValue = featuredPriceIsPublished || storefront.catalogPriceState.status === "loading"
+    ? featuredPrice?.value
+    : "—"
+  const featuredPriceNote = storefront.catalogPriceState.status === "loading"
+    ? "Предварительная цена"
+    : featuredPriceIsPublished
+      ? "Цена товара"
+      : "Сейчас не продаётся"
+
   return (
     <section className="shop-hero" aria-labelledby="hero-title">
       <div className="shop-hero__copy">
-        <span className="shop-hero__eyebrow">Обувь и одежда для спорта</span>
-        <h1 id="hero-title">
-          <span>KICKS</span>
-          <span>BASE</span>
-        </h1>
+        <span className="shop-hero__eyebrow">KICKSBASE · спортивная витрина</span>
+        <h1 id="hero-title">Выберите модель. Остальное видно сразу.</h1>
         <p className="shop-hero__lead">
-          Выберите модель и размер, оплатите на сайте и получите заказ. Цена и условия
-          известны до оплаты.
+          Цена, доступные размеры и срок доставки собраны рядом с товаром до перехода
+          к оплате.
         </p>
         <div className="hero-actions">
           <a className="button button--primary" href="#catalog">
             <ShoppingBag aria-hidden="true" size={18} />
-            Перейти к товарам
+            Смотреть каталог
           </a>
-          {storefront.botUrl ? (
-            <a
-              className="button button--quiet"
-              href={storefront.botUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Send aria-hidden="true" size={18} />
-              Подбор в Telegram
-            </a>
-          ) : null}
+          <a className="shop-hero__delivery" href="/delivery-returns">
+            Условия доставки
+            <ArrowUpRight aria-hidden="true" size={17} />
+          </a>
         </div>
-        <p className="shop-hero__note">
-          <BadgeCheck aria-hidden="true" size={18} />
-          Подлинность проверяется до отправки
-        </p>
       </div>
 
-      <div className="hero-commerce" aria-label="Популярные товары">
-        <div className="hero-commerce__head">
-          <div>
-            <span>Быстрый выбор</span>
-            <h2>Популярные модели</h2>
+      {featuredProduct && featuredPrice ? (
+        <div className="hero-feature" aria-label="Выбранная модель">
+          <a
+            className="hero-feature__stage"
+            href={getProductPath(featuredProduct)}
+            aria-label={`Открыть товар: ${featuredProduct.brand} ${featuredProduct.name}`}
+          >
+            <img
+              src={resolveAssetUrl(featuredProduct.image)}
+              width="1200"
+              height="900"
+              alt={`${featuredProduct.brand} ${featuredProduct.name}`}
+              loading="eager"
+              decoding="async"
+              fetchPriority="high"
+              onError={(event) => setImageFallback(event, featuredProduct.fallbackImage)}
+            />
+          </a>
+          <div className="hero-feature__caption">
+            <span>
+              <small>{getProductTypeLabel(featuredProduct)}</small>
+              <strong>{featuredProduct.brand} {featuredProduct.name}</strong>
+            </span>
+            <span className="hero-feature__price">
+              <b>{featuredPriceValue}</b>
+              <small>{featuredPriceNote}</small>
+            </span>
           </div>
-          <a href="#catalog">
-            Все товары <ArrowUpRight size={17} aria-hidden="true" />
-          </a>
         </div>
-        <div className="hero-commerce__grid">
-          {storefront.heroProducts.map((product, index) => {
-            const price = getDisplayPrice(product, storefront.catalogPriceState.lookup)
-
-            return (
-              <a
-                className="hero-pick"
-                key={product.slug}
-                href={getProductPath(product)}
-                aria-label={`Открыть товар: ${product.brand} ${product.name}`}
-              >
-                <span className="hero-pick__image">
-                  <img
-                    src={resolveAssetUrl(product.image)}
-                     width="1200"
-                     height="900"
-                     alt=""
-                     loading={index === 0 ? "eager" : "lazy"}
-                     decoding="async"
-                     fetchPriority={index === 0 ? "high" : "auto"}
-                     onError={(event) => setImageFallback(event, product.fallbackImage)}
-                  />
-                </span>
-                <span className="hero-pick__body">
-                  <span>{getProductTypeLabel(product)}</span>
-                  <strong>
-                    {product.brand} {product.name}
-                  </strong>
-                  <small>{price.value}</small>
-                </span>
-              </a>
-            )
-          })}
-        </div>
-      </div>
+      ) : null}
     </section>
   )
 }
