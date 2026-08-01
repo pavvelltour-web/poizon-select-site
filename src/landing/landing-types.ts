@@ -31,6 +31,8 @@ export interface CatalogPriceState {
   items: PublishedCatalogMap
   version: string
   personalDataConsentVersion: string | null
+  orderCreationEnabled: boolean
+  onlinePaymentEnabled: boolean
   error: string | null
 }
 
@@ -49,7 +51,6 @@ export interface StorefrontState {
   search: string
   sort: CatalogSort
   taskInput: string
-  heroProducts: CatalogProduct[]
   filteredProducts: CatalogProduct[]
   selectedProduct: CatalogProduct | null
   selectedImage: { src: string; alt: string } | null

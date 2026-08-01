@@ -11,6 +11,8 @@ import {
 const catalogPayload = {
   version: "2026-07-31-v2",
   personal_data_consent_version: "pd-2026-08",
+  order_creation_enabled: true,
+  online_payment_enabled: true,
   items: [
     {
       slug: "nike-gt-cut-academy",
@@ -34,6 +36,10 @@ describe("checkout catalogue v10", () => {
     const parsed = parseCheckoutCatalog(catalogPayload)
 
     expect(parsed?.version).toBe("2026-07-31-v2")
+    expect(parsed).toMatchObject({
+      orderCreationEnabled: true,
+      onlinePaymentEnabled: true,
+    })
     expect(parsed?.items["nike-gt-cut-academy"]).toMatchObject({
       priceRub: 25100,
       sizes: ["43", "44"],
@@ -41,6 +47,28 @@ describe("checkout catalogue v10", () => {
       liveProviderVerified: false,
     })
     expect(parseCheckoutCatalog({ version: "v1", prices: { shoe: 1 } })).toBeNull()
+  })
+
+  it("fails closed when public order and payment capabilities are absent or inconsistent", () => {
+    const withoutCapabilities = parseCheckoutCatalog({
+      ...catalogPayload,
+      order_creation_enabled: undefined,
+      online_payment_enabled: undefined,
+    })
+    const paymentWithoutOrders = parseCheckoutCatalog({
+      ...catalogPayload,
+      order_creation_enabled: false,
+      online_payment_enabled: true,
+    })
+
+    expect(withoutCapabilities).toMatchObject({
+      orderCreationEnabled: false,
+      onlinePaymentEnabled: false,
+    })
+    expect(paymentWithoutOrders).toMatchObject({
+      orderCreationEnabled: false,
+      onlinePaymentEnabled: false,
+    })
   })
 
   it("uses server-owned checkout fields and delivery, not local compatibility values", () => {

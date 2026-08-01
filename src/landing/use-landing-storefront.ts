@@ -36,7 +36,6 @@ import {
 import {
   findTaskMatches,
   getDisplayPrice,
-  heroProductSlugs,
   isCategory,
   isSort,
   readUrlState,
@@ -124,6 +123,8 @@ export function useLandingStorefront(
     items: {} as PublishedCatalogMap,
     version: CATALOG_PRICE_VERSION,
     personalDataConsentVersion: null as string | null,
+    orderCreationEnabled: false,
+    onlinePaymentEnabled: false,
     error: null as string | null,
   })
   const productTriggerRef = useRef<HTMLButtonElement | null>(null)
@@ -157,13 +158,6 @@ export function useLandingStorefront(
   const filteredProducts = useMemo(
     () => sortCatalog(filterCatalog(publicCatalogProducts, category, search), sort),
     [category, search, sort],
-  )
-  const heroProducts = useMemo(
-    () =>
-      heroProductSlugs
-        .map((slug) => publicCatalogProducts.find((product) => product.slug === slug))
-        .filter((product): product is CatalogProduct => product !== undefined),
-    [],
   )
   const request = selectedProduct
     ? buildOrderRequest(selectedProduct, selectedSize ?? undefined)
@@ -220,6 +214,8 @@ export function useLandingStorefront(
         items: nextPriceState.items,
         version: nextPriceState.version,
         personalDataConsentVersion: nextPriceState.personalDataConsentVersion,
+        orderCreationEnabled: nextPriceState.orderCreationEnabled,
+        onlinePaymentEnabled: nextPriceState.onlinePaymentEnabled,
         error: null,
       })
       setCartLines((lines) => reconcileCartLines(lines, nextPriceState.items))
@@ -231,6 +227,8 @@ export function useLandingStorefront(
         status: "failed",
         lookup: null,
         items: {},
+        orderCreationEnabled: false,
+        onlinePaymentEnabled: false,
         error: error instanceof Error ? error.message : "Каталог заказа недоступен.",
       }))
       setCartLines((lines) => lines.map((line) => ({ ...line, validation: "pending" })))
@@ -436,6 +434,16 @@ export function useLandingStorefront(
       setCartOpen(true)
       return
     }
+    if (!catalogPriceState.orderCreationEnabled) {
+      setCheckoutResult(
+        emptyCheckoutResult(
+          "failed",
+          "Оформление заказа временно недоступно. Цена и карточка товара остаются видны.",
+        ),
+      )
+      setCartOpen(true)
+      return
+    }
     setCartLines((lines) => addOrIncrementCartLine(lines, product, size, "valid"))
     setCheckoutResult(emptyCheckoutResult("idle", ""))
     setCartOpen(true)
@@ -474,12 +482,16 @@ export function useLandingStorefront(
     if (cartLines.length === 0) return
     if (
       catalogPriceState.status !== "ready" ||
+      !catalogPriceState.orderCreationEnabled ||
       cartLines.some((line) => line.validation !== "valid")
     ) {
       setCheckoutResult(
         emptyCheckoutResult(
           "failed",
-          "Заказ заблокирован: цена, товар и размер должны быть подтверждены серверным каталогом.",
+          catalogPriceState.status === "ready" &&
+            !catalogPriceState.orderCreationEnabled
+            ? "Оформление заказа временно отключено. Попробуйте позже."
+            : "Заказ заблокирован: цена, товар и размер должны быть подтверждены серверным каталогом.",
         ),
       )
       return
@@ -575,7 +587,6 @@ export function useLandingStorefront(
     search,
     sort,
     taskInput,
-    heroProducts,
     catalogPriceState,
     filteredProducts,
     selectedProduct,

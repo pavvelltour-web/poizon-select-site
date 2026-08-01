@@ -102,7 +102,7 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
           <ProductDetailPage product={routeProduct} storefront={storefront} />
         ) : (
           <>
-            <HeroSection storefront={storefront} />
+            <HeroSection />
             <CatalogSection storefront={storefront} />
             <InfoSections mode="order" />
           </>

@@ -1,4 +1,5 @@
-import { MoveRight, RotateCcw, SlidersHorizontal } from "lucide-react"
+import { AlertCircle, ChevronDown, MoveRight, RotateCcw, SlidersHorizontal } from "lucide-react"
+import { useState } from "react"
 
 import {
   catalogCategories,
@@ -26,7 +27,44 @@ interface CatalogSectionProps {
   storefront: LandingStorefront
 }
 
+export const CATALOG_PAGE_SIZE = 24
+
+const categoryAccessibleNames: Record<ActiveCategory, string> = {
+  all: "Все товары",
+  "court-shoes": "Кроссовки для зала",
+  volleyball: "Волейбольные пары для матча",
+  basketball: "Баскетбольные пары для игры",
+  recovery: "Обувь для восстановления после тренировки",
+  apparel: "Спортивная одежда",
+  sneakers: "Базовые модели на каждый день",
+}
+
 export function CatalogSection({ storefront }: CatalogSectionProps) {
+  const viewKey = `${storefront.category}\u0000${storefront.search}\u0000${storefront.sort}`
+  const [catalogPage, setCatalogPage] = useState({
+    key: viewKey,
+    count: CATALOG_PAGE_SIZE,
+  })
+  const visibleCount = catalogPage.key === viewKey
+    ? catalogPage.count
+    : CATALOG_PAGE_SIZE
+  const visibleProducts = storefront.filteredProducts.slice(0, visibleCount)
+  const remainingProducts = Math.max(
+    0,
+    storefront.filteredProducts.length - visibleProducts.length,
+  )
+  const nextPageSize = Math.min(CATALOG_PAGE_SIZE, remainingProducts)
+  const commerceNotice =
+    storefront.catalogPriceState.status === "loading"
+      ? "Проверяем доступность оформления. Цены из витрины уже видны."
+      : storefront.catalogPriceState.status === "failed"
+        ? "Цены из витрины видны. Оформление вернётся после восстановления связи с сервером."
+        : !storefront.catalogPriceState.orderCreationEnabled
+          ? "Цены видны. Оформление заказа пока отключено."
+          : !storefront.catalogPriceState.onlinePaymentEnabled
+            ? "Заказ можно оформить. Онлайн-оплата пока недоступна."
+            : null
+
   return (
     <section className="catalog-shell" id="catalog" aria-labelledby="catalog-title">
       <div className="catalog-heading">
@@ -46,22 +84,57 @@ export function CatalogSection({ storefront }: CatalogSectionProps) {
       <div className="catalog-status" aria-live="polite">
         <strong>{storefront.filteredProducts.length} товаров</strong>
         <span>{categoryCopy[storefront.category]}</span>
+        {remainingProducts > 0 ? (
+          <span>Показано {visibleProducts.length}</span>
+        ) : null}
       </div>
 
+      {commerceNotice ? (
+        <p
+          className="catalog-commerce-notice"
+          data-tone={storefront.catalogPriceState.status}
+          role={storefront.catalogPriceState.status === "failed" ? "alert" : "status"}
+        >
+          <AlertCircle aria-hidden="true" size={18} />
+          {commerceNotice}
+        </p>
+      ) : null}
+
       {storefront.filteredProducts.length > 0 ? (
-        <div className="product-grid">
-          {storefront.filteredProducts.map((product, index) => (
-            <ProductCard
-              key={product.slug}
-              product={product}
-              catalogPriceLookup={storefront.catalogPriceState.lookup}
-              catalogStatus={storefront.catalogPriceState.status}
-              publishedOffer={storefront.catalogPriceState.items[product.slug] ?? null}
-              featured={index === 0}
-              index={index}
-            />
-          ))}
-        </div>
+        <>
+          <div className="product-grid" id="catalog-product-grid">
+            {visibleProducts.map((product, index) => (
+              <ProductCard
+                key={product.slug}
+                product={product}
+                catalogPriceLookup={storefront.catalogPriceState.lookup}
+                catalogStatus={storefront.catalogPriceState.status}
+                publishedOffer={storefront.catalogPriceState.items[product.slug] ?? null}
+                featured={index === 0}
+                index={index}
+              />
+            ))}
+          </div>
+          {remainingProducts > 0 ? (
+            <div className="catalog-more">
+              <button
+                className="button button--quiet"
+                type="button"
+                aria-controls="catalog-product-grid"
+                onClick={() =>
+                  setCatalogPage({
+                    key: viewKey,
+                    count: visibleCount + CATALOG_PAGE_SIZE,
+                  })
+                }
+              >
+                Показать ещё {nextPageSize}
+                <ChevronDown aria-hidden="true" size={18} />
+              </button>
+              <span>Осталось {remainingProducts}</span>
+            </div>
+          ) : null}
+        </>
       ) : (
         <div className="catalog-empty" role="status">
           <h3>Ничего не нашли по этому запросу.</h3>
@@ -222,13 +295,7 @@ function CategoryRow({ storefront }: CatalogSectionProps) {
             <button
               key={item.id}
               type="button"
-              aria-label={
-                id === "volleyball"
-                  ? "На матч: Волейбол"
-                  : id === "basketball"
-                    ? "Для движения: Баскетбол"
-                    : undefined
-              }
+              aria-label={categoryAccessibleNames[id]}
               aria-pressed={storefront.category === item.id}
               data-tone={categoryTone[id]}
               onClick={() => storefront.selectCategory(id)}

@@ -52,7 +52,7 @@ describe("Header SMS login", () => {
       />,
     )
 
-    await user.click(screen.getByRole("button", { name: "Войти" }))
+    await user.click(screen.getByRole("button", { name: "Войти по SMS" }))
     await user.type(screen.getByRole("textbox", { name: "Телефон" }), "+79990000000")
     await user.click(
       screen.getByRole("checkbox", { name: /Согласен на обработку телефона/i }),
@@ -82,7 +82,7 @@ describe("Header SMS login", () => {
       />,
     )
 
-    await user.click(screen.getByRole("button", { name: "Войти" }))
+    await user.click(screen.getByRole("button", { name: "Войти по SMS" }))
     await user.type(screen.getByRole("textbox", { name: "Телефон" }), "+79990000000")
     await user.click(
       screen.getByRole("checkbox", { name: /Согласен на обработку телефона/i }),
@@ -93,5 +93,35 @@ describe("Header SMS login", () => {
       "Сервис входа временно недоступен",
     )
     expect(fetchMock).not.toHaveBeenCalled()
+  })
+
+  it("traps focus, locks page scroll and restores the login trigger on Escape", async () => {
+    const user = userEvent.setup()
+
+    render(
+      <Header
+        cartCount={0}
+        openCart={vi.fn()}
+        personalDataConsentVersion="pd-2026-08"
+        refreshPersonalDataConsentVersion={vi.fn()}
+      />,
+    )
+
+    const trigger = screen.getByRole("button", { name: "Войти по SMS" })
+    await user.click(trigger)
+
+    const phoneInput = screen.getByRole("textbox", { name: "Телефон" })
+    const submit = screen.getByRole("button", { name: "Получить код" })
+    expect(phoneInput).toHaveFocus()
+    expect(document.body.style.overflow).toBe("hidden")
+
+    submit.focus()
+    await user.tab()
+    expect(screen.getAllByRole("button", { name: "Закрыть вход" }).at(-1)).toHaveFocus()
+
+    await user.keyboard("{Escape}")
+    expect(screen.queryByRole("dialog")).toBeNull()
+    expect(trigger).toHaveFocus()
+    expect(document.body.style.overflow).toBe("")
   })
 })

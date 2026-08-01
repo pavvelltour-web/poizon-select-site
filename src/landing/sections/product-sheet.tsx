@@ -281,7 +281,7 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
 
           <p className="product-sheet__fineprint">
             Опубликованный каталог не подтверждает живой остаток Poizon. Товары оплачиваются
-            сейчас, доставка СДЭК — отдельно после прибытия.
+            сейчас, доставка СДЭК оплачивается отдельно после прибытия.
           </p>
           <p className="product-sheet__order-proof">
             Оплата проходит на защищённой странице банка.

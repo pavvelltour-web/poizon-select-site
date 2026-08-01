@@ -1,16 +1,28 @@
 import { AlertCircle, Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react"
 import { motion } from "motion/react"
+import { useRef } from "react"
 
 import { formatRub } from "../../catalog/catalog"
 import { getEffectiveLinePrice } from "../cart"
-import { resolveAssetUrl } from "../landing-data"
+import { resolveAssetUrl, setImageFallback } from "../landing-data"
 import type { StorefrontState } from "../landing-types"
+import { useModalDialog } from "../use-modal-dialog"
 
 interface CartDrawerProps {
   storefront: StorefrontState
 }
 
 export function CartDrawer({ storefront }: CartDrawerProps) {
+  const drawerRef = useRef<HTMLElement>(null)
+  const closeButtonRef = useRef<HTMLButtonElement>(null)
+
+  useModalDialog({
+    dialogRef: drawerRef,
+    initialFocusRef: closeButtonRef,
+    isOpen: storefront.isCartOpen,
+    onClose: storefront.closeCart,
+  })
+
   if (!storefront.isCartOpen) return null
 
   const email = storefront.checkoutCustomer.email.trim()
@@ -23,9 +35,12 @@ export function CartDrawer({ storefront }: CartDrawerProps) {
     /^\d{6}$/.test(delivery.postalCode.trim()) &&
     destinationIsValid
   const catalogIsReady = storefront.catalogPriceState.status === "ready"
+  const orderCreationEnabled = storefront.catalogPriceState.orderCreationEnabled
+  const onlinePaymentEnabled = storefront.catalogPriceState.onlinePaymentEnabled
   const hasInvalidLines = storefront.cartLines.some((line) => line.validation !== "valid")
   const canSubmit =
     catalogIsReady &&
+    orderCreationEnabled &&
     !hasInvalidLines &&
     storefront.cartLines.length > 0 &&
     storefront.checkoutCustomer.fullName.trim().length >= 2 &&
@@ -41,6 +56,7 @@ export function CartDrawer({ storefront }: CartDrawerProps) {
       <motion.button
         className="cart-scrim"
         type="button"
+        tabIndex={-1}
         onClick={storefront.closeCart}
         aria-label="Закрыть заказ"
         initial={{ opacity: 0 }}
@@ -48,10 +64,12 @@ export function CartDrawer({ storefront }: CartDrawerProps) {
         exit={{ opacity: 0 }}
       />
       <motion.aside
+        ref={drawerRef}
         className="cart-drawer"
         role="dialog"
         aria-modal="true"
         aria-labelledby="cart-title"
+        tabIndex={-1}
         initial={{ opacity: 0, x: 32 }}
         animate={{ opacity: 1, x: 0 }}
         exit={{ opacity: 0, x: 32 }}
@@ -62,7 +80,7 @@ export function CartDrawer({ storefront }: CartDrawerProps) {
             <ShoppingBag aria-hidden="true" size={22} />
             <strong id="cart-title">Заказ</strong>
           </span>
-          <button type="button" onClick={storefront.closeCart} aria-label="Закрыть заказ">
+          <button ref={closeButtonRef} type="button" onClick={storefront.closeCart} aria-label="Закрыть заказ">
             <X aria-hidden="true" size={20} />
           </button>
         </div>
@@ -88,8 +106,12 @@ export function CartDrawer({ storefront }: CartDrawerProps) {
                 role={storefront.catalogPriceState.status === "failed" ? "alert" : "status"}
               >
                 <AlertCircle aria-hidden="true" size={17} />
-                {storefront.catalogPriceState.status === "ready"
-                  ? "Цена и размеры сверены с опубликованным каталогом. Это не подтверждение живого остатка Poizon."
+                {storefront.catalogPriceState.status === "ready" && !orderCreationEnabled
+                  ? "Цена и размеры видны. Оформление заказа сейчас отключено."
+                  : storefront.catalogPriceState.status === "ready" && !onlinePaymentEnabled
+                    ? "Заказ можно оформить. Онлайн-оплата пока недоступна."
+                    : storefront.catalogPriceState.status === "ready"
+                      ? "Цена и размеры сверены. После оформления откроется защищённая страница оплаты."
                   : storefront.catalogPriceState.status === "loading"
                     ? "Проверяем цену и размеры на сервере. До проверки оформить заказ нельзя."
                     : "Серверный каталог недоступен. Оформление заказа временно заблокировано."}
@@ -106,6 +128,7 @@ export function CartDrawer({ storefront }: CartDrawerProps) {
                     height="72"
                     alt=""
                     loading="lazy"
+                    onError={(event) => setImageFallback(event, line.product.fallbackImage)}
                   />
                   <div>
                     <strong>{line.product.brand} {line.product.name}</strong>
@@ -290,10 +313,14 @@ export function CartDrawer({ storefront }: CartDrawerProps) {
 
               <button className="button button--primary" type="submit" disabled={!canSubmit}>
                 {storefront.checkoutResult.status === "submitting"
-                  ? "Создаём заказ…"
-                  : catalogIsReady
-                    ? `Оплатить товары ${formatRub(storefront.cartTotalRub)}`
-                    : "Проверяем каталог…"}
+                  ? "Создаём заказ..."
+                  : !catalogIsReady
+                    ? "Проверяем каталог"
+                    : !orderCreationEnabled
+                      ? "Оформление временно недоступно"
+                      : onlinePaymentEnabled
+                        ? `Оплатить товары ${formatRub(storefront.cartTotalRub)}`
+                        : `Оформить заказ ${formatRub(storefront.cartTotalRub)}`}
               </button>
 
               {storefront.checkoutResult.message ? (

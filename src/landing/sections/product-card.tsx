@@ -32,13 +32,10 @@ export function ProductCard({
   const variant = getProductVariantLabel(product)
   const displayPrice = price.value
   const exceptionalStatus =
-    catalogStatus === "failed"
-      ? { text: "Заказ временно недоступен", tone: "alert" }
-      : catalogStatus === "loading"
-        ? { text: "Проверяем цену и наличие", tone: "muted" }
-        : !publishedOffer || publishedOffer.availability !== "catalog_listed"
-          ? { text: "Нет в продаже", tone: "alert" }
-          : null
+    catalogStatus === "ready" &&
+    (!publishedOffer || publishedOffer.availability !== "catalog_listed")
+      ? { text: "Нет в продаже", tone: "alert" }
+      : null
 
   return (
     <article
@@ -50,7 +47,7 @@ export function ProductCard({
       <a
         className="product-card__link"
         href={getProductPath(product)}
-        aria-label={`Открыть товар: ${product.brand} ${product.name}`}
+        aria-label={`Открыть товар: ${product.brand} ${product.name}. Цена ${displayPrice}${exceptionalStatus ? `. ${exceptionalStatus.text}` : ""}`}
       >
         <span className={`product-card__visual ${mediaReady ? "product-card__visual--ready" : ""}`}>
           <img
@@ -60,7 +57,7 @@ export function ProductCard({
             height="900"
             loading="lazy"
             decoding="async"
-            alt={`${product.brand} ${product.name}`}
+            alt=""
             fetchPriority="auto"
             onLoad={() => setMediaReady(true)}
             onError={(event) => {
@@ -80,6 +77,7 @@ export function ProductCard({
           ) : null}
           <span className="product-card__bottom">
             <span>
+              <span className="sr-only">Цена товара: </span>
               <b>{displayPrice}</b>
             </span>
           </span>

@@ -54,6 +54,8 @@ export interface CheckoutCatalogSnapshot {
   lookup: CatalogPriceMap
   version: string
   personalDataConsentVersion: string | null
+  orderCreationEnabled: boolean
+  onlinePaymentEnabled: boolean
 }
 
 export interface CheckoutAmounts {
@@ -209,11 +211,15 @@ export function parseCheckoutCatalog(payload: unknown): CheckoutCatalogSnapshot 
   }
 
   if (Object.keys(items).length === 0) return null
+  const orderCreationEnabled = source.order_creation_enabled === true
   return {
     items,
     lookup,
     version,
     personalDataConsentVersion: optionalString(source.personal_data_consent_version),
+    orderCreationEnabled,
+    onlinePaymentEnabled:
+      orderCreationEnabled && source.online_payment_enabled === true,
   }
 }
 

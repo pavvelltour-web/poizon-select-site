@@ -69,12 +69,6 @@ export const categoryIcons: Record<ActiveCategory, LucideIcon> = {
   sneakers: Footprints,
 }
 
-export const heroProductSlugs = [
-  "nike-kd-18",
-  "asics-sky-elite-ff-3",
-  "adidas-crazyflight-shorts",
-] as const
-
 type QuickFilter = {
   label: string
   detail: string

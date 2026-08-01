@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it, vi } from "vitest"
 
 import { LandingPage } from "./landing-page"
 import { publicCatalogProducts } from "../catalog/catalog"
+import { CATALOG_PAGE_SIZE } from "./sections/catalog-section"
 
 function productLinks() {
   return screen
@@ -11,10 +12,18 @@ function productLinks() {
     .filter((link) => link.classList.contains("product-card__link"))
 }
 
-function checkoutCatalogPayload(sizes = ["36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46"]) {
+function checkoutCatalogPayload(
+  sizes = ["36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46"],
+  capabilities = {
+    orderCreationEnabled: true,
+    onlinePaymentEnabled: true,
+  },
+) {
   return {
     version: "2026-07-31-v2",
     personal_data_consent_version: "pd-2026-08",
+    order_creation_enabled: capabilities.orderCreationEnabled,
+    online_payment_enabled: capabilities.onlinePaymentEnabled,
     items: [
       {
         slug: "nike-gt-cut-academy",
@@ -42,23 +51,26 @@ afterEach(() => {
 })
 
 describe("LandingPage", () => {
-  it("renders all items with readable prices", () => {
+  it("renders 24 products first, then progressively reveals the full catalog", async () => {
+    const user = userEvent.setup()
     render(<LandingPage configuredBotUsername={null} />)
 
     expect(
       screen.getByRole("heading", { name: "Выберите модель. Остальное видно сразу." }),
     ).toBeInTheDocument()
-    expect(productLinks()).toHaveLength(publicCatalogProducts.length)
+    expect(productLinks()).toHaveLength(CATALOG_PAGE_SIZE)
+    expect(screen.getByText(`Показано ${CATALOG_PAGE_SIZE}`)).toBeInTheDocument()
+    expect(
+      screen.getByRole("button", { name: `Показать ещё ${CATALOG_PAGE_SIZE}` }),
+    ).toBeInTheDocument()
     expect(screen.queryByText("по запросу")).toBeNull()
     expect(screen.getAllByText("24 500 ₽").length).toBeGreaterThan(0)
-    expect(screen.getAllByText("45 000 ₽").length).toBeGreaterThan(0)
-    expect(screen.getAllByText("5 000 ₽").length).toBeGreaterThan(0)
     const firstCard = productLinks()[0]
     expect(firstCard).toHaveAccessibleName(/Nike KD 18/)
     expect(within(firstCard).getByText("Баскетбольные кроссовки")).toBeInTheDocument()
     expect(within(firstCard).getByRole("heading", { name: "Nike KD 18" })).toBeInTheDocument()
     expect(
-      screen.getByText(/Цена, доступные размеры и срок доставки/),
+      screen.getByText("Цена, размер и срок доставки видны до оформления заказа."),
     ).toBeInTheDocument()
     expect(screen.queryByText(/менеджер/i)).toBeNull()
     expect(screen.queryByText("Предварительные данные")).toBeNull()
@@ -70,6 +82,15 @@ describe("LandingPage", () => {
     for (const method of ["МИР", "СБП", "Visa", "Mastercard"]) {
       expect(within(paymentMethods).getByText(method)).toBeInTheDocument()
     }
+
+    while (productLinks().length < publicCatalogProducts.length) {
+      await user.click(screen.getByRole("button", { name: /Показать ещё/ }))
+    }
+
+    expect(productLinks()).toHaveLength(publicCatalogProducts.length)
+    expect(screen.queryByRole("button", { name: /Показать ещё/ })).toBeNull()
+    expect(screen.getAllByText("45 000 ₽").length).toBeGreaterThan(0)
+    expect(screen.getAllByText("5 000 ₽").length).toBeGreaterThan(0)
   })
 
   it.each([
@@ -125,7 +146,7 @@ describe("LandingPage", () => {
     await user.click(
       within(screen.getByRole("group", { name: "Категории товара" })).getByRole(
         "button",
-        { name: /На матч/ },
+        { name: "Волейбольные пары для матча" },
       ),
     )
     expect(productLinks()).toHaveLength(19)
@@ -145,7 +166,7 @@ describe("LandingPage", () => {
     )
 
     await user.click(screen.getByRole("button", { name: "Сбросить фильтры" }))
-    expect(productLinks()).toHaveLength(publicCatalogProducts.length)
+    expect(productLinks()).toHaveLength(CATALOG_PAGE_SIZE)
     expect(window.location.search).toBe("")
   })
 
@@ -162,7 +183,7 @@ describe("LandingPage", () => {
     )
 
     await user.click(screen.getByRole("button", { name: /Показать все товары/ }))
-    expect(productLinks()).toHaveLength(publicCatalogProducts.length)
+    expect(productLinks()).toHaveLength(CATALOG_PAGE_SIZE)
   })
 
   it("publishes a stable product deep link and renders the full product page", async () => {
@@ -257,15 +278,10 @@ describe("LandingPage", () => {
     expect(screen.getAllByRole("button", { name: /Показать фото/ })).toHaveLength(4)
   })
 
-  it("reserves eager high-priority loading for the first hero image", () => {
+  it("keeps the hero rights-safe and lazily loads catalog photography", () => {
     render(<LandingPage configuredBotUsername={null} />)
 
-    const heroImages = Array.from(
-      document.querySelectorAll<HTMLImageElement>(".hero-feature__stage img"),
-    )
-    expect(heroImages).toHaveLength(1)
-    expect(heroImages[0]).toHaveAttribute("loading", "eager")
-    expect(heroImages[0]).toHaveAttribute("fetchpriority", "high")
+    expect(document.querySelector(".hero img")).toBeNull()
 
     document.querySelectorAll<HTMLImageElement>(".product-card__image").forEach((image) => {
       expect(image).toHaveAttribute("loading", "lazy")
@@ -360,7 +376,11 @@ describe("LandingPage", () => {
     render(<LandingPage configuredBotUsername={null} />)
 
     await waitFor(() => {
-      expect(screen.getAllByText("Заказ временно недоступен").length).toBeGreaterThan(0)
+      expect(
+        screen.getByText(
+          "Цены из витрины видны. Оформление вернётся после восстановления связи с сервером.",
+        ),
+      ).toBeInTheDocument()
     })
 
     const firstCard = productLinks()[0]
@@ -398,7 +418,7 @@ describe("LandingPage", () => {
     await user.click(
       within(screen.getByRole("group", { name: "Категории товара" })).getByRole(
         "button",
-        { name: /Для движения/ },
+        { name: "Баскетбольные пары для игры" },
       ),
     )
     await user.type(screen.getByRole("searchbox", { name: "Поиск по товарам" }), "nike")
@@ -524,6 +544,61 @@ describe("LandingPage", () => {
       "href",
       "https://securepay.tbank.ru/test",
     )
+  })
+
+  it("keeps the PDP visible but blocks add-to-cart when order creation is disabled", async () => {
+    const user = userEvent.setup()
+    const fetchMock = vi.fn(async (_url: string, _options?: RequestInit) => ({
+      ok: true,
+      status: 200,
+      json: async () => checkoutCatalogPayload(undefined, {
+        orderCreationEnabled: false,
+        onlinePaymentEnabled: false,
+      }),
+    }))
+    vi.stubGlobal("fetch", fetchMock)
+    window.history.replaceState(null, "", "/product/nike-gt-cut-academy")
+
+    render(<LandingPage configuredBotUsername={null} />)
+
+    await user.click(await screen.findByRole("button", { name: "44" }))
+    const purchaseButton = await screen.findByRole("button", {
+      name: "Оформление временно недоступно",
+    })
+    expect(purchaseButton).toBeDisabled()
+    expect(purchaseButton).toHaveAttribute("data-order-enabled", "false")
+    expect(purchaseButton).toHaveAttribute("data-selected-size", "44")
+    expect(screen.queryByRole("dialog", { name: "Заказ" })).toBeNull()
+    expect(fetchMock.mock.calls.some((call) => call[1]?.method === "POST")).toBe(false)
+  })
+
+  it("keeps a valid persisted cart readable but blocks checkout when order creation is disabled", async () => {
+    localStorage.setItem(
+      "kicksbase-cart-v1",
+      JSON.stringify([{ slug: "nike-gt-cut-academy", size: "44", quantity: 1 }]),
+    )
+    const fetchMock = vi.fn(async (_url: string, _options?: RequestInit) => ({
+      ok: true,
+      status: 200,
+      json: async () => checkoutCatalogPayload(undefined, {
+        orderCreationEnabled: false,
+        onlinePaymentEnabled: false,
+      }),
+    }))
+    vi.stubGlobal("fetch", fetchMock)
+    window.history.replaceState(null, "", "/?cart=1")
+
+    render(<LandingPage configuredBotUsername={null} />)
+
+    const cart = await screen.findByRole("dialog", { name: "Заказ" })
+    expect(
+      await within(cart).findByText("Цена и размеры видны. Оформление заказа сейчас отключено."),
+    ).toBeInTheDocument()
+    expect(
+      within(cart).getByRole("button", { name: "Оформление временно недоступно" }),
+    ).toBeDisabled()
+    expect(within(cart).getAllByText("24 500 ₽")).toHaveLength(2)
+    expect(fetchMock.mock.calls.some((call) => call[1]?.method === "POST")).toBe(false)
   })
 
   it("flags a persisted size that is absent from the server catalogue", async () => {

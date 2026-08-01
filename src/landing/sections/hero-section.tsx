@@ -1,87 +1,73 @@
-import { ArrowUpRight, ShoppingBag } from "lucide-react"
+import { ArrowRight, ArrowUpRight, BadgeCheck, ShoppingBag } from "lucide-react"
 
-import {
-  getDisplayPrice,
-  getProductPath,
-  getProductTypeLabel,
-  resolveAssetUrl,
-  setImageFallback,
-} from "../landing-data"
-import type { LandingStorefront } from "../use-landing-storefront"
+const heroPaths = [
+  {
+    href: "/?category=court-shoes#catalog",
+    label: "Для зала",
+    detail: "Тренировки и игры",
+  },
+  {
+    href: "/?category=volleyball#catalog",
+    label: "Волейбол",
+    detail: "Пары для матча",
+  },
+  {
+    href: "/?category=basketball#catalog",
+    label: "Баскетбол",
+    detail: "Пары для движения",
+  },
+  {
+    href: "/?category=recovery#catalog",
+    label: "После тренировки",
+    detail: "Слайды и сабо",
+  },
+] as const
 
-interface HeroSectionProps {
-  storefront: LandingStorefront
-}
-
-export function HeroSection({ storefront }: HeroSectionProps) {
-  const featuredProduct = storefront.heroProducts[0] ?? null
-  const featuredPrice = featuredProduct
-    ? getDisplayPrice(featuredProduct, storefront.catalogPriceState.lookup)
-    : null
-  const featuredOffer = featuredProduct
-    ? storefront.catalogPriceState.items[featuredProduct.slug]
-    : null
-  const featuredPriceIsPublished =
-    storefront.catalogPriceState.status === "ready" &&
-    featuredOffer?.availability === "catalog_listed"
-  const featuredPriceValue = featuredPrice?.value ?? ""
-  const featuredPriceNote = storefront.catalogPriceState.status === "loading"
-    ? "Проверяем цену и наличие"
-    : featuredPriceIsPublished
-      ? "Цена товара"
-      : "Заказ временно недоступен"
-
+export function HeroSection() {
   return (
     <section className="shop-hero" aria-labelledby="hero-title">
       <div className="shop-hero__copy">
-        <span className="shop-hero__eyebrow">KICKSBASE · спортивная витрина</span>
+        <span className="shop-hero__eyebrow">Оригинальная обувь и одежда</span>
         <h1 id="hero-title">Выберите модель. Остальное видно сразу.</h1>
         <p className="shop-hero__lead">
-          Цена, доступные размеры и срок доставки собраны рядом с товаром до перехода
-          к оплате.
+          Цена, размер и срок доставки видны до оформления заказа.
         </p>
         <div className="hero-actions">
           <a className="button button--primary" href="#catalog">
             <ShoppingBag aria-hidden="true" size={18} />
-            Смотреть каталог
+            Перейти к товарам
           </a>
           <a className="shop-hero__delivery" href="/delivery-returns">
-            Условия доставки
+            Доставка и возврат
             <ArrowUpRight aria-hidden="true" size={17} />
           </a>
         </div>
       </div>
 
-      {featuredProduct && featuredPrice ? (
-        <div className="hero-feature" aria-label="Выбранная модель">
-          <a
-            className="hero-feature__stage"
-            href={getProductPath(featuredProduct)}
-            aria-label={`Открыть товар: ${featuredProduct.brand} ${featuredProduct.name}`}
-          >
-            <img
-              src={resolveAssetUrl(featuredProduct.image)}
-              width="1200"
-              height="900"
-              alt={`${featuredProduct.brand} ${featuredProduct.name}`}
-              loading="eager"
-              decoding="async"
-              fetchPriority="high"
-              onError={(event) => setImageFallback(event, featuredProduct.fallbackImage)}
-            />
-          </a>
-          <div className="hero-feature__caption">
-            <span>
-              <small>{getProductTypeLabel(featuredProduct)}</small>
-              <strong>{featuredProduct.brand} {featuredProduct.name}</strong>
-            </span>
-            <span className="hero-feature__price">
-              <b>{featuredPriceValue}</b>
-              <small>{featuredPriceNote}</small>
-            </span>
-          </div>
+      <aside className="hero-paths" aria-label="Быстрый выбор">
+        <div className="hero-paths__head">
+          <span>Быстрый выбор</span>
+          <strong>С чего начать</strong>
         </div>
-      ) : null}
+        <nav className="hero-paths__grid" aria-label="Подбор по задаче">
+          {heroPaths.map((path) => (
+            <a key={path.href} href={path.href}>
+              <span>
+                <strong>{path.label}</strong>
+                <small>{path.detail}</small>
+              </span>
+              <ArrowRight aria-hidden="true" size={20} />
+            </a>
+          ))}
+        </nav>
+        <div className="hero-paths__note">
+          <BadgeCheck aria-hidden="true" size={21} />
+          <span>
+            <strong>Данные заказа</strong>
+            <small>Модель, размер и цена сохраняются в системе.</small>
+          </span>
+        </div>
+      </aside>
     </section>
   )
 }

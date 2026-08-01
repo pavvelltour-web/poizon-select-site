@@ -76,6 +76,8 @@ export function ProductDetailPage({ product, storefront }: ProductDetailPageProp
     storefront.catalogPriceState.status === "ready" &&
     publishedOffer?.availability === "catalog_listed"
   const sizeOptions = catalogReady ? publishedOffer.sizes : []
+  const orderCreationEnabled =
+    catalogReady && storefront.catalogPriceState.orderCreationEnabled
   const sourcingMode = publishedOffer
     ? publishedOffer.fulfillmentMode === "in_stock"
       ? "В наличии в России"
@@ -84,7 +86,7 @@ export function ProductDetailPage({ product, storefront }: ProductDetailPageProp
       ? "Проверяем данные"
       : "Недоступно для заказа"
   const eta = publishedOffer?.etaMinDays && publishedOffer.etaMaxDays
-    ? `${publishedOffer.etaMinDays}–${publishedOffer.etaMaxDays} дней до Москвы`
+    ? `От ${publishedOffer.etaMinDays} до ${publishedOffer.etaMaxDays} дней до Москвы`
     : "Срок будет показан после серверной проверки"
   const deliveryRoute = publishedOffer?.fulfillmentMode === "in_stock"
     ? "Со склада в России"
@@ -195,7 +197,7 @@ export function ProductDetailPage({ product, storefront }: ProductDetailPageProp
               <Truck aria-hidden="true" size={18} />
               <strong>{sourcingMode}</strong>
             </span>
-            <small>{eta}. Остаток подтверждаем при заказе.</small>
+            <small>{eta}. Актуальное наличие проверяется при оформлении.</small>
           </div>
 
           <div className="pdp-buybox__price" id="pdp-price">
@@ -229,17 +231,22 @@ export function ProductDetailPage({ product, storefront }: ProductDetailPageProp
             data-selected-size={selectedSize ?? ""}
             data-display-price={price.value}
             data-catalog-ready={catalogReady ? "true" : "false"}
+            data-order-enabled={orderCreationEnabled ? "true" : "false"}
             aria-describedby="pdp-price pdp-selection-status"
-            disabled={!selectedSize || !catalogReady}
+            disabled={!selectedSize || !orderCreationEnabled}
             onClick={() => {
               if (selectedSize) storefront.addProductToCart(product, selectedSize)
             }}
           >
             <ShoppingBag aria-hidden="true" size={19} />
-            {!catalogReady
+            {storefront.catalogPriceState.status === "loading"
               ? "Проверяем каталог"
+              : !catalogReady
+                ? "Недоступно для заказа"
+                : !orderCreationEnabled
+                  ? "Оформление временно недоступно"
               : selectedSize
-                ? `Добавить в заказ · ${price.value}`
+                ? `Добавить в заказ за ${price.value}`
                 : "Выберите размер"}
           </button>
           <span className="sr-only" id="pdp-selection-status" aria-live="polite">

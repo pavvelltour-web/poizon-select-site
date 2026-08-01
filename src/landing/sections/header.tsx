@@ -1,5 +1,7 @@
 import { LogIn, Search, ShoppingCart, X } from "lucide-react"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
+
+import { useModalDialog } from "../use-modal-dialog"
 
 interface HeaderProps {
   cartCount: number
@@ -16,7 +18,8 @@ export function Header({
 }: HeaderProps) {
   const [loginOpen, setLoginOpen] = useState(() => {
     if (typeof window === "undefined") return false
-    return new URLSearchParams(window.location.search).get("login") === "1"
+    const searchParams = new URLSearchParams(window.location.search)
+    return searchParams.get("login") === "1" && searchParams.get("cart") !== "1"
   })
   const [phone, setPhone] = useState("")
   const [code, setCode] = useState("")
@@ -25,15 +28,17 @@ export function Header({
   const [loginStatus, setLoginStatus] = useState<"idle" | "loading" | "error" | "verified">("idle")
   const [loginMessage, setLoginMessage] = useState("")
   const [retryAfter, setRetryAfter] = useState(0)
+  const loginTriggerRef = useRef<HTMLButtonElement>(null)
+  const loginDialogRef = useRef<HTMLFormElement>(null)
+  const phoneInputRef = useRef<HTMLInputElement>(null)
 
-  useEffect(() => {
-    if (!loginOpen) return
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setLoginOpen(false)
-    }
-    document.addEventListener("keydown", closeOnEscape)
-    return () => document.removeEventListener("keydown", closeOnEscape)
-  }, [loginOpen])
+  useModalDialog({
+    dialogRef: loginDialogRef,
+    initialFocusRef: phoneInputRef,
+    isOpen: loginOpen,
+    onClose: () => setLoginOpen(false),
+    returnFocusRef: loginTriggerRef,
+  })
 
   useEffect(() => {
     if (retryAfter <= 0) return
@@ -134,11 +139,22 @@ export function Header({
           <Search aria-hidden="true" size={17} />
           <span>Поиск</span>
         </a>
-        <button className="kb-header__login" type="button" onClick={() => setLoginOpen(true)}>
+        <button
+          ref={loginTriggerRef}
+          className="kb-header__login"
+          type="button"
+          aria-label="Войти по SMS"
+          onClick={() => setLoginOpen(true)}
+        >
           <LogIn aria-hidden="true" size={17} />
           <span>Войти</span>
         </button>
-        <button className="kb-header__cart" type="button" onClick={openCart}>
+        <button
+          className="kb-header__cart"
+          type="button"
+          aria-label={cartCount > 0 ? `Корзина, товаров: ${cartCount}` : "Корзина"}
+          onClick={openCart}
+        >
           <ShoppingCart aria-hidden="true" size={17} />
           <span>Корзина</span>
           {cartCount > 0 ? <span className="kb-header__count">{cartCount}</span> : null}
@@ -147,9 +163,11 @@ export function Header({
     </header>
     {loginOpen ? (
       <div className="sms-login" role="dialog" aria-modal="true" aria-labelledby="sms-login-title">
-        <button className="sms-login__scrim" type="button" onClick={() => setLoginOpen(false)} aria-label="Закрыть вход" />
+        <button className="sms-login__scrim" type="button" tabIndex={-1} onClick={() => setLoginOpen(false)} aria-label="Закрыть вход" />
         <form
+          ref={loginDialogRef}
           className="sms-login__panel"
+          tabIndex={-1}
           onSubmit={(event) => {
             event.preventDefault()
             void (challengeId ? verifyCode() : requestCode())
@@ -167,6 +185,7 @@ export function Header({
           <label>
             <span>Телефон</span>
             <input
+              ref={phoneInputRef}
               type="tel"
               inputMode="tel"
               autoComplete="tel"
