@@ -120,7 +120,7 @@ def expected_orientation(kind: str, role: str) -> tuple[str | None, str | None]:
     if role != "primary":
         return None, None
     if kind == "footwear":
-        return "side", "toe-right"
+        return "side", "toe-left"
     if kind == "apparel":
         return "front", "front-facing"
     return None, None

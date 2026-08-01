@@ -35,7 +35,7 @@ class OfficialMediaPipelineTests(unittest.TestCase):
     def tearDown(self) -> None:
         self.temporary.cleanup()
 
-    def item(self, *, role: str = "primary", angle: str = "side", orientation: str = "toe-right"):
+    def item(self, *, role: str = "primary", angle: str = "side", orientation: str = "toe-left"):
         return {
             "slug": "nike-example-shoe",
             "product_type": "footwear",
@@ -96,7 +96,7 @@ class OfficialMediaPipelineTests(unittest.TestCase):
         self.assertEqual(normalized.getpixel((right - 1, top + 50)), (0, 0, 240))
 
     def test_primary_footwear_must_be_side_view_with_toe_right(self) -> None:
-        item = self.item(orientation="toe-left")
+        item = self.item(orientation="toe-right")
         manifest = self.write_manifest([item])
         with self.assertRaisesRegex(pipeline.PipelineError, "do not mirror"):
             pipeline.load_and_validate_manifest(manifest, self.sources)
@@ -129,7 +129,7 @@ class OfficialMediaPipelineTests(unittest.TestCase):
     def test_committed_schema_example_matches_runtime_contract(self) -> None:
         example = pipeline.ROOT / "catalog-media" / "official-media.example.json"
         validated = pipeline.load_and_validate_manifest(example, self.sources)
-        self.assertEqual(validated[0]["media"]["orientation"], "toe-right")
+        self.assertEqual(validated[0]["media"]["orientation"], "toe-left")
 
     def test_exact_source_duplicates_are_blocked_before_staging(self) -> None:
         first = self.item()

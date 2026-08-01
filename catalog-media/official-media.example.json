@@ -26,7 +26,7 @@
       "media": {
         "role": "primary",
         "angle": "side",
-        "orientation": "toe-right",
+        "orientation": "toe-left",
         "mime_type": "image/jpeg"
       },
       "qa": {
