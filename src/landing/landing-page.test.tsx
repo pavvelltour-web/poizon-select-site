@@ -355,6 +355,19 @@ describe("LandingPage", () => {
     expect(within(finder).getByText("16 000 ₽")).toBeInTheDocument()
   })
 
+  it("hides unconfirmed fallback prices when the API is temporarily offline", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("offline")))
+    render(<LandingPage configuredBotUsername={null} />)
+
+    await waitFor(() => {
+      expect(screen.getAllByText("Заказ временно недоступен").length).toBeGreaterThan(0)
+    })
+
+    const firstCard = productLinks()[0]
+    expect(within(firstCard).getByText("—")).toBeInTheDocument()
+    expect(within(firstCard).queryByText("34 500 ₽")).toBeNull()
+  })
+
   it("maps a legacy product query to the canonical product page", async () => {
     window.history.replaceState(
       null,

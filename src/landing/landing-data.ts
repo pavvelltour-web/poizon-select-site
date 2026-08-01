@@ -40,13 +40,13 @@ export const categoryCopy: Record<ActiveCategory, string> = {
   sneakers: "Базовые пары",
 }
 export const categoryDetails: Record<ActiveCategory, string> = {
-  all: "Обувь и одежда",
-  "court-shoes": "Тренировки",
-  volleyball: "Турниры и отработка",
-  basketball: "Турниры и отработка",
-  recovery: "Восстановление",
-  apparel: "Одежда",
-  sneakers: "Базовые",
+  all: "Весь каталог",
+  "court-shoes": "для зала",
+  volleyball: "для матча",
+  basketball: "для игры",
+  recovery: "после тренировки",
+  apparel: "верх и низ",
+  sneakers: "на каждый день",
 }
 
 export const categoryTone: Record<ActiveCategory, string> = {
@@ -87,38 +87,38 @@ type QuickFilter = {
 export const quickFilters: readonly QuickFilter[] = [
   {
     label: "Кроссовки для зала",
-    detail: "тренировки и матчевые дни",
+    detail: "тренировки и игры",
     category: "court-shoes",
     icon: Zap,
   },
   {
     label: "Волейбольные пары",
-    detail: "бег и смена направления",
+    detail: "матч и тренировка",
     category: "volleyball",
     icon: Trophy,
   },
   {
     label: "Баскетбольные пары",
-    detail: "для динамики и ускорения",
+    detail: "игра и тренировка",
     category: "basketball",
     icon: CircleDot,
   },
   {
-    label: "Для восстановления",
-    detail: "после тренировки и для отдыха",
+    label: "После тренировки",
+    detail: "слайды и сабо",
     category: "recovery",
     icon: Waves,
   },
   {
-    label: "До 15 тыс.",
-    detail: "сначала доступное",
+    label: "Сначала дешевле",
+    detail: "по возрастанию цены",
     category: "all",
     sort: "price-asc",
     icon: BadgeCheck,
   },
   {
     label: "Одежда",
-    detail: "верх и шорты",
+    detail: "футболки, шорты, худи",
     category: "apparel",
     icon: Shirt,
   },

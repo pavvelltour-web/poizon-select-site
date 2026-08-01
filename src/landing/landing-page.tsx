@@ -1,5 +1,5 @@
 import { AnimatePresence } from "motion/react"
-import { useEffect, useState, type ReactNode } from "react"
+import { useEffect, useRef, useState, type ReactNode } from "react"
 
 import { findPublicProductBySlug } from "../catalog/catalog"
 import { CatalogSection } from "./sections/catalog-section"
@@ -497,15 +497,51 @@ function CookiesPage() {
 
 function CookieNotice() {
   const [isVisible, setVisible] = useState(false)
+  const noticeRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     setVisible(localStorage.getItem("kicksbase-cookie-notice") !== "accepted")
   }, [])
 
+  useEffect(() => {
+    const notice = noticeRef.current
+
+    if (!isVisible || !notice) {
+      document.documentElement.style.removeProperty("--kb-cookie-notice-height")
+      return
+    }
+
+    const updateNoticeHeight = () => {
+      document.documentElement.style.setProperty(
+        "--kb-cookie-notice-height",
+        `${Math.ceil(notice.getBoundingClientRect().height)}px`,
+      )
+    }
+
+    updateNoticeHeight()
+    window.addEventListener("resize", updateNoticeHeight)
+
+    const resizeObserver = typeof ResizeObserver === "undefined"
+      ? null
+      : new ResizeObserver(updateNoticeHeight)
+    resizeObserver?.observe(notice)
+
+    return () => {
+      resizeObserver?.disconnect()
+      window.removeEventListener("resize", updateNoticeHeight)
+      document.documentElement.style.removeProperty("--kb-cookie-notice-height")
+    }
+  }, [isVisible])
+
   if (!isVisible) return null
 
   return (
-    <div className="cookie-notice" role="region" aria-label="Согласие на использование cookie">
+    <div
+      ref={noticeRef}
+      className="cookie-notice"
+      role="region"
+      aria-label="Согласие на использование cookie"
+    >
       <p>
         Сайт использует необходимые файлы cookie для работы витрины и сохранения корзины.
         Продолжая использование сайта, вы соглашаетесь с{" "}

@@ -7,6 +7,24 @@ export default defineConfig({
   // those routes from incorrectly requesting /product/assets/*.
   base: "/",
   plugins: [react()],
+  server: {
+    host: "127.0.0.1",
+    proxy: {
+      "/api": {
+        target: "http://127.0.0.1:8000",
+        changeOrigin: false,
+      },
+    },
+  },
+  preview: {
+    host: "127.0.0.1",
+    proxy: {
+      "/api": {
+        target: "http://127.0.0.1:8000",
+        changeOrigin: false,
+      },
+    },
+  },
   test: {
     css: true,
     environment: "jsdom",

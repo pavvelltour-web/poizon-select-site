@@ -24,14 +24,15 @@ export function HeroSection({ storefront }: HeroSectionProps) {
   const featuredPriceIsPublished =
     storefront.catalogPriceState.status === "ready" &&
     featuredOffer?.availability === "catalog_listed"
-  const featuredPriceValue = featuredPriceIsPublished || storefront.catalogPriceState.status === "loading"
-    ? featuredPrice?.value
-    : "—"
+  const featuredPriceValue =
+    featuredPriceIsPublished || storefront.catalogPriceState.status === "loading"
+      ? featuredPrice?.value
+      : "—"
   const featuredPriceNote = storefront.catalogPriceState.status === "loading"
-    ? "Предварительная цена"
+    ? "Проверяем цену и наличие"
     : featuredPriceIsPublished
       ? "Цена товара"
-      : "Сейчас не продаётся"
+      : "Заказ временно недоступен"
 
   return (
     <section className="shop-hero" aria-labelledby="hero-title">

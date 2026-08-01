@@ -35,9 +35,9 @@ export function ProductCard({
   const displayPrice = priceIsPublished || catalogStatus === "loading" ? price.value : "—"
   const exceptionalStatus =
     catalogStatus === "failed"
-      ? { text: "Цена временно недоступна", tone: "alert" }
+      ? { text: "Заказ временно недоступен", tone: "alert" }
       : catalogStatus === "loading"
-        ? { text: "Предварительная цена", tone: "muted" }
+        ? { text: "Проверяем цену и наличие", tone: "muted" }
         : !publishedOffer || publishedOffer.availability !== "catalog_listed"
           ? { text: "Нет в продаже", tone: "alert" }
           : null
@@ -74,9 +74,7 @@ export function ProductCard({
         <span className="product-card__body">
           <span className="product-card__type">{getProductTypeLabel(product)}</span>
           <h3>{product.brand} {product.name}</h3>
-          <span className="product-card__variant" aria-hidden={variant ? undefined : true}>
-            {variant ?? "\u00a0"}
-          </span>
+          {variant ? <span className="product-card__variant">{variant}</span> : null}
           {exceptionalStatus ? (
             <span className="product-card__status" data-tone={exceptionalStatus.tone}>
               {exceptionalStatus.text}

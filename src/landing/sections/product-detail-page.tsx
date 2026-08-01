@@ -86,6 +86,11 @@ export function ProductDetailPage({ product, storefront }: ProductDetailPageProp
   const eta = publishedOffer?.etaMinDays && publishedOffer.etaMaxDays
     ? `${publishedOffer.etaMinDays}–${publishedOffer.etaMaxDays} дней до Москвы`
     : "Срок будет показан после серверной проверки"
+  const deliveryRoute = publishedOffer?.fulfillmentMode === "in_stock"
+    ? "Со склада в России"
+    : publishedOffer
+      ? "Из Китая через Москву"
+      : "После проверки заказа"
   const imageSrc = currentImage?.src ?? product.fallbackImage
   const imageAlt = currentImage?.alt ?? `${product.brand} ${product.name}`
 
@@ -190,7 +195,7 @@ export function ProductDetailPage({ product, storefront }: ProductDetailPageProp
               <Truck aria-hidden="true" size={18} />
               <strong>{sourcingMode}</strong>
             </span>
-            <small>{eta}. Опубликованный каталог не подтверждает живой остаток Poizon.</small>
+            <small>{eta}. Остаток подтверждаем при заказе.</small>
           </div>
 
           <div className="pdp-buybox__price" id="pdp-price">
@@ -249,8 +254,8 @@ export function ProductDetailPage({ product, storefront }: ProductDetailPageProp
               <dd>{kindLabels[product.kind]}</dd>
             </div>
             <div>
-              <dt>Получение</dt>
-              <dd>{sourcingMode}</dd>
+              <dt>Маршрут</dt>
+              <dd>{deliveryRoute}</dd>
             </div>
           </dl>
 
