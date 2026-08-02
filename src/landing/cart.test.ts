@@ -12,7 +12,7 @@ import {
 } from "./cart"
 
 const catalogPayload = {
-  version: "2026-07-31-v2",
+  version: "2026-08-02-v3",
   personal_data_consent_version: "pd-2026-08",
   order_creation_enabled: true,
   online_payment_enabled: true,
@@ -163,7 +163,7 @@ describe("checkout catalogue v10", () => {
   it("parses the complete published offer and rejects a prices-only payload", () => {
     const parsed = parseCheckoutCatalog(catalogPayload)
 
-    expect(parsed?.version).toBe("2026-07-31-v2")
+    expect(parsed?.version).toBe("2026-08-02-v3")
     expect(parsed).toMatchObject({
       orderCreationEnabled: true,
       onlinePaymentEnabled: true,

@@ -20,7 +20,7 @@ function checkoutCatalogPayload(
   },
 ) {
   return {
-    version: "2026-07-31-v2",
+    version: "2026-08-02-v3",
     personal_data_consent_version: "pd-2026-08",
     order_creation_enabled: capabilities.orderCreationEnabled,
     online_payment_enabled: capabilities.onlinePaymentEnabled,
@@ -186,6 +186,16 @@ describe("LandingPage", () => {
     expect(productLinks()).toHaveLength(publicCatalogProducts.length)
     expect(screen.queryByRole("button", { name: /Показать ещё/ })).toBeNull()
     expect(screen.getByText("Показан весь каталог")).toBeInTheDocument()
+  })
+
+  it("canonicalizes the trailing-slash catalog route and renders the full catalog view", () => {
+    window.history.replaceState(null, "", "/catalog/")
+
+    render(<LandingPage configuredBotUsername={null} />)
+
+    expect(window.location.pathname).toBe("/catalog")
+    expect(screen.getByRole("heading", { name: /Каталог/ })).toBeInTheDocument()
+    expect(productLinks()).toHaveLength(CATALOG_PAGE_SIZE)
   })
 
   it.each([
@@ -670,7 +680,7 @@ describe("LandingPage", () => {
       size_eu: "44",
       quantity: 1,
       price_rub: 24500,
-      price_version: "2026-07-31-v2",
+      price_version: "2026-08-02-v3",
     })
     expect(body.delivery).toEqual({
       method: "cdek_courier",

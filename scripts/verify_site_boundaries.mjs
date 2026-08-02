@@ -123,6 +123,12 @@ for (const required of [
   const target = required === "USER nginx" ? dockerfile : nginx
   if (!target.includes(required)) fail(`deployment policy is missing ${required}`)
 }
+for (const route of ["location = /catalog {", "location = /catalog/ {"]) {
+  if (!nginx.includes(route)) fail(`nginx must serve the SPA route with ${route}`)
+}
+if (nginx.includes("try_files $uri $uri/")) {
+  fail("nginx directory fallback can redirect SPA routes to the internal port")
+}
 
 const browserFiles = await sourceFiles(path.join(siteRoot, "src"))
 const publicRoot = path.join(siteRoot, "public")

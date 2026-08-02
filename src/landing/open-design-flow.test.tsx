@@ -9,7 +9,7 @@ const approvedRoot = "/storefront-media/approved/products"
 
 function checkoutCatalogPayload() {
   return {
-    version: "2026-07-31-v2",
+    version: "2026-08-02-v3",
     personal_data_consent_version: "pd-2026-08",
     order_creation_enabled: true,
     online_payment_enabled: true,

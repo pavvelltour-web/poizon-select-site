@@ -528,7 +528,7 @@
     .product-info {
       display: grid;
       gap: 5px;
-      padding: 16px 9px 0;
+      padding: 16px 12px 14px;
     }
     .product-price {
       margin: 0;
@@ -1647,7 +1647,7 @@
         right: 8px;
       }
       .product-info {
-        padding-inline: 8px;
+        padding-inline: 10px;
       }
       .card-sizes {
         margin-inline: 8px;

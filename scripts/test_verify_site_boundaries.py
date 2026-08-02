@@ -82,6 +82,22 @@ class SiteBoundaryVerifierTests(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         self.assertIn("unexpected release artifact", result.stderr)
 
+    def test_rejects_directory_fallback_that_redirects_the_catalog_route(self) -> None:
+        fixture = self.make_fixture()
+        nginx = fixture / "nginx.conf"
+        nginx.write_text(
+            nginx.read_text(encoding="utf-8").replace(
+                "try_files $uri /index.html;",
+                "try_files $uri $uri/ /index.html;",
+            ),
+            encoding="utf-8",
+        )
+
+        result = self.run_verifier(fixture)
+
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("internal port", result.stderr)
+
 
 if __name__ == "__main__":
     unittest.main()

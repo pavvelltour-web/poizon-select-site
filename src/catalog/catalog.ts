@@ -34,7 +34,7 @@ export const MARKET_PRICE_BASIS =
 export const PRICE_FORMULA_BASIS =
   "УСН 6%, ракета до Москвы, резерв, эквайринг и маржа KICKSBASE"
 
-export const CATALOG_PRICE_VERSION = "2026-07-31-v2"
+export const CATALOG_PRICE_VERSION = "2026-08-02-v3"
 
 export const PUBLIC_CATALOG_POLICY =
   "Публичная витрина показывает все 100 SKU: обувь, одежду, защиту, мячи, сумки и другие аксессуары."
@@ -1909,11 +1909,37 @@ export function getCatalogPriceRub(product: CatalogProduct): number {
 export const publicCatalogProducts: readonly CatalogProduct[] =
   catalogProducts.filter(isPublicCatalogProduct)
 
-function normalizeCatalogSearch(value: string): string {
-  return value
-    .toLocaleLowerCase("ru")
-    .replace(/ё/gu, "е")
-    .replace(/(^|[^\p{L}\p{N}])(?:найк|наик)(?=$|[^\p{L}\p{N}])/gu, "$1nike")
+const catalogSearchAliases: Readonly<Record<string, string>> = {
+  найк: "nike",
+  наик: "nike",
+  адидас: "adidas",
+  асикс: "asics",
+  мизуно: "mizuno",
+  кроссовки: "footwear",
+  обувь: "footwear",
+  одежда: "apparel",
+  аксессуар: "accessory",
+  аксессуары: "accessory",
+  волейбол: "volleyball",
+  волейбола: "volleyball",
+  волейбольный: "volleyball",
+  баскетбол: "basketball",
+  баскетбола: "basketball",
+  баскетбольный: "basketball",
+  мяч: "balls",
+  мячи: "balls",
+  сумка: "bags",
+  сумки: "bags",
+  рюкзак: "bags",
+  рюкзаки: "bags",
+  защита: "protection",
+  наколенники: "protection",
+  налокотники: "protection",
+}
+
+function catalogSearchTokens(value: string): string[] {
+  return (value.toLocaleLowerCase("ru").replace(/ё/gu, "е").match(/[\p{L}\p{N}]+/gu) ?? [])
+    .map((token) => catalogSearchAliases[token] ?? token)
 }
 
 export function filterCatalog(
@@ -1921,15 +1947,15 @@ export function filterCatalog(
   category: "all" | CatalogCategory,
   search: string,
 ): CatalogProduct[] {
-  const normalizedSearch = normalizeCatalogSearch(search.trim())
+  const searchTokens = catalogSearchTokens(search.trim())
 
   return products.filter((product) => {
     if (category !== "all" && !matchesCatalogCategory(product, category)) {
       return false
     }
-    if (!normalizedSearch) return true
+    if (searchTokens.length === 0) return true
 
-    return normalizeCatalogSearch(
+    const productTokens = new Set(catalogSearchTokens(
       [
         product.brand,
         product.name,
@@ -1939,7 +1965,10 @@ export function filterCatalog(
         product.note,
         product.marketPrice ?? "",
       ].join(" "),
-    ).includes(normalizedSearch)
+    ))
+    return searchTokens.every((token) =>
+      [...productTokens].some((productToken) => productToken === token || productToken.startsWith(token)),
+    )
   })
 }
 

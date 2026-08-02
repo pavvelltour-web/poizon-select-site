@@ -186,6 +186,7 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
 }
 
 function canonicalLegacyPath(pathname: string): string {
+  if (pathname.endsWith("/") && pathname.slice(0, -1) === "/catalog") return pathname.slice(0, -1)
   if (pathname === "/kicksbase-signal-catalog.html" || pathname === "/kicksbase-signal-catalog-v4.html") return "/catalog"
   if (pathname === "/kicksbase-legal.html") {
     if (window.location.hash === "#privacy") return "/privacy"

@@ -226,6 +226,17 @@ describe("catalogProducts", () => {
     expect(filterCatalog(publicCatalogProducts, "apparel", "")).toHaveLength(16)
     expect(filterCatalog(publicCatalogProducts, "accessories", "")).toHaveLength(25)
     expect(filterCatalog(publicCatalogProducts, "all", "ronaldinho")).toHaveLength(1)
+    expect(filterCatalog(publicCatalogProducts, "all", "Force Nike Air").map((product) => product.slug)).toEqual([
+      "nike-air-force-1-07-white",
+    ])
+    expect(filterCatalog(publicCatalogProducts, "all", "sabr").map((product) => product.slug)).toContain(
+      "nike-sabrina-3",
+    )
+    expect(filterCatalog(publicCatalogProducts, "all", "волейбольный мяч").map((product) => product.slug)).toEqual([
+      "molten-v5m5000-flistatec",
+      "molten-v5m4500-volleyball",
+      "mikasa-v200w-volleyball",
+    ])
     expect(filterCatalog(publicCatalogProducts, "basketball", "NIKE")).toHaveLength(6)
     const nikeSlugs = filterCatalog(publicCatalogProducts, "all", "Nike").map(
       (product) => product.slug,
