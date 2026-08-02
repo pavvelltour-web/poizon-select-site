@@ -232,6 +232,7 @@ describe("catalogProducts", () => {
     expect(filterCatalog(publicCatalogProducts, "all", "sabr").map((product) => product.slug)).toContain(
       "nike-sabrina-3",
     )
+    expect(filterCatalog(publicCatalogProducts, "all", "Nike Metcon 10")).toEqual([])
     expect(filterCatalog(publicCatalogProducts, "all", "волейбольный мяч").map((product) => product.slug)).toEqual([
       "molten-v5m5000-flistatec",
       "molten-v5m4500-volleyball",

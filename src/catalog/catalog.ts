@@ -1963,7 +1963,6 @@ export function filterCatalog(
         product.categoryLabel,
         product.kind,
         product.note,
-        product.marketPrice ?? "",
       ].join(" "),
     ))
     return searchTokens.every((token) =>
