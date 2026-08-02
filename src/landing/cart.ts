@@ -62,7 +62,7 @@ export interface PublishedSizeOffer {
 export type CatalogPriceMap = Record<string, number>
 export type PublishedCatalogMap = Record<string, PublishedCatalogItem>
 
-export type CatalogSearchStatus = "ready" | "clarification" | "unavailable"
+export type CatalogSearchStatus = "catalog" | "ready" | "clarification" | "unavailable"
 
 export interface CatalogSearchOffer {
   skuId: string
@@ -262,7 +262,25 @@ function parseQuoteTimestamp(value: unknown): number | null {
 
 function safeCatalogNavigationUrl(value: unknown): string | null {
   const url = optionalString(value)
-  return url && /^\/product\/[a-z0-9][a-z0-9-]*\/?$/iu.test(url) ? url : null
+  if (url && /^\/product\/[a-z0-9][a-z0-9-]*\/?$/iu.test(url)) return url
+  if (!url) return null
+
+  try {
+    const parsed = new URL(url)
+    const pathname = parsed.pathname
+    return (
+      parsed.protocol === "https:" &&
+      parsed.hostname === "kicksbase.ru" &&
+      !parsed.username &&
+      !parsed.password &&
+      !parsed.port &&
+      !parsed.search &&
+      !parsed.hash &&
+      /^\/product\/[a-z0-9][a-z0-9-]*\/?$/iu.test(pathname)
+    ) ? pathname : null
+  } catch {
+    return null
+  }
 }
 
 function parseCatalogSearchResult(value: unknown): CatalogSearchResult | null {
@@ -383,7 +401,7 @@ export function parseCatalogSearch(payload: unknown): CatalogSearchResponse | nu
   const normalizedQuery = optionalString(source.normalized_query)
   if (
     !normalizedQuery ||
-    !["ready", "clarification", "unavailable"].includes(status || "") ||
+    !["catalog", "ready", "clarification", "unavailable"].includes(status || "") ||
     !Array.isArray(source.results)
   ) {
     return null

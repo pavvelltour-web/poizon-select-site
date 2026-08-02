@@ -21,7 +21,6 @@ import {
   saveCart,
   submitCheckout,
   isCheckoutApiError,
-  isCatalogSearchResultForProduct,
   getPublishedSizeOffer,
   updateCartQuantity,
   type CheckoutConsents,
@@ -351,40 +350,15 @@ export function useLandingStorefront(
       return
     }
 
-    const controller = new AbortController()
-    const productSlug = selectedProduct.slug
     setSelectedSizeOfferState({
-      status: "loading",
-      productSlug,
+      // The product sheet uses server-owned checkout offers.  It must not
+      // trigger a supplier lookup just because a customer opens a card.
+      status: "ready",
+      productSlug: selectedProduct.slug,
       result: null,
       error: null,
     })
-    void fetchCatalogSearch(apiBaseUrl, selectedProduct.query, controller.signal)
-      .then((response) => {
-        if (controller.signal.aborted) return
-        setSelectedSizeOfferState({
-          status: "ready",
-          productSlug,
-          result: response.status === "ready"
-            ? response.results.find(
-              (result) => isCatalogSearchResultForProduct(selectedProduct, result),
-            ) ?? null
-            : null,
-          error: null,
-        })
-      })
-      .catch((error: unknown) => {
-        if (controller.signal.aborted) return
-        setSelectedSizeOfferState({
-          status: "failed",
-          productSlug,
-          result: null,
-          error: error instanceof Error ? error.message : "Размеры временно недоступны.",
-        })
-      })
-
-    return () => controller.abort()
-  }, [apiBaseUrl, selectedProduct])
+  }, [selectedProduct])
 
   useEffect(() => {
     if (!["ready", "failed"].includes(selectedSizeOfferState.status)) return
@@ -410,10 +384,12 @@ export function useLandingStorefront(
             status: "ready",
             response,
             fallback:
-              response.status === "unavailable"
+              response.status === "catalog" || response.status === "unavailable"
                 ? response.fallback.length > 0
                   ? response.fallback
-                  : catalogFallbacks
+                  : response.status === "unavailable"
+                    ? catalogFallbacks
+                    : []
                 : [],
             error: null,
           })
@@ -452,10 +428,12 @@ export function useLandingStorefront(
             status: "ready",
             response,
             fallback:
-              response.status === "unavailable"
+              response.status === "catalog" || response.status === "unavailable"
                 ? response.fallback.length > 0
                   ? response.fallback
-                  : taskFallbacks
+                  : response.status === "unavailable"
+                    ? taskFallbacks
+                    : []
                 : [],
             error: null,
           })

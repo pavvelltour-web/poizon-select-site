@@ -183,12 +183,10 @@ describe("approved Open Design product flow", () => {
     expect(within(dialog).getAllByText("32 900 ₽").length).toBeGreaterThan(1)
     expect(within(dialog).getByRole("button", { name: "Добавить в заказ" })).toBeEnabled()
 
-    const searchCall = vi.mocked(fetch).mock.calls.find(
-      ([url]) => String(url).endsWith("/api/catalog/search"),
-    )
-    expect(JSON.parse(String(searchCall?.[1]?.body))).toMatchObject({
-      query: "Nike KD 18 basketball volleyball",
-    })
+    expect(vi.mocked(fetch).mock.calls.filter(
+      ([url, options]) =>
+        String(url).endsWith("/api/catalog/search") && options?.method === "POST",
+    )).toHaveLength(0)
     expect(document.body).toHaveClass("is-locked")
 
     await user.keyboard("{Escape}")

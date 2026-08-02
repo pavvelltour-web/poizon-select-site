@@ -266,18 +266,18 @@ function SearchResults({ state, botUrl, botUsername, className }: SearchResultsP
   const isUnavailable = state.status === "failed" || response?.status === "unavailable"
   const statusText =
     state.status === "loading"
-      ? "Ищем подтверждённые предложения Poizon..."
+      ? "Ищем в каталоге KICKSBASE..."
       : state.status === "failed"
         ? state.error ?? "Поиск временно недоступен."
         : response?.status === "clarification"
           ? response.clarification ?? "Уточните модель, артикул, размер или бюджет."
           : response?.status === "unavailable"
-            ? response.clarification ?? "Проверка Poizon временно недоступна."
+            ? response.clarification ?? "Поиск по каталогу временно недоступен."
             : null
   const showEmpty =
     state.status === "ready" &&
-    response?.status === "ready" &&
-    liveResults.length === 0
+    response?.status === "catalog" &&
+    state.fallback.length === 0
 
   return (
     <div className={`live-search ${className}`} data-status={state.status}>
@@ -307,7 +307,11 @@ function SearchResults({ state, botUrl, botUsername, className }: SearchResultsP
 
       {state.fallback.length > 0 ? (
         <div className="live-search__fallback" aria-live="polite">
-          <p>Цена и наличие требуют проверки.</p>
+          <p>
+            {response?.status === "catalog"
+              ? "Результаты из опубликованного каталога KICKSBASE."
+              : "Показаны товары из локальной витрины."}
+          </p>
           <div>
             {state.fallback.map((item) => (
               <CatalogFallbackCard key={item.slug} item={item} />
@@ -318,7 +322,7 @@ function SearchResults({ state, botUrl, botUsername, className }: SearchResultsP
 
       {showEmpty ? (
         <p className="live-search__empty" role="status">
-          Подтверждённых предложений по этому запросу пока нет.
+          В опубликованном каталоге по этому запросу ничего не найдено.
         </p>
       ) : null}
     </div>
@@ -439,7 +443,7 @@ function CatalogFallbackCard({ item }: { item: CatalogSearchFallback }) {
         }}
       />
       <span>
-        <small>Витрина · наличие не подтверждено</small>
+        <small>Опубликованный каталог KICKSBASE</small>
         <strong>{title}</strong>
       </span>
       <MoveRight aria-hidden="true" size={18} />

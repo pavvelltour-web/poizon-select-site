@@ -116,6 +116,23 @@ function readySearchPayload(normalizedQuery = "Nike Air Force 1") {
   }
 }
 
+function catalogSearchPayload(normalizedQuery = "Nike Air Force 1") {
+  return {
+    status: "catalog",
+    normalized_query: normalizedQuery,
+    results: [],
+    fallback: [{
+      source: "catalog",
+      slug: "nike-air-force-1-07-white",
+      name: "Air Force 1 ’07 White",
+      brand: "Nike",
+      image: "https://kicksbase.ru/catalog/nike-air-force-1-07-white.webp",
+      navigation_url: "https://kicksbase.ru/product/nike-air-force-1-07-white",
+      availability: "unverified",
+    }],
+  }
+}
+
 afterEach(() => {
   vi.restoreAllMocks()
   vi.unstubAllGlobals()
@@ -387,12 +404,12 @@ describe("LandingPage", () => {
     })
   })
 
-  it("uses the verified API for Russian and English catalog searches", async () => {
+  it("uses local catalog results for Russian and English catalog searches", async () => {
     const user = userEvent.setup()
     const fetchMock = vi.fn(async (url: string, options?: RequestInit) => {
       if (url.endsWith("/api/catalog/search") && options?.method === "POST") {
         const body = JSON.parse(String(options.body)) as { query: string }
-        return { ok: true, json: async () => readySearchPayload(body.query) }
+        return { ok: true, json: async () => catalogSearchPayload(body.query) }
       }
       if (url.includes("/api/checkout/orders")) {
         return { ok: true, json: async () => checkoutCatalogPayload() }
@@ -407,22 +424,15 @@ describe("LandingPage", () => {
     await user.type(screen.getByRole("searchbox", { name: "Поиск по товарам" }), catalogQuery)
 
     await waitFor(() => {
-      expect(screen.getAllByTestId("live-search-result")).toHaveLength(1)
+      expect(screen.getByText("Результаты из опубликованного каталога KICKSBASE.")).toBeInTheDocument()
     })
-    const liveResult = screen.getByTestId("live-search-result")
-    expect(within(liveResult).getByText("Артикул: DV0788-104")).toBeInTheDocument()
-    expect(within(liveResult).getByText("Проверенные размеры: 42, 43")).toBeInTheDocument()
-    expect(within(liveResult).getByText("16 700 ₽")).toBeInTheDocument()
-    expect(within(liveResult).getByText("Официальная цена: ¥699")).toBeInTheDocument()
-    expect(within(liveResult).getByRole("link", { name: "Карточка Poizon" })).toHaveAttribute(
+    const catalogResult = screen.getAllByRole("link", { name: "Открыть товар: Nike Air Force 1 ’07 White" })
+      .find((link) => link.classList.contains("live-search-fallback"))
+    expect(catalogResult).toHaveAttribute(
       "href",
-      "https://www.poizon.com/product/dv0788-104",
+      "/product/nike-air-force-1-07-white",
     )
-    expect(within(liveResult).getByRole("link", { name: "Открыть @SelectBuyerBot" })).toHaveAttribute(
-      "href",
-      "https://t.me/SelectBuyerBot",
-    )
-    expect(within(liveResult).queryByRole("button", { name: /Добавить в заказ/ })).toBeNull()
+    expect(screen.queryByText("Проверка Poizon временно недоступна.")).toBeNull()
 
     view.unmount()
     window.history.replaceState(null, "", "/")
@@ -433,7 +443,7 @@ describe("LandingPage", () => {
       "Nike DV0788-104 42 до 18000",
     )
     await waitFor(() => {
-      expect(within(finder).getByText("Артикул: DV0788-104")).toBeInTheDocument()
+      expect(within(finder).getByText("Результаты из опубликованного каталога KICKSBASE.")).toBeInTheDocument()
     })
 
     const searchCalls = fetchMock.mock.calls.filter(
@@ -446,6 +456,24 @@ describe("LandingPage", () => {
         { query: "Nike DV0788-104 42 до 18000", limit: 4 },
       ]),
     )
+  })
+
+  it("does not look up a provider when a customer opens a published product card", async () => {
+    const fetchMock = vi.fn(async (url: string, _options?: RequestInit) => ({
+      ok: url.includes("/api/checkout/orders?mode=catalog"),
+      json: async () => checkoutCatalogPayload(),
+    }))
+    vi.stubGlobal("fetch", fetchMock)
+    window.history.replaceState(null, "", "/product/nike-gt-cut-academy")
+
+    render(<LandingPage configuredBotUsername={null} />)
+
+    await waitFor(() => {
+      expect(screen.getByRole("dialog", { name: /Nike G\.T\. Cut Academy/ })).toBeInTheDocument()
+    })
+    expect(fetchMock.mock.calls.filter(([url, options]) =>
+      String(url).endsWith("/api/catalog/search") && options?.method === "POST",
+    )).toHaveLength(0)
   })
 
   it("uses no-price static fallback only when the search API is unavailable", async () => {
@@ -464,7 +492,7 @@ describe("LandingPage", () => {
         within(finder).getByRole("link", { name: /Nike Air Force 1 ’07 White/ }),
       ).toHaveAttribute("href", "/product/nike-air-force-1-07-white")
     })
-    expect(within(finder).getByText("Цена и наличие требуют проверки.")).toBeInTheDocument()
+    expect(within(finder).getByText("Показаны товары из локальной витрины.")).toBeInTheDocument()
     expect(within(finder).queryByText("16 000 ₽")).toBeNull()
   })
 
@@ -532,39 +560,24 @@ describe("LandingPage", () => {
     })
   })
 
-  it("uses the matching live result instead of a mismatched first result", async () => {
-    const matchingPayload = readyGtCutSearchPayload()
-    const matchingResult = {
-      ...matchingPayload.results[0],
-      model: "G.T. Cut Academy",
-      offers: matchingPayload.results[0].offers.map((offer) => ({ ...offer, ru: "42" })),
-    }
-    const mismatchedResult = {
-      ...matchingResult,
-      provider_product_id: "poizon-air-force-1-07-white",
-      provider_url: "https://www.poizon.com/product/cw2288-111",
-      name: "Air Force 1 '07 White",
-      model: "Air Force 1 '07 White",
-      article: "CW2288-111",
-      offers: matchingResult.offers.map((offer) => ({ ...offer, ru: "99" })),
-    }
-    const fetchMock = vi.fn(async (_url: string) => ({
+  it("uses server-owned checkout offers instead of a provider result", async () => {
+    const fetchMock = vi.fn(async (url: string) => ({
       ok: true,
       status: 200,
-      json: async () => _url.endsWith("/api/catalog/search")
-        ? { ...matchingPayload, results: [mismatchedResult, matchingResult] }
-        : checkoutCatalogPayload(),
+      json: async () => url.includes("/api/checkout/orders?mode=catalog")
+        ? checkoutCatalogPayload()
+        : {},
     }))
     vi.stubGlobal("fetch", fetchMock)
     window.history.replaceState(null, "", "/product/nike-gt-cut-academy")
     render(<LandingPage configuredBotUsername={null} />)
 
     expect(await screen.findByRole("button", {
-      name: "42 RU, 44 EU, 24 500 ₽",
+      name: "43 RU, 44 EU, 24 500 ₽",
     })).toBeEnabled()
-    expect(screen.queryByRole("button", {
-      name: "99 RU, 44 EU, 24 500 ₽",
-    })).toBeNull()
+    expect(fetchMock.mock.calls.filter(([url]) =>
+      String(url).endsWith("/api/catalog/search"),
+    )).toHaveLength(0)
   })
 
   it("adds a selected product to the site cart and submits checkout", async () => {

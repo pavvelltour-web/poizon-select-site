@@ -55,6 +55,30 @@ const catalogPayload = {
 }
 
 describe("checkout catalogue v10", () => {
+  it("parses a published catalog response without presenting a live provider quote", () => {
+    const parsed = parseCatalogSearch({
+      status: "catalog",
+      normalized_query: "Nike Air Force",
+      results: [],
+      fallback: [{
+        source: "catalog",
+        slug: "nike-air-force-1-07-white",
+        name: "Air Force 1 ’07 White",
+        brand: "Nike",
+        image: "https://kicksbase.ru/catalog/nike-air-force-1-07-white.webp",
+        navigation_url: "https://kicksbase.ru/product/nike-air-force-1-07-white",
+        availability: "unverified",
+      }],
+    })
+
+    expect(parsed).toMatchObject({
+      status: "catalog",
+      normalizedQuery: "Nike Air Force",
+      results: [],
+      fallback: [{ slug: "nike-air-force-1-07-white" }],
+    })
+  })
+
   it("parses a verified live Poizon result without creating a checkout offer", () => {
     const observedAt = new Date(Date.now() - 60_000).toISOString()
     const expiresAt = new Date(Date.now() + 14 * 60_000).toISOString()
