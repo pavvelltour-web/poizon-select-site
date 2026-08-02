@@ -38,6 +38,7 @@ frame has this shape:
   "composition": "single",
   "origin_kind": "project-generated-original",
   "origin_reference": "scripts/generate_catalog_art.py",
+  "origin_hash_mode": "text-lf",
   "origin_sha256": "lowercase-64-character-sha256",
   "generator": "scripts/generate_catalog_art.py",
   "rights": {
@@ -51,10 +52,14 @@ frame has this shape:
 All 500 `file` and `origin_reference` values are resolved relative to the
 project root. The origin may be a source reference or the reproducible
 generator, but it must never be silently presented as official provider media.
+`origin_hash_mode` is `text-lf` for known text sources and normalizes only
+CRLF/CR line endings to LF before hashing; it is `binary` for image and other
+binary origins and always hashes exact bytes.
 
-`unified-catalog-media-review.json` is deliberately separate. It binds a
-manual visual review to the exact SHA-256 of the generated manifest. Rebuilding
-the catalog invalidates that approval until the new pixels have been reviewed.
+`unified-catalog-media-review.json` is deliberately separate. It must declare
+`"manifest_sha256_mode": "text-lf"` and binds a manual visual review to the
+line-ending-portable SHA-256 of the generated manifest. Rebuilding the catalog
+invalidates that approval until the new pixels have been reviewed.
 
 The gate compares the SKU set with `public/catalog/sources.json`, requires the
 exact storefront path for every frame, and rejects non-uniform backgrounds,

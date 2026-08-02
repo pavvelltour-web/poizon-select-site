@@ -83,6 +83,7 @@ class UnifiedCatalogMediaTests(unittest.TestCase):
         return {
             "origin_kind": "project-generated-original",
             "origin_reference": source_file,
+            "origin_hash_mode": gate.BINARY_HASH_MODE,
             "origin_sha256": source_hash,
             "generator": "test fixture",
             "rights": {
@@ -152,7 +153,11 @@ class UnifiedCatalogMediaTests(unittest.TestCase):
                     "reviewer_type": "agent-assisted-manual",
                     "reviewed_at": "2026-08-02T00:00:00Z",
                     "reviewed_frame_count": 500,
-                    "manifest_sha256": hashlib.sha256(manifest.read_bytes()).hexdigest(),
+                    "manifest_sha256_mode": gate.TEXT_LF_HASH_MODE,
+                    "manifest_sha256": gate.sha256_file(
+                        manifest,
+                        mode=gate.TEXT_LF_HASH_MODE,
+                    ),
                     "checks": ["complete subject", "safe margins", "angle order", "consistent background"],
                 }
             ),
@@ -242,6 +247,73 @@ class UnifiedCatalogMediaTests(unittest.TestCase):
             r"origin_reference must be an existing root-relative file[\s\S]*rights metadata is required",
         ):
             self.verify(payload)
+
+    def test_text_origin_hash_is_portable_between_crlf_and_lf(self) -> None:
+        origin = self.root / "scripts" / "origin.py"
+        origin.parent.mkdir(parents=True)
+        origin.write_bytes(b"first = 1\r\nsecond = 2\r\n")
+        frame = self.provenance(
+            "text-origin",
+            1,
+            origin.relative_to(self.root).as_posix(),
+            gate.sha256_file(origin, mode=gate.TEXT_LF_HASH_MODE),
+        )
+        frame["origin_hash_mode"] = gate.TEXT_LF_HASH_MODE
+        origin.write_bytes(b"first = 1\nsecond = 2\n")
+
+        self.assertEqual(gate.validate_provenance(frame, "frame", self.root), [])
+
+    def test_binary_origin_hash_remains_byte_exact(self) -> None:
+        origin = self.root / "public" / "catalog" / "origin.bin"
+        origin.write_bytes(b"\x00image\r\npayload\xff")
+        frame = self.provenance(
+            "binary-origin",
+            1,
+            origin.relative_to(self.root).as_posix(),
+            gate.sha256_file(origin),
+        )
+        origin.write_bytes(b"\x00image\npayload\xff")
+
+        errors = gate.validate_provenance(frame, "frame", self.root)
+        self.assertTrue(any("origin_sha256 does not match" in error for error in errors))
+
+    def test_binary_origin_cannot_claim_text_lf_mode(self) -> None:
+        origin = self.root / "public" / "catalog" / "origin.png"
+        origin.write_bytes(b"\x89PNG\r\n\x1a\n\r\npayload")
+        frame = self.provenance(
+            "binary-mode",
+            1,
+            origin.relative_to(self.root).as_posix(),
+            gate.sha256_file(origin, mode=gate.TEXT_LF_HASH_MODE),
+        )
+        frame["origin_hash_mode"] = gate.TEXT_LF_HASH_MODE
+
+        errors = gate.validate_provenance(frame, "frame", self.root)
+        self.assertTrue(any("origin_hash_mode must be binary" in error for error in errors))
+
+    def test_review_hash_is_portable_between_crlf_and_lf(self) -> None:
+        manifest = self.root / "catalog-media" / "manifest.json"
+        manifest.parent.mkdir(exist_ok=True)
+        manifest.write_bytes(b"{\r\n  \"products\": []\r\n}\r\n")
+        review = self.root / "catalog-media" / "review.json"
+        review.write_text(
+            json.dumps(
+                {
+                    "schema_version": 1,
+                    "status": "approved",
+                    "reviewer_type": "agent-assisted-manual",
+                    "reviewed_at": "2026-08-02T00:00:00Z",
+                    "reviewed_frame_count": 500,
+                    "manifest_sha256_mode": gate.TEXT_LF_HASH_MODE,
+                    "manifest_sha256": gate.sha256_file(manifest, mode=gate.TEXT_LF_HASH_MODE),
+                    "checks": ["complete", "margins", "angles", "background"],
+                }
+            ),
+            encoding="utf-8",
+        )
+        manifest.write_bytes(b"{\n  \"products\": []\n}\n")
+
+        self.assertEqual(gate.validate_visual_review(review, manifest), [])
 
 
 if __name__ == "__main__":

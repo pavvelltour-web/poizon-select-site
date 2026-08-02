@@ -9,7 +9,6 @@ uniformly and centers it on the KICKSBASE 4:3 product canvas.
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 from dataclasses import dataclass
 from pathlib import Path
@@ -19,8 +18,10 @@ from PIL import Image, ImageChops, ImageFilter, ImageOps
 
 try:
     from scripts.import_ai_contact_sheet import border_connected_background_alpha
+    from scripts.portable_hash import hash_mode_for_path, sha256_file
 except ModuleNotFoundError:  # Direct execution: python scripts/build_*.py
     from import_ai_contact_sheet import border_connected_background_alpha
+    from portable_hash import hash_mode_for_path, sha256_file
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -202,14 +203,6 @@ PROFILE_SPECS: dict[str, tuple[FrameSpec, ...]] = {
 }
 
 
-def sha256_file(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as source:
-        for chunk in iter(lambda: source.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
-
-
 def media_profile(slug: str) -> str:
     cohorts = (
         (SLIDES, "slide"),
@@ -350,10 +343,12 @@ def provenance(slug: str, position: int, source: Path) -> dict[str, object]:
         origin = CATALOG_GENERATOR
         generator = "scripts/generate_catalog_art.py"
 
+    origin_hash_mode = hash_mode_for_path(origin)
     return {
         "origin_kind": "project-generated-original",
         "origin_reference": origin.resolve().relative_to(ROOT.resolve()).as_posix(),
-        "origin_sha256": sha256_file(origin),
+        "origin_hash_mode": origin_hash_mode,
+        "origin_sha256": sha256_file(origin, mode=origin_hash_mode),
         "generator": generator,
         "rights": {
             "status": "owned",

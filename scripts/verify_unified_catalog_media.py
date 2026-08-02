@@ -9,7 +9,6 @@ is safe to run before a release without altering any image files.
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import re
 from collections import defaultdict
@@ -18,6 +17,11 @@ from pathlib import Path
 from typing import Any
 
 from PIL import Image, ImageChops
+
+try:
+    from scripts.portable_hash import BINARY_HASH_MODE, HASH_MODES, TEXT_LF_HASH_MODE, hash_mode_for_path, sha256_file
+except ModuleNotFoundError:  # Direct execution: python scripts/verify_*.py
+    from portable_hash import BINARY_HASH_MODE, HASH_MODES, TEXT_LF_HASH_MODE, hash_mode_for_path, sha256_file
 
 
 CANVAS_SIZE = (1600, 1200)
@@ -175,14 +179,6 @@ class ImageMetrics:
     scale_score: float
 
 
-def sha256_file(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as source:
-        for chunk in iter(lambda: source.read(1024 * 1024), b""):
-            digest.update(chunk)
-    return digest.hexdigest()
-
-
 def safe_file(root: Path, value: Any) -> Path | None:
     if not isinstance(value, str) or not value or Path(value).is_absolute():
         return None
@@ -202,12 +198,20 @@ def validate_provenance(frame: dict[str, Any], label: str, project_root: Path) -
     errors: list[str] = []
     if frame.get("origin_kind") not in ORIGIN_KINDS:
         errors.append(f"{label}: origin_kind is not an accepted provenance type")
+    origin_hash_mode = frame.get("origin_hash_mode")
+    if origin_hash_mode not in HASH_MODES:
+        errors.append(f"{label}: origin_hash_mode must be text-lf or binary")
     origin = safe_file(project_root, frame.get("origin_reference"))
     if origin is None or not origin.is_file():
         errors.append(f"{label}: origin_reference must be an existing root-relative file")
     else:
+        expected_origin_hash_mode = hash_mode_for_path(origin)
+        if origin_hash_mode != expected_origin_hash_mode:
+            errors.append(
+                f"{label}: origin_hash_mode must be {expected_origin_hash_mode} for {origin}"
+            )
         listed_origin_hash = frame.get("origin_sha256")
-        actual_origin_hash = sha256_file(origin)
+        actual_origin_hash = sha256_file(origin, mode=expected_origin_hash_mode)
         if not isinstance(listed_origin_hash, str) or not SHA256_PATTERN.fullmatch(listed_origin_hash):
             errors.append(f"{label}: origin_sha256 must be a lowercase SHA-256 digest")
         elif listed_origin_hash != actual_origin_hash:
@@ -357,7 +361,9 @@ def validate_visual_review(review_path: Path, manifest_path: Path) -> list[str]:
         errors.append(f"{review_path}: reviewed_at must be an ISO UTC timestamp")
     if review.get("reviewed_frame_count") != EXPECTED_SKU_COUNT * EXPECTED_FRAMES_PER_SKU:
         errors.append(f"{review_path}: reviewed_frame_count must be 500")
-    if review.get("manifest_sha256") != sha256_file(manifest_path):
+    if review.get("manifest_sha256_mode") != TEXT_LF_HASH_MODE:
+        errors.append(f"{review_path}: manifest_sha256_mode must be {TEXT_LF_HASH_MODE}")
+    elif review.get("manifest_sha256") != sha256_file(manifest_path, mode=TEXT_LF_HASH_MODE):
         errors.append(f"{review_path}: manifest_sha256 does not match the active manifest")
     checks = review.get("checks")
     if not isinstance(checks, list) or not all(nonempty_string(check) for check in checks) or len(checks) < 4:

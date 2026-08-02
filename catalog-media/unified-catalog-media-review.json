@@ -4,7 +4,8 @@
   "reviewer_type": "agent-assisted-manual",
   "reviewed_at": "2026-08-02T21:18:07Z",
   "reviewed_frame_count": 500,
-  "manifest_sha256": "756ad8e59ce12ad46e884929dfb87d5b980c253ab1daccc11a26453c8805a80a",
+  "manifest_sha256_mode": "text-lf",
+  "manifest_sha256": "1ad4d58a4aada0090bf45e710717b4b1b39424c59507e4861c45b0e88c76c59f",
   "checks": [
     "complete product remains visible without edge crop",
     "uniform RGB 242,243,243 studio background",
