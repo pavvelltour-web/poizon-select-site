@@ -5,6 +5,7 @@ export const catalogCategories = [
   { id: "basketball", label: "Баскетбол" },
   { id: "recovery", label: "Восстановление" },
   { id: "apparel", label: "Одежда" },
+  { id: "accessories", label: "Аксессуары" },
   { id: "sneakers", label: "Базовый стиль" },
 ] as const
 
@@ -36,7 +37,7 @@ export const PRICE_FORMULA_BASIS =
 export const CATALOG_PRICE_VERSION = "2026-07-31-v2"
 
 export const PUBLIC_CATALOG_POLICY =
-  "Публичная витрина показывает обувь и одежду. Защита, мячи, тейпы, сумки и прочие аксессуары скрыты до отдельного ассортимента."
+  "Публичная витрина показывает все 100 SKU: обувь, одежду, защиту, мячи, сумки и другие аксессуары."
 
 export interface CatalogImage {
   src: string
@@ -1781,6 +1782,31 @@ function withFallbackGallery(product: ProductSource): CatalogProduct {
           categoryLabel: "Одежда",
           note: "Для тренировок и повседневной носки.",
         }
+      : product.kind === "accessory" && product.category === "protection"
+        ? {
+            categoryLabel: "Защита",
+            note: "Для игр и тренировок в зале.",
+          }
+        : product.kind === "accessory" && product.category === "balls"
+          ? {
+              categoryLabel: "Мячи",
+              note: "Для игр и регулярных тренировок.",
+            }
+          : product.kind === "accessory" && product.category === "bags"
+            ? {
+                categoryLabel: "Сумки и мелочи",
+                note: "Для тренировок и поездок.",
+              }
+            : product.kind === "accessory" && product.category === "recovery"
+              ? {
+                  categoryLabel: "Восстановление",
+                  note: "Для отдыха после тренировки.",
+                }
+              : product.kind === "accessory"
+                ? {
+                    categoryLabel: "Аксессуары",
+                    note: "Для разминки и тренировок.",
+                  }
       : product.kind === "footwear" && product.category === "volleyball"
         ? {
             categoryLabel: "Для матча",
@@ -1820,9 +1846,34 @@ function withFallbackGallery(product: ProductSource): CatalogProduct {
   }
 }
 
+const approvedStorefrontMediaRoot = "/storefront-media/approved/products"
+const approvedStorefrontSlugs = new Set([
+  "anta-kai-1",
+  "asics-sky-elite-ff-3",
+  "li-ning-wade-808-4-ultra",
+  "new-balance-two-wxy-v5",
+  "nike-aone",
+  "nike-free-metcon-6",
+  "nike-kd-18",
+  "nike-sabrina-3",
+])
+
+function withApprovedStorefrontGallery(product: CatalogProduct): CatalogProduct {
+  if (!approvedStorefrontSlugs.has(product.slug)) return product
+  const gallery = [
+    { src: `${approvedStorefrontMediaRoot}/${product.slug}/01-side.png`, alt: `${product.brand} ${product.name}, боковой профиль`, source: "KICKSBASE approved normalized release", contentSignal: `${product.slug}-approved-1` },
+    { src: `${approvedStorefrontMediaRoot}/${product.slug}/02-three-quarter.png`, alt: `${product.brand} ${product.name}, ракурс три четверти`, source: "KICKSBASE approved normalized release", contentSignal: `${product.slug}-approved-2` },
+    { src: `${approvedStorefrontMediaRoot}/${product.slug}/03-side.png`, alt: `${product.brand} ${product.name}, противоположный боковой профиль`, source: "KICKSBASE approved normalized release", contentSignal: `${product.slug}-approved-3` },
+    { src: `${approvedStorefrontMediaRoot}/${product.slug}/04-rear.png`, alt: `${product.brand} ${product.name}, вид сзади`, source: "KICKSBASE approved normalized release", contentSignal: `${product.slug}-approved-4` },
+    { src: `${approvedStorefrontMediaRoot}/${product.slug}/05-sole.png`, alt: `${product.brand} ${product.name}, подошва`, source: "KICKSBASE approved normalized release", contentSignal: `${product.slug}-approved-5` },
+  ] as const
+
+  return { ...product, gallery, image: gallery[0].src }
+}
+
 export const catalogProducts: readonly CatalogProduct[] = catalogProductSource.map(
   (product) =>
-    withFallbackGallery({
+    withApprovedStorefrontGallery(withFallbackGallery({
       ...product,
       ...performanceBasketballOverrides[product.slug],
       ...(requestPriceGuides[product.slug]
@@ -1831,13 +1882,11 @@ export const catalogProducts: readonly CatalogProduct[] = catalogProductSource.m
             priceBasis: MARKET_PRICE_BASIS,
           }
         : {}),
-    }),
+    })),
 )
 
 export function isPublicCatalogProduct(product: CatalogProduct): boolean {
-  if (product.kind === "apparel") return true
-  if (product.kind !== "footwear") return false
-  return true
+  return product.kind === "footwear" || product.kind === "apparel" || product.kind === "accessory"
 }
 
 function marketPriceCeilingRub(price: string): number | null {
@@ -1860,12 +1909,19 @@ export function getCatalogPriceRub(product: CatalogProduct): number {
 export const publicCatalogProducts: readonly CatalogProduct[] =
   catalogProducts.filter(isPublicCatalogProduct)
 
+function normalizeCatalogSearch(value: string): string {
+  return value
+    .toLocaleLowerCase("ru")
+    .replace(/ё/gu, "е")
+    .replace(/(^|[^\p{L}\p{N}])(?:найк|наик)(?=$|[^\p{L}\p{N}])/gu, "$1nike")
+}
+
 export function filterCatalog(
   products: readonly CatalogProduct[],
   category: "all" | CatalogCategory,
   search: string,
 ): CatalogProduct[] {
-  const normalizedSearch = search.trim().toLocaleLowerCase("ru")
+  const normalizedSearch = normalizeCatalogSearch(search.trim())
 
   return products.filter((product) => {
     if (category !== "all" && !matchesCatalogCategory(product, category)) {
@@ -1873,18 +1929,17 @@ export function filterCatalog(
     }
     if (!normalizedSearch) return true
 
-    return [
-      product.brand,
-      product.name,
-      product.query,
-      product.categoryLabel,
-      product.kind,
-      product.note,
-      product.marketPrice ?? "",
-    ]
-      .join(" ")
-      .toLocaleLowerCase("ru")
-      .includes(normalizedSearch)
+    return normalizeCatalogSearch(
+      [
+        product.brand,
+        product.name,
+        product.query,
+        product.categoryLabel,
+        product.kind,
+        product.note,
+        product.marketPrice ?? "",
+      ].join(" "),
+    ).includes(normalizedSearch)
   })
 }
 
@@ -1907,6 +1962,9 @@ function matchesCatalogCategory(
   }
   if (category === "apparel") {
     return product.kind === "apparel"
+  }
+  if (category === "accessories") {
+    return product.kind === "accessory"
   }
   return false
 }

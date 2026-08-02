@@ -6,6 +6,8 @@ import {
   type WheelEvent as ReactWheelEvent,
 } from "react"
 
+import { acquireModalPageLock, releaseModalPageLock } from "./use-modal-dialog"
+
 const MIN_ZOOM = 1
 const MAX_ZOOM = 4
 const CLICK_ZOOM = 2
@@ -156,13 +158,13 @@ export function useProductLightbox({
 
   useEffect(() => {
     if (!isOpen) return
-    const previousOverflow = document.body.style.overflow
-    document.body.style.overflow = "hidden"
+    acquireModalPageLock()
     queueMicrotask(() => closeButtonRef.current?.focus())
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
         event.preventDefault()
+        event.stopImmediatePropagation()
         close()
         return
       }
@@ -202,7 +204,7 @@ export function useProductLightbox({
 
     document.addEventListener("keydown", onKeyDown, true)
     return () => {
-      document.body.style.overflow = previousOverflow
+      releaseModalPageLock()
       document.removeEventListener("keydown", onKeyDown, true)
       pointersRef.current.clear()
     }

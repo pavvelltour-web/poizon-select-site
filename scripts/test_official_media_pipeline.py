@@ -87,13 +87,14 @@ class OfficialMediaPipelineTests(unittest.TestCase):
             normalized = pipeline.normalize_without_crop_or_mirror(source.convert("RGBA"))
 
         self.assertEqual(normalized.size, pipeline.CANVAS_SIZE)
-        bbox = pipeline.content_bbox(normalized)
+        bbox = pipeline.content_bbox(normalized, pipeline.CANVAS_BACKGROUND)
         self.assertIsNotNone(bbox)
         assert bbox is not None
         left, top, right, bottom = bbox
         self.assertEqual((right - left, bottom - top), (400, 200))
         self.assertEqual(normalized.getpixel((left, top + 50)), (240, 0, 0))
         self.assertEqual(normalized.getpixel((right - 1, top + 50)), (0, 0, 240))
+        self.assertEqual(normalized.getpixel((0, 0)), pipeline.CANVAS_BACKGROUND)
 
     def test_primary_footwear_must_be_side_view_with_toe_right(self) -> None:
         item = self.item(orientation="toe-right")
@@ -182,6 +183,7 @@ class OfficialMediaPipelineTests(unittest.TestCase):
         staged_manifest = json.loads((batch / "staged-manifest.json").read_text(encoding="utf-8"))
         self.assertEqual(staged_manifest["publication_status"], "staged-not-published")
         self.assertIn("no crop; no mirror", staged_manifest["items"][0]["transform"])
+        self.assertIn("RGB(242,243,243)", staged_manifest["items"][0]["transform"])
         self.assertEqual(list(empty_catalog.glob("*.webp")), [])
 
     def test_stage_rejects_any_output_under_public(self) -> None:

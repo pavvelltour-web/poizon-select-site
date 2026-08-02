@@ -1,4 +1,4 @@
-import { AlertCircle, Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react"
+import { AlertCircle, CreditCard, Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react"
 import { motion } from "motion/react"
 import { useRef } from "react"
 
@@ -59,26 +59,22 @@ export function CartDrawer({ storefront }: CartDrawerProps) {
         tabIndex={-1}
         onClick={storefront.closeCart}
         aria-label="Закрыть заказ"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
       />
       <motion.aside
         ref={drawerRef}
-        className="cart-drawer"
+        id="cart-dialog"
+        className="modal cart-drawer"
+        data-od-id="cart-dialog"
         role="dialog"
         aria-modal="true"
         aria-labelledby="cart-title"
         tabIndex={-1}
-        initial={{ opacity: 0, x: 32 }}
-        animate={{ opacity: 1, x: 0 }}
-        exit={{ opacity: 0, x: 32 }}
-        transition={{ duration: 0.2 }}
       >
-        <div className="cart-drawer__head">
+        <div className="modal-shell cart-drawer__shell">
+        <div className="modal-head cart-drawer__head">
           <span>
             <ShoppingBag aria-hidden="true" size={22} />
-            <strong id="cart-title">Заказ</strong>
+            <strong id="cart-title">Корзина</strong>
           </span>
           <button ref={closeButtonRef} type="button" onClick={storefront.closeCart} aria-label="Закрыть заказ">
             <X aria-hidden="true" size={20} />
@@ -100,7 +96,7 @@ export function CartDrawer({ storefront }: CartDrawerProps) {
           </div>
         ) : (
           <>
-            <div className="cart-lines" aria-label="Товары в заказе">
+            <div className="cart-list cart-lines" aria-label="Товары в заказе">
               <p
                 className={`cart-catalog-status cart-catalog-status--${storefront.catalogPriceState.status}`}
                 role={storefront.catalogPriceState.status === "failed" ? "alert" : "status"}
@@ -117,25 +113,31 @@ export function CartDrawer({ storefront }: CartDrawerProps) {
                     : "Серверный каталог недоступен. Оформление заказа временно заблокировано."}
               </p>
 
-              {storefront.cartLines.map((line) => (
+              {storefront.cartLines.map((line, index) => (
                 <article
-                  className={`cart-line cart-line--${line.validation}`}
+                  className={`cart-item cart-line cart-line--${line.validation}`}
                   key={line.id}
+                  data-od-id={`cart-item-${index}`}
                 >
-                  <img
+                  <div className="cart-item-media"><img
                     src={resolveAssetUrl(line.product.image)}
                     width="96"
                     height="72"
                     alt=""
                     loading="lazy"
                     onError={(event) => setImageFallback(event, line.product.fallbackImage)}
-                  />
-                  <div>
+                  /></div>
+                  <div className="cart-item-copy">
                     <strong>{line.product.brand} {line.product.name}</strong>
                     <span>EU {line.size}</span>
                     <em>
                       {formatRub(
-                        getEffectiveLinePrice(line.product, storefront.catalogPriceState.lookup),
+                        getEffectiveLinePrice(
+                          line.product,
+                          storefront.catalogPriceState.lookup,
+                          storefront.catalogPriceState.items,
+                          line.size,
+                        ),
                       )}
                       {catalogIsReady ? "" : " · предварительно"}
                     </em>
@@ -165,6 +167,7 @@ export function CartDrawer({ storefront }: CartDrawerProps) {
                   <button
                     className="cart-line__remove"
                     type="button"
+                    data-od-id={`remove-cart-item-${index}`}
                     onClick={() => storefront.removeCartLine(line.id)}
                     aria-label="Удалить товар из заказа"
                   >
@@ -181,11 +184,25 @@ export function CartDrawer({ storefront }: CartDrawerProps) {
                 void storefront.submitCartCheckout()
               }}
             >
-              <div className="checkout-form__total">
+              <div className="cart-total checkout-form__total">
                 <span>Товары сейчас</span>
                 <strong>{formatRub(storefront.cartTotalRub)}</strong>
                 <small>Доставка СДЭК рассчитывается и оплачивается отдельно после прибытия.</small>
               </div>
+
+              <section className="payment-methods" data-od-id="payment-methods" aria-labelledby="payment-methods-title">
+                <p id="payment-methods-title">Оплата на следующем шаге</p>
+                <div className="payment-method-list">
+                  <span className="payment-method" aria-label="Система быстрых платежей">
+                    <span className="payment-mark payment-mark--sbp" aria-hidden="true"><img src="/storefront-media/approved/assets/brand/sbp-sign-official.png" alt="" /></span>
+                    <span>СБП</span>
+                  </span>
+                  <span className="payment-method" aria-label="Банковская карта">
+                    <span className="payment-mark payment-mark--card" aria-hidden="true"><CreditCard size={18} /></span>
+                    <span>Банковская карта</span>
+                  </span>
+                </div>
+              </section>
 
               <label>
                 <span>ФИО получателя</span>
@@ -311,7 +328,7 @@ export function CartDrawer({ storefront }: CartDrawerProps) {
                 </span>
               </label>
 
-              <button className="button button--primary" type="submit" disabled={!canSubmit}>
+              <button className="dialog-primary button button--primary" type="submit" disabled={!canSubmit}>
                 {storefront.checkoutResult.status === "submitting"
                   ? "Создаём заказ..."
                   : !catalogIsReady
@@ -368,6 +385,7 @@ export function CartDrawer({ storefront }: CartDrawerProps) {
             </form>
           </>
         )}
+        </div>
       </motion.aside>
     </>
   )

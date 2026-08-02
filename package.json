@@ -19,13 +19,14 @@
     "media:official:audit": "node scripts/run_official_media_pipeline.mjs audit-current --output catalog-media/current-catalog-audit.json",
     "media:official:validate": "node scripts/run_official_media_pipeline.mjs validate",
     "media:official:stage": "node scripts/run_official_media_pipeline.mjs stage",
+    "media:storefront:qa": "python scripts/verify_approved_storefront_media.py --manifest catalog-media/approved-storefront-media.json --asset-root public",
     "test:media-official": "node scripts/run_official_media_pipeline.mjs test",
     "verify:assets": "node scripts/verify_catalog_assets.mjs",
     "verify:boundaries": "node scripts/verify_site_boundaries.mjs",
     "verify:dist": "node scripts/verify_dist_portability.mjs",
     "verify:media-pipeline": "node scripts/verify_product_media_pipeline.mjs",
     "verify:release-rights": "node scripts/verify_release_rights.mjs",
-    "verify:release": "npm run verify:assets && npm run verify:release-rights",
+    "verify:release": "npm run verify:assets && npm run verify:release-rights && npm run media:storefront:qa",
     "check": "npm run lint && npm test && npm run test:media-official && npm run verify:media-pipeline && npm run test:maintainer && npm run build"
   },
   "dependencies": {

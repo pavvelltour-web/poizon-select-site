@@ -9,7 +9,10 @@ import { Footer } from "./sections/footer"
 import { Header } from "./sections/header"
 import { HeroSection } from "./sections/hero-section"
 import { InfoSections } from "./sections/info-sections"
+import { LegalFooter, LegalHeader } from "./sections/legal-chrome"
 import { ProductDetailPage } from "./sections/product-detail-page"
+import { PaymentDialog } from "./sections/payment-dialog"
+import { ProductSheet } from "./sections/product-sheet"
 import { useLandingStorefront } from "./use-landing-storefront"
 
 interface LandingPageProps {
@@ -26,7 +29,9 @@ type StaticRoute =
 
 export function LandingPage({ configuredBotUsername }: LandingPageProps) {
   const storefront = useLandingStorefront(configuredBotUsername)
-  const pathname = typeof window === "undefined" ? "/" : window.location.pathname
+  const [favoriteSlugs, setFavoriteSlugs] = useState<string[]>(loadFavoriteSlugs)
+  const rawPathname = typeof window === "undefined" ? "/" : window.location.pathname
+  const pathname = canonicalLegacyPath(rawPathname)
   const searchParams = readSearchParams()
   const routeName = pathname.replace(/^\/|\/$/g, "")
   const productRouteMatch = pathname.match(/^\/product\/([^/]+)\/?$/u)
@@ -46,6 +51,30 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
   }
   const productRoute = productRouteMatch !== null || legacyProductSlug !== null
   const routeProduct = findPublicProductBySlug(productRouteSlug)
+  const catalogRoute = pathname === "/catalog"
+  const legalDesignRoute =
+    staticRouteName(pathname) === "offer" ||
+    staticRouteName(pathname) === "privacy" ||
+    staticRouteName(pathname) === "personal-data-consent" ||
+    staticRouteName(pathname) === "cookies"
+
+  useEffect(() => {
+    if (rawPathname === pathname) return
+    const hash = pathname === "/catalog" ? "" : window.location.hash
+    window.history.replaceState(window.history.state, "", `${pathname}${window.location.search}${hash}`)
+  }, [pathname, rawPathname])
+
+  useEffect(() => {
+    window.localStorage.setItem("kicksbase-favorites-v1", JSON.stringify(favoriteSlugs))
+  }, [favoriteSlugs])
+
+  const toggleFavorite = (slug: string) => {
+    setFavoriteSlugs((current) =>
+      current.includes(slug)
+        ? current.filter((item) => item !== slug)
+        : [...current, slug],
+    )
+  }
 
   useEffect(() => {
     if (!legacyProductSlug || productRouteMatch) return
@@ -69,7 +98,7 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
       : null
 
   return (
-    <div className="kb-page">
+    <div className={`kb-page${catalogRoute ? " catalog-page" : ""}${legalDesignRoute ? " legal-page" : ""}`}>
       <a
         className="skip-link"
         href={staticRoute || checkoutOutcome || productRoute ? "#route-main" : "#catalog"}
@@ -79,18 +108,31 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
           : "Перейти к товарам"}
       </a>
 
-      <Header
-        cartCount={storefront.cartCount}
-        openCart={storefront.openCart}
-        personalDataConsentVersion={
-          storefront.catalogPriceState.personalDataConsentVersion
-        }
-        refreshPersonalDataConsentVersion={
-          storefront.refreshPersonalDataConsentVersion
-        }
-      />
+      {legalDesignRoute ? (
+        <LegalHeader cartCount={storefront.cartCount} openCart={storefront.openCart} />
+      ) : (
+        <Header
+          cartCount={storefront.cartCount}
+          openCart={storefront.openCart}
+          personalDataConsentVersion={
+            storefront.catalogPriceState.personalDataConsentVersion
+          }
+          refreshPersonalDataConsentVersion={
+            storefront.refreshPersonalDataConsentVersion
+          }
+          searchValue={storefront.search}
+          onSearchChange={storefront.setSearchValue}
+          favoriteSlugs={favoriteSlugs}
+          onRemoveFavorite={toggleFavorite}
+          onOpenProduct={storefront.openProduct}
+        />
+      )}
 
-      <main>
+      <main
+        className={legalDesignRoute ? "legal-main shell" : undefined}
+        id={legalDesignRoute ? "route-main" : undefined}
+        data-od-id={legalDesignRoute ? "legal-main" : undefined}
+      >
         {checkoutOutcome ? (
           <CheckoutOutcomePage
             outcome={checkoutOutcome}
@@ -98,27 +140,83 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
           />
         ) : staticRoute ? (
           <StaticRoutePage route={staticRoute} />
-        ) : productRoute ? (
+        ) : productRoute && !routeProduct ? (
           <ProductDetailPage product={routeProduct} storefront={storefront} />
+        ) : catalogRoute ? (
+          <>
+            <section className="catalog-intro container" data-od-id="catalog-intro" aria-labelledby="catalog-page-title">
+              <h1 id="catalog-page-title">Каталог<br />KICKSBASE</h1>
+            </section>
+            <CatalogSection
+              storefront={storefront}
+              favoriteSlugs={favoriteSlugs}
+              onToggleFavorite={toggleFavorite}
+              mode="full"
+            />
+          </>
         ) : (
           <>
             <HeroSection />
-            <CatalogSection storefront={storefront} />
+            <CatalogSection
+              storefront={storefront}
+              favoriteSlugs={favoriteSlugs}
+              onToggleFavorite={toggleFavorite}
+            />
             <InfoSections mode="order" />
           </>
         )}
       </main>
 
-      <Footer />
+      {legalDesignRoute ? <LegalFooter /> : <Footer />}
       <CookieNotice />
 
       <AnimatePresence>
+        {storefront.selectedProduct ? (
+          <ProductSheet key="product-dialog" storefront={storefront} />
+        ) : null}
         {storefront.isCartOpen ? (
           <CartDrawer key="cart-drawer" storefront={storefront} />
+        ) : null}
+        {storefront.checkoutResult.status === "created" ? (
+          <PaymentDialog key="payment-dialog" storefront={storefront} />
         ) : null}
       </AnimatePresence>
     </div>
   )
+}
+
+function canonicalLegacyPath(pathname: string): string {
+  if (pathname === "/kicksbase-signal-catalog.html" || pathname === "/kicksbase-signal-catalog-v4.html") return "/catalog"
+  if (pathname === "/kicksbase-legal.html") {
+    if (window.location.hash === "#privacy") return "/privacy"
+    if (window.location.hash === "#delivery") return "/delivery-returns"
+    if (window.location.hash === "#contacts") return "/contacts"
+    return "/offer"
+  }
+  if (pathname === "/kicksbase-direction-03-blue-field-v2.html" || pathname === "/kicksbase-signal-pdp.html") return "/"
+  return pathname
+}
+
+function staticRouteName(pathname: string): StaticRoute | null {
+  const routeName = pathname.replace(/^\/|\/$/g, "")
+  return routeName === "contacts" ||
+    routeName === "delivery-returns" ||
+    routeName === "offer" ||
+    routeName === "privacy" ||
+    routeName === "personal-data-consent" ||
+    routeName === "cookies"
+    ? routeName
+    : null
+}
+
+function loadFavoriteSlugs(): string[] {
+  if (typeof window === "undefined") return []
+  try {
+    const value = JSON.parse(window.localStorage.getItem("kicksbase-favorites-v1") || "[]")
+    return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : []
+  } catch {
+    return []
+  }
 }
 
 function readSearchParams(): URLSearchParams {
@@ -127,10 +225,18 @@ function readSearchParams(): URLSearchParams {
 }
 
 function StaticRoutePage({ route }: { route: StaticRoute }) {
-  if (route === "offer") return <OfferPage />
-  if (route === "privacy") return <PrivacyPage />
-  if (route === "personal-data-consent") return <PersonalDataConsentPage />
-  if (route === "cookies") return <CookiesPage />
+  if (route === "offer" || route === "privacy") {
+    return (
+      <LegalPageShell>
+        <OfferPage />
+        <PrivacyPage />
+      </LegalPageShell>
+    )
+  }
+  if (route === "personal-data-consent") {
+    return <LegalPageShell><PersonalDataConsentPage /></LegalPageShell>
+  }
+  if (route === "cookies") return <LegalPageShell><CookiesPage /></LegalPageShell>
 
   if (route === "contacts") {
     return (
@@ -206,34 +312,56 @@ function StaticRoutePage({ route }: { route: StaticRoute }) {
   )
 }
 
+function LegalPageShell({ children }: { children: ReactNode }) {
+  return (
+    <>
+      <header className="legal-hero">
+        <p className="legal-kicker">Правовая информация</p>
+        <h1>Условия покупки и обработки данных</h1>
+        <p>Документы собраны в читаемой форме и доступны до подтверждения заказа.</p>
+      </header>
+      <nav className="legal-tabs" aria-label="Документы">
+        <a href="#offer">Публичная оферта</a>
+        <a href="#privacy">Персональные данные</a>
+      </nav>
+      {children}
+    </>
+  )
+}
+
 function LegalDocument({
+  id,
   eyebrow,
   title,
   children,
 }: {
+  id: string
   eyebrow: string
   title: string
   children: ReactNode
 }) {
   return (
-    <article className="legal-route" id="route-main">
-      <a className="legal-route__back" href="/">На главную</a>
-      <p className="legal-route__eyebrow">{eyebrow}</p>
-      <h1>{title}</h1>
-      <div className="legal-route__grid legal-route__grid--document">{children}</div>
-      <p className="legal-route__review-note">
-        Документ опубликован для информирования пользователей и подлежит проверке
-        владельцем и профильным юристом при изменении процессов или законодательства.
-      </p>
+    <article className="legal-document" id={id} data-od-id={`legal-${id}`}>
+      <header className="legal-document-head">
+        <h2>{title}</h2>
+        <p className="legal-edition">{eyebrow}</p>
+      </header>
+      <div>
+        <div className="legal-sections">{children}</div>
+        <p className="legal-review">
+          Документ опубликован для информирования пользователей и подлежит проверке
+          владельцем и профильным юристом при изменении процессов или законодательства.
+        </p>
+      </div>
     </article>
   )
 }
 
 function OfferPage() {
   return (
-    <LegalDocument eyebrow="Редакция от 31 июля 2026 года" title="Публичная оферта">
+    <LegalDocument id="offer" eyebrow="Редакция от 31 июля 2026 года" title="Публичная оферта">
       <section>
-        <h2>1. Продавец</h2>
+        <h3>1. Продавец</h3>
         <p>
           ИП Шустров Павел Павлович, ИНН 772919270272, ОГРНИП 323774600547884.
           Адрес регистрации: 119607, Москва, ул. Лобачевского, д. 100, корп. 2,
@@ -242,7 +370,7 @@ function OfferPage() {
         </p>
       </section>
       <section>
-        <h2>2. Товар и заказ</h2>
+        <h3>2. Товар и заказ</h3>
         <p>
           Витрина предназначена для дистанционной продажи оригинальной обуви,
           одежды и экипировки. Наименование, размер, количество, местонахождение,
@@ -251,7 +379,7 @@ function OfferPage() {
         </p>
       </section>
       <section>
-        <h2>3. Заключение договора</h2>
+        <h3>3. Заключение договора</h3>
         <p>
           Покупатель оформляет заказ, отдельно принимает оферту и даёт согласие на
           обработку данных. Договор заключается в порядке, установленном законом,
@@ -261,7 +389,7 @@ function OfferPage() {
         </p>
       </section>
       <section>
-        <h2>4. Цена и оплата</h2>
+        <h3>4. Цена и оплата</h3>
         <p>
           Цена товара указывается в рублях и оплачивается при оформлении. Расчёт
           СДЭК показывается до перехода к платёжному партнёру, сохраняется в заказе
@@ -272,7 +400,7 @@ function OfferPage() {
         </p>
       </section>
       <section>
-        <h2>5. Доставка</h2>
+        <h3>5. Доставка</h3>
         <p>
           Способ, стоимость и ориентировочный срок зависят от местонахождения товара.
           Заказы из Китая в среднем поступают в Москву за 10-18 дней, затем передаются
@@ -282,7 +410,7 @@ function OfferPage() {
         </p>
       </section>
       <section>
-        <h2>6. Отказ и возврат</h2>
+        <h3>6. Отказ и возврат</h3>
         <p>
           Покупатель вправе отказаться от товара до передачи и после передачи в
           сроки и на условиях дистанционной продажи, установленных законом. Для
@@ -295,7 +423,7 @@ function OfferPage() {
         </p>
       </section>
       <section>
-        <h2>7. Качество и претензии</h2>
+        <h3>7. Качество и претензии</h3>
         <p>
           При недостатке товара покупатель может заявить предусмотренные законом
           требования. Обращение направляется на support@kicksbase.ru с номером
@@ -305,7 +433,7 @@ function OfferPage() {
         </p>
       </section>
       <section>
-        <h2>8. Дополнительные варианты</h2>
+        <h3>8. Дополнительные варианты</h3>
         <p>
           Комиссионная продажа неподошедшей пары и бонусные единицы Kikki могут
           предлагаться только добровольно. Они не являются деньгами, не выводятся
@@ -318,9 +446,9 @@ function OfferPage() {
 
 function PrivacyPage() {
   return (
-    <LegalDocument eyebrow="152-ФЗ · информация для пользователя" title="Политика обработки персональных данных">
+    <LegalDocument id="privacy" eyebrow="152-ФЗ · информация для пользователя" title="Политика обработки персональных данных">
       <section>
-        <h2>1. Оператор</h2>
+        <h3>1. Оператор</h3>
         <p>
           ИП Шустров Павел Павлович, ИНН 772919270272, ОГРНИП 323774600547884,
           адрес: 119607, Москва, ул. Лобачевского, д. 100, корп. 2, кв. 539.
@@ -328,7 +456,7 @@ function PrivacyPage() {
         </p>
       </section>
       <section>
-        <h2>2. Какие данные обрабатываются</h2>
+        <h3>2. Какие данные обрабатываются</h3>
         <p>
           ФИО, телефон, email, адрес и параметры доставки, состав и история заказа,
           сведения об оплате и чеке без хранения полных реквизитов карты, сообщения
@@ -337,7 +465,7 @@ function PrivacyPage() {
         </p>
       </section>
       <section>
-        <h2>3. Цели</h2>
+        <h3>3. Цели</h3>
         <p>
           Регистрация и вход, создание и исполнение заказа, оплата и фискализация,
           доставка, возврат и рассмотрение обращений, защита сайта и предотвращение
@@ -346,7 +474,7 @@ function PrivacyPage() {
         </p>
       </section>
       <section>
-        <h2>4. Правовые основания</h2>
+        <h3>4. Правовые основания</h3>
         <p>
           Согласие субъекта, заключение и исполнение договора по инициативе
           покупателя, исполнение обязанностей оператора по закону и иные основания,
@@ -355,7 +483,7 @@ function PrivacyPage() {
         </p>
       </section>
       <section>
-        <h2>5. Действия с данными</h2>
+        <h3>5. Действия с данными</h3>
         <p>
           Сбор, запись, систематизация, накопление, хранение, уточнение, извлечение,
           использование, передача необходимым исполнителям, обезличивание,
@@ -364,7 +492,7 @@ function PrivacyPage() {
         </p>
       </section>
       <section>
-        <h2>6. Исполнители</h2>
+        <h3>6. Исполнители</h3>
         <p>
           Данные в минимально необходимом объёме могут получать платёжный партнёр,
           CloudKassir и ОФД, СДЭК и выбранная служба доставки, поставщик сервисных
@@ -374,7 +502,7 @@ function PrivacyPage() {
         </p>
       </section>
       <section>
-        <h2>7. Локализация и сроки</h2>
+        <h3>7. Локализация и сроки</h3>
         <p>
           Первичная запись и хранение данных граждан РФ выполняются с использованием
           баз данных в России. Данные хранятся не дольше, чем требуется для цели,
@@ -383,7 +511,7 @@ function PrivacyPage() {
         </p>
       </section>
       <section>
-        <h2>8. Права пользователя</h2>
+        <h3>8. Права пользователя</h3>
         <p>
           Пользователь вправе запросить сведения об обработке, доступ, исправление,
           блокирование или удаление данных, отозвать согласие и обжаловать действия
@@ -393,7 +521,7 @@ function PrivacyPage() {
         </p>
       </section>
       <section>
-        <h2>9. Защита</h2>
+        <h3>9. Защита</h3>
         <p>
           Применяются разграничение доступа, HTTPS, журналирование, резервное
           копирование, контроль секретов, ограничение сетевых вызовов и организационные
@@ -407,9 +535,9 @@ function PrivacyPage() {
 
 function PersonalDataConsentPage() {
   return (
-    <LegalDocument eyebrow="Отдельное согласие" title="Согласие на обработку персональных данных">
+    <LegalDocument id="personal-data-consent" eyebrow="Отдельное согласие" title="Согласие на обработку персональных данных">
       <section>
-        <h2>Кому даётся согласие</h2>
+        <h3>Кому даётся согласие</h3>
         <p>
           ИП Шустрову Павлу Павловичу, ИНН 772919270272, ОГРНИП
           323774600547884, по адресу и контактам, указанным на странице{" "}
@@ -417,7 +545,7 @@ function PersonalDataConsentPage() {
         </p>
       </section>
       <section>
-        <h2>Состав данных и цели</h2>
+        <h3>Состав данных и цели</h3>
         <p>
           ФИО, телефон, email, адрес доставки, параметры и история заказа,
           обращения и технические данные обрабатываются для входа, оформления,
@@ -426,7 +554,7 @@ function PersonalDataConsentPage() {
         </p>
       </section>
       <section>
-        <h2>Разрешённые действия</h2>
+        <h3>Разрешённые действия</h3>
         <p>
           Сбор, запись, систематизация, накопление, хранение, уточнение, извлечение,
           использование, необходимая передача исполнителям из политики, блокирование,
@@ -434,7 +562,7 @@ function PersonalDataConsentPage() {
         </p>
       </section>
       <section>
-        <h2>Срок и отзыв</h2>
+        <h3>Срок и отзыв</h3>
         <p>
           Согласие действует до достижения целей либо отзыва, если закон не требует
           продолжить хранение. Отзыв направляется на support@kicksbase.ru с данными,
@@ -443,7 +571,7 @@ function PersonalDataConsentPage() {
         </p>
       </section>
       <section>
-        <h2>Как подтверждается</h2>
+        <h3>Как подтверждается</h3>
         <p>
           Пользователь самостоятельно отмечает пустой чекбокс рядом со ссылкой на
           это согласие. Принятие оферты и согласие на данные являются двумя отдельными
@@ -457,9 +585,9 @@ function PersonalDataConsentPage() {
 
 function CookiesPage() {
   return (
-    <LegalDocument eyebrow="Только необходимые технологии" title="Уведомление о cookie">
+    <LegalDocument id="cookies" eyebrow="Только необходимые технологии" title="Уведомление о cookie">
       <section>
-        <h2>Что используется</h2>
+        <h3>Что используется</h3>
         <p>
           Сайт использует только необходимые cookie и локальные записи для работы
           сессии и SMS-входа, защиты от межсайтовых запросов, сохранения корзины,
@@ -467,7 +595,7 @@ function CookiesPage() {
         </p>
       </section>
       <section>
-        <h2>Для чего</h2>
+        <h3>Для чего</h3>
         <p>
           Эти технологии обеспечивают безопасность, авторизацию, оформление заказа
           и непрерывность витрины. Рекламные cookie, профилирование и необязательные
@@ -475,7 +603,7 @@ function CookiesPage() {
         </p>
       </section>
       <section>
-        <h2>Управление</h2>
+        <h3>Управление</h3>
         <p>
           Пользователь может удалить или заблокировать записи в настройках браузера.
           После этого потребуется войти заново, корзина может очиститься, а отдельные
@@ -484,7 +612,7 @@ function CookiesPage() {
         </p>
       </section>
       <section>
-        <h2>Изменения</h2>
+        <h3>Изменения</h3>
         <p>
           Если появятся необязательные аналитические или рекламные технологии,
           уведомление и механизм выбора должны быть обновлены до их включения.

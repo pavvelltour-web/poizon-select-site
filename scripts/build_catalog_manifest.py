@@ -40,7 +40,7 @@ def build(generated_at: str) -> dict[str, object]:
             image.verify()
         with Image.open(path) as image:
             dimensions = list(image.size)
-            if image.format != "WEBP" or dimensions != [1200, 900]:
+            if image.format != "WEBP" or dimensions != [1600, 1200]:
                 raise RuntimeError(f"invalid normalized WebP: {path.name}")
             if image.getexif():
                 raise RuntimeError(f"metadata was not stripped: {path.name}")
@@ -53,7 +53,7 @@ def build(generated_at: str) -> dict[str, object]:
                     "kind": "project-generated-original",
                     "generator": (
                         "scripts/generate_catalog_art.py; project-generated product "
-                        "reference cutouts normalized to metadata-free 1200x900 WebP"
+                        "reference rasters normalized without crop or mirror to metadata-free 1600x1200 WebP"
                     ),
                     "official_product_photo": False,
                     "generated_at": generated_at,

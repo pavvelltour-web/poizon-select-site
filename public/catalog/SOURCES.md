@@ -1,7 +1,7 @@
 # Catalog image provenance
 
 All 100 catalog root images and 400 gallery images are local studio-style visual references. They are
-normalized metadata-free WebP files at 1200×900; the browser does not contact
+normalized metadata-free WebP files at 1600×1200; the browser does not contact
 third-party image hosts.
 
 - All visuals use the same cold-studio product-reference direction rendered

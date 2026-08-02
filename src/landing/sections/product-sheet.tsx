@@ -12,6 +12,7 @@ import {
 import { motion } from "motion/react"
 import { useEffect, useRef, useState } from "react"
 
+import { formatRub } from "../../catalog/catalog"
 import {
   getProductTypeLabel,
   getProductUse,
@@ -20,6 +21,7 @@ import {
   setImageFallback,
 } from "../landing-data"
 import type { StorefrontState } from "../landing-types"
+import { useModalDialog } from "../use-modal-dialog"
 import { useProductLightbox } from "../use-product-lightbox"
 
 interface ProductSheetProps {
@@ -28,6 +30,8 @@ interface ProductSheetProps {
 
 export function ProductSheet({ storefront }: ProductSheetProps) {
   const touchStartX = useRef<number | null>(null)
+  const dialogRef = useRef<HTMLElement>(null)
+  const closeButtonRef = useRef<HTMLButtonElement>(null)
   const expandButtonRef = useRef<HTMLButtonElement>(null)
   const [selectedMediaReady, setSelectedMediaReady] = useState(false)
   const [thumbsReady, setThumbsReady] = useState<Record<string, boolean>>({})
@@ -37,6 +41,12 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
     imageKey: selectedImageSrcKey,
     previousImage: storefront.showPreviousProductImage,
     nextImage: storefront.showNextProductImage,
+  })
+  useModalDialog({
+    dialogRef,
+    initialFocusRef: closeButtonRef,
+    isOpen: Boolean(product),
+    onClose: storefront.closeProduct,
   })
 
   useEffect(() => {
@@ -56,9 +66,24 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
   const selectedImageSrc = selectedImageSrcKey || product.fallbackImage
   const selectedImageAlt = storefront.selectedImage?.alt ?? `${product.brand} ${product.name}`
   const publishedOffer = storefront.catalogPriceState.items[product.slug]
+  const selectedSizeOffer = storefront.selectedSize
+    ? storefront.selectedSizeOffers.find(
+      (offer) => offer.sizeEu === storefront.selectedSize && offer.available,
+    ) ?? null
+    : null
+  const selectedProductInCart = Boolean(
+    storefront.selectedSize && storefront.cartLines.some(
+      (line) => line.product.slug === product.slug && line.size === storefront.selectedSize,
+    ),
+  )
   const catalogReady =
     storefront.catalogPriceState.status === "ready" &&
     publishedOffer?.availability === "catalog_listed"
+  const canAddToCart = Boolean(
+    catalogReady &&
+    storefront.catalogPriceState.orderCreationEnabled &&
+    selectedSizeOffer?.checkoutConfirmed,
+  )
   const sourcingMode = publishedOffer
     ? publishedOffer.fulfillmentMode === "in_stock"
       ? "В наличии в России"
@@ -74,32 +99,20 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
         type="button"
         onClick={storefront.closeProduct}
         aria-label="Закрыть карточку товара"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
       />
       <motion.aside
-        className="product-sheet product-sheet--rebuilt"
+        ref={dialogRef}
+        id="product-dialog"
+        className="sheet product-sheet product-sheet--rebuilt"
+        data-od-id="product-dialog"
         role="dialog"
         aria-modal="true"
         aria-labelledby="product-sheet-title"
         data-testid="order-dock"
-        initial={{ opacity: 0, y: 24 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: 24 }}
-        transition={{ duration: 0.24, ease: [0.16, 1, 0.3, 1] }}
       >
-        <button
-          className="product-sheet__close"
-          type="button"
-          onClick={storefront.closeProduct}
-          aria-label="Закрыть карточку товара"
-        >
-          <X aria-hidden="true" size={20} />
-        </button>
-
+        <div className="product-sheet-grid">
         <div
-          className={`product-sheet__media product-sheet__gallery ${selectedMediaReady ? "product-sheet__media--ready" : ""}`}
+          className={`sheet-media product-sheet__media ${selectedMediaReady ? "product-sheet__media--ready" : ""}`}
           onTouchStart={(event) => {
             touchStartX.current = event.touches[0]?.clientX ?? null
           }}
@@ -114,6 +127,8 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
             else storefront.showNextProductImage()
           }}
         >
+          <div className="sheet-gallery product-sheet__gallery" data-od-id="product-gallery" aria-label="Галерея товара">
+          <div className="sheet-gallery-main">
           <motion.img
             key={selectedImageSrc}
             src={resolveAssetUrl(selectedImageSrc)}
@@ -178,14 +193,16 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
               />
             ))}
           </div>
-          <div className="product-sheet__thumbs" aria-label="Миниатюры фото">
+          </div>
+          <div className="sheet-gallery-thumbs product-sheet__thumbs" aria-label="Миниатюры фото">
             {storefront.selectedVisibleGallery.map((image, index) => (
               <button
                 key={`${image.src}-${index}`}
-                className={`product-sheet__thumb ${
+                className={`sheet-gallery-thumb product-sheet__thumb ${
                   thumbsReady[`${image.src}-${index}`] ? "product-sheet__thumb--ready" : ""
                 }`}
                 type="button"
+                data-od-id={`gallery-${product.slug}-${index + 1}`}
                 aria-label={`Показать фото ${index + 1}`}
                 aria-current={index === storefront.selectedImageIndex}
                 onClick={() => storefront.selectProductImage(index)}
@@ -206,37 +223,87 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
               </button>
             ))}
           </div>
+          </div>
+          <p className="sheet-photo-caption">Фото товара {storefront.selectedImageDisplayIndex} из {storefront.selectedVisibleGallery.length}</p>
         </div>
 
         <div
-          className="product-sheet__content"
+          className="sheet-copy product-sheet__content"
           data-testid="product-sheet-scroll"
           tabIndex={0}
           aria-label="Данные товара"
         >
-          <p className="product-sheet__type">{getProductTypeLabel(product)}</p>
-          <h2 id="product-sheet-title" ref={storefront.sheetHeadingRef} tabIndex={-1}>
-            {product.brand} {product.name}
-          </h2>
-          <p className="product-sheet__description">{getProductUse(product)}</p>
+          <div className="sheet-head">
+            <h2 id="product-sheet-title" ref={storefront.sheetHeadingRef} tabIndex={-1}>{getProductTypeLabel(product)} {product.brand} {product.name}</h2>
+            <button ref={closeButtonRef} className="icon-button modal-close product-sheet__close" type="button" onClick={storefront.closeProduct} aria-label="Закрыть карточку товара"><X aria-hidden="true" size={20} /></button>
+          </div>
+          <p className="sheet-category product-sheet__type">{kindLabels[product.kind]}</p>
+          <p className="sheet-description product-sheet__description">{getProductUse(product)}</p>
+          <p className="sheet-price">{price?.value}</p>
+          <p className="sheet-supply">{sourcingMode}</p>
 
-          <div className="product-size" aria-label="Выбор размера">
-            <span>
-              <strong>Размер</strong>
-              <em>Выберите размер, чтобы добавить товар в заказ.</em>
-            </span>
-            <div className="product-size__grid" aria-label="Размеры на выбор">
-              {storefront.selectedSizeOptions.map((size) => (
+          <div
+            className="product-size product-size--matrix"
+            aria-label="Выбор размера и цены"
+            aria-busy={storefront.selectedSizeOfferStatus === "loading"}
+          >
+            <div className="product-size__head">
+              <strong>Размер: RU (EU)</strong>
+              <details className="product-size__guide">
+                <summary>Гайд размера</summary>
+                <div>
+                  <table aria-label="Таблица размеров RU и EU">
+                    <thead>
+                      <tr><th>RU</th><th>EU</th></tr>
+                    </thead>
+                    <tbody>
+                      {storefront.selectedSizeOffers.map((offer) => (
+                        <tr key={`guide-${offer.sizeEu}`}>
+                          <td>{offer.sizeRu ?? "—"}</td>
+                          <td>{offer.sizeEu}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </details>
+            </div>
+            <div className="size-price-grid" aria-label="Размеры и цены на выбор">
+              {storefront.selectedSizeOffers.map((offer) => (
                 <button
-                  key={size}
+                  key={offer.sizeEu}
+                  className="size-price-cell"
                   type="button"
-                  aria-pressed={storefront.selectedSize === size}
-                  onClick={() => storefront.setSelectedSize(size)}
+                  data-od-id={`sheet-size-${product.slug}-${offer.sizeEu.replaceAll(".", "-")}`}
+                  aria-label={`${offer.sizeRu ?? "Размер RU не указан"} RU, ${offer.sizeEu} EU, ${offer.priceRub ? formatRub(offer.priceRub) : "нет в наличии"}`}
+                  aria-pressed={storefront.selectedSize === offer.sizeEu}
+                  disabled={!offer.available || !offer.priceRub}
+                  onClick={() => storefront.setSelectedSize(offer.sizeEu)}
                 >
-                  {size}
+                  <span className="size-price-cell__sizes">
+                    <strong>{offer.sizeRu ?? "—"}</strong>
+                    <small>({offer.sizeEu})</small>
+                  </span>
+                  <span className="size-price-cell__price">
+                    {offer.priceRub ? formatRub(offer.priceRub) : "— ₽"}
+                  </span>
                 </button>
               ))}
             </div>
+            {storefront.selectedSizeOfferStatus === "loading" ? (
+              <p className="product-size__status sr-only" role="status">Получаем размеры и цены...</p>
+            ) : storefront.selectedSizeOfferStatus === "failed" ? (
+              <p className="product-size__status sr-only" role="status">
+                {storefront.selectedSizeOfferError ?? "Размеры временно недоступны."}
+              </p>
+            ) : !storefront.selectedSizeOffers.some((offer) => offer.available) ? (
+              <p className="product-size__status sr-only" role="status">Актуальных предложений по размерам нет.</p>
+            ) : null}
+            {selectedSizeOffer && !selectedSizeOffer.checkoutConfirmed ? (
+              <p className="product-size__status sr-only" role="status">
+                Цена ещё не подтверждена для оплаты. Оформите запрос менеджеру.
+              </p>
+            ) : null}
           </div>
 
           <div className="product-sheet__purchase">
@@ -246,21 +313,42 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
               <em>{price?.detail}</em>
             </span>
             <button
-              className="button button--primary"
+              className="dialog-primary add-button button button--primary"
               type="button"
               onClick={storefront.addSelectedToCart}
-              disabled={!storefront.selectedSize || !catalogReady}
+              disabled={!storefront.selectedSize || !canAddToCart}
+              data-selected-size={storefront.selectedSize ?? ""}
+              data-display-price={price?.value ?? ""}
+              data-order-enabled={String(storefront.catalogPriceState.orderCreationEnabled)}
             >
               <ShoppingCart aria-hidden="true" size={18} />
-              {!catalogReady
+              {storefront.selectedSizeOfferStatus === "loading"
+                ? "Проверяем размеры"
+                : !catalogReady
                 ? "Проверяем каталог"
+                : !storefront.catalogPriceState.orderCreationEnabled
+                  ? "Оформление временно недоступно"
+                : selectedSizeOffer && !selectedSizeOffer.checkoutConfirmed
+                  ? "Заказ через менеджера"
                 : storefront.selectedSize
-                  ? "Добавить в заказ"
+                  ? selectedProductInCart
+                    ? "Добавлено"
+                    : "Добавить в заказ"
                   : "Выберите размер выше"}
             </button>
+            {storefront.checkoutResult.status === "failed" ? (
+              <p className="product-sheet__feedback" role="alert">
+                {storefront.checkoutResult.message}
+              </p>
+            ) : null}
+            <p className="sr-only" aria-live="polite">
+              {selectedProductInCart ? "Товар добавлен в корзину" : ""}
+            </p>
           </div>
 
-          <dl className="product-facts">
+          <section className="sheet-spec-section" data-od-id="product-short-specs" aria-labelledby="sheet-spec-title">
+          <h3 id="sheet-spec-title">Краткие характеристики</h3>
+          <dl className="sheet-specs product-facts">
             <div>
               <dt>Направление</dt>
               <dd>{kindLabels[product.kind]}</dd>
@@ -278,10 +366,10 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
               <dd>{price?.value}</dd>
             </div>
           </dl>
+          </section>
 
           <p className="product-sheet__fineprint">
-            Опубликованный каталог не подтверждает живой остаток Poizon. Товары оплачиваются
-            сейчас, доставка СДЭК оплачивается отдельно после прибытия.
+            Оплата доступна после подтверждения выбранного товара. Доставка СДЭК оплачивается отдельно.
           </p>
           <p className="product-sheet__order-proof">
             Оплата проходит на защищённой странице банка.
@@ -333,6 +421,7 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
               ? "Запрос скопирован в буфер обмена"
               : ""}
           </p>
+        </div>
         </div>
       </motion.aside>
       {lightbox.isOpen ? (

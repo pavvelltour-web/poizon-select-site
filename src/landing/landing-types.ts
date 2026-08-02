@@ -6,7 +6,10 @@ import type {
   CheckoutConsents,
   CheckoutCustomer,
   CheckoutResult,
+  CatalogSearchFallback,
+  CatalogSearchResponse,
   CatalogPriceMap,
+  ProductSizeOffer,
   PublishedCatalogMap,
 } from "./cart"
 
@@ -42,6 +45,13 @@ export interface TaskMatch {
   reason: string
 }
 
+export interface CatalogSearchState {
+  status: "idle" | "loading" | "ready" | "failed"
+  response: CatalogSearchResponse | null
+  fallback: readonly CatalogSearchFallback[]
+  error: string | null
+}
+
 export type CopyState = "idle" | "copied" | "failed"
 
 export interface StorefrontState {
@@ -59,6 +69,9 @@ export interface StorefrontState {
   selectedVisibleGallery: readonly { src: string; alt: string }[]
   selectedSize: string | null
   selectedSizeOptions: readonly string[]
+  selectedSizeOffers: readonly ProductSizeOffer[]
+  selectedSizeOfferStatus: "idle" | "loading" | "ready" | "failed"
+  selectedSizeOfferError: string | null
   selectedProductPrice: DisplayPrice | null
   catalogPriceState: CatalogPriceState
   cartLines: CartLine[]
@@ -71,7 +84,8 @@ export interface StorefrontState {
   checkoutResult: CheckoutResult
   request: string
   copyState: CopyState
-  taskMatches: TaskMatch[]
+  catalogSearch: CatalogSearchState
+  taskSearch: CatalogSearchState
   sheetHeadingRef: RefObject<HTMLHeadingElement | null>
   selectCategory: (category: ActiveCategory) => void
   setSearchValue: (search: string) => void
@@ -83,7 +97,7 @@ export interface StorefrontState {
   }) => void
   resetCatalog: () => void
   setTaskInput: (task: string) => void
-  openProduct: (product: CatalogProduct, trigger: HTMLButtonElement) => void
+  openProduct: (product: CatalogProduct, trigger: HTMLElement, preferredSize?: string) => void
   closeProduct: () => void
   selectProductImage: (index: number) => void
   showPreviousProductImage: () => void
@@ -93,6 +107,7 @@ export interface StorefrontState {
   addSelectedToCart: () => void
   openCart: () => void
   closeCart: () => void
+  closePayment: () => void
   removeCartLine: (id: string) => void
   setCartLineQuantity: (id: string, quantity: number) => void
   updateCheckoutCustomer: (field: keyof CheckoutCustomer, value: string) => void

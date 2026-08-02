@@ -2,6 +2,7 @@ import {
   BadgeCheck,
   CircleDot,
   Footprints,
+  Package,
   Search,
   Shirt,
   Sparkles,
@@ -37,6 +38,7 @@ export const categoryCopy: Record<ActiveCategory, string> = {
   basketball: "Баскетбол",
   recovery: "Восстановление",
   apparel: "Одежда для тренировок",
+  accessories: "Аксессуары и экипировка",
   sneakers: "Базовые пары",
 }
 export const categoryDetails: Record<ActiveCategory, string> = {
@@ -46,6 +48,7 @@ export const categoryDetails: Record<ActiveCategory, string> = {
   basketball: "для игры",
   recovery: "после тренировки",
   apparel: "верх и низ",
+  accessories: "для игры и тренировки",
   sneakers: "на каждый день",
 }
 
@@ -56,6 +59,7 @@ export const categoryTone: Record<ActiveCategory, string> = {
   volleyball: "court",
   basketball: "court",
   apparel: "kit",
+  accessories: "gear",
   recovery: "reset",
 }
 
@@ -66,6 +70,7 @@ export const categoryIcons: Record<ActiveCategory, LucideIcon> = {
   basketball: CircleDot,
   recovery: Waves,
   apparel: Shirt,
+  accessories: Package,
   sneakers: Footprints,
 }
 
@@ -258,6 +263,32 @@ const productColorWords = [
   "Oatmeal",
   "Beef & Broccoli",
 ] as const
+const nikePerformanceFootwearSizes = [
+  "35.5",
+  "36",
+  "36.5",
+  "37.5",
+  "38",
+  "38.5",
+  "39",
+  "40",
+  "40.5",
+  "41",
+  "42",
+  "42.5",
+  "43",
+  "44",
+  "44.5",
+  "45",
+  "45.5",
+  "46",
+  "47.5",
+] as const
+const nikePerformanceFootwearSlugs = new Set([
+  "nike-aone",
+  "nike-sabrina-3",
+  "nike-kd-18",
+])
 
 /**
  * Показывает вариант только тогда, когда он уже является частью утверждённого
@@ -293,7 +324,9 @@ export function getSizeOptions(product: CatalogProduct): readonly string[] {
     }
     return oneSize
   }
-  return footwearSizes
+  return nikePerformanceFootwearSlugs.has(product.slug)
+    ? nikePerformanceFootwearSizes
+    : footwearSizes
 }
 
 export function getSizeRangeLabel(product: CatalogProduct): string {
@@ -307,7 +340,10 @@ export function getProductPath(product: CatalogProduct): string {
 }
 
 function normalizedText(value: string): string {
-  return value.toLowerCase().replace(/ё/g, "е")
+  return value
+    .toLowerCase()
+    .replace(/ё/gu, "е")
+    .replace(/(^|[^\p{L}\p{N}])(?:найк|наик)(?=$|[^\p{L}\p{N}])/gu, "$1nike")
 }
 
 function productSearchText(product: CatalogProduct): string {
@@ -447,12 +483,21 @@ export function readUrlState(): UrlState {
   const params = new URLSearchParams(window.location.search)
   const category = params.get("category")
   const sort = params.get("sort")
+  const routeProductMatch = window.location.pathname.match(/^\/product\/([^/]+)\/?$/u)
+  let routeProductSlug: string | null = null
+  if (routeProductMatch?.[1]) {
+    try {
+      routeProductSlug = decodeURIComponent(routeProductMatch[1])
+    } catch {
+      routeProductSlug = null
+    }
+  }
 
   return {
     category: isCategory(category) ? category : "all",
     search: params.get("q") ?? "",
     sort: isSort(sort) ? sort : "featured",
-    productSlug: params.get("product"),
+    productSlug: routeProductSlug ?? params.get("product"),
   }
 }
 

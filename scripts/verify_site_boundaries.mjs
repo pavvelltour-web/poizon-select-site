@@ -80,9 +80,9 @@ if (
 }
 if (
   packageManifest.scripts?.["verify:release"] !==
-  "npm run verify:assets && npm run verify:release-rights"
+  "npm run verify:assets && npm run verify:release-rights && npm run media:storefront:qa"
 ) {
-  fail("verify:release must include assets and the release-rights gate")
+  fail("verify:release must include assets, release rights and approved storefront media QA")
 }
 
 const dockerfile = await text("Dockerfile")
@@ -139,6 +139,7 @@ const allowedPublicEntries = new Set([
   "brand",
   "catalog",
   "favicon.svg",
+  "storefront-media",
 ])
 for (const entry of publicEntries) {
   if (!allowedPublicEntries.has(entry.name)) {
@@ -190,7 +191,11 @@ for (const file of publicFiles) {
       [".ico", ".png", ".webp"].includes(extension)
     ) &&
     !(relative.startsWith(`catalog${path.sep}`) && extension === ".webp") &&
-    !(relative.startsWith(`brand${path.sep}`) && extension === ".webp")
+    !(relative.startsWith(`brand${path.sep}`) && extension === ".webp") &&
+    !(
+      relative.startsWith(`storefront-media${path.sep}approved${path.sep}`) &&
+      [".png", ".webp"].includes(extension)
+    )
   ) {
     fail(`public contains an unaudited file type: ${relative}`)
   }

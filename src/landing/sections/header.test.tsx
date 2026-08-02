@@ -24,15 +24,15 @@ describe("Header SMS login", () => {
     const navigation = screen.getByRole("navigation", { name: "Основная навигация" })
     expect(within(navigation).getByRole("link", { name: "Каталог" })).toHaveAttribute(
       "href",
-      "/#catalog",
+      "/#popular",
     )
     expect(within(navigation).getByRole("link", { name: "Подобрать" })).toHaveAttribute(
       "href",
-      "/#selection",
+      "/#finder",
     )
     expect(
       within(navigation).getByRole("link", { name: "Доставка и возврат" }),
-    ).toHaveAttribute("href", "/delivery-returns")
+    ).toHaveAttribute("href", "/#delivery")
   })
 
   it("sends the public consent version supplied by the backend", async () => {

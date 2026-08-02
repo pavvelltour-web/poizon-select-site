@@ -44,10 +44,80 @@ export interface PublishedCatalogItem {
   etaMinDays: number | null
   etaMaxDays: number | null
   liveProviderVerified: boolean
+  sizeOffers: readonly PublishedSizeOffer[]
+}
+
+export interface PublishedSizeOffer {
+  skuId: string
+  sizeEu: string
+  sizeRu: string | null
+  priceRub: number
+  available: boolean
+  checkoutConfirmed: boolean
+  liveProviderVerified: boolean
+  observedAt: string | null
+  expiresAt: string | null
 }
 
 export type CatalogPriceMap = Record<string, number>
 export type PublishedCatalogMap = Record<string, PublishedCatalogItem>
+
+export type CatalogSearchStatus = "ready" | "clarification" | "unavailable"
+
+export interface CatalogSearchOffer {
+  skuId: string
+  size: string
+  sizeRu: string | null
+  sizeUs: string | null
+  sizeCn: string | null
+  priceCny: number
+  quoteRub: number
+}
+
+export interface ProductSizeOffer {
+  skuId: string | null
+  sizeEu: string
+  sizeRu: string | null
+  sizeUs: string | null
+  sizeCn: string | null
+  priceCny: number | null
+  priceRub: number | null
+  available: boolean
+  checkoutConfirmed: boolean
+}
+
+export interface CatalogSearchResult {
+  source: "poizon" | "dewu"
+  providerProductId: string
+  providerUrl: string
+  brand: string | null
+  name: string
+  model: string
+  article: string | null
+  kind: CatalogProduct["kind"]
+  images: readonly string[]
+  observedAt: string
+  expiresAt: string
+  offers: readonly CatalogSearchOffer[]
+}
+
+export interface CatalogSearchFallback {
+  source: "catalog"
+  slug: string
+  name: string
+  brand: string | null
+  image: string
+  navigationUrl: string
+  availability: "unverified"
+}
+
+export interface CatalogSearchResponse {
+  status: CatalogSearchStatus
+  normalizedQuery: string
+  clarification: string | null
+  results: readonly CatalogSearchResult[]
+  fallback: readonly CatalogSearchFallback[]
+}
 
 export interface CheckoutCatalogSnapshot {
   items: PublishedCatalogMap
@@ -156,6 +226,231 @@ function finitePositiveNumber(value: unknown): number | null {
   return Number.isFinite(number) && number > 0 ? number : null
 }
 
+// External search data is untrusted until its URL and quote metadata are validated.
+function safeHttpsUrl(value: unknown): string | null {
+  const url = optionalString(value)
+  if (!url) return null
+
+  try {
+    const parsed = new URL(url)
+    return parsed.protocol === "https:" && !parsed.username && !parsed.password && !parsed.port
+      ? parsed.toString()
+      : null
+  } catch {
+    return null
+  }
+}
+
+const officialProviderHosts = new Set(["poizon.com", "www.poizon.com", "dewu.com", "www.dewu.com"])
+const quoteClockSkewMs = 5 * 60 * 1000
+
+function safeProviderUrl(value: unknown): string | null {
+  const url = safeHttpsUrl(value)
+  if (!url) return null
+
+  const parsed = new URL(url)
+  return officialProviderHosts.has(parsed.hostname.toLowerCase()) ? parsed.toString() : null
+}
+
+function parseQuoteTimestamp(value: unknown): number | null {
+  const timestamp = optionalString(value)
+  if (!timestamp || !/^\d{4}-\d{2}-\d{2}T/u.test(timestamp)) return null
+
+  const milliseconds = Date.parse(timestamp)
+  return Number.isFinite(milliseconds) ? milliseconds : null
+}
+
+function safeCatalogNavigationUrl(value: unknown): string | null {
+  const url = optionalString(value)
+  return url && /^\/product\/[a-z0-9][a-z0-9-]*\/?$/iu.test(url) ? url : null
+}
+
+function parseCatalogSearchResult(value: unknown): CatalogSearchResult | null {
+  if (!value || typeof value !== "object") return null
+  const source = value as Record<string, unknown>
+  const providerProductId = optionalString(source.provider_product_id)
+  const providerUrl = safeProviderUrl(source.provider_url)
+  const name = optionalString(source.name)
+  const kind = optionalString(source.kind)
+  const observedAt = optionalString(source.observed_at)
+  const expiresAt = optionalString(source.expires_at)
+  const observedAtMs = parseQuoteTimestamp(source.observed_at)
+  const expiresAtMs = parseQuoteTimestamp(source.expires_at)
+  const now = Date.now()
+  const images = Array.isArray(source.images)
+    ? source.images
+      .map(safeHttpsUrl)
+      .filter((image): image is string => !!image)
+      .slice(0, 5)
+    : []
+  const offers = Array.isArray(source.offers)
+    ? source.offers.flatMap((rawOffer): CatalogSearchOffer[] => {
+      if (!rawOffer || typeof rawOffer !== "object") return []
+      const offer = rawOffer as Record<string, unknown>
+      const skuId = optionalString(offer.sku_id)
+      const size = optionalString(offer.size) ?? optionalString(offer.eu)
+      const quoteRub = finitePositiveNumber(offer.quote_rub)
+      const sourcePrice = finitePositiveNumber(offer.price_cny)
+      if (
+        !skuId ||
+        !size ||
+        !quoteRub ||
+        !sourcePrice ||
+        offer.currency !== "CNY"
+      ) {
+        return []
+      }
+      return [{
+        skuId,
+        size,
+        sizeRu: optionalString(offer.ru),
+        sizeUs: optionalString(offer.us),
+        sizeCn: optionalString(offer.cn),
+        priceCny: sourcePrice,
+        quoteRub,
+      }]
+    })
+    : []
+
+  if (
+    !["poizon", "dewu"].includes(String(source.source)) ||
+    !providerProductId ||
+    !providerUrl ||
+    !name ||
+    !observedAt ||
+    !expiresAt ||
+    !observedAtMs ||
+    !expiresAtMs ||
+    observedAtMs > now + quoteClockSkewMs ||
+    expiresAtMs <= now ||
+    expiresAtMs <= observedAtMs ||
+    !["footwear", "apparel", "accessory"].includes(kind || "") ||
+    images.length === 0 ||
+    offers.length === 0
+  ) {
+    return null
+  }
+
+  return {
+    source: source.source as CatalogSearchResult["source"],
+    providerProductId,
+    providerUrl,
+    brand: optionalString(source.brand),
+    name,
+    model: optionalString(source.model) ?? name,
+    article: optionalString(source.article),
+    kind: kind as CatalogProduct["kind"],
+    images,
+    observedAt,
+    expiresAt,
+    offers,
+  }
+}
+
+function parseCatalogSearchFallback(value: unknown): CatalogSearchFallback | null {
+  if (!value || typeof value !== "object") return null
+  const source = value as Record<string, unknown>
+  const slug = optionalString(source.slug)
+  const name = optionalString(source.name)
+  const image = optionalString(source.image)
+  const navigationUrl = safeCatalogNavigationUrl(source.navigation_url)
+  if (
+    source.source !== "catalog" ||
+    source.availability !== "unverified" ||
+    !slug ||
+    !name ||
+    !image ||
+    !navigationUrl
+  ) {
+    return null
+  }
+
+  return {
+    source: "catalog",
+    slug,
+    name,
+    brand: optionalString(source.brand),
+    image,
+    navigationUrl,
+    availability: "unverified",
+  }
+}
+
+export function parseCatalogSearch(payload: unknown): CatalogSearchResponse | null {
+  if (!payload || typeof payload !== "object") return null
+  const source = payload as Record<string, unknown>
+  const status = optionalString(source.status)
+  const normalizedQuery = optionalString(source.normalized_query)
+  if (
+    !normalizedQuery ||
+    !["ready", "clarification", "unavailable"].includes(status || "") ||
+    !Array.isArray(source.results)
+  ) {
+    return null
+  }
+
+  return {
+    status: status as CatalogSearchStatus,
+    normalizedQuery,
+    clarification: optionalString(source.clarification),
+    results: source.results
+      .map(parseCatalogSearchResult)
+      .filter((result): result is CatalogSearchResult => !!result),
+    fallback: Array.isArray(source.fallback)
+      ? source.fallback
+        .map(parseCatalogSearchFallback)
+        .filter((item): item is CatalogSearchFallback => !!item)
+      : [],
+  }
+}
+
+function normalizedIdentity(value: string): string {
+  return value
+    .normalize("NFKD")
+    .replace(/\p{M}/gu, "")
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu, " ")
+    .trim()
+}
+
+function identityWithoutBrand(value: string, brand: string): string {
+  const normalizedValue = normalizedIdentity(value)
+  const normalizedBrand = normalizedIdentity(brand)
+  return normalizedBrand && normalizedValue.startsWith(`${normalizedBrand} `)
+    ? normalizedValue.slice(normalizedBrand.length + 1)
+    : normalizedValue
+}
+
+function compactIdentity(value: string): string {
+  return normalizedIdentity(value).replace(/\s/gu, "")
+}
+
+export function isCatalogSearchResultForProduct(
+  product: CatalogProduct,
+  result: CatalogSearchResult,
+): boolean {
+  const expectedBrand = normalizedIdentity(product.brand)
+  const resultBrand = result.brand ? normalizedIdentity(result.brand) : ""
+  const expectedName = identityWithoutBrand(product.name, product.brand)
+  const resultName = identityWithoutBrand(result.name, result.brand ?? product.brand)
+  const resultModel = identityWithoutBrand(result.model, result.brand ?? product.brand)
+  const article = result.article ? normalizedIdentity(result.article) : ""
+  const compactArticle = compactIdentity(result.article ?? "")
+  const compactExpectedName = compactIdentity(expectedName)
+  const compactQuery = compactIdentity(product.query)
+
+  return Boolean(
+    expectedBrand &&
+    expectedBrand === resultBrand &&
+    product.kind === result.kind &&
+    expectedName &&
+    expectedName === resultName &&
+    expectedName === resultModel &&
+    article &&
+    (compactArticle === compactExpectedName || compactQuery.includes(compactArticle)),
+  )
+}
+
 export function parseCheckoutCatalog(payload: unknown): CheckoutCatalogSnapshot | null {
   if (!payload || typeof payload !== "object") return null
   const source = payload as Record<string, unknown>
@@ -192,6 +487,30 @@ export function parseCheckoutCatalog(payload: unknown): CheckoutCatalogSnapshot 
       continue
     }
 
+    const itemLiveProviderVerified = item.live_provider_verified === true
+    const sizeOffers = Array.isArray(item.size_offers)
+      ? item.size_offers.flatMap((rawOffer): PublishedSizeOffer[] => {
+        if (!rawOffer || typeof rawOffer !== "object") return []
+        const offer = rawOffer as Record<string, unknown>
+        const skuId = optionalString(offer.sku_id)
+        const sizeEu = optionalString(offer.size_eu) ?? optionalString(offer.size)
+        const price = finitePositiveNumber(offer.price_rub)
+        const offerAvailable = offer.available === true
+        if (!skuId || !sizeEu || !price || !offerAvailable || !sizes.includes(sizeEu)) return []
+        return [{
+          skuId,
+          sizeEu,
+          sizeRu: optionalString(offer.size_ru) ?? optionalString(offer.ru),
+          priceRub: price,
+          available: true,
+          checkoutConfirmed: offer.checkout_confirmed === true,
+          liveProviderVerified:
+            offer.live_provider_verified === true || itemLiveProviderVerified,
+          observedAt: optionalString(offer.observed_at),
+          expiresAt: optionalString(offer.expires_at),
+        }]
+      })
+      : []
     const normalized: PublishedCatalogItem = {
       slug,
       name,
@@ -204,10 +523,16 @@ export function parseCheckoutCatalog(payload: unknown): CheckoutCatalogSnapshot 
       availability,
       etaMinDays: finitePositiveNumber(item.eta_min_days),
       etaMaxDays: finitePositiveNumber(item.eta_max_days),
-      liveProviderVerified: item.live_provider_verified === true,
+      liveProviderVerified: itemLiveProviderVerified,
+      sizeOffers,
     }
     items[slug] = normalized
-    lookup[slug] = priceRub
+    const confirmedSizeOffers = sizeOffers.filter(
+      (offer) => offer.available && offer.checkoutConfirmed,
+    )
+    lookup[slug] = confirmedSizeOffers.length > 0
+      ? Math.min(...confirmedSizeOffers.map((offer) => offer.priceRub))
+      : priceRub
   }
 
   if (Object.keys(items).length === 0) return null
@@ -235,12 +560,12 @@ export async function fetchCheckoutCatalog(
   return parsed
 }
 
-export async function fetchCatalogRecommendations(
+export async function fetchCatalogSearch(
   apiBaseUrl: string,
   query: string,
   signal?: AbortSignal,
-): Promise<unknown[]> {
-  const endpoint = `${apiBaseUrl.replace(/\/$/, "")}/api/catalog/recommendations`
+): Promise<CatalogSearchResponse> {
+  const endpoint = `${apiBaseUrl.replace(/\/$/, "")}/api/catalog/search`
   const response = await fetch(endpoint, {
     method: "POST",
     credentials: "include",
@@ -248,19 +573,156 @@ export async function fetchCatalogRecommendations(
     body: JSON.stringify({ query, limit: 4 }),
     signal,
   })
-  if (!response.ok) return []
-  const payload = (await response.json().catch(() => null)) as { items?: unknown } | null
-  return payload && Array.isArray(payload.items) ? payload.items.slice(0, 4) : []
+  const payload = await response.json().catch(() => null)
+  const parsed = response.ok ? parseCatalogSearch(payload) : null
+  if (!parsed) throw new Error("Поиск по каталогу временно недоступен.")
+  return parsed
 }
 
 export function getEffectiveLinePrice(
   product: CatalogProduct,
   catalogPrices: CatalogPriceMap | null,
+  catalogItems: PublishedCatalogMap | null = null,
+  size: string | null = null,
 ): number {
+  if (catalogItems && size) {
+    const sizeOffer = getPublishedSizeOffer(catalogItems[product.slug], size)
+    if (sizeOffer) return sizeOffer.priceRub
+  }
   if (!catalogPrices) return getCatalogPriceRub(product)
   const override = catalogPrices[product.slug]
   if (!Number.isFinite(override) || override <= 0) return getCatalogPriceRub(product)
   return override
+}
+
+function canonicalSize(value: string): string {
+  return value.trim().replace(",", ".").toUpperCase()
+}
+
+function numericSize(value: string): number | null {
+  const parsed = Number(canonicalSize(value))
+  return Number.isFinite(parsed) ? parsed : null
+}
+
+function formatSize(value: number): string {
+  return Number.isInteger(value) ? String(value) : String(value).replace(".", ",")
+}
+
+function nikeRuFallback(brand: string, sizeEu: string): string | null {
+  if (brand.trim().toLowerCase() !== "nike") return null
+  const eu = numericSize(sizeEu)
+  return eu === null ? null : formatSize(eu - 1)
+}
+
+function displayRuSize(value: string | null): string | null {
+  if (!value) return null
+  return numericSize(value) === null ? value.trim() : canonicalSize(value).replace(".", ",")
+}
+
+function sortSizeLabels(values: readonly string[]): string[] {
+  return [...values].sort((left, right) => {
+    const leftNumber = numericSize(left)
+    const rightNumber = numericSize(right)
+    if (leftNumber !== null && rightNumber !== null) return leftNumber - rightNumber
+    if (leftNumber !== null) return -1
+    if (rightNumber !== null) return 1
+    return left.localeCompare(right, "ru")
+  })
+}
+
+export function getPublishedSizeOffer(
+  item: PublishedCatalogItem | undefined,
+  sizeEu: string,
+): PublishedSizeOffer | null {
+  if (!item) return null
+  const matchingOffers = item.sizeOffers.filter(
+    (offer) =>
+      offer.available &&
+      offer.checkoutConfirmed &&
+      offer.sizeEu === sizeEu,
+  )
+  return matchingOffers.length === 1 ? matchingOffers[0] ?? null : null
+}
+
+export function buildProductSizeOffers(
+  sizeUniverse: readonly string[],
+  brand: string,
+  liveResult: CatalogSearchResult | null,
+  checkoutItem: PublishedCatalogItem | undefined,
+): ProductSizeOffer[] {
+  const sizeLabels = new Map<string, string>()
+  for (const size of sizeUniverse) {
+    const normalized = canonicalSize(size)
+    if (normalized) sizeLabels.set(normalized, size.trim())
+  }
+
+  const liveByExactSize = new Map<string, CatalogSearchOffer[]>()
+  for (const offer of liveResult?.offers ?? []) {
+    const normalized = canonicalSize(offer.size)
+    if (!normalized) continue
+    sizeLabels.set(normalized, offer.size.trim())
+    const liveOffers = liveByExactSize.get(offer.size) ?? []
+    liveOffers.push(offer)
+    liveByExactSize.set(offer.size, liveOffers)
+  }
+  for (const offer of checkoutItem?.sizeOffers ?? []) {
+    if (!offer.available || !offer.checkoutConfirmed) continue
+    sizeLabels.set(canonicalSize(offer.sizeEu), offer.sizeEu)
+  }
+
+  return sortSizeLabels([...sizeLabels.values()]).map((sizeEu) => {
+    const checkoutOffer = getPublishedSizeOffer(checkoutItem, sizeEu)
+    const matchingLiveOffer = checkoutOffer
+      ? (liveByExactSize.get(checkoutOffer.sizeEu) ?? []).find(
+        (liveOffer) =>
+          liveOffer.size === checkoutOffer.sizeEu &&
+          liveOffer.skuId === checkoutOffer.skuId &&
+          liveOffer.quoteRub === checkoutOffer.priceRub,
+      ) ?? null
+      : null
+
+    if (checkoutOffer && matchingLiveOffer) {
+      return {
+        skuId: matchingLiveOffer.skuId,
+        sizeEu: matchingLiveOffer.size,
+        sizeRu: displayRuSize(matchingLiveOffer.sizeRu) ??
+          nikeRuFallback(brand, matchingLiveOffer.size),
+        sizeUs: matchingLiveOffer.sizeUs,
+        sizeCn: matchingLiveOffer.sizeCn,
+        priceCny: matchingLiveOffer.priceCny,
+        priceRub: matchingLiveOffer.quoteRub,
+        available: true,
+        checkoutConfirmed: true,
+      }
+    }
+
+    if (checkoutOffer) {
+      return {
+        skuId: checkoutOffer.skuId,
+        sizeEu: checkoutOffer.sizeEu,
+        sizeRu: displayRuSize(checkoutOffer.sizeRu) ??
+          nikeRuFallback(brand, checkoutOffer.sizeEu),
+        sizeUs: null,
+        sizeCn: null,
+        priceCny: null,
+        priceRub: checkoutOffer.priceRub,
+        available: true,
+        checkoutConfirmed: true,
+      }
+    }
+
+    return {
+      skuId: null,
+      sizeEu,
+      sizeRu: nikeRuFallback(brand, sizeEu),
+      sizeUs: null,
+      sizeCn: null,
+      priceCny: null,
+      priceRub: null,
+      available: false,
+      checkoutConfirmed: false,
+    }
+  })
 }
 
 export const cartStorageKey = "kicksbase-cart-v1"
@@ -302,9 +764,15 @@ export function updateCartQuantity(
 export function cartTotalRub(
   lines: readonly CartLine[],
   catalogPrices: CatalogPriceMap | null = null,
+  catalogItems: PublishedCatalogMap | null = null,
 ): number {
   return lines.reduce(
-    (sum, line) => sum + getEffectiveLinePrice(line.product, catalogPrices) * line.quantity,
+    (sum, line) => sum + getEffectiveLinePrice(
+      line.product,
+      catalogPrices,
+      catalogItems,
+      line.size,
+    ) * line.quantity,
     0,
   )
 }
@@ -349,7 +817,7 @@ export function reconcileCartLines(
   return lines.map((line) => ({
     ...line,
     validation: catalogItems[line.product.slug]?.availability === "catalog_listed" &&
-      catalogItems[line.product.slug]?.sizes.includes(line.size)
+      Boolean(getPublishedSizeOffer(catalogItems[line.product.slug], line.size))
       ? "valid"
       : "invalid",
   }))
@@ -365,10 +833,11 @@ export function buildCheckoutPayload(
 ) {
   const items = lines.map((line) => {
     const offer = catalogItems[line.product.slug]
+    const sizeOffer = getPublishedSizeOffer(offer, line.size)
     if (
       !offer ||
       offer.availability !== "catalog_listed" ||
-      !offer.sizes.includes(line.size) ||
+      !sizeOffer ||
       line.validation !== "valid"
     ) {
       throw new Error("В заказе есть товар или размер без подтверждения сервера.")
@@ -378,8 +847,9 @@ export function buildCheckoutPayload(
       product_name: offer.name,
       brand: offer.brand,
       product_kind: offer.productKind,
-      size_eu: line.size,
-      price_rub: offer.priceRub,
+      size_eu: sizeOffer.sizeEu,
+      sku_id: sizeOffer.skuId,
+      price_rub: sizeOffer.priceRub,
       price_version: priceVersion || CATALOG_PRICE_VERSION,
       quantity: line.quantity,
       image_url: offer.imageUrl,

@@ -17,6 +17,25 @@ const focusableSelector = [
   '[tabindex]:not([tabindex="-1"])',
 ].join(",")
 
+let activeModalCount = 0
+let originalBodyOverflow = ""
+
+export function acquireModalPageLock() {
+  if (activeModalCount === 0) {
+    originalBodyOverflow = document.body.style.overflow
+    document.body.style.overflow = "hidden"
+    document.body.classList.add("is-locked")
+  }
+  activeModalCount += 1
+}
+
+export function releaseModalPageLock() {
+  activeModalCount = Math.max(0, activeModalCount - 1)
+  if (activeModalCount > 0) return
+  document.body.style.overflow = originalBodyOverflow
+  document.body.classList.remove("is-locked")
+}
+
 export function useModalDialog({
   dialogRef,
   initialFocusRef,
@@ -33,8 +52,7 @@ export function useModalDialog({
     const previousFocus = document.activeElement instanceof HTMLElement
       ? document.activeElement
       : null
-    const previousOverflow = document.body.style.overflow
-    document.body.style.overflow = "hidden"
+    acquireModalPageLock()
     initialFocusRef.current?.focus()
 
     const onKeyDown = (event: KeyboardEvent) => {
@@ -70,9 +88,10 @@ export function useModalDialog({
     document.addEventListener("keydown", onKeyDown)
     return () => {
       document.removeEventListener("keydown", onKeyDown)
-      document.body.style.overflow = previousOverflow
+      releaseModalPageLock()
+      if (activeModalCount > 0) return
       const returnTarget = returnFocusRef?.current ?? previousFocus
-      returnTarget?.focus()
+      if (returnTarget?.isConnected) returnTarget.focus()
     }
   }, [dialogRef, initialFocusRef, isOpen, returnFocusRef])
 }

@@ -5,26 +5,31 @@ import {
   CATALOG_PRICE_VERSION,
   filterCatalog,
   findPublicProductBySlug,
+  formatRub,
   sortCatalog,
   type CatalogSort,
   type CatalogProduct,
 } from "../catalog/catalog"
 import {
   addOrIncrementCartLine,
+  buildProductSizeOffers,
   cartTotalRub,
-  fetchCatalogRecommendations,
+  fetchCatalogSearch,
   fetchCheckoutCatalog,
   loadCart,
   reconcileCartLines,
   saveCart,
   submitCheckout,
   isCheckoutApiError,
+  isCatalogSearchResultForProduct,
+  getPublishedSizeOffer,
   updateCartQuantity,
   type CheckoutConsents,
   type CheckoutCustomer,
   type CheckoutDelivery,
   type CheckoutResult,
   type CartLine,
+  type CatalogSearchFallback,
   type PublishedCatalogMap,
 } from "./cart"
 import {
@@ -36,11 +41,18 @@ import {
 import {
   findTaskMatches,
   getDisplayPrice,
+  getProductPath,
+  getSizeOptions,
   isCategory,
   isSort,
   readUrlState,
 } from "./landing-data"
-import type { ActiveCategory, StorefrontState, UrlState } from "./landing-types"
+import type {
+  ActiveCategory,
+  CatalogSearchState,
+  StorefrontState,
+  UrlState,
+} from "./landing-types"
 
 function createCheckoutIdempotencyKey(): string {
   if (typeof globalThis.crypto?.randomUUID === "function") {
@@ -68,6 +80,22 @@ function checkoutIntentSignature(
   })
 }
 
+function emptyCatalogSearchState(): CatalogSearchState {
+  return { status: "idle", response: null, fallback: [], error: null }
+}
+
+function catalogFallback(product: CatalogProduct): CatalogSearchFallback {
+  return {
+    source: "catalog",
+    slug: product.slug,
+    name: product.name,
+    brand: product.brand,
+    image: product.image,
+    navigationUrl: getProductPath(product),
+    availability: "unverified",
+  }
+}
+
 export type LandingStorefront = StorefrontState
 
 export function useLandingStorefront(
@@ -84,9 +112,18 @@ export function useLandingStorefront(
   const [selectedSize, setSelectedSizeState] = useState<string | null>(null)
   const [copyState, setCopyState] = useState<"idle" | "copied" | "failed">("idle")
   const [taskInput, setTaskInputState] = useState("")
-  const [remoteTaskMatches, setRemoteTaskMatches] = useState<
-    StorefrontState["taskMatches"] | null
-  >(null)
+  const [catalogSearch, setCatalogSearch] = useState<CatalogSearchState>(
+    emptyCatalogSearchState,
+  )
+  const [taskSearch, setTaskSearch] = useState<CatalogSearchState>(
+    emptyCatalogSearchState,
+  )
+  const [selectedSizeOfferState, setSelectedSizeOfferState] = useState<{
+    status: "idle" | "loading" | "ready" | "failed"
+    productSlug: string | null
+    result: import("./cart").CatalogSearchResult | null
+    error: string | null
+  }>({ status: "idle", productSlug: null, result: null, error: null })
   const [cartLines, setCartLines] = useState<CartLine[]>([])
   const [isCartOpen, setCartOpen] = useState(() => {
     if (typeof window === "undefined") return false
@@ -127,7 +164,7 @@ export function useLandingStorefront(
     onlinePaymentEnabled: false,
     error: null as string | null,
   })
-  const productTriggerRef = useRef<HTMLButtonElement | null>(null)
+  const productTriggerRef = useRef<HTMLElement | null>(null)
   const sheetHeadingRef = useRef<HTMLHeadingElement | null>(null)
   const checkoutAttemptRef = useRef<{ signature: string; key: string } | null>(null)
 
@@ -145,14 +182,39 @@ export function useLandingStorefront(
     (selectedProduct
       ? { src: selectedProduct.fallbackImage, alt: selectedProduct.name }
       : null)
-  const selectedProductPrice = selectedProduct
-    ? getDisplayPrice(selectedProduct, catalogPriceState.lookup)
+  const selectedLiveResult = selectedProduct &&
+    selectedSizeOfferState.productSlug === selectedProduct.slug
+    ? selectedSizeOfferState.result
     : null
-  const selectedSizeOptions = selectedProduct
-    ? catalogPriceState.items[selectedProduct.slug]?.availability === "catalog_listed"
-      ? catalogPriceState.items[selectedProduct.slug]?.sizes ?? []
-      : []
-    : []
+  const selectedSizeOffers = useMemo(
+    () => selectedProduct
+      ? buildProductSizeOffers(
+        getSizeOptions(selectedProduct),
+        selectedProduct.brand,
+        selectedLiveResult,
+        catalogPriceState.items[selectedProduct.slug],
+      )
+      : [],
+    [catalogPriceState.items, selectedLiveResult, selectedProduct],
+  )
+  const selectedSizeOptions = selectedSizeOffers
+    .filter((offer) => offer.available)
+    .map((offer) => offer.sizeEu)
+  const selectedLiveOffer = selectedSize
+    ? selectedSizeOffers.find((offer) => offer.sizeEu === selectedSize) ?? null
+    : null
+  const liveDisplayPrice = selectedLiveOffer?.priceRub ?? Math.min(
+    ...selectedSizeOffers.flatMap((offer) => offer.priceRub ? [offer.priceRub] : []),
+  )
+  const selectedProductPrice = selectedProduct
+    ? Number.isFinite(liveDisplayPrice)
+      ? {
+        label: selectedLiveOffer ? "Цена размера" : "Цена от",
+        value: formatRub(liveDisplayPrice),
+        detail: "СДЭК рассчитывается отдельно",
+      }
+      : getDisplayPrice(selectedProduct, catalogPriceState.lookup)
+    : null
   const selectedImageDisplayIndex =
     selectedVisibleGallery.length === 0 ? 0 : selectedImageIndex + 1
   const filteredProducts = useMemo(
@@ -162,17 +224,26 @@ export function useLandingStorefront(
   const request = selectedProduct
     ? buildOrderRequest(selectedProduct, selectedSize ?? undefined)
     : ""
-  const localTaskMatches = useMemo(
+  const catalogFallbacks = useMemo(
     () =>
-      findTaskMatches(publicCatalogProducts, taskInput, catalogPriceState.lookup).slice(
-        0,
-        3,
-      ),
-    [taskInput, catalogPriceState.lookup],
+      sortCatalog(filterCatalog(publicCatalogProducts, category, search), sort)
+        .slice(0, 4)
+        .map(catalogFallback),
+    [category, search, sort],
   )
-  const taskMatches = remoteTaskMatches ?? localTaskMatches
+  const taskFallbacks = useMemo(
+    () =>
+      findTaskMatches(publicCatalogProducts, taskInput)
+        .slice(0, 4)
+        .map((match) => catalogFallback(match.product)),
+    [taskInput],
+  )
   const cartCount = cartLines.reduce((sum, line) => sum + line.quantity, 0)
-  const currentCartTotalRub = cartTotalRub(cartLines, catalogPriceState.lookup)
+  const currentCartTotalRub = cartTotalRub(
+    cartLines,
+    catalogPriceState.lookup,
+    catalogPriceState.items,
+  )
 
   const writeUrl = (
     nextState: Partial<UrlState>,
@@ -256,7 +327,6 @@ export function useLandingStorefront(
 
   useEffect(() => {
     setSelectedImageIndex(0)
-    setSelectedSizeState(null)
     setCopyState("idle")
   }, [selectedSlug])
 
@@ -271,46 +341,141 @@ export function useLandingStorefront(
   }, [apiBaseUrl])
 
   useEffect(() => {
-    const query = taskInput.trim()
-    if (query.length < 2) {
-      setRemoteTaskMatches(null)
+    if (!selectedProduct) {
+      setSelectedSizeOfferState({
+        status: "idle",
+        productSlug: null,
+        result: null,
+        error: null,
+      })
       return
     }
 
-    setRemoteTaskMatches(null)
     const controller = new AbortController()
-    const timer = window.setTimeout(async () => {
-      try {
-        const recommendations = await fetchCatalogRecommendations(
-          apiBaseUrl,
-          query,
-          controller.signal,
-        )
-        const matches = recommendations
-          .map((item, index) => {
-            if (!item || typeof item !== "object") return null
-            const slug = "slug" in item && typeof item.slug === "string" ? item.slug : ""
-            const reason =
-              "reason" in item && typeof item.reason === "string"
-                ? item.reason.slice(0, 80)
-                : "Подходит под запрос"
-            const product = findPublicProductBySlug(slug)
-            return product ? { product, reason, score: 100 - index } : null
+    const productSlug = selectedProduct.slug
+    setSelectedSizeOfferState({
+      status: "loading",
+      productSlug,
+      result: null,
+      error: null,
+    })
+    void fetchCatalogSearch(apiBaseUrl, selectedProduct.query, controller.signal)
+      .then((response) => {
+        if (controller.signal.aborted) return
+        setSelectedSizeOfferState({
+          status: "ready",
+          productSlug,
+          result: response.status === "ready"
+            ? response.results.find(
+              (result) => isCatalogSearchResultForProduct(selectedProduct, result),
+            ) ?? null
+            : null,
+          error: null,
+        })
+      })
+      .catch((error: unknown) => {
+        if (controller.signal.aborted) return
+        setSelectedSizeOfferState({
+          status: "failed",
+          productSlug,
+          result: null,
+          error: error instanceof Error ? error.message : "Размеры временно недоступны.",
+        })
+      })
+
+    return () => controller.abort()
+  }, [apiBaseUrl, selectedProduct])
+
+  useEffect(() => {
+    if (!["ready", "failed"].includes(selectedSizeOfferState.status)) return
+    setSelectedSizeState((current) => current && selectedSizeOffers.some(
+      (offer) => offer.available && offer.sizeEu === current,
+    ) ? current : null)
+  }, [selectedSizeOfferState.status, selectedSizeOffers])
+
+  useEffect(() => {
+    const query = search.trim()
+    if (query.length < 2) {
+      setCatalogSearch(emptyCatalogSearchState())
+      return
+    }
+
+    const controller = new AbortController()
+    setCatalogSearch({ status: "loading", response: null, fallback: [], error: null })
+    const timer = window.setTimeout(() => {
+      void fetchCatalogSearch(apiBaseUrl, query, controller.signal)
+        .then((response) => {
+          if (controller.signal.aborted) return
+          setCatalogSearch({
+            status: "ready",
+            response,
+            fallback:
+              response.status === "unavailable"
+                ? response.fallback.length > 0
+                  ? response.fallback
+                  : catalogFallbacks
+                : [],
+            error: null,
           })
-          .filter(
-            (match): match is StorefrontState["taskMatches"][number] => match !== null,
-          )
-        if (matches.length > 0) setRemoteTaskMatches(matches)
-      } catch {
-        // The deterministic in-browser matcher remains available offline.
-      }
+        })
+        .catch((error: unknown) => {
+          if (controller.signal.aborted) return
+          setCatalogSearch({
+            status: "failed",
+            response: null,
+            fallback: catalogFallbacks,
+            error: error instanceof Error ? error.message : "Поиск временно недоступен.",
+          })
+        })
     }, 350)
 
     return () => {
       window.clearTimeout(timer)
       controller.abort()
     }
-  }, [apiBaseUrl, taskInput])
+  }, [apiBaseUrl, catalogFallbacks, search])
+
+  useEffect(() => {
+    const query = taskInput.trim()
+    if (query.length < 2) {
+      setTaskSearch(emptyCatalogSearchState())
+      return
+    }
+
+    const controller = new AbortController()
+    setTaskSearch({ status: "loading", response: null, fallback: [], error: null })
+    const timer = window.setTimeout(() => {
+      void fetchCatalogSearch(apiBaseUrl, query, controller.signal)
+        .then((response) => {
+          if (controller.signal.aborted) return
+          setTaskSearch({
+            status: "ready",
+            response,
+            fallback:
+              response.status === "unavailable"
+                ? response.fallback.length > 0
+                  ? response.fallback
+                  : taskFallbacks
+                : [],
+            error: null,
+          })
+        })
+        .catch((error: unknown) => {
+          if (controller.signal.aborted) return
+          setTaskSearch({
+            status: "failed",
+            response: null,
+            fallback: taskFallbacks,
+            error: error instanceof Error ? error.message : "Поиск временно недоступен.",
+          })
+        })
+    }, 350)
+
+    return () => {
+      window.clearTimeout(timer)
+      controller.abort()
+    }
+  }, [apiBaseUrl, taskFallbacks, taskInput])
 
   useEffect(() => {
     saveCart(cartLines)
@@ -364,15 +529,19 @@ export function useLandingStorefront(
 
   const setTaskInput = (task: string) => setTaskInputState(task)
 
-  const openProduct = (product: CatalogProduct, trigger: HTMLButtonElement) => {
+  const openProduct = (product: CatalogProduct, trigger: HTMLElement, preferredSize?: string) => {
     productTriggerRef.current = trigger
     setSelectedSlug(product.slug)
-    writeUrl({ productSlug: product.slug }, "push")
+    setSelectedSizeState(preferredSize ?? null)
   }
 
   function closeProduct() {
     setSelectedSlug(null)
-    writeUrl({ productSlug: null }, "replace")
+    setSelectedSizeState(null)
+    if (/^\/product\/[^/]+\/?$/u.test(window.location.pathname)) {
+      window.history.pushState(null, "", "/")
+      window.dispatchEvent(new PopStateEvent("popstate"))
+    }
     queueMicrotask(() => productTriggerRef.current?.focus())
   }
 
@@ -398,6 +567,7 @@ export function useLandingStorefront(
   }
 
   const setSelectedSize = (size: string) => {
+    if (!selectedSizeOffers.some((offer) => offer.available && offer.sizeEu === size)) return
     setSelectedSizeState(size)
     setCopyState("idle")
   }
@@ -415,23 +585,28 @@ export function useLandingStorefront(
     delivery: null,
   })
 
-  const addProductToCart = (product: CatalogProduct, size: string) => {
+  const addProductToCart = (
+    product: CatalogProduct,
+    size: string,
+    openAfterAdd = true,
+  ) => {
     const offer = catalogPriceState.items[product.slug]
+    const confirmedSizeOffer = getPublishedSizeOffer(offer, size)
     if (
       catalogPriceState.status !== "ready" ||
       !offer ||
       offer.availability !== "catalog_listed" ||
-      !offer.sizes.includes(size)
+      !confirmedSizeOffer
     ) {
       setCheckoutResult(
         emptyCheckoutResult(
           "failed",
           catalogPriceState.status === "loading"
             ? "Проверяем цену и размеры на сервере. Добавление станет доступно после загрузки каталога."
-            : "Этот товар или размер сейчас не опубликован для заказа.",
+            : "Live-цена размера ещё не подтверждена сервером заказа. Отправьте запрос менеджеру.",
         ),
       )
-      setCartOpen(true)
+      setCartOpen(openAfterAdd)
       return
     }
     if (!catalogPriceState.orderCreationEnabled) {
@@ -441,20 +616,24 @@ export function useLandingStorefront(
           "Оформление заказа временно недоступно. Цена и карточка товара остаются видны.",
         ),
       )
-      setCartOpen(true)
+      setCartOpen(openAfterAdd)
       return
     }
     setCartLines((lines) => addOrIncrementCartLine(lines, product, size, "valid"))
     setCheckoutResult(emptyCheckoutResult("idle", ""))
-    setCartOpen(true)
+    setCartOpen(openAfterAdd)
   }
 
   const addSelectedToCart = () => {
     if (!selectedProduct || !selectedSize) return
-    addProductToCart(selectedProduct, selectedSize)
+    addProductToCart(selectedProduct, selectedSize, false)
   }
 
-  const openCart = () => setCartOpen(true)
+  const openCart = () => {
+    setSelectedSlug(null)
+    setSelectedSizeState(null)
+    setCartOpen(true)
+  }
   const closeCart = () => setCartOpen(false)
   const removeCartLine = (id: string) => {
     setCartLines((lines) => lines.filter((line) => line.id !== id))
@@ -559,6 +738,7 @@ export function useLandingStorefront(
         amounts: result.amounts,
         delivery: result.delivery,
       })
+      setCartOpen(false)
     } catch (error) {
       if (isCheckoutApiError(error) && error.status === 409) {
         await refreshCatalogPrices()
@@ -580,6 +760,10 @@ export function useLandingStorefront(
     setCopyState(copied ? "copied" : "failed")
   }
 
+  const closePayment = () => {
+    setCheckoutResult(emptyCheckoutResult("idle", ""))
+  }
+
   return {
     botUsername,
     botUrl,
@@ -596,6 +780,9 @@ export function useLandingStorefront(
     selectedVisibleGallery,
     selectedSize,
     selectedSizeOptions,
+    selectedSizeOffers,
+    selectedSizeOfferStatus: selectedSizeOfferState.status,
+    selectedSizeOfferError: selectedSizeOfferState.error,
     selectedProductPrice,
     cartLines,
     cartCount,
@@ -607,7 +794,8 @@ export function useLandingStorefront(
     checkoutResult,
     request,
     copyState,
-    taskMatches,
+    catalogSearch,
+    taskSearch,
     sheetHeadingRef,
     selectCategory,
     setSearchValue,
@@ -625,6 +813,7 @@ export function useLandingStorefront(
     addSelectedToCart,
     openCart,
     closeCart,
+    closePayment,
     removeCartLine,
     setCartLineQuantity,
     updateCheckoutCustomer,

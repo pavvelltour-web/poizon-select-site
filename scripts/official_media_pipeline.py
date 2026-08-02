@@ -27,6 +27,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PUBLIC_CATALOG = ROOT / "public" / "catalog"
 DEFAULT_STAGING = ROOT / "catalog-media" / "staging"
 CANVAS_SIZE = (1600, 1200)
+CANVAS_BACKGROUND = (242, 243, 243)
 SAFE_INSET_RATIO = 0.08
 MAX_SOURCE_PIXELS = 40_000_000
 ACCEPTED_RIGHTS = {"licensed", "owned", "supplier-api"}
@@ -319,7 +320,7 @@ def normalize_without_crop_or_mirror(source: Image.Image) -> Image.Image:
     intentionally not available because it would corrupt logos and printed text.
     """
 
-    canvas = Image.new("RGB", CANVAS_SIZE, "white")
+    canvas = Image.new("RGB", CANVAS_SIZE, CANVAS_BACKGROUND)
     max_width = round(CANVAS_SIZE[0] * (1 - 2 * SAFE_INSET_RATIO))
     max_height = round(CANVAS_SIZE[1] * (1 - 2 * SAFE_INSET_RATIO))
     contained = ImageOps.contain(source, (max_width, max_height), Image.Resampling.LANCZOS)
@@ -329,7 +330,7 @@ def normalize_without_crop_or_mirror(source: Image.Image) -> Image.Image:
     if contained.width > max_width or contained.height > max_height:
         contained = ImageOps.contain(contained, (max_width, max_height), Image.Resampling.LANCZOS)
     if contained.mode == "RGBA":
-        flattened = Image.new("RGB", contained.size, "white")
+        flattened = Image.new("RGB", contained.size, CANVAS_BACKGROUND)
         flattened.paste(contained, mask=contained.getchannel("A"))
         contained = flattened
     else:
@@ -397,7 +398,10 @@ def stage(manifest_path: Path, source_root: Path, output_root: Path) -> dict[str
                     "staged_file": target.relative_to(transaction).as_posix(),
                     "output_sha256": digest,
                     "output_dimensions": list(CANVAS_SIZE),
-                    "transform": "uniform-scale-and-pad-only; no crop; no mirror; white canvas",
+                    "transform": (
+                        "uniform-scale-and-pad-only; no crop; no mirror; "
+                        "cold-gray RGB(242,243,243) canvas"
+                    ),
                 }
             )
         duplicates = {digest: slots for digest, slots in derived_hashes.items() if len(slots) > 1}
@@ -426,10 +430,13 @@ def stage(manifest_path: Path, source_root: Path, output_root: Path) -> dict[str
         raise
 
 
-def content_bbox(image: Image.Image) -> tuple[int, int, int, int] | None:
+def content_bbox(
+    image: Image.Image,
+    background: tuple[int, int, int] = (255, 255, 255),
+) -> tuple[int, int, int, int] | None:
     rgb = image.convert("RGB")
-    white = Image.new("RGB", rgb.size, "white")
-    difference = ImageChops.difference(rgb, white).convert("L")
+    backdrop = Image.new("RGB", rgb.size, background)
+    difference = ImageChops.difference(rgb, backdrop).convert("L")
     mask = difference.point(lambda value: 255 if value > 16 else 0)
     return mask.getbbox()
 

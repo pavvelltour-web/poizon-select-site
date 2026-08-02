@@ -24,8 +24,8 @@ Signal Studio acceptance rules:
 - human review must confirm product match, uncropped source, legible marks,
   orientation and consistent subject scale before staging.
 
-The script only scales uniformly and pads the complete source onto a white
-1600x1200 canvas. It rejects unverified rights, missing identifiers, hash
+The script only scales uniformly and pads the complete source onto the approved
+cold-gray `RGB(242,243,243)` 1600x1200 canvas. It rejects unverified rights, missing identifiers, hash
 mismatches, duplicate source files, unsafe paths, wrong primary orientation and
 mirrored EXIF orientation.
 

@@ -190,14 +190,14 @@ for (const item of manifest.items) {
 
   const dimensions = readNormalizedWebpDimensions(bytes)
   if (
-    dimensions[0] !== 1200 ||
-    dimensions[1] !== 900 ||
+    dimensions[0] !== 1600 ||
+    dimensions[1] !== 1200 ||
     JSON.stringify(dimensions) !== JSON.stringify(item.output_dimensions)
   ) {
-    fail(`${item.file} is not the recorded 1200×900 image`)
+    fail(`${item.file} is not the recorded 1600×1200 image`)
   }
 }
 
 console.log(
-  `Catalog assets verified: ${expectedRootAssets} unique local 1200×900 WebP files and ${expectedGalleryAssets} gallery files`,
+  `Catalog assets verified: ${expectedRootAssets} unique local 1600×1200 WebP files and ${expectedGalleryAssets} gallery files`,
 )

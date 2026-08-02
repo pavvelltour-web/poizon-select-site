@@ -1,4 +1,5 @@
-import { useState, type CSSProperties } from "react"
+import { Heart } from "lucide-react"
+import { useState, type MouseEvent } from "react"
 
 import type { CatalogProduct } from "../../catalog/catalog"
 import type { CatalogPriceMap, PublishedCatalogItem } from "../cart"
@@ -6,7 +7,7 @@ import {
   getDisplayPrice,
   getProductPath,
   getProductTypeLabel,
-  getProductVariantLabel,
+  getProductUse,
   resolveAssetUrl,
   setImageFallback,
 } from "../landing-data"
@@ -18,71 +19,119 @@ interface ProductCardProps {
   catalogPriceLookup: CatalogPriceMap | null
   catalogStatus: "loading" | "ready" | "failed"
   publishedOffer: PublishedCatalogItem | null
+  favorite?: boolean
+  onToggleFavorite?: (slug: string) => void
+  onOpen?: (product: CatalogProduct, trigger: HTMLElement, preferredSize?: string) => void
 }
+
+function fallbackSizes(kind: CatalogProduct["kind"]): readonly string[] {
+  if (kind === "apparel") return ["XS", "S", "M", "L", "XL"]
+  if (kind === "accessory") return ["Один размер"]
+  return ["36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46"]
+}
+
 export function ProductCard({
-  featured,
   index,
   product,
   catalogPriceLookup,
   catalogStatus,
   publishedOffer,
+  favorite = false,
+  onToggleFavorite,
+  onOpen,
 }: ProductCardProps) {
   const price = getDisplayPrice(product, catalogPriceLookup)
   const [mediaReady, setMediaReady] = useState(false)
-  const variant = getProductVariantLabel(product)
   const displayPrice = price.value
-  const exceptionalStatus =
+  const primaryImage = resolveAssetUrl(product.image)
+  const pairImage = resolveAssetUrl(product.gallery[1]?.src ?? product.image)
+  const sizes = publishedOffer?.sizes.length ? publishedOffer.sizes : fallbackSizes(product.kind)
+  const cardSizes = (sizes.length >= 7 ? [sizes[2], sizes[4], sizes[6]] : sizes.slice(0, 3))
+    .filter((size): size is string => Boolean(size))
+  const available = !(
     catalogStatus === "ready" &&
     (!publishedOffer || publishedOffer.availability !== "catalog_listed")
-      ? { text: "Нет в продаже", tone: "alert" }
-      : null
+  )
+  const eta = publishedOffer?.etaMinDays && publishedOffer.etaMaxDays
+    ? `Доставка ${publishedOffer.etaMinDays}–${publishedOffer.etaMaxDays} дней`
+    : "Доставка 10–18 дней"
+
+  const openProduct = (event: MouseEvent<HTMLElement>, preferredSize?: string) => {
+    if (!onOpen || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return
+    event.preventDefault()
+    onOpen(product, event.currentTarget, preferredSize)
+  }
 
   return (
     <article
-      className={`product-card ${featured ? "product-card--feature" : ""}`}
+      className="product-card product-card--normalized"
       data-category={product.category}
       data-kind={product.kind}
-      style={{ "--card-index": Math.min(index, 12) } as CSSProperties}
+      data-od-id={`product-card-${product.slug}`}
     >
       <a
-        className="product-card__link"
+        className="product-open product-card__link"
         href={getProductPath(product)}
-        aria-label={`Открыть товар: ${product.brand} ${product.name}. Цена ${displayPrice}${exceptionalStatus ? `. ${exceptionalStatus.text}` : ""}`}
+        data-od-id={`open-product-${product.slug}`}
+        aria-label={`Открыть товар: ${product.brand} ${product.name}. Цена ${displayPrice}${available ? "" : ". Нет в продаже"}`}
+        onClick={openProduct}
       >
-        <span className={`product-card__visual ${mediaReady ? "product-card__visual--ready" : ""}`}>
+        <span className={`product-media ${mediaReady ? "is-ready" : ""}`}>
+          {index < 2 ? <span className="badge-stack"><span className="product-badge badge-choice">Выбор клиентов</span></span> : null}
           <img
             className="product-card__image"
-            src={resolveAssetUrl(product.image)}
-            width="1200"
-            height="900"
+            src={primaryImage}
+            width="1600"
+            height="1200"
             loading="lazy"
             decoding="async"
             alt=""
-            fetchPriority="auto"
             onLoad={() => setMediaReady(true)}
             onError={(event) => {
               setImageFallback(event, product.fallbackImage)
               setMediaReady(true)
             }}
           />
+          <span className="product-pair" aria-hidden="true">
+            <img
+              src={pairImage}
+              width="1600"
+              height="1200"
+              alt=""
+              loading="lazy"
+              onError={(event) => setImageFallback(event, product.fallbackImage)}
+            />
+          </span>
         </span>
-        <span className="product-card__body">
-          <span className="product-card__type">{getProductTypeLabel(product)}</span>
-          <h3>{product.brand} {product.name}</h3>
-          {variant ? <span className="product-card__variant">{variant}</span> : null}
-          {exceptionalStatus ? (
-            <span className="product-card__status" data-tone={exceptionalStatus.tone}>
-              {exceptionalStatus.text}
-            </span>
-          ) : null}
-          <span className="product-card__bottom">
-            <span>
-              <span className="sr-only">Цена товара: </span>
-              <b>{displayPrice}</b>
-            </span>
+        <span className="product-info">
+          <span className="sr-only product-card__type">{getProductTypeLabel(product)}</span>
+          <span className="product-name">{product.kind === "footwear" ? "Кроссовки " : ""}{product.brand} {product.name}</span>
+          <span className="product-use">{getProductUse(product)}</span>
+          <span className="product-price-row">
+            <span className="product-price">{displayPrice}</span>
+            <span className="product-supply">{available ? eta : "Нет в продаже"}</span>
           </span>
         </span>
       </a>
+      <button
+        className={`favorite-button ${favorite ? "is-active" : ""}`}
+        type="button"
+        data-od-id={`favorite-product-${product.slug}`}
+        aria-label={`${favorite ? "Удалить" : "Добавить"} ${product.brand} ${product.name} ${favorite ? "из избранного" : "в избранное"}`}
+        aria-pressed={favorite}
+        onClick={() => onToggleFavorite?.(product.slug)}
+      >
+        <Heart aria-hidden="true" />
+      </button>
+      <div className="card-sizes">
+        <span>Размеры {product.kind === "footwear" ? "EU" : ""}</span>
+        <div className="card-size-options">
+          {cardSizes.map((size) => (
+            <button className="card-size-button" key={size} type="button" data-od-id={`size-${product.slug}-${size.replaceAll(".", "-")}`} onClick={(event) => openProduct(event, size)}>{size}</button>
+          ))}
+          <button className="card-size-button card-size-button--all" type="button" data-od-id={`size-${product.slug}-all`} onClick={(event) => openProduct(event)}>Все</button>
+        </div>
+      </div>
     </article>
   )
 }
