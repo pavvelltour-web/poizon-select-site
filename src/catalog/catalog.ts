@@ -250,20 +250,6 @@ function nikeGallery(name: string, urls: readonly string[]): CatalogImage[] {
   }))
 }
 
-const auditedDuplicatePrimaryFrames = new Set([
-  "asics-metarise-2",
-  "asics-netburner-ballistic-ff-4",
-  "asics-sky-elite-ff-3",
-  "asics-sky-elite-ff-mt-3",
-  "hoka-ora-recovery-slide-3",
-  "jordan-luka-4",
-  "mizuno-wave-luminous-3",
-  "mizuno-wave-voltage-2",
-  "nike-ja-3",
-  "nike-sabrina-3",
-  "nike-zoom-hyperset-2",
-])
-
 export function canonicalCatalogMediaUrl(src: string): string {
   const trimmed = src.trim()
   if (!/^https?:\/\//iu.test(trimmed)) return trimmed.replace(/^\/+/, "")
@@ -315,10 +301,7 @@ function projectGallery(product: ProductSource): CatalogImage[] {
       src,
       alt: `${product.brand} ${product.name} · ракурс ${index + 1}`,
       source: "Project-generated studio reference",
-      contentSignal:
-        index === 1 && auditedDuplicatePrimaryFrames.has(assetSlug)
-          ? `${assetSlug}:0`
-          : `${assetSlug}:${index}`,
+      contentSignal: `${assetSlug}:${index}`,
     })),
   )
 }
@@ -1862,8 +1845,8 @@ function withApprovedStorefrontGallery(product: CatalogProduct): CatalogProduct 
   if (!approvedStorefrontSlugs.has(product.slug)) return product
   const gallery = [
     { src: `${approvedStorefrontMediaRoot}/${product.slug}/01-side.png`, alt: `${product.brand} ${product.name}, боковой профиль`, source: "KICKSBASE approved normalized release", contentSignal: `${product.slug}-approved-1` },
-    { src: `${approvedStorefrontMediaRoot}/${product.slug}/02-three-quarter.png`, alt: `${product.brand} ${product.name}, ракурс три четверти`, source: "KICKSBASE approved normalized release", contentSignal: `${product.slug}-approved-2` },
-    { src: `${approvedStorefrontMediaRoot}/${product.slug}/03-side.png`, alt: `${product.brand} ${product.name}, противоположный боковой профиль`, source: "KICKSBASE approved normalized release", contentSignal: `${product.slug}-approved-3` },
+    { src: `${approvedStorefrontMediaRoot}/${product.slug}/03-side.png`, alt: `${product.brand} ${product.name}, противоположный боковой профиль`, source: "KICKSBASE approved normalized release", contentSignal: `${product.slug}-approved-2` },
+    { src: `${approvedStorefrontMediaRoot}/${product.slug}/02-three-quarter.png`, alt: `${product.brand} ${product.name}, фронтальный ракурс`, source: "KICKSBASE approved normalized release", contentSignal: `${product.slug}-approved-3` },
     { src: `${approvedStorefrontMediaRoot}/${product.slug}/04-rear.png`, alt: `${product.brand} ${product.name}, вид сзади`, source: "KICKSBASE approved normalized release", contentSignal: `${product.slug}-approved-4` },
     { src: `${approvedStorefrontMediaRoot}/${product.slug}/05-sole.png`, alt: `${product.brand} ${product.name}, подошва`, source: "KICKSBASE approved normalized release", contentSignal: `${product.slug}-approved-5` },
   ] as const

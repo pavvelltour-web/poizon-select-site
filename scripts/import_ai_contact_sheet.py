@@ -6,17 +6,19 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+from collections import deque
 from datetime import UTC, datetime
 from pathlib import Path
 
-from PIL import Image, ImageOps
+from PIL import Image, ImageFilter, ImageOps
 
 ROOT = Path(__file__).resolve().parents[1]
 CATALOG = ROOT / "public" / "catalog"
 GALLERY = CATALOG / "gallery"
 PROVENANCE = ROOT / "generated" / "ai-product-renders"
-OUTPUT_SIZE = (1200, 900)
-PANEL_SAFE_INSET_RATIO = 0.13
+OUTPUT_SIZE = (1600, 1200)
+BACKGROUND = (242, 243, 243)
+SAFE_INSET = (160, 120)
 
 
 def sha256(path: Path) -> str:
@@ -27,80 +29,79 @@ def sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-def remove_rear_edge_artifacts(panel: Image.Image) -> Image.Image:
-    mask = ImageOps.invert(panel.convert("L")).point(lambda value: 255 if value > 12 else 0)
-    width, height = mask.size
-    pixels = mask.load()
-    visited: set[tuple[int, int]] = set()
-    components: list[tuple[int, int, int, int, int, list[tuple[int, int]]]] = []
+def border_connected_background_alpha(image: Image.Image, tolerance: int = 12) -> Image.Image:
+    """Make only near-white background connected to a panel edge transparent."""
 
-    for start_y in range(height):
-        for start_x in range(width):
-            if pixels[start_x, start_y] == 0 or (start_x, start_y) in visited:
-                continue
+    rgb = image.convert("RGB")
+    width, height = rgb.size
+    pixels = rgb.load()
+    corners = (
+        pixels[0, 0],
+        pixels[width - 1, 0],
+        pixels[0, height - 1],
+        pixels[width - 1, height - 1],
+    )
+    key = tuple(sorted(pixel[channel] for pixel in corners)[len(corners) // 2] for channel in range(3))
+    eligible = bytearray(width * height)
+    for y in range(height):
+        row = y * width
+        for x in range(width):
+            pixel = pixels[x, y]
+            if max(abs(pixel[channel] - key[channel]) for channel in range(3)) <= tolerance:
+                eligible[row + x] = 1
 
-            stack = [(start_x, start_y)]
-            visited.add((start_x, start_y))
-            coords: list[tuple[int, int]] = []
-            min_x = max_x = start_x
-            min_y = max_y = start_y
-            while stack:
-                x, y = stack.pop()
-                coords.append((x, y))
-                min_x = min(min_x, x)
-                max_x = max(max_x, x)
-                min_y = min(min_y, y)
-                max_y = max(max_y, y)
-                for nx, ny in ((x - 1, y), (x + 1, y), (x, y - 1), (x, y + 1)):
-                    if (
-                        0 <= nx < width
-                        and 0 <= ny < height
-                        and pixels[nx, ny] != 0
-                        and (nx, ny) not in visited
-                    ):
-                        visited.add((nx, ny))
-                        stack.append((nx, ny))
-            if len(coords) >= 12:
-                components.append((len(coords), min_x, min_y, max_x, max_y, coords))
+    background = bytearray(width * height)
+    queue: deque[int] = deque()
+    for x in range(width):
+        queue.append(x)
+        queue.append((height - 1) * width + x)
+    for y in range(1, height - 1):
+        queue.append(y * width)
+        queue.append(y * width + width - 1)
+    while queue:
+        index = queue.popleft()
+        if background[index] or not eligible[index]:
+            continue
+        background[index] = 1
+        x = index % width
+        if x:
+            queue.append(index - 1)
+        if x + 1 < width:
+            queue.append(index + 1)
+        if index >= width:
+            queue.append(index - width)
+        if index + width < width * height:
+            queue.append(index + width)
 
-    if not components:
-        return panel
-
-    largest_area = max(component[0] for component in components)
-    cleaned = panel.copy()
-    cleaned_pixels = cleaned.load()
-    for area, min_x, _min_y, max_x, _max_y, coords in components:
-        center_x = (min_x + max_x) / 2 / width
-        near_edge = center_x < 0.14 or center_x > 0.73
-        smaller_than_subject = area < largest_area * 0.8
-        if near_edge and smaller_than_subject:
-            for x, y in coords:
-                cleaned_pixels[x, y] = (255, 255, 255)
-
-    return cleaned
+    alpha = Image.frombytes("L", (width, height), bytes(0 if value else 255 for value in background))
+    return alpha.filter(ImageFilter.GaussianBlur(0.45))
 
 
 def normalize_panel(panel: Image.Image, view_index: int) -> Image.Image:
     panel = panel.convert("RGB")
-    inset_x = int(panel.width * PANEL_SAFE_INSET_RATIO)
-    inset_y = int(panel.height * PANEL_SAFE_INSET_RATIO)
-    if inset_x > 0 and inset_y > 0:
-        panel = panel.crop((inset_x, inset_y, panel.width - inset_x, panel.height - inset_y))
-    if view_index == 3:
-        panel = remove_rear_edge_artifacts(panel)
-    # Trim almost-white gutters from the generated contact sheet, then re-center
-    # on a pure white ecommerce canvas.
-    diff = ImageOps.invert(panel.convert("L")).point(lambda value: 255 if value > 12 else 0)
-    bbox = diff.getbbox()
-    if bbox is not None:
-        panel = panel.crop(bbox)
-    canvas = Image.new("RGB", OUTPUT_SIZE, "white")
-    contained = ImageOps.contain(panel, (1120, 820), Image.Resampling.LANCZOS)
+    # Trim only detected studio gutter. Fixed-percentage cropping destroyed full
+    # heels and outsole edges, especially in the rear footwear panel.
+    alpha = border_connected_background_alpha(panel)
+    bbox = alpha.point(lambda value: 255 if value > 8 else 0).getbbox()
+    if bbox is None:
+        raise RuntimeError(f"contact-sheet view {view_index + 1} has no product foreground")
+    left, top, right, bottom = bbox
+    if left <= 1 or top <= 1 or right >= panel.width - 1 or bottom >= panel.height - 1:
+        raise RuntimeError(
+            f"contact-sheet view {view_index + 1} touches a panel edge; regenerate it uncropped"
+        )
+    panel = panel.convert("RGBA")
+    panel.putalpha(alpha)
+    panel = panel.crop(bbox)
+    canvas = Image.new("RGB", OUTPUT_SIZE, BACKGROUND)
+    contained = ImageOps.contain(
+        panel,
+        (OUTPUT_SIZE[0] - 2 * SAFE_INSET[0], OUTPUT_SIZE[1] - 2 * SAFE_INSET[1]),
+        Image.Resampling.LANCZOS,
+    )
     x = (OUTPUT_SIZE[0] - contained.width) // 2
     y = (OUTPUT_SIZE[1] - contained.height) // 2
-    canvas.paste(contained, (x, y))
-    if view_index == 3:
-        canvas = remove_rear_edge_artifacts(canvas)
+    canvas.paste(contained.convert("RGB"), (x, y), contained.getchannel("A"))
     return canvas
 
 

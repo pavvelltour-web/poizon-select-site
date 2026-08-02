@@ -7,31 +7,24 @@ catalog. The machine-readable evidence is in `current-catalog-audit.json`.
 
 - 500 WebP files checked: 100 root images and 400 gallery images.
 - 0 files have confirmed official-source provenance in the current manifest.
-- 11 exact duplicate groups were found. Every group repeats a primary image as
-  gallery image 2.
-- 441 files fail the automated 8% composition safe-area check.
+- 2 exact duplicate groups remain in the legacy WebP fallback. Both products
+  use distinct approved PNG sets in the active storefront media resolver.
+- 0 files fail the automated 8% composition safe-area check.
 - The audit does not alter or promote any image.
 
 Exact primary/gallery duplicates:
 
-- `asics-metarise-2`
-- `asics-netburner-ballistic-ff-4`
 - `asics-sky-elite-ff-3`
-- `asics-sky-elite-ff-mt-3`
-- `hoka-ora-recovery-slide-3`
-- `jordan-luka-4`
-- `mizuno-wave-luminous-3`
-- `mizuno-wave-voltage-2`
-- `nike-ja-3`
 - `nike-sabrina-3`
-- `nike-zoom-hyperset-2`
 
 ## Interpretation
 
-The hashes prove exact repetition, but a pixel audit cannot reliably identify a
-shoe's toe direction or tell whether the upstream source was already cropped
-before it was padded. Those decisions remain mandatory human QA. Current assets
-must not be described as Poizon originals or replaced wholesale.
+The active `unified-catalog-media.json` release gate covers 100 products and
+500 resolved frames, including the approved overrides. The hashes prove exact
+repetition, but a pixel audit cannot reliably identify a shoe's toe direction
+or tell whether the upstream source was already cropped before it was padded.
+Those decisions remain mandatory human QA. Current assets must not be described
+as Poizon originals.
 
 The next safe step is a small official-source pilot. Supply files obtained via
 an approved Poizon/Dewu merchant integration or licensed supplier export, plus

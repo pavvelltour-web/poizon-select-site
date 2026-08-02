@@ -80,9 +80,9 @@ if (
 }
 if (
   packageManifest.scripts?.["verify:release"] !==
-  "npm run verify:assets && npm run verify:release-rights && npm run media:storefront:qa"
+  "npm run verify:assets && npm run verify:release-rights && npm run media:storefront:qa && npm run media:unified:qa"
 ) {
-  fail("verify:release must include assets, release rights and approved storefront media QA")
+  fail("verify:release must include assets, release rights, approved media and unified catalog QA")
 }
 
 const dockerfile = await text("Dockerfile")

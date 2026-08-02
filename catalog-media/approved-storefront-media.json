@@ -331,12 +331,12 @@
           "orientation": "rear-facing",
           "composition": "pair",
           "source_kind": "generated-reference",
-          "sha256": "ec37d86d0c53254dedb5e0260b5c00ef5dd689ce2d719d69a3c745259d24d695",
+          "sha256": "0f41d8c55a845d96e48fea40eeea48b424f21ed3f215e44f0e20dd111d3025d4",
           "generation": {
             "model": "gpt-image-2",
-            "source_file": "catalog-media/generated-reference/approved-missing-angles/new-balance-two-wxy-v5-rear-chroma.png",
-            "source_sha256": "901c517ae68d9d8c8721054fd9ffc6421cb05cedca945d4aba95b267d47d4eb4",
-            "prompt_reference": "catalog-media/generated-reference/approved-missing-angles/PROMPTS.md"
+            "source_file": "catalog-media/generated-reference/unified-missing-angles/new-balance-two-wxy-v5-rear.png",
+            "source_sha256": "02d4e2c25747d5148f751b37bd6f5362971fda0f4aed0c791854d2cffe6a11d4",
+            "prompt_reference": "catalog-media/generated-reference/unified-missing-angles/GENERATION_NOTES.md"
           }
         },
         {

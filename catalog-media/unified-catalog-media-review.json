@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "status": "approved",
+  "reviewer_type": "agent-assisted-manual",
+  "reviewed_at": "2026-08-02T21:18:07Z",
+  "reviewed_frame_count": 500,
+  "manifest_sha256": "756ad8e59ce12ad46e884929dfb87d5b980c253ab1daccc11a26453c8805a80a",
+  "checks": [
+    "complete product remains visible without edge crop",
+    "uniform RGB 242,243,243 studio background",
+    "profile-specific angle order and subject scale",
+    "safe margins and centered composition",
+    "desktop and mobile product-gallery presentation"
+  ],
+  "evidence": {
+    "contact_sheets": "tmp/media-audit/final/frame-1-all-100.jpg through frame-5-all-100.jpg",
+    "critical_product": "nike-sabrina-3 frame 4 reviewed on desktop and mobile",
+    "generated_angle_replacements": 14,
+    "replacement_review": "all generated replacement outputs reviewed individually before normalization"
+  },
+  "note": "This record approves the active rendered set only. It does not claim official Poizon or manufacturer origin."
+}

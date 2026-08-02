@@ -109,8 +109,7 @@ describe("catalogProducts", () => {
       expect(product.categoryLabel.length).toBeGreaterThan(2)
       expect(product.query.length).toBeGreaterThan(8)
       expect(product.fallbackImage).toMatch(/^catalog\/[a-z0-9-]+\.webp$/)
-      expect(product.gallery.length).toBeGreaterThanOrEqual(4)
-      expect(product.gallery.length).toBeLessThanOrEqual(5)
+      expect(product.gallery).toHaveLength(5)
       expect(product.image).toBe(product.gallery[0]?.src)
       if (!approvedStorefrontSlugs.includes(product.slug as typeof approvedStorefrontSlugs[number])) {
         expect(product.gallery.map((image) => image.src)).toContain(product.fallbackImage)
@@ -134,22 +133,7 @@ describe("catalogProducts", () => {
     }
 
     expect(imagePaths.size).toBe(100)
-    expect(
-      catalogProducts
-        .filter((product) => product.gallery.length === 4)
-        .map((product) => product.slug)
-        .sort(),
-    ).toEqual([
-      "asics-metarise-2",
-      "asics-netburner-ballistic-ff-4",
-      "asics-sky-elite-ff-mt-3",
-      "hoka-ora-recovery-slide-3",
-      "jordan-luka-4",
-      "mizuno-wave-luminous-3",
-      "mizuno-wave-voltage-2",
-      "nike-ja-3",
-      "nike-zoom-hyperset-2",
-    ])
+    expect(catalogProducts.every((product) => product.gallery.length === 5)).toBe(true)
   })
 
   it("keeps the approved preview, product sheet and PDP on the same five images", () => {
@@ -157,8 +141,8 @@ describe("catalogProducts", () => {
       const product = findProductBySlug(slug)
       const expectedGallery = [
         `${approvedStorefrontMediaRoot}/${slug}/01-side.png`,
-        `${approvedStorefrontMediaRoot}/${slug}/02-three-quarter.png`,
         `${approvedStorefrontMediaRoot}/${slug}/03-side.png`,
+        `${approvedStorefrontMediaRoot}/${slug}/02-three-quarter.png`,
         `${approvedStorefrontMediaRoot}/${slug}/04-rear.png`,
         `${approvedStorefrontMediaRoot}/${slug}/05-sole.png`,
       ]

@@ -355,7 +355,7 @@ describe("LandingPage", () => {
     })
     expect(heroImage).toHaveAttribute(
       "src",
-      expect.stringContaining("asics-sky-elite-ff-3/02-three-quarter.png"),
+      expect.stringContaining("asics-sky-elite-ff-3/03-side.png"),
     )
     expect(screen.getByText("Фото товара 2 из 5")).toBeInTheDocument()
 
