@@ -86,9 +86,10 @@ describe("catalogProducts", () => {
       expect(product.fallbackImage).toMatch(/^catalog\/[a-z0-9-]+\.webp$/)
       expect(product.gallery).toHaveLength(5)
       expect(product.image).toBe(product.gallery[0]?.src)
-      expect(product.gallery.map((image) => image.src)).toContain(product.fallbackImage)
-      expect(product.image).toBe(product.fallbackImage)
-      expect(product.gallery.map((image) => image.src)).toEqual(fallbackGallery)
+      const galleryPaths = product.gallery.map((image) => image.src)
+      expect(galleryPaths).toContain(product.fallbackImage)
+      expect(new Set(galleryPaths).size).toBe(5)
+      expect(galleryPaths.every((path) => fallbackGallery.includes(path))).toBe(true)
       expect(
         product.gallery.every(
           (image) => image.source === "Project-generated studio reference",

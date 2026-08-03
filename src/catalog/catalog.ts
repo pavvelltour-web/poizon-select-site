@@ -224,29 +224,6 @@ export function formatRub(amount: number): string {
     .replace(/\u00a0/g, " ")} ₽`
 }
 
-function asicsGallery(code: string, label: string): CatalogImage[] {
-  const views = [
-    ["SR_RT_GLB", "side"],
-    ["SB_FR_GLB", "front"],
-    ["SB_FL_GLB", "side alternate"],
-    ["SB_BT_GLB", "outsole"],
-  ] as const
-
-  return views.map(([view, angle]) => ({
-    src: `https://images.asics.com/is/image/asics/${code}_${view}?$sfcc-product$&wid=1200&hei=900`,
-    alt: `${label} · ${angle}`,
-    source: "ASICS product media",
-  }))
-}
-
-function nikeGallery(name: string, urls: readonly string[]): CatalogImage[] {
-  return urls.slice(0, 7).map((src, index) => ({
-    src,
-    alt: `${name} · ракурс ${index + 1}`,
-    source: "Nike product media",
-  }))
-}
-
 function projectGallery(product: ProductSource): CatalogImage[] {
   const assetSlug = product.assetSlug ?? product.slug
   const frames = [
@@ -278,7 +255,6 @@ const sportProducts: readonly ProductSource[] = [
     marketPrice: "17,5–20,5 тыс. ₽",
     priceBasis: MARKET_PRICE_BASIS,
     chinaPriceYuan: 980,
-    gallery: asicsGallery("1051A080_100", "ASICS SKY ELITE FF 3"),
   },
   {
     slug: "asics-sky-elite-ff-mt-3",
@@ -293,7 +269,6 @@ const sportProducts: readonly ProductSource[] = [
     marketPrice: "20–22,5 тыс. ₽",
     priceBasis: MARKET_PRICE_BASIS,
     chinaPriceYuan: 1080,
-    gallery: asicsGallery("1051A081_100", "ASICS SKY ELITE FF MT 3"),
   },
   {
     slug: "asics-metarise-2",
@@ -308,7 +283,6 @@ const sportProducts: readonly ProductSource[] = [
     marketPrice: "24–34 тыс. ₽",
     priceBasis: MARKET_PRICE_BASIS,
     chinaPriceYuan: 1500,
-    gallery: asicsGallery("1051A089_100", "ASICS METARISE 2"),
   },
   {
     slug: "asics-netburner-ballistic-ff-4",
@@ -336,7 +310,6 @@ const sportProducts: readonly ProductSource[] = [
     marketPrice: "14–16 тыс. ₽",
     priceBasis: MARKET_PRICE_BASIS,
     chinaPriceYuan: 760,
-    gallery: asicsGallery("1071A102_100", "ASICS GEL-TACTIC 13"),
   },
   {
     slug: "mizuno-wave-lightning-z8",
@@ -429,12 +402,6 @@ const sportProducts: readonly ProductSource[] = [
     marketPrice: "24–25 тыс. ₽",
     priceBasis: MARKET_PRICE_BASIS,
     chinaPriceYuan: 1180,
-    gallery: nikeGallery("Nike ZOOM HYPERSET 2", [
-      "https://static.nike.com/a/images/t_web_pdp_936_v2/f_auto,u_9ddf04c7-2a9a-4d76-add1-d15af8f0263d,c_scale,fl_relative,w_1.0,h_1.0,fl_layer_apply/f8bf3cba-270d-47c7-87e4-d7e8b69d2f38/NIKE+ZOOM+HYPERSET+2+SE.png",
-      "https://static.nike.com/a/images/t_default/f8bf3cba-270d-47c7-87e4-d7e8b69d2f38/NIKE+ZOOM+HYPERSET+2+SE.png",
-      "https://static.nike.com/a/images/t_PDP_144_v1/f_auto,q_auto:eco/f8bf3cba-270d-47c7-87e4-d7e8b69d2f38/NIKE+ZOOM+HYPERSET+2+SE.png",
-      "https://static.nike.com/a/images/t_web_pdp_535_v2/f_auto,u_9ddf04c7-2a9a-4d76-add1-d15af8f0263d,c_scale,fl_relative,w_1.0,h_1.0,fl_layer_apply/f8bf3cba-270d-47c7-87e4-d7e8b69d2f38/NIKE+ZOOM+HYPERSET+2+SE.png",
-    ]),
   },
   {
     slug: "nike-hyperace-3-se",
@@ -1177,12 +1144,12 @@ const expandedProducts: readonly ProductSource[] = [
   {
     slug: "oofos-ooahh-slide",
     brand: "OOFOS",
-    name: "OOahh Slide",
+    name: "OOHH Slide",
     category: "recovery",
     categoryLabel: "Восстановление · слайды",
     kind: "footwear",
     sportPriority: true,
-    query: "OOFOS OOahh Slide recovery sandal",
+    query: "OOFOS OOHH Slide recovery sandal",
     note: "Классический recovery-слайд после зала · премиум-дополнение к Nike Calm",
     marketPrice: "6–10 тыс. ₽",
     priceBasis: MARKET_PRICE_BASIS,
@@ -1679,6 +1646,51 @@ const performanceBasketballOverrides: Record<string, Partial<ProductSource>> = {
   },
 }
 
+function mergeGalleryImages(
+  sourceGallery: readonly CatalogImage[],
+  fallbackGallery: readonly CatalogImage[],
+): readonly CatalogImage[] {
+  const bySource = new Map<string, CatalogImage>()
+  for (const image of [...sourceGallery, ...fallbackGallery]) {
+    if (bySource.has(image.src)) continue
+    bySource.set(image.src, image)
+  }
+  return [...bySource.values()].slice(0, 5)
+}
+
+const catalogGalleryOrders: Record<string, readonly number[]> = {
+  "oofos-ooahh-slide": [1, 0, 2, 3, 4],
+  "nike-sabrina-3": [0, 1, 3, 2, 4],
+  "nike-kd-18": [0, 1, 3, 2, 4],
+}
+
+function applyGalleryOrder(
+  slug: string,
+  gallery: readonly CatalogImage[],
+): readonly CatalogImage[] {
+  const order = catalogGalleryOrders[slug]
+  if (!order) return gallery
+
+  const seen = new Set<number>()
+  const reordered = order
+    .map((index) => {
+      const image = gallery[index]
+      if (image) {
+        seen.add(index)
+      }
+      return image
+    })
+    .filter((entry): entry is CatalogImage => Boolean(entry))
+
+  for (let index = 0; index < gallery.length; index += 1) {
+    if (!seen.has(index)) {
+      reordered.push(gallery[index]!)
+    }
+  }
+
+  return reordered
+}
+
 const requestPriceGuides: Record<string, string> = {
   "asics-gel-1130-black-pure-silver": "11–16 тыс. ₽",
   "asics-gel-nyc-cream-oyster-grey": "14–21 тыс. ₽",
@@ -1711,7 +1723,10 @@ const requestPriceGuides: Record<string, string> = {
 
 function withFallbackGallery(product: ProductSource): CatalogProduct {
   const fallbackImage = `catalog/${product.assetSlug ?? product.slug}.webp`
-  const gallery = projectGallery(product)
+  const sourceGallery = product.gallery ?? []
+  const orderedGallery = applyGalleryOrder(product.slug, sourceGallery)
+  const fallbackGallery = projectGallery(product)
+  const gallery = mergeGalleryImages(orderedGallery, fallbackGallery)
   const orderQuote =
     product.chinaPriceYuan === undefined
       ? undefined
@@ -1863,3 +1878,6 @@ export function findProductBySlug(slug: string | null): CatalogProduct | null {
 
   return catalogProducts.find((product) => product.slug === slug) ?? null
 }
+
+
+

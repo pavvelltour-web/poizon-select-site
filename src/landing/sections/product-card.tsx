@@ -19,6 +19,8 @@ interface ProductCardProps {
   openProduct: (product: CatalogProduct, trigger: HTMLButtonElement) => void
 }
 
+const HOVER_PREVIEW_IMAGE_INDEX = 2
+
 export function ProductCard({
   featured,
   index,
@@ -27,7 +29,11 @@ export function ProductCard({
 }: ProductCardProps) {
   const price = getDisplayPrice(product)
   const tags = getProductTags(product)
-  const galleryPreview = product.gallery[1]?.src ?? product.fallbackImage
+  const galleryPreview =
+    product.gallery[HOVER_PREVIEW_IMAGE_INDEX]?.src ??
+    product.gallery[1]?.src ??
+    product.fallbackImage
+  const hoverLabel = `Фото товара ${HOVER_PREVIEW_IMAGE_INDEX + 1} из 5`
 
   return (
     <button
@@ -63,6 +69,9 @@ export function ProductCard({
             setImageFallback(event, product.fallbackImage)
           }}
         />
+        <span className="product-card__angle-strip" aria-hidden="true">
+          <span>{hoverLabel}</span>
+        </span>
         <span className="product-card__badge">{getProductBadge(product)}</span>
         <span className="product-card__category">{product.categoryLabel}</span>
         <span className="product-card__price-chip">{price.value}</span>
