@@ -44,7 +44,10 @@ export function ProductCard({
   const [mediaReady, setMediaReady] = useState(false)
   const displayPrice = price.value
   const primaryImage = resolveAssetUrl(product.image)
-  const pairImage = resolveAssetUrl(product.gallery[1]?.src ?? product.image)
+  // The third frame is the canonical front three-quarter pair view for footwear.
+  // Keep the second gallery image untouched for its own product-gallery position.
+  const hoverImageIndex = product.kind === "footwear" ? 2 : 1
+  const hoverImage = resolveAssetUrl(product.gallery[hoverImageIndex]?.src ?? product.image)
   const sizes = publishedOffer?.sizes.length ? publishedOffer.sizes : fallbackSizes(product.kind)
   const cardSizes = (sizes.length >= 7 ? [sizes[2], sizes[4], sizes[6]] : sizes.slice(0, 3))
     .filter((size): size is string => Boolean(size))
@@ -92,9 +95,9 @@ export function ProductCard({
               setMediaReady(true)
             }}
           />
-          <span className="product-pair" aria-hidden="true">
+          <span className="product-pair" aria-hidden="true" data-hover-frame={hoverImageIndex + 1}>
             <img
-              src={pairImage}
+              src={hoverImage}
               width="1600"
               height="1200"
               alt=""

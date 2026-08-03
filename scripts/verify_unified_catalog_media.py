@@ -33,7 +33,12 @@ MIN_SAFE_INSET_Y = 120
 MAX_CENTER_OFFSET_X = 0.025
 MAX_CENTER_OFFSET_Y = 0.025
 MAX_COHORT_SCALE_SPREAD = 0.075
-ORIGIN_KINDS = {"project-generated-original", "owner-provided", "supplier-original"}
+ORIGIN_KINDS = {
+    "project-generated-original",
+    "project-generated-derivative",
+    "owner-provided",
+    "supplier-original",
+}
 RIGHTS_STATUSES = {"owned", "licensed", "supplier-api"}
 SHA256_PATTERN = re.compile(r"^[0-9a-f]{64}$")
 ISO_UTC_PATTERN = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")

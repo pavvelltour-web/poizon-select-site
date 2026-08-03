@@ -2,22 +2,24 @@
   "schema_version": 1,
   "status": "approved",
   "reviewer_type": "agent-assisted-manual",
-  "reviewed_at": "2026-08-02T21:18:07Z",
+  "reviewed_at": "2026-08-03T08:09:58Z",
   "reviewed_frame_count": 500,
   "manifest_sha256_mode": "text-lf",
-  "manifest_sha256": "1ad4d58a4aada0090bf45e710717b4b1b39424c59507e4861c45b0e88c76c59f",
+  "manifest_sha256": "8ba5aa9fc105e18e88ccdddfd510bbf680925c63f6a5af60ce2aff9d7b99962e",
   "checks": [
     "complete product remains visible without edge crop",
     "uniform RGB 242,243,243 studio background",
     "profile-specific angle order and subject scale",
     "safe margins and centered composition",
-    "desktop and mobile product-gallery presentation"
+    "desktop and mobile product-gallery presentation",
+    "logical frame 3 for footwear and slides shows a complete pair in a front three-quarter presentation"
   ],
   "evidence": {
-    "contact_sheets": "tmp/media-audit/final/frame-1-all-100.jpg through frame-5-all-100.jpg",
+    "contact_sheets": "tmp/media-audit/final/frame-1-all-100.jpg through frame-5-all-100.jpg; tmp/media-audit/p3-all-footwear-and-slides-59.jpg",
     "critical_product": "nike-sabrina-3 frame 4 reviewed on desktop and mobile",
-    "generated_angle_replacements": 14,
-    "replacement_review": "all generated replacement outputs reviewed individually before normalization"
+    "generated_angle_replacements": 49,
+    "replacement_review": "all 49 logical-frame-three replacement outputs and the complete 59-product footwear/slide frame-three contact sheet were reviewed after normalization",
+    "second_frame_integrity": "SHA-256 comparison confirmed all 100 active gallery frame 2 files remain byte-identical"
   },
-  "note": "This record approves the active rendered set only. It does not claim official Poizon or manufacturer origin."
+  "note": "This record retains the prior review of 451 unchanged active frames and records review of 49 logical-frame-three replacements. It approves the active rendered set only and does not claim official Poizon or manufacturer origin."
 }

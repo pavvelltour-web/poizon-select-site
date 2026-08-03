@@ -28,6 +28,7 @@ ROOT = Path(__file__).resolve().parents[1]
 CATALOG = ROOT / "public" / "catalog"
 APPROVED_PRODUCTS = ROOT / "public" / "storefront-media" / "approved" / "products"
 GENERATED_OVERRIDES = ROOT / "catalog-media" / "generated-reference" / "unified-missing-angles"
+FRONT_PAIR_OVERRIDES = ROOT / "catalog-media" / "generated-reference" / "unified-front-pairs"
 MANIFEST = ROOT / "catalog-media" / "unified-catalog-media.json"
 APPROVED_MANIFEST = ROOT / "catalog-media" / "approved-storefront-media.json"
 CATALOG_GENERATOR = ROOT / "scripts" / "generate_catalog_art.py"
@@ -112,6 +113,60 @@ RECOVERY = {
 }
 HEADWEAR = {"new-era-yankees-59fifty-black"}
 
+# Only logical frame three is replaced for these products. Frame two stays byte-for-byte
+# intact, while hover gets a complete, front three-quarter pair view.
+FRONT_PAIR_OVERRIDE_SLUGS = frozenset({
+    "adidas-campus-00s-core-black",
+    "adidas-crazyflight-6-mid",
+    "adidas-gazelle-indoor-green",
+    "adidas-handball-spezial-core-black",
+    "adidas-harden-volume-9",
+    "adidas-samba-og-white-black",
+    "adidas-stabil-16-indoor",
+    "asics-gel-kayano-14-white-midnight",
+    "asics-gel-kayano-20-glacier-grey",
+    "asics-gel-nyc-cream-oyster-grey",
+    "asics-gel-1130-black-pure-silver",
+    "asics-gel-tactic-13",
+    "asics-metarise-2",
+    "asics-netburner-ballistic-ff-4",
+    "asics-sky-elite-ff-mt-3",
+    "asics-upcourt-6",
+    "converse-chuck-70-high-black",
+    "crocs-mellow-recovery-slide",
+    "hoka-ora-recovery-slide-3",
+    "jordan-luka-4",
+    "mizuno-cyclone-speed-5",
+    "mizuno-wave-lightning-z8",
+    "mizuno-wave-lightning-z8-mid",
+    "mizuno-wave-luminous-3",
+    "mizuno-wave-momentum-3",
+    "mizuno-wave-momentum-elite-mid",
+    "mizuno-wave-momentum-pro",
+    "mizuno-wave-voltage-2",
+    "new-balance-1000-black",
+    "new-balance-1906r-silver-metallic",
+    "new-balance-2002r-protection-pack",
+    "new-balance-530-white-silver-navy",
+    "new-balance-9060-rain-cloud",
+    "nike-air-force-1-07-white",
+    "nike-air-max-95-black-anthracite",
+    "nike-calm-slide",
+    "nike-dunk-low-panda",
+    "nike-gt-cut-academy",
+    "nike-hyperace-3-se",
+    "nike-ja-3",
+    "nike-lebron-nxxt-genisus",
+    "nike-mind-001-slide-black",
+    "nike-zoom-hyperset-2",
+    "nike-zoom-vomero-5-photon-dust",
+    "oofos-ooahh-slide",
+    "salomon-xt-6-white-lunar-rock",
+    "timberland-field-boot-beef-broccoli",
+    "vans-old-skool-36-black-white",
+    "way-of-wade-all-city-12",
+})
+
 
 @dataclass(frozen=True)
 class FrameSpec:
@@ -129,14 +184,14 @@ PROFILE_SPECS: dict[str, tuple[FrameSpec, ...]] = {
     "footwear": (
         FrameSpec("primary", "side", "single", target_width=1184, max_height=760),
         FrameSpec("gallery", "opposite-side", "single", target_width=1120, max_height=760),
-        FrameSpec("gallery", "front", "single-or-pair", target_height=800, max_width=1184),
+        FrameSpec("gallery", "three-quarter", "pair", target_width=1184, max_height=760),
         FrameSpec("gallery", "rear", "single-or-pair", target_height=760, max_width=1088),
         FrameSpec("gallery", "sole", "single-or-pair", target_height=840, max_width=1152, rotate_portrait=True),
     ),
     "slide": (
         FrameSpec("primary", "side", "single-or-pair", target_width=1088, max_height=720),
         FrameSpec("gallery", "opposite-side", "single-or-pair", target_width=1040, max_height=720),
-        FrameSpec("gallery", "front", "pair", target_width=960, max_height=780),
+        FrameSpec("gallery", "three-quarter", "pair", target_width=1056, max_height=760),
         FrameSpec("gallery", "rear", "pair", target_width=960, max_height=780),
         FrameSpec("gallery", "sole", "single-or-pair", target_width=1000, max_height=780),
     ),
@@ -254,6 +309,9 @@ def source_paths(slug: str) -> tuple[Path, ...]:
     for index, override in overrides.items():
         if override.is_file():
             paths[index] = override
+    front_pair = FRONT_PAIR_OVERRIDES / f"{slug}-front-three-quarter-pair.webp"
+    if slug in FRONT_PAIR_OVERRIDE_SLUGS and front_pair.is_file():
+        paths[2] = front_pair
     return tuple(paths)
 
 
@@ -273,7 +331,7 @@ def subject_cutout(path: Path) -> Image.Image:
         opened.load()
         rgb = ImageOps.exif_transpose(opened).convert("RGB")
     key = border_key(rgb)
-    if GENERATED_OVERRIDES in path.parents:
+    if GENERATED_OVERRIDES in path.parents or FRONT_PAIR_OVERRIDES in path.parents:
         alpha = border_connected_background_alpha(rgb, tolerance=4)
     else:
         difference = ImageChops.difference(rgb, Image.new("RGB", rgb.size, key))
@@ -333,19 +391,26 @@ def save(image: Image.Image, path: Path) -> None:
 
 
 def provenance(slug: str, position: int, source: Path) -> dict[str, object]:
-    if GENERATED_OVERRIDES in source.parents:
+    if FRONT_PAIR_OVERRIDES in source.parents:
+        origin = source
+        generator = "scripts/build_footwear_front_pair_overrides.py"
+        origin_kind = "project-generated-derivative"
+    elif GENERATED_OVERRIDES in source.parents:
         origin = source
         generator = "OpenAI image generation from the existing five-frame product reference set"
+        origin_kind = "project-generated-original"
     elif slug in APPROVED_SLUGS:
         origin = APPROVED_MANIFEST
         generator = "KICKSBASE approved storefront media pipeline"
+        origin_kind = "project-generated-original"
     else:
         origin = CATALOG_GENERATOR
         generator = "scripts/generate_catalog_art.py"
+        origin_kind = "project-generated-original"
 
     origin_hash_mode = hash_mode_for_path(origin)
     return {
-        "origin_kind": "project-generated-original",
+        "origin_kind": origin_kind,
         "origin_reference": origin.resolve().relative_to(ROOT.resolve()).as_posix(),
         "origin_hash_mode": origin_hash_mode,
         "origin_sha256": sha256_file(origin, mode=origin_hash_mode),
@@ -358,7 +423,12 @@ def provenance(slug: str, position: int, source: Path) -> dict[str, object]:
     }
 
 
-def build(*, dry_run: bool, only_slugs: set[str] | None = None) -> dict[str, object]:
+def build(
+    *,
+    dry_run: bool,
+    only_slugs: set[str] | None = None,
+    only_positions: set[int] | None = None,
+) -> dict[str, object]:
     slugs = sorted(path.stem for path in CATALOG.glob("*.webp"))
     if len(slugs) != 100 or len(set(slugs)) != 100:
         raise RuntimeError(f"Expected 100 catalog slugs, found {len(slugs)}")
@@ -377,7 +447,8 @@ def build(*, dry_run: bool, only_slugs: set[str] | None = None) -> dict[str, obj
             # approved builder. Keep those pixels intact and normalize only the
             # 92 legacy sets here so both pipelines remain reproducible.
             selected = only_slugs is None or slug in only_slugs
-            should_render = selected and (
+            selected_position = only_positions is None or index in only_positions
+            should_render = selected and selected_position and (
                 slug not in APPROVED_SLUGS or GENERATED_OVERRIDES in source.parents
             )
             if should_render:
@@ -428,12 +499,21 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--only", action="append", default=[], metavar="SLUG")
+    parser.add_argument("--frame", action="append", default=[], type=int, metavar="POSITION")
     parser.add_argument("--manifest-only", action="store_true")
     args = parser.parse_args()
-    if args.manifest_only and args.only:
-        parser.error("--manifest-only cannot be combined with --only")
+    if args.manifest_only and (args.only or args.frame):
+        parser.error("--manifest-only cannot be combined with --only or --frame")
+    if any(position not in {1, 2, 3, 4, 5} for position in args.frame):
+        parser.error("--frame must be between 1 and 5")
     selection = set() if args.manifest_only else set(args.only) or None
-    print(json.dumps(build(dry_run=args.dry_run, only_slugs=selection), ensure_ascii=False))
+    positions = set(args.frame) or None
+    print(
+        json.dumps(
+            build(dry_run=args.dry_run, only_slugs=selection, only_positions=positions),
+            ensure_ascii=False,
+        )
+    )
 
 
 if __name__ == "__main__":

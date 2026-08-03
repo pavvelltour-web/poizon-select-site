@@ -20,6 +20,7 @@ export interface UrlState {
   search: string
   sort: CatalogSort
   productSlug: string | null
+  cartOpen: boolean
 }
 
 export interface DisplayPrice {

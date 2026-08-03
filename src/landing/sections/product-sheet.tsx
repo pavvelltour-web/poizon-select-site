@@ -14,6 +14,7 @@ import { useEffect, useRef, useState } from "react"
 
 import { formatRub } from "../../catalog/catalog"
 import {
+  getProductGalleryAngleLabel,
   getProductTypeLabel,
   getProductUse,
   kindLabels,
@@ -65,6 +66,10 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
   const botUsername = storefront.botUsername
   const selectedImageSrc = selectedImageSrcKey || product.fallbackImage
   const selectedImageAlt = storefront.selectedImage?.alt ?? `${product.brand} ${product.name}`
+  const selectedImageAngleLabel = getProductGalleryAngleLabel(
+    product,
+    storefront.selectedImageIndex,
+  )
   const publishedOffer = storefront.catalogPriceState.items[product.slug]
   const selectedSizeOffer = storefront.selectedSize
     ? storefront.selectedSizeOffers.find(
@@ -187,7 +192,7 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
               <button
                 key={`dot-${image.src}-${index}`}
                 type="button"
-                aria-label={`Показать фото ${index + 1}`}
+                aria-label={`Показать фото ${index + 1}: ${getProductGalleryAngleLabel(product, index)}`}
                 aria-current={index === storefront.selectedImageIndex}
                 onClick={() => storefront.selectProductImage(index)}
               />
@@ -203,7 +208,7 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
                 }`}
                 type="button"
                 data-od-id={`gallery-${product.slug}-${index + 1}`}
-                aria-label={`Показать фото ${index + 1}`}
+                aria-label={`Показать фото ${index + 1}: ${getProductGalleryAngleLabel(product, index)}`}
                 aria-current={index === storefront.selectedImageIndex}
                 onClick={() => storefront.selectProductImage(index)}
               >
@@ -224,7 +229,11 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
             ))}
           </div>
           </div>
-          <p className="sheet-photo-caption">Фото товара {storefront.selectedImageDisplayIndex} из {storefront.selectedVisibleGallery.length}</p>
+          <p className="sheet-photo-caption">
+            Фото товара {storefront.selectedImageDisplayIndex} из {storefront.selectedVisibleGallery.length}
+            {" · "}
+            {selectedImageAngleLabel}
+          </p>
         </div>
 
         <div

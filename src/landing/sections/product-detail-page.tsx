@@ -15,6 +15,7 @@ import { useEffect, useRef, useState } from "react"
 import type { CatalogProduct } from "../../catalog/catalog"
 import {
   getDisplayPrice,
+  getProductGalleryAngleLabel,
   getProductTypeLabel,
   getProductUse,
   kindLabels,
@@ -95,6 +96,7 @@ export function ProductDetailPage({ product, storefront }: ProductDetailPageProp
       : "После проверки заказа"
   const imageSrc = currentImage?.src ?? product.fallbackImage
   const imageAlt = currentImage?.alt ?? `${product.brand} ${product.name}`
+  const imageAngleLabel = getProductGalleryAngleLabel(product, imageIndex)
 
   return (
     <article className="pdp" id="route-main" aria-labelledby="pdp-title">
@@ -161,7 +163,8 @@ export function ProductDetailPage({ product, storefront }: ProductDetailPageProp
               <ChevronRight aria-hidden="true" size={24} />
             </button>
             <span className="pdp-gallery__count">
-              {gallery.length ? imageIndex + 1 : 0}/{gallery.length}
+              Фото товара {gallery.length ? imageIndex + 1 : 0} из {gallery.length}
+              {gallery.length ? ` · ${imageAngleLabel}` : ""}
             </span>
           </div>
 
@@ -170,7 +173,7 @@ export function ProductDetailPage({ product, storefront }: ProductDetailPageProp
               <button
                 key={`${image.src}-${index}`}
                 type="button"
-                aria-label={`Показать фото ${index + 1}`}
+                aria-label={`Показать фото ${index + 1}: ${getProductGalleryAngleLabel(product, index)}`}
                 aria-current={index === imageIndex}
                 onClick={() => setImageIndex(index)}
               >

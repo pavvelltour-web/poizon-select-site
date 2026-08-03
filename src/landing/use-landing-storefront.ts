@@ -105,7 +105,7 @@ export function useLandingStorefront(
   const [search, setSearch] = useState(initialState.search)
   const [sort, setSort] = useState<CatalogSort>(initialState.sort)
   const [selectedSlug, setSelectedSlug] = useState<string | null>(
-    initialState.productSlug,
+    initialState.cartOpen ? null : initialState.productSlug,
   )
   const [selectedImageIndex, setSelectedImageIndex] = useState(0)
   const [selectedSize, setSelectedSizeState] = useState<string | null>(null)
@@ -124,10 +124,7 @@ export function useLandingStorefront(
     error: string | null
   }>({ status: "idle", productSlug: null, result: null, error: null })
   const [cartLines, setCartLines] = useState<CartLine[]>([])
-  const [isCartOpen, setCartOpen] = useState(() => {
-    if (typeof window === "undefined") return false
-    return new URLSearchParams(window.location.search).get("cart") === "1"
-  })
+  const [isCartOpen, setCartOpen] = useState(initialState.cartOpen)
   const [checkoutCustomer, setCheckoutCustomer] = useState<CheckoutCustomer>({
     fullName: "",
     phone: "",
@@ -255,6 +252,7 @@ export function useLandingStorefront(
     const nextSort = nextState.sort ?? sort
     const nextProductSlug =
       nextState.productSlug === undefined ? selectedSlug : nextState.productSlug
+    const nextCartOpen = nextState.cartOpen ?? isCartOpen
     const url = new URL(window.location.href)
 
     if (nextCategory === "all") url.searchParams.delete("category")
@@ -265,6 +263,13 @@ export function useLandingStorefront(
     else url.searchParams.set("sort", nextSort)
     if (nextProductSlug) url.searchParams.set("product", nextProductSlug)
     else url.searchParams.delete("product")
+    if (nextCartOpen) {
+      url.searchParams.set("cart", "1")
+      if (url.searchParams.get("view") === "cart") url.searchParams.delete("view")
+    } else {
+      url.searchParams.delete("cart")
+      if (url.searchParams.get("view") === "cart") url.searchParams.delete("view")
+    }
 
     const nextHref = `${url.pathname}${url.search}${url.hash}`
     if (nextHref === `${window.location.pathname}${window.location.search}${window.location.hash}`) {
@@ -317,7 +322,9 @@ export function useLandingStorefront(
       setCategory(nextState.category)
       setSearch(nextState.search)
       setSort(nextState.sort)
-      setSelectedSlug(nextState.productSlug)
+      setCartOpen(nextState.cartOpen)
+      setSelectedSlug(nextState.cartOpen ? null : nextState.productSlug)
+      setSelectedSizeState(null)
     }
 
     window.addEventListener("popstate", syncFromHistory)
@@ -509,6 +516,8 @@ export function useLandingStorefront(
 
   const openProduct = (product: CatalogProduct, trigger: HTMLElement, preferredSize?: string) => {
     productTriggerRef.current = trigger
+    setCartOpen(false)
+    writeUrl({ cartOpen: false, productSlug: null })
     setSelectedSlug(product.slug)
     setSelectedSizeState(preferredSize ?? null)
   }
@@ -550,6 +559,22 @@ export function useLandingStorefront(
     setCopyState("idle")
   }
 
+  function openCart() {
+    setSelectedSlug(null)
+    setSelectedSizeState(null)
+    setCartOpen(true)
+    writeUrl({ cartOpen: true, productSlug: null })
+  }
+
+  function closeCart() {
+    const routeState = readUrlState()
+    const productRoute = /^\/product\/[^/]+\/?$/u.test(window.location.pathname)
+    setCartOpen(false)
+    setSelectedSizeState(null)
+    setSelectedSlug(productRoute ? routeState.productSlug : null)
+    writeUrl({ cartOpen: false, productSlug: null })
+  }
+
   const emptyCheckoutResult = (
     status: CheckoutResult["status"],
     message: string,
@@ -584,7 +609,7 @@ export function useLandingStorefront(
             : "Live-цена размера ещё не подтверждена сервером заказа. Отправьте запрос менеджеру.",
         ),
       )
-      setCartOpen(openAfterAdd)
+      if (openAfterAdd) openCart()
       return
     }
     if (!catalogPriceState.orderCreationEnabled) {
@@ -594,12 +619,12 @@ export function useLandingStorefront(
           "Оформление заказа временно недоступно. Цена и карточка товара остаются видны.",
         ),
       )
-      setCartOpen(openAfterAdd)
+      if (openAfterAdd) openCart()
       return
     }
     setCartLines((lines) => addOrIncrementCartLine(lines, product, size, "valid"))
     setCheckoutResult(emptyCheckoutResult("idle", ""))
-    setCartOpen(openAfterAdd)
+    if (openAfterAdd) openCart()
   }
 
   const addSelectedToCart = () => {
@@ -607,12 +632,6 @@ export function useLandingStorefront(
     addProductToCart(selectedProduct, selectedSize, false)
   }
 
-  const openCart = () => {
-    setSelectedSlug(null)
-    setSelectedSizeState(null)
-    setCartOpen(true)
-  }
-  const closeCart = () => setCartOpen(false)
   const removeCartLine = (id: string) => {
     setCartLines((lines) => lines.filter((line) => line.id !== id))
   }

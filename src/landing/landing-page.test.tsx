@@ -325,6 +325,49 @@ describe("LandingPage", () => {
     expect(screen.queryByText(/VITE_BOT_USERNAME|менеджер/i)).toBeNull()
   })
 
+  it("gives a cart deep link precedence over a product sheet and restores the product on close", async () => {
+    const user = userEvent.setup()
+    window.history.replaceState(null, "", "/product/nike-gt-cut-academy?cart=1")
+    render(<LandingPage configuredBotUsername={null} />)
+
+    const cart = screen.getByRole("dialog", { name: "Корзина" })
+    expect(screen.queryByRole("dialog", { name: /Nike G\.T\. Cut Academy/ })).toBeNull()
+
+    await user.click(within(cart).getByRole("button", { name: "Закрыть заказ" }))
+
+    await waitFor(() => {
+      expect(screen.queryByRole("dialog", { name: "Корзина" })).toBeNull()
+    })
+    expect(screen.getByRole("dialog", { name: /Nike G\.T\. Cut Academy/ })).toBeInTheDocument()
+    expect(window.location.pathname).toBe("/product/nike-gt-cut-academy")
+    expect(window.location.search).toBe("")
+  })
+
+  it("adds and removes the cart query without disturbing catalog filters", async () => {
+    const user = userEvent.setup()
+    window.history.replaceState(
+      null,
+      "",
+      "/catalog?category=volleyball&q=nike&sort=price-desc",
+    )
+    render(<LandingPage configuredBotUsername={null} />)
+
+    await user.click(screen.getByRole("button", { name: "Открыть корзину" }))
+    const cart = screen.getByRole("dialog", { name: "Корзина" })
+    expect(window.location.pathname).toBe("/catalog")
+    expect(window.location.search).toBe(
+      "?category=volleyball&q=nike&sort=price-desc&cart=1",
+    )
+
+    await user.click(within(cart).getByRole("button", { name: "Закрыть заказ" }))
+
+    await waitFor(() => {
+      expect(screen.queryByRole("dialog", { name: "Корзина" })).toBeNull()
+    })
+    expect(window.location.pathname).toBe("/catalog")
+    expect(window.location.search).toBe("?category=volleyball&q=nike&sort=price-desc")
+  })
+
   it("makes the complete accessories category available by URL", () => {
     window.history.replaceState(null, "", "/catalog?category=accessories")
     render(<LandingPage configuredBotUsername={null} />)
@@ -346,7 +389,7 @@ describe("LandingPage", () => {
       "src",
       "http://localhost:3000/storefront-media/approved/products/asics-sky-elite-ff-3/01-side.png",
     )
-    expect(screen.getByText("Фото товара 1 из 5")).toBeInTheDocument()
+    expect(screen.getByText("Фото товара 1 из 5 · Боковой профиль")).toBeInTheDocument()
 
     await user.click(screen.getByRole("button", { name: "Следующее фото товара" }))
 
@@ -357,7 +400,7 @@ describe("LandingPage", () => {
       "src",
       expect.stringContaining("asics-sky-elite-ff-3/03-side.png"),
     )
-    expect(screen.getByText("Фото товара 2 из 5")).toBeInTheDocument()
+    expect(screen.getByText("Фото товара 2 из 5 · Противоположный боковой профиль")).toBeInTheDocument()
 
     const openPhotoButton = screen.getByRole("button", {
       name: "Открыть фото в полном размере",

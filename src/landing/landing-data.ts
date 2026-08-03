@@ -136,6 +136,34 @@ export const kindLabels: Record<ProductKind, string> = {
   accessory: "Экипировка",
 }
 
+const galleryAngleLabels: Record<ProductKind, readonly string[]> = {
+  footwear: [
+    "Боковой профиль",
+    "Противоположный боковой профиль",
+    "Спереди, три четверти",
+    "Вид сзади",
+    "Подошва",
+  ],
+  apparel: [
+    "Вид спереди",
+    "Вид сзади",
+    "Ракурс спереди",
+    "Боковой профиль",
+    "Деталь",
+  ],
+  accessory: [
+    "Основной ракурс",
+    "Дополнительный ракурс",
+    "Ракурс спереди",
+    "Вид сзади",
+    "Деталь",
+  ],
+}
+
+export function getProductGalleryAngleLabel(product: CatalogProduct, index: number): string {
+  return galleryAngleLabels[product.kind][index] ?? "Дополнительный ракурс"
+}
+
 const footwearSizes = [
   "36",
   "37",
@@ -477,7 +505,13 @@ export function isSort(value: string | null): value is CatalogSort {
 
 export function readUrlState(): UrlState {
   if (typeof window === "undefined") {
-    return { category: "all", search: "", sort: "featured", productSlug: null }
+    return {
+      category: "all",
+      search: "",
+      sort: "featured",
+      productSlug: null,
+      cartOpen: false,
+    }
   }
 
   const params = new URLSearchParams(window.location.search)
@@ -498,6 +532,7 @@ export function readUrlState(): UrlState {
     search: params.get("q") ?? "",
     sort: isSort(sort) ? sort : "featured",
     productSlug: routeProductSlug ?? params.get("product"),
+    cartOpen: params.get("cart") === "1" || params.get("view") === "cart",
   }
 }
 

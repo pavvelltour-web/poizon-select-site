@@ -57,19 +57,19 @@
           "position": 3,
           "file": "public/catalog/gallery/adidas-campus-00s-core-black-3.webp",
           "role": "gallery",
-          "angle": "front",
-          "composition": "single-or-pair",
-          "origin_kind": "project-generated-original",
-          "origin_reference": "scripts/generate_catalog_art.py",
-          "origin_hash_mode": "text-lf",
-          "origin_sha256": "2cb84eaceb65213438aa6b7c3577e85d999cea768809201b3491558f5b20778b",
-          "generator": "scripts/generate_catalog_art.py",
+          "angle": "three-quarter",
+          "composition": "pair",
+          "origin_kind": "project-generated-derivative",
+          "origin_reference": "catalog-media/generated-reference/unified-front-pairs/adidas-campus-00s-core-black-front-three-quarter-pair.webp",
+          "origin_hash_mode": "binary",
+          "origin_sha256": "ec6e3a6ed2e3ed1eb7c1d89235c53415bc4595b66f73b18c92f3d0658fb5ded1",
+          "generator": "scripts/build_footwear_front_pair_overrides.py",
           "rights": {
             "status": "owned",
             "license_reference": "KICKSBASE project-generated catalog media: adidas-campus-00s-core-black:3",
             "verified_at": "2026-08-02T00:00:00Z"
           },
-          "sha256": "4e9632796f15494a597c673e54ba375a094ec1f122c43609f67fa2d398db8e68"
+          "sha256": "3f8bdcde31c63ef2c8b5bea3980924b18ff17bfe7cef2731cb0723562803abcf"
         },
         {
           "position": 4,
@@ -153,19 +153,19 @@
           "position": 3,
           "file": "public/catalog/gallery/adidas-crazyflight-6-mid-3.webp",
           "role": "gallery",
-          "angle": "front",
-          "composition": "single-or-pair",
-          "origin_kind": "project-generated-original",
-          "origin_reference": "scripts/generate_catalog_art.py",
-          "origin_hash_mode": "text-lf",
-          "origin_sha256": "2cb84eaceb65213438aa6b7c3577e85d999cea768809201b3491558f5b20778b",
-          "generator": "scripts/generate_catalog_art.py",
+          "angle": "three-quarter",
+          "composition": "pair",
+          "origin_kind": "project-generated-derivative",
+          "origin_reference": "catalog-media/generated-reference/unified-front-pairs/adidas-crazyflight-6-mid-front-three-quarter-pair.webp",
+          "origin_hash_mode": "binary",
+          "origin_sha256": "1e5a4266fd29e649dc1fc37a307892c0873dbc6be8aa78ebf418e58ce708af76",
+          "generator": "scripts/build_footwear_front_pair_overrides.py",
           "rights": {
             "status": "owned",
             "license_reference": "KICKSBASE project-generated catalog media: adidas-crazyflight-6-mid:3",
             "verified_at": "2026-08-02T00:00:00Z"
           },
-          "sha256": "1175f37f4bcca94086154a64aaa71181d82093a353b83a4ac09361306009f1cb"
+          "sha256": "6142acf2316dee0935ab0bb3a3188c8751d3590ce0e42d540d47932b3224311b"
         },
         {
           "position": 4,
@@ -345,19 +345,19 @@
           "position": 3,
           "file": "public/catalog/gallery/adidas-gazelle-indoor-green-3.webp",
           "role": "gallery",
-          "angle": "front",
-          "composition": "single-or-pair",
-          "origin_kind": "project-generated-original",
-          "origin_reference": "scripts/generate_catalog_art.py",
-          "origin_hash_mode": "text-lf",
-          "origin_sha256": "2cb84eaceb65213438aa6b7c3577e85d999cea768809201b3491558f5b20778b",
-          "generator": "scripts/generate_catalog_art.py",
+          "angle": "three-quarter",
+          "composition": "pair",
+          "origin_kind": "project-generated-derivative",
+          "origin_reference": "catalog-media/generated-reference/unified-front-pairs/adidas-gazelle-indoor-green-front-three-quarter-pair.webp",
+          "origin_hash_mode": "binary",
+          "origin_sha256": "df2b4ed05009a27c775bdbcc56cee9f0fe773348b8d4ca6f2871e3d490a9b3ed",
+          "generator": "scripts/build_footwear_front_pair_overrides.py",
           "rights": {
             "status": "owned",
             "license_reference": "KICKSBASE project-generated catalog media: adidas-gazelle-indoor-green:3",
             "verified_at": "2026-08-02T00:00:00Z"
           },
-          "sha256": "0bcab7417399c085b2d5891904de5e6e288b9be3d4afc44bf6ebd29af8ebb357"
+          "sha256": "50ef1f20e4ef5de5f6a18e7077065fdb1555787aaf15409340947b2c8321a47e"
         },
         {
           "position": 4,
@@ -441,19 +441,19 @@
           "position": 3,
           "file": "public/catalog/gallery/adidas-handball-spezial-core-black-3.webp",
           "role": "gallery",
-          "angle": "front",
-          "composition": "single-or-pair",
-          "origin_kind": "project-generated-original",
-          "origin_reference": "scripts/generate_catalog_art.py",
-          "origin_hash_mode": "text-lf",
-          "origin_sha256": "2cb84eaceb65213438aa6b7c3577e85d999cea768809201b3491558f5b20778b",
-          "generator": "scripts/generate_catalog_art.py",
+          "angle": "three-quarter",
+          "composition": "pair",
+          "origin_kind": "project-generated-derivative",
+          "origin_reference": "catalog-media/generated-reference/unified-front-pairs/adidas-handball-spezial-core-black-front-three-quarter-pair.webp",
+          "origin_hash_mode": "binary",
+          "origin_sha256": "b0fb9d47c521b3c1f36752092678c63369a9477b87e9c250a80e1fb7f7fb5777",
+          "generator": "scripts/build_footwear_front_pair_overrides.py",
           "rights": {
             "status": "owned",
             "license_reference": "KICKSBASE project-generated catalog media: adidas-handball-spezial-core-black:3",
             "verified_at": "2026-08-02T00:00:00Z"
           },
-          "sha256": "63b4c9dadaa60f9e5518a5fbefb17b5f3bb4e1d3de68a98e140bb69568549cae"
+          "sha256": "cdd5a0b7d9bd03ca96acde012020d13e2fadca925d68861283706c9e5b53951d"
         },
         {
           "position": 4,
@@ -537,19 +537,19 @@
           "position": 3,
           "file": "public/catalog/gallery/adidas-harden-volume-9-3.webp",
           "role": "gallery",
-          "angle": "front",
-          "composition": "single-or-pair",
-          "origin_kind": "project-generated-original",
-          "origin_reference": "scripts/generate_catalog_art.py",
-          "origin_hash_mode": "text-lf",
-          "origin_sha256": "2cb84eaceb65213438aa6b7c3577e85d999cea768809201b3491558f5b20778b",
-          "generator": "scripts/generate_catalog_art.py",
+          "angle": "three-quarter",
+          "composition": "pair",
+          "origin_kind": "project-generated-derivative",
+          "origin_reference": "catalog-media/generated-reference/unified-front-pairs/adidas-harden-volume-9-front-three-quarter-pair.webp",
+          "origin_hash_mode": "binary",
+          "origin_sha256": "951033d34a6aa212b1361066984ae3b06ec7dc7df7f66245cf4c4a50196b2db4",
+          "generator": "scripts/build_footwear_front_pair_overrides.py",
           "rights": {
             "status": "owned",
             "license_reference": "KICKSBASE project-generated catalog media: adidas-harden-volume-9:3",
             "verified_at": "2026-08-02T00:00:00Z"
           },
-          "sha256": "a637bf09ce42f7954c3ab45fe4a913d230af323998d54c5db60f98fbcbeae77d"
+          "sha256": "9ebc5674d22ad274dc536b0ebfb759445c35eb4d6417fc39689eab70c997db9f"
         },
         {
           "position": 4,
@@ -729,19 +729,19 @@
           "position": 3,
           "file": "public/catalog/gallery/adidas-samba-og-white-black-3.webp",
           "role": "gallery",
-          "angle": "front",
-          "composition": "single-or-pair",
-          "origin_kind": "project-generated-original",
-          "origin_reference": "scripts/generate_catalog_art.py",
-          "origin_hash_mode": "text-lf",
-          "origin_sha256": "2cb84eaceb65213438aa6b7c3577e85d999cea768809201b3491558f5b20778b",
-          "generator": "scripts/generate_catalog_art.py",
+          "angle": "three-quarter",
+          "composition": "pair",
+          "origin_kind": "project-generated-derivative",
+          "origin_reference": "catalog-media/generated-reference/unified-front-pairs/adidas-samba-og-white-black-front-three-quarter-pair.webp",
+          "origin_hash_mode": "binary",
+          "origin_sha256": "cb254e11a2c1d156e3e1e809d90e87cb7b80e8f9dd68ed8bbc7817abc5fa573d",
+          "generator": "scripts/build_footwear_front_pair_overrides.py",
           "rights": {
             "status": "owned",
             "license_reference": "KICKSBASE project-generated catalog media: adidas-samba-og-white-black:3",
             "verified_at": "2026-08-02T00:00:00Z"
           },
-          "sha256": "7cc62d0eb772ef84b7a34254a97b4db72de57fd12034d12cb15f0c9c0297ad09"
+          "sha256": "793ee9a4310bc4b86f0d09fd0050a222d5442bfe4d44c52a7dc83537bdfe04cc"
         },
         {
           "position": 4,
@@ -825,19 +825,19 @@
           "position": 3,
           "file": "public/catalog/gallery/adidas-stabil-16-indoor-3.webp",
           "role": "gallery",
-          "angle": "front",
-          "composition": "single-or-pair",
-          "origin_kind": "project-generated-original",
-          "origin_reference": "scripts/generate_catalog_art.py",
-          "origin_hash_mode": "text-lf",
-          "origin_sha256": "2cb84eaceb65213438aa6b7c3577e85d999cea768809201b3491558f5b20778b",
-          "generator": "scripts/generate_catalog_art.py",
+          "angle": "three-quarter",
+          "composition": "pair",
+          "origin_kind": "project-generated-derivative",
+          "origin_reference": "catalog-media/generated-reference/unified-front-pairs/adidas-stabil-16-indoor-front-three-quarter-pair.webp",
+          "origin_hash_mode": "binary",
+          "origin_sha256": "cb08ffc1c6af9af999b07be2325512fdf021ef911e115578cec290198502004a",
+          "generator": "scripts/build_footwear_front_pair_overrides.py",
           "rights": {
             "status": "owned",
             "license_reference": "KICKSBASE project-generated catalog media: adidas-stabil-16-indoor:3",
             "verified_at": "2026-08-02T00:00:00Z"
           },
-          "sha256": "35d9d06857f300e256855884034e7c6e895149f3b8cddecf0c31224a41bfac21"
+          "sha256": "352433fe5e012ff61e8876a2c72fec346f57b5ab5ee8d461868b726582ca5b62"
         },
         {
           "position": 4,
@@ -1113,8 +1113,8 @@
           "position": 3,
           "file": "public/storefront-media/approved/products/anta-kai-1/02-three-quarter.png",
           "role": "gallery",
-          "angle": "front",
-          "composition": "single-or-pair",
+          "angle": "three-quarter",
+          "composition": "pair",
           "origin_kind": "project-generated-original",
           "origin_reference": "catalog-media/approved-storefront-media.json",
           "origin_hash_mode": "text-lf",
@@ -1305,19 +1305,19 @@
           "position": 3,
           "file": "public/catalog/gallery/asics-gel-1130-black-pure-silver-3.webp",
           "role": "gallery",
-          "angle": "front",
-          "composition": "single-or-pair",
-          "origin_kind": "project-generated-original",
-          "origin_reference": "scripts/generate_catalog_art.py",
-          "origin_hash_mode": "text-lf",
-          "origin_sha256": "2cb84eaceb65213438aa6b7c3577e85d999cea768809201b3491558f5b20778b",
-          "generator": "scripts/generate_catalog_art.py",
+          "angle": "three-quarter",
+          "composition": "pair",
+          "origin_kind": "project-generated-derivative",
+          "origin_reference": "catalog-media/generated-reference/unified-front-pairs/asics-gel-1130-black-pure-silver-front-three-quarter-pair.webp",
+          "origin_hash_mode": "binary",
+          "origin_sha256": "2d4e14d1982631ef8314bb44eb582ea8a618ff144d91f8c99ecc9cd160c9d09d",
+          "generator": "scripts/build_footwear_front_pair_overrides.py",
           "rights": {
             "status": "owned",
             "license_reference": "KICKSBASE project-generated catalog media: asics-gel-1130-black-pure-silver:3",
             "verified_at": "2026-08-02T00:00:00Z"
           },
-          "sha256": "59c9292755208d3c0de70c29bd9c8dd68cd2fe14d5e0dc5945a2f84ae02839b6"
+          "sha256": "97e1f54751ea4f0f177b1b6ecd8749a45802fc3c361db31274f3064253edd028"
         },
         {
           "position": 4,
@@ -1401,19 +1401,19 @@
           "position": 3,
           "file": "public/catalog/gallery/asics-gel-kayano-14-white-midnight-3.webp",
           "role": "gallery",
-          "angle": "front",
-          "composition": "single-or-pair",
-          "origin_kind": "project-generated-original",
-          "origin_reference": "scripts/generate_catalog_art.py",
-          "origin_hash_mode": "text-lf",
-          "origin_sha256": "2cb84eaceb65213438aa6b7c3577e85d999cea768809201b3491558f5b20778b",
-          "generator": "scripts/generate_catalog_art.py",
+          "angle": "three-quarter",
+          "composition": "pair",
+          "origin_kind": "project-generated-derivative",
+          "origin_reference": "catalog-media/generated-reference/unified-front-pairs/asics-gel-kayano-14-white-midnight-front-three-quarter-pair.webp",
+          "origin_hash_mode": "binary",
+          "origin_sha256": "fc41193360745cce0f6093bdb0a01a28453fa27b4d003518f836ab9543b7e29c",
+          "generator": "scripts/build_footwear_front_pair_overrides.py",
           "rights": {
             "status": "owned",
             "license_reference": "KICKSBASE project-generated catalog media: asics-gel-kayano-14-white-midnight:3",
             "verified_at": "2026-08-02T00:00:00Z"
           },
-          "sha256": "4701acad7f1bd9efcf575ace29cfaa573d9298805f5c820ab6bd86eff340f261"
+          "sha256": "2cfbf26536e8f22996d588d464294de3fd0c1b88315445f60ca4bd903f3433d3"
         },
         {
           "position": 4,
@@ -1497,19 +1497,19 @@
           "position": 3,
           "file": "public/catalog/gallery/asics-gel-kayano-20-glacier-grey-3.webp",
           "role": "gallery",
-          "angle": "front",
-          "composition": "single-or-pair",
-          "origin_kind": "project-generated-original",
-          "origin_reference": "scripts/generate_catalog_art.py",
-          "origin_hash_mode": "text-lf",
-          "origin_sha256": "2cb84eaceb65213438aa6b7c3577e85d999cea768809201b3491558f5b20778b",
-          "generator": "scripts/generate_catalog_art.py",
+          "angle": "three-quarter",
+          "composition": "pair",
+          "origin_kind": "project-generated-derivative",
+          "origin_reference": "catalog-media/generated-reference/unified-front-pairs/asics-gel-kayano-20-glacier-grey-front-three-quarter-pair.webp",
+          "origin_hash_mode": "binary",
+          "origin_sha256": "f8eb3830d132db29cae271beeb5be436dd5ec62e4dd71d8c102b0fe066b1d09a",
+          "generator": "scripts/build_footwear_front_pair_overrides.py",
           "rights": {
             "status": "owned",
             "license_reference": "KICKSBASE project-generated catalog media: asics-gel-kayano-20-glacier-grey:3",
             "verified_at": "2026-08-02T00:00:00Z"
           },
-          "sha256": "7f12600d26150e69ffdfd71d1d8c21f949cbdcc4057db646197c1c8cb160e901"
+          "sha256": "a442dee1c3e3e07b5960d3b31b9e868711532559a62ddd8d0cec46c62a881d51"
         },
         {
           "position": 4,
@@ -1593,19 +1593,19 @@
           "position": 3,
           "file": "public/catalog/gallery/asics-gel-nyc-cream-oyster-grey-3.webp",
           "role": "gallery",
-          "angle": "front",
-          "composition": "single-or-pair",
-          "origin_kind": "project-generated-original",
-          "origin_reference": "scripts/generate_catalog_art.py",
-          "origin_hash_mode": "text-lf",
-          "origin_sha256": "2cb84eaceb65213438aa6b7c3577e85d999cea768809201b3491558f5b20778b",
-          "generator": "scripts/generate_catalog_art.py",
+          "angle": "three-quarter",
+          "composition": "pair",
+          "origin_kind": "project-generated-derivative",
+          "origin_reference": "catalog-media/generated-reference/unified-front-pairs/asics-gel-nyc-cream-oyster-grey-front-three-quarter-pair.webp",
+          "origin_hash_mode": "binary",
+          "origin_sha256": "eebd02698f2f06d8649adac681efe5c7c0d6fdea4f85370a6c3a322e095f246a",
+          "generator": "scripts/build_footwear_front_pair_overrides.py",
           "rights": {
             "status": "owned",
             "license_reference": "KICKSBASE project-generated catalog media: asics-gel-nyc-cream-oyster-grey:3",
             "verified_at": "2026-08-02T00:00:00Z"
           },
-          "sha256": "6c1db6534c2c0a2651e3f71d8a70f239e15f151dafa0d79c0d7bd199890725cb"
+          "sha256": "71cd836b8824a550d454009216eb1538521c225813bd8fb04d2346475e3aa1a0"
         },
         {
           "position": 4,
@@ -1689,19 +1689,19 @@
           "position": 3,
           "file": "public/catalog/gallery/asics-gel-tactic-13-3.webp",
           "role": "gallery",
-          "angle": "front",
-          "composition": "single-or-pair",
-          "origin_kind": "project-generated-original",
-          "origin_reference": "scripts/generate_catalog_art.py",
-          "origin_hash_mode": "text-lf",
-          "origin_sha256": "2cb84eaceb65213438aa6b7c3577e85d999cea768809201b3491558f5b20778b",
-          "generator": "scripts/generate_catalog_art.py",
+          "angle": "three-quarter",
+          "composition": "pair",
+          "origin_kind": "project-generated-derivative",
+          "origin_reference": "catalog-media/generated-reference/unified-front-pairs/asics-gel-tactic-13-front-three-quarter-pair.webp",
+          "origin_hash_mode": "binary",
+          "origin_sha256": "825e4feaadc55dd8700b8072b1080b43ea36e897278dded619cfd3012de9d95f",
+          "generator": "scripts/build_footwear_front_pair_overrides.py",
           "rights": {
             "status": "owned",
             "license_reference": "KICKSBASE project-generated catalog media: asics-gel-tactic-13:3",
             "verified_at": "2026-08-02T00:00:00Z"
           },
-          "sha256": "970d2fb66a7ab564ec1d29950b0006dbfe6c80b20d6e5c93553248be89afd32c"
+          "sha256": "da5b769aa875725e17bc10ce3b1b690a3e1535bbd7d1c7e63cfcf70d7e70bc2f"
         },
         {
           "position": 4,
@@ -1785,19 +1785,19 @@
           "position": 3,
           "file": "public/catalog/gallery/asics-metarise-2-3.webp",
           "role": "gallery",
-          "angle": "front",
-          "composition": "single-or-pair",
-          "origin_kind": "project-generated-original",
-          "origin_reference": "scripts/generate_catalog_art.py",
-          "origin_hash_mode": "text-lf",
-          "origin_sha256": "2cb84eaceb65213438aa6b7c3577e85d999cea768809201b3491558f5b20778b",
-          "generator": "scripts/generate_catalog_art.py",
+          "angle": "three-quarter",
+          "composition": "pair",
+          "origin_kind": "project-generated-derivative",
+          "origin_reference": "catalog-media/generated-reference/unified-front-pairs/asics-metarise-2-front-three-quarter-pair.webp",
+          "origin_hash_mode": "binary",
+          "origin_sha256": "d762fbdbbba414768ae6218669d3c4e3d0b514975bcb92a6b15c0bde9cb71b3a",
+          "generator": "scripts/build_footwear_front_pair_overrides.py",
           "rights": {
             "status": "owned",
             "license_reference": "KICKSBASE project-generated catalog media: asics-metarise-2:3",
             "verified_at": "2026-08-02T00:00:00Z"
           },
-          "sha256": "f3f2cb020e4923c4f1f72262fbeb048db0b91fb6e0a5825069d437aafd2d52a8"
+          "sha256": "76ad1d53c9bb41ebcffa03db44bf89a1ccf12e90c549c6ddf326433b936788df"
         },
         {
           "position": 4,
@@ -1881,19 +1881,19 @@
           "position": 3,
           "file": "public/catalog/gallery/asics-netburner-ballistic-ff-4-3.webp",
           "role": "gallery",
-          "angle": "front",
-          "composition": "single-or-pair",
-          "origin_kind": "project-generated-original",
-          "origin_reference": "scripts/generate_catalog_art.py",
-          "origin_hash_mode": "text-lf",
-          "origin_sha256": "2cb84eaceb65213438aa6b7c3577e85d999cea768809201b3491558f5b20778b",
-          "generator": "scripts/generate_catalog_art.py",
+          "angle": "three-quarter",
+          "composition": "pair",
+          "origin_kind": "project-generated-derivative",
+          "origin_reference": "catalog-media/generated-reference/unified-front-pairs/asics-netburner-ballistic-ff-4-front-three-quarter-pair.webp",
+          "origin_hash_mode": "binary",
+          "origin_sha256": "acc7d0b95412d572124251f35d9f9f1406852325c7a15bfbf8dd766bc9406e86",
+          "generator": "scripts/build_footwear_front_pair_overrides.py",
           "rights": {
             "status": "owned",
             "license_reference": "KICKSBASE project-generated catalog media: asics-netburner-ballistic-ff-4:3",
             "verified_at": "2026-08-02T00:00:00Z"
           },
-          "sha256": "9b0714a668444a6ba12e5750e13f1d9653aca7fe1e9beb8fe439d55f77693a5d"
+          "sha256": "56f86f739a2f0472324f216e3d99b474c7977f6803f1cf0161ed2ff8e332f8c4"
         },
         {
           "position": 4,
@@ -1977,8 +1977,8 @@
           "position": 3,
           "file": "public/catalog/gallery/asics-rote-japan-lyte-ff-3-3.webp",
           "role": "gallery",
-          "angle": "front",
-          "composition": "single-or-pair",
+          "angle": "three-quarter",
+          "composition": "pair",
           "origin_kind": "project-generated-original",
           "origin_reference": "scripts/generate_catalog_art.py",
           "origin_hash_mode": "text-lf",
@@ -2073,8 +2073,8 @@
           "position": 3,
           "file": "public/storefront-media/approved/products/asics-sky-elite-ff-3/02-three-quarter.png",
           "role": "gallery",
-          "angle": "front",
-          "composition": "single-or-pair",
+          "angle": "three-quarter",
+          "composition": "pair",
           "origin_kind": "project-generated-original",
           "origin_reference": "catalog-media/approved-storefront-media.json",
           "origin_hash_mode": "text-lf",
@@ -2169,19 +2169,19 @@
           "position": 3,
           "file": "public/catalog/gallery/asics-sky-elite-ff-mt-3-3.webp",
           "role": "gallery",
-          "angle": "front",
-          "composition": "single-or-pair",
-          "origin_kind": "project-generated-original",
-          "origin_reference": "scripts/generate_catalog_art.py",
-          "origin_hash_mode": "text-lf",
-          "origin_sha256": "2cb84eaceb65213438aa6b7c3577e85d999cea768809201b3491558f5b20778b",
-          "generator": "scripts/generate_catalog_art.py",
+          "angle": "three-quarter",
+          "composition": "pair",
+          "origin_kind": "project-generated-derivative",
+          "origin_reference": "catalog-media/generated-reference/unified-front-pairs/asics-sky-elite-ff-mt-3-front-three-quarter-pair.webp",
+          "origin_hash_mode": "binary",
+          "origin_sha256": "1212f5edd586b0eeff5aa2f92be177de44b500a6a94d779ea578ae0a09bb3ce1",
+          "generator": "scripts/build_footwear_front_pair_overrides.py",
           "rights": {
             "status": "owned",
             "license_reference": "KICKSBASE project-generated catalog media: asics-sky-elite-ff-mt-3:3",
             "verified_at": "2026-08-02T00:00:00Z"
           },
-          "sha256": "baa487ab6fdffbf3e608ef665c4e9f7502d92fb97437650d149705b0fe15d564"
+          "sha256": "115c3b050f54bc7cf74d57da3696bc2c64132cfe6f834fe9ac2219c010d408d7"
         },
         {
           "position": 4,
@@ -2265,19 +2265,19 @@
           "position": 3,
           "file": "public/catalog/gallery/asics-upcourt-6-3.webp",
           "role": "gallery",
-          "angle": "front",
-          "composition": "single-or-pair",
-          "origin_kind": "project-generated-original",
-          "origin_reference": "scripts/generate_catalog_art.py",
-          "origin_hash_mode": "text-lf",
-          "origin_sha256": "2cb84eaceb65213438aa6b7c3577e85d999cea768809201b3491558f5b20778b",
-          "generator": "scripts/generate_catalog_art.py",
+          "angle": "three-quarter",
+          "composition": "pair",
+          "origin_kind": "project-generated-derivative",
+          "origin_reference": "catalog-media/generated-reference/unified-front-pairs/asics-upcourt-6-front-three-quarter-pair.webp",
+          "origin_hash_mode": "binary",
+          "origin_sha256": "f5bbf66eb819eeca39f705d1ceb7e862645f658e7bf37518cb10030530175799",
+          "generator": "scripts/build_footwear_front_pair_overrides.py",
           "rights": {
             "status": "owned",
             "license_reference": "KICKSBASE project-generated catalog media: asics-upcourt-6:3",
             "verified_at": "2026-08-02T00:00:00Z"
           },
-          "sha256": "d0825122f0d789c0b592f5354fe8f8dbe392b80fabf6247840cbd6331784443d"
+          "sha256": "368ba198f12544faf9ba8426facb1328fe170a20f76c6f7692e4ad8f711eb34c"
         },
         {
           "position": 4,
@@ -2553,19 +2553,19 @@
           "position": 3,
           "file": "public/catalog/gallery/converse-chuck-70-high-black-3.webp",
           "role": "gallery",
-          "angle": "front",
-          "composition": "single-or-pair",
-          "origin_kind": "project-generated-original",
-          "origin_reference": "catalog-media/generated-reference/unified-missing-angles/converse-chuck-70-high-black-front.png",
+          "angle": "three-quarter",
+          "composition": "pair",
+          "origin_kind": "project-generated-derivative",
+          "origin_reference": "catalog-media/generated-reference/unified-front-pairs/converse-chuck-70-high-black-front-three-quarter-pair.webp",
           "origin_hash_mode": "binary",
-          "origin_sha256": "e1b53521c0835556ba4373be8a03dc55e10997830997dc1e9abd9ceee20476b9",
-          "generator": "OpenAI image generation from the existing five-frame product reference set",
+          "origin_sha256": "b1c625bb41e6134b31f44832e90e1e7065f88bfadc885c5a731e3b01f960238a",
+          "generator": "scripts/build_footwear_front_pair_overrides.py",
           "rights": {
             "status": "owned",
             "license_reference": "KICKSBASE project-generated catalog media: converse-chuck-70-high-black:3",
             "verified_at": "2026-08-02T00:00:00Z"
           },
-          "sha256": "2793598a342c1a7e0c340528436c4133de9fdada9da9cac02db65a254327bb1a"
+          "sha256": "ee5d2200dd404056023f505bc65ec396ad6a7cfd813eae1fe1597421f0514262"
         },
         {
           "position": 4,
@@ -2649,19 +2649,19 @@
           "position": 3,
           "file": "public/catalog/gallery/crocs-mellow-recovery-slide-3.webp",
           "role": "gallery",
-          "angle": "front",
+          "angle": "three-quarter",
           "composition": "pair",
-          "origin_kind": "project-generated-original",
-          "origin_reference": "scripts/generate_catalog_art.py",
-          "origin_hash_mode": "text-lf",
-          "origin_sha256": "2cb84eaceb65213438aa6b7c3577e85d999cea768809201b3491558f5b20778b",
-          "generator": "scripts/generate_catalog_art.py",
+          "origin_kind": "project-generated-derivative",
+          "origin_reference": "catalog-media/generated-reference/unified-front-pairs/crocs-mellow-recovery-slide-front-three-quarter-pair.webp",
+          "origin_hash_mode": "binary",
+          "origin_sha256": "de4acbcf706db7421ca16cbd5ed3c3f45ebdc8283b30c3175d222288e6915bde",
+          "generator": "scripts/build_footwear_front_pair_overrides.py",
           "rights": {
             "status": "owned",
             "license_reference": "KICKSBASE project-generated catalog media: crocs-mellow-recovery-slide:3",
             "verified_at": "2026-08-02T00:00:00Z"
           },
-          "sha256": "d2e98a1ebca96ea31d228f4cab1b28b8183fad5d9dbe62ada2e404ac1ef0d61f"
+          "sha256": "a9a4d33d8da5b7e02efa78ee4a379c4af331ccfc9ac1fb792b0ce439ea08908f"
         },
         {
           "position": 4,
@@ -2841,19 +2841,19 @@
           "position": 3,
           "file": "public/catalog/gallery/hoka-ora-recovery-slide-3-3.webp",
           "role": "gallery",
-          "angle": "front",
+          "angle": "three-quarter",
           "composition": "pair",
-          "origin_kind": "project-generated-original",
-          "origin_reference": "scripts/generate_catalog_art.py",
-          "origin_hash_mode": "text-lf",
-          "origin_sha256": "2cb84eaceb65213438aa6b7c3577e85d999cea768809201b3491558f5b20778b",
-          "generator": "scripts/generate_catalog_art.py",
+          "origin_kind": "project-generated-derivative",
+          "origin_reference": "catalog-media/generated-reference/unified-front-pairs/hoka-ora-recovery-slide-3-front-three-quarter-pair.webp",
+          "origin_hash_mode": "binary",
+          "origin_sha256": "bcf2ac65ad6a232732cb0e7ea22fa2da89f091cdd4ede8a64a0b879daafdaad2",
+          "generator": "scripts/build_footwear_front_pair_overrides.py",
           "rights": {
             "status": "owned",
             "license_reference": "KICKSBASE project-generated catalog media: hoka-ora-recovery-slide-3:3",
             "verified_at": "2026-08-02T00:00:00Z"
           },
-          "sha256": "2f02961c03cf99c2f373f42f32645c7a0ee1c5151df306c74b74d979c2b5838a"
+          "sha256": "9799d728f5691dad1e87c70a7be31ec0c530f6531c2c20f449f49d1bc58bf926"
         },
         {
           "position": 4,
@@ -3033,19 +3033,19 @@
           "position": 3,
           "file": "public/catalog/gallery/jordan-luka-4-3.webp",
           "role": "gallery",
-          "angle": "front",
-          "composition": "single-or-pair",
-          "origin_kind": "project-generated-original",
-          "origin_reference": "scripts/generate_catalog_art.py",
-          "origin_hash_mode": "text-lf",
-          "origin_sha256": "2cb84eaceb65213438aa6b7c3577e85d999cea768809201b3491558f5b20778b",
-          "generator": "scripts/generate_catalog_art.py",
+          "angle": "three-quarter",
+          "composition": "pair",
+          "origin_kind": "project-generated-derivative",
+          "origin_reference": "catalog-media/generated-reference/unified-front-pairs/jordan-luka-4-front-three-quarter-pair.webp",
+          "origin_hash_mode": "binary",
+          "origin_sha256": "55c336f3545efb120e195daf59a0f35e82b832ce85af1e6968e300b96a3e74df",
+          "generator": "scripts/build_footwear_front_pair_overrides.py",
           "rights": {
             "status": "owned",
             "license_reference": "KICKSBASE project-generated catalog media: jordan-luka-4:3",
             "verified_at": "2026-08-02T00:00:00Z"
           },
-          "sha256": "520e7d0f8399e74d5655dd05af026416f08ac6b87b4a70aada3bebf54cf71abd"
+          "sha256": "5557225168c493facd7a58a0df5bfd32b5e6d3263c6caa1a7ee14b552cc604d8"
         },
         {
           "position": 4,
@@ -3321,8 +3321,8 @@
           "position": 3,
           "file": "public/storefront-media/approved/products/li-ning-wade-808-4-ultra/02-three-quarter.png",
           "role": "gallery",
-          "angle": "front",
-          "composition": "single-or-pair",
+          "angle": "three-quarter",
+          "composition": "pair",
           "origin_kind": "project-generated-original",
           "origin_reference": "catalog-media/approved-storefront-media.json",
           "origin_hash_mode": "text-lf",
@@ -3801,19 +3801,19 @@
           "position": 3,
           "file": "public/catalog/gallery/mizuno-cyclone-speed-5-3.webp",
           "role": "gallery",
-          "angle": "front",
-          "composition": "single-or-pair",
-          "origin_kind": "project-generated-original",
-          "origin_reference": "scripts/generate_catalog_art.py",
-          "origin_hash_mode": "text-lf",
-          "origin_sha256": "2cb84eaceb65213438aa6b7c3577e85d999cea768809201b3491558f5b20778b",
-          "generator": "scripts/generate_catalog_art.py",
+          "angle": "three-quarter",
+          "composition": "pair",
+          "origin_kind": "project-generated-derivative",
+          "origin_reference": "catalog-media/generated-reference/unified-front-pairs/mizuno-cyclone-speed-5-front-three-quarter-pair.webp",
+          "origin_hash_mode": "binary",
+          "origin_sha256": "39ee0ff738fa6d21d7fdc5023a4c124256dbd1c40b827106928688f93c6b6d1b",
+          "generator": "scripts/build_footwear_front_pair_overrides.py",
           "rights": {
             "status": "owned",
             "license_reference": "KICKSBASE project-generated catalog media: mizuno-cyclone-speed-5:3",
             "verified_at": "2026-08-02T00:00:00Z"
           },
-          "sha256": "08625f02e2cc9898420e6e17f890d86f6a599729c816d0bb547c287acd1cf643"
+          "sha256": "3a2a9546715f201d13860321f3a1e30df8181cbf4138c25ad58647212c3f0797"
         },
         {
           "position": 4,
@@ -4089,19 +4089,19 @@
           "position": 3,
           "file": "public/catalog/gallery/mizuno-wave-lightning-z8-3.webp",
           "role": "gallery",
-          "angle": "front",
-          "composition": "single-or-pair",
-          "origin_kind": "project-generated-original",
-          "origin_reference": "scripts/generate_catalog_art.py",
-          "origin_hash_mode": "text-lf",
-          "origin_sha256": "2cb84eaceb65213438aa6b7c3577e85d999cea768809201b3491558f5b20778b",
-          "generator": "scripts/generate_catalog_art.py",
+          "angle": "three-quarter",
+          "composition": "pair",
+          "origin_kind": "project-generated-derivative",
+          "origin_reference": "catalog-media/generated-reference/unified-front-pairs/mizuno-wave-lightning-z8-front-three-quarter-pair.webp",
+          "origin_hash_mode": "binary",
+          "origin_sha256": "09a48e527582a4c9092d28b8dd5b939203b085c88cb834405e2a3829ed10f568",
+          "generator": "scripts/build_footwear_front_pair_overrides.py",
           "rights": {
             "status": "owned",
             "license_reference": "KICKSBASE project-generated catalog media: mizuno-wave-lightning-z8:3",
             "verified_at": "2026-08-02T00:00:00Z"
           },
-          "sha256": "8e680099d326c691e9212a22e267350d9da1915e46e3bf2dcd1893eb1713954b"
+          "sha256": "d658c6fe88166beb0690f7e5649822d853abad5345ef47328e67788205b615a4"
         },
         {
           "position": 4,
@@ -4185,19 +4185,19 @@
           "position": 3,
           "file": "public/catalog/gallery/mizuno-wave-lightning-z8-mid-3.webp",
           "role": "gallery",
-          "angle": "front",
-          "composition": "single-or-pair",
-          "origin_kind": "project-generated-original",
-          "origin_reference": "scripts/generate_catalog_art.py",
-          "origin_hash_mode": "text-lf",
-          "origin_sha256": "2cb84eaceb65213438aa6b7c3577e85d999cea768809201b3491558f5b20778b",
-          "generator": "scripts/generate_catalog_art.py",
+          "angle": "three-quarter",
+          "composition": "pair",
+          "origin_kind": "project-generated-derivative",
+          "origin_reference": "catalog-media/generated-reference/unified-front-pairs/mizuno-wave-lightning-z8-mid-front-three-quarter-pair.webp",
+          "origin_hash_mode": "binary",
+          "origin_sha256": "6a955a661163982db80a4fa8369f0eb1ff11978a7c558ec2b3bea01cbb8fc33f",
+          "generator": "scripts/build_footwear_front_pair_overrides.py",
           "rights": {
             "status": "owned",
             "license_reference": "KICKSBASE project-generated catalog media: mizuno-wave-lightning-z8-mid:3",
             "verified_at": "2026-08-02T00:00:00Z"
           },
-          "sha256": "2e0c624ef67c5e8cab87a26e3f2710b13b3c147ff09591af922bcda41483c08a"
+          "sha256": "173fc42c573802f6434393d65c54d033508a6650a4db62663c36ff2942270c1d"
         },
         {
           "position": 4,
@@ -4281,19 +4281,19 @@
           "position": 3,
           "file": "public/catalog/gallery/mizuno-wave-luminous-3-3.webp",
           "role": "gallery",
-          "angle": "front",
-          "composition": "single-or-pair",
-          "origin_kind": "project-generated-original",
-          "origin_reference": "scripts/generate_catalog_art.py",
-          "origin_hash_mode": "text-lf",
-          "origin_sha256": "2cb84eaceb65213438aa6b7c3577e85d999cea768809201b3491558f5b20778b",
-          "generator": "scripts/generate_catalog_art.py",
+          "angle": "three-quarter",
+          "composition": "pair",
+          "origin_kind": "project-generated-derivative",
+          "origin_reference": "catalog-media/generated-reference/unified-front-pairs/mizuno-wave-luminous-3-front-three-quarter-pair.webp",
+          "origin_hash_mode": "binary",
+          "origin_sha256": "a72c641a26628e76933eb72f64e884a2fb0a486bf8c3af2d27c8c85ec60eed3d",
+          "generator": "scripts/build_footwear_front_pair_overrides.py",
           "rights": {
             "status": "owned",
             "license_reference": "KICKSBASE project-generated catalog media: mizuno-wave-luminous-3:3",
             "verified_at": "2026-08-02T00:00:00Z"
           },
-          "sha256": "27bc4dba26abb50293936b8c0ea899bf58285ccd5369beda44866c775aff8ba8"
+          "sha256": "cc0c82fc2d7eafc2efb7f3492634d54bb83da8550d7aff3ddc3d1205d4fe5b4f"
         },
         {
           "position": 4,
@@ -4377,19 +4377,19 @@
           "position": 3,
           "file": "public/catalog/gallery/mizuno-wave-momentum-3-3.webp",
           "role": "gallery",
-          "angle": "front",
-          "composition": "single-or-pair",
-          "origin_kind": "project-generated-original",
-          "origin_reference": "scripts/generate_catalog_art.py",
-          "origin_hash_mode": "text-lf",
-          "origin_sha256": "2cb84eaceb65213438aa6b7c3577e85d999cea768809201b3491558f5b20778b",
-          "generator": "scripts/generate_catalog_art.py",
+          "angle": "three-quarter",
+          "composition": "pair",
+          "origin_kind": "project-generated-derivative",
+          "origin_reference": "catalog-media/generated-reference/unified-front-pairs/mizuno-wave-momentum-3-front-three-quarter-pair.webp",
+          "origin_hash_mode": "binary",
+          "origin_sha256": "e6297f6dfaca9e8572c598ffe4f48176b3c6d3c2b797c3aa43ffca3e39a82f0c",
+          "generator": "scripts/build_footwear_front_pair_overrides.py",
           "rights": {
             "status": "owned",
             "license_reference": "KICKSBASE project-generated catalog media: mizuno-wave-momentum-3:3",
             "verified_at": "2026-08-02T00:00:00Z"
           },
-          "sha256": "0563cd9a6b90b09c36976b0a529e9043c6313213b5767cc8f8fde25984167a15"
+          "sha256": "43f52e508fae74cfc842458ce3e4f7031ce9187d7388274fb01a291abbd38565"
         },
         {
           "position": 4,
@@ -4473,19 +4473,19 @@
           "position": 3,
           "file": "public/catalog/gallery/mizuno-wave-momentum-elite-mid-3.webp",
           "role": "gallery",
-          "angle": "front",
-          "composition": "single-or-pair",
-          "origin_kind": "project-generated-original",
-          "origin_reference": "scripts/generate_catalog_art.py",
-          "origin_hash_mode": "text-lf",
-          "origin_sha256": "2cb84eaceb65213438aa6b7c3577e85d999cea768809201b3491558f5b20778b",
-          "generator": "scripts/generate_catalog_art.py",
+          "angle": "three-quarter",
+          "composition": "pair",
+          "origin_kind": "project-generated-derivative",
+          "origin_reference": "catalog-media/generated-reference/unified-front-pairs/mizuno-wave-momentum-elite-mid-front-three-quarter-pair.webp",
+          "origin_hash_mode": "binary",
+          "origin_sha256": "f6a3df43cc9deaa1721c4d5fb2f5e0480a4563729a6446cfadee42a4e08b5a77",
+          "generator": "scripts/build_footwear_front_pair_overrides.py",
           "rights": {
             "status": "owned",
             "license_reference": "KICKSBASE project-generated catalog media: mizuno-wave-momentum-elite-mid:3",
             "verified_at": "2026-08-02T00:00:00Z"
           },
-          "sha256": "a5a6838ed4170dd134006b1078d6e5297d8dd4eaf41e254834abd7ebaca43094"
+          "sha256": "d400b495e93f36c498b9c1c7fd927c9c2f9c9177fd459ce22b7b4bcc6bbc7545"
         },
         {
           "position": 4,
@@ -4569,19 +4569,19 @@
           "position": 3,
           "file": "public/catalog/gallery/mizuno-wave-momentum-pro-3.webp",
           "role": "gallery",
-          "angle": "front",
-          "composition": "single-or-pair",
-          "origin_kind": "project-generated-original",
-          "origin_reference": "scripts/generate_catalog_art.py",
-          "origin_hash_mode": "text-lf",
-          "origin_sha256": "2cb84eaceb65213438aa6b7c3577e85d999cea768809201b3491558f5b20778b",
-          "generator": "scripts/generate_catalog_art.py",
+          "angle": "three-quarter",
+          "composition": "pair",
+          "origin_kind": "project-generated-derivative",
+          "origin_reference": "catalog-media/generated-reference/unified-front-pairs/mizuno-wave-momentum-pro-front-three-quarter-pair.webp",
+          "origin_hash_mode": "binary",
+          "origin_sha256": "9d56832424810cd489b09a7302c9e910dfe4b315b65d04baadb1cdb23beb5fcf",
+          "generator": "scripts/build_footwear_front_pair_overrides.py",
           "rights": {
             "status": "owned",
             "license_reference": "KICKSBASE project-generated catalog media: mizuno-wave-momentum-pro:3",
             "verified_at": "2026-08-02T00:00:00Z"
           },
-          "sha256": "342d88f6d9bce75e5bf479a098f4af5423a82a294426fe40d8ca7792f4db3d30"
+          "sha256": "9da567d5d9cb620ee8873f6f94f7c73cbd2b45444a5ca323512e4a484929f80d"
         },
         {
           "position": 4,
@@ -4665,19 +4665,19 @@
           "position": 3,
           "file": "public/catalog/gallery/mizuno-wave-voltage-2-3.webp",
           "role": "gallery",
-          "angle": "front",
-          "composition": "single-or-pair",
-          "origin_kind": "project-generated-original",
-          "origin_reference": "scripts/generate_catalog_art.py",
-          "origin_hash_mode": "text-lf",
-          "origin_sha256": "2cb84eaceb65213438aa6b7c3577e85d999cea768809201b3491558f5b20778b",
-          "generator": "scripts/generate_catalog_art.py",
+          "angle": "three-quarter",
+          "composition": "pair",
+          "origin_kind": "project-generated-derivative",
+          "origin_reference": "catalog-media/generated-reference/unified-front-pairs/mizuno-wave-voltage-2-front-three-quarter-pair.webp",
+          "origin_hash_mode": "binary",
+          "origin_sha256": "cbbfa2a211bc41d534a1e89cad14db90d10a99aa9c588668b3a6d1953af2e9e0",
+          "generator": "scripts/build_footwear_front_pair_overrides.py",
           "rights": {
             "status": "owned",
             "license_reference": "KICKSBASE project-generated catalog media: mizuno-wave-voltage-2:3",
             "verified_at": "2026-08-02T00:00:00Z"
           },
-          "sha256": "5ba2d92541cb05068ce2a61f5c0f9d52f349d738665f82da0bc13abf1dfb950f"
+          "sha256": "7f8f3dd5e32cbbb52e3331ddfdc34595ea5c6d750c5bcd85699eefbbe2ea9094"
         },
         {
           "position": 4,
@@ -5049,19 +5049,19 @@
           "position": 3,
           "file": "public/catalog/gallery/new-balance-1000-black-3.webp",
           "role": "gallery",
-          "angle": "front",
-          "composition": "single-or-pair",
-          "origin_kind": "project-generated-original",
-          "origin_reference": "scripts/generate_catalog_art.py",
-          "origin_hash_mode": "text-lf",
-          "origin_sha256": "2cb84eaceb65213438aa6b7c3577e85d999cea768809201b3491558f5b20778b",
-          "generator": "scripts/generate_catalog_art.py",
+          "angle": "three-quarter",
+          "composition": "pair",
+          "origin_kind": "project-generated-derivative",
+          "origin_reference": "catalog-media/generated-reference/unified-front-pairs/new-balance-1000-black-front-three-quarter-pair.webp",
+          "origin_hash_mode": "binary",
+          "origin_sha256": "aef769f64a55f217baacf1dc35890e3c5f6f0ce41a84fb66b2a8f30d08e95fa8",
+          "generator": "scripts/build_footwear_front_pair_overrides.py",
           "rights": {
             "status": "owned",
             "license_reference": "KICKSBASE project-generated catalog media: new-balance-1000-black:3",
             "verified_at": "2026-08-02T00:00:00Z"
           },
-          "sha256": "689866f46b2d4020e02e23f5f6d61d6dfdc8cca1cf0427b4dd1c23e3f1a91fef"
+          "sha256": "e88ea7a1b2a9954a963e377367eefc8707d7aac0b85aede6a20a7b73cb327242"
         },
         {
           "position": 4,
@@ -5145,19 +5145,19 @@
           "position": 3,
           "file": "public/catalog/gallery/new-balance-1906r-silver-metallic-3.webp",
           "role": "gallery",
-          "angle": "front",
-          "composition": "single-or-pair",
-          "origin_kind": "project-generated-original",
-          "origin_reference": "scripts/generate_catalog_art.py",
-          "origin_hash_mode": "text-lf",
-          "origin_sha256": "2cb84eaceb65213438aa6b7c3577e85d999cea768809201b3491558f5b20778b",
-          "generator": "scripts/generate_catalog_art.py",
+          "angle": "three-quarter",
+          "composition": "pair",
+          "origin_kind": "project-generated-derivative",
+          "origin_reference": "catalog-media/generated-reference/unified-front-pairs/new-balance-1906r-silver-metallic-front-three-quarter-pair.webp",
+          "origin_hash_mode": "binary",
+          "origin_sha256": "be2763ba74683f889e47df1559bc701e6e95e0e2087a933ea01ad1c25218bf97",
+          "generator": "scripts/build_footwear_front_pair_overrides.py",
           "rights": {
             "status": "owned",
             "license_reference": "KICKSBASE project-generated catalog media: new-balance-1906r-silver-metallic:3",
             "verified_at": "2026-08-02T00:00:00Z"
           },
-          "sha256": "77b785c14f4ed180e19805c3867e6ef3203a4709272011c966c7c40eeb4f64d7"
+          "sha256": "ed3eb2f31000636cd03c33b5c7afac0f8f42e9de3550d847f8f513564e95adaf"
         },
         {
           "position": 4,
@@ -5241,19 +5241,19 @@
           "position": 3,
           "file": "public/catalog/gallery/new-balance-2002r-protection-pack-3.webp",
           "role": "gallery",
-          "angle": "front",
-          "composition": "single-or-pair",
-          "origin_kind": "project-generated-original",
-          "origin_reference": "scripts/generate_catalog_art.py",
-          "origin_hash_mode": "text-lf",
-          "origin_sha256": "2cb84eaceb65213438aa6b7c3577e85d999cea768809201b3491558f5b20778b",
-          "generator": "scripts/generate_catalog_art.py",
+          "angle": "three-quarter",
+          "composition": "pair",
+          "origin_kind": "project-generated-derivative",
+          "origin_reference": "catalog-media/generated-reference/unified-front-pairs/new-balance-2002r-protection-pack-front-three-quarter-pair.webp",
+          "origin_hash_mode": "binary",
+          "origin_sha256": "6fd657d4c588a4ad414e125fae30122bb36c0a0d734f1fb46d32c01a827f0d8c",
+          "generator": "scripts/build_footwear_front_pair_overrides.py",
           "rights": {
             "status": "owned",
             "license_reference": "KICKSBASE project-generated catalog media: new-balance-2002r-protection-pack:3",
             "verified_at": "2026-08-02T00:00:00Z"
           },
-          "sha256": "400588d206a713cd123fc917bf73958946e09a176412a3a89309673905525eea"
+          "sha256": "29b0b70dd1f6f7c30208aa1baa2fefc6c03fcd8e6c6ad347ec04c42bead8bafd"
         },
         {
           "position": 4,
@@ -5337,19 +5337,19 @@
           "position": 3,
           "file": "public/catalog/gallery/new-balance-530-white-silver-navy-3.webp",
           "role": "gallery",
-          "angle": "front",
-          "composition": "single-or-pair",
-          "origin_kind": "project-generated-original",
-          "origin_reference": "scripts/generate_catalog_art.py",
-          "origin_hash_mode": "text-lf",
-          "origin_sha256": "2cb84eaceb65213438aa6b7c3577e85d999cea768809201b3491558f5b20778b",
-          "generator": "scripts/generate_catalog_art.py",
+          "angle": "three-quarter",
+          "composition": "pair",
+          "origin_kind": "project-generated-derivative",
+          "origin_reference": "catalog-media/generated-reference/unified-front-pairs/new-balance-530-white-silver-navy-front-three-quarter-pair.webp",
+          "origin_hash_mode": "binary",
+          "origin_sha256": "95c5b9490d8f98a41d93e1049b5ae2c52a6cf9b17710fc2b67a0662f8e29953a",
+          "generator": "scripts/build_footwear_front_pair_overrides.py",
           "rights": {
             "status": "owned",
             "license_reference": "KICKSBASE project-generated catalog media: new-balance-530-white-silver-navy:3",
             "verified_at": "2026-08-02T00:00:00Z"
           },
-          "sha256": "54fa59b0cbb197d7a08845de56fdaac62b052cad2e2c2175a1a77c82088d73d4"
+          "sha256": "db32879924cb4a8b63334231bdd5028485fc9b1834c947614499a28e727f88c0"
         },
         {
           "position": 4,
@@ -5433,19 +5433,19 @@
           "position": 3,
           "file": "public/catalog/gallery/new-balance-9060-rain-cloud-3.webp",
           "role": "gallery",
-          "angle": "front",
-          "composition": "single-or-pair",
-          "origin_kind": "project-generated-original",
-          "origin_reference": "scripts/generate_catalog_art.py",
-          "origin_hash_mode": "text-lf",
-          "origin_sha256": "2cb84eaceb65213438aa6b7c3577e85d999cea768809201b3491558f5b20778b",
-          "generator": "scripts/generate_catalog_art.py",
+          "angle": "three-quarter",
+          "composition": "pair",
+          "origin_kind": "project-generated-derivative",
+          "origin_reference": "catalog-media/generated-reference/unified-front-pairs/new-balance-9060-rain-cloud-front-three-quarter-pair.webp",
+          "origin_hash_mode": "binary",
+          "origin_sha256": "62c2a39ec33ab7fa89ad380d69fc07d90b048ee9c90ed4ee12c3a5f5f70b4ad2",
+          "generator": "scripts/build_footwear_front_pair_overrides.py",
           "rights": {
             "status": "owned",
             "license_reference": "KICKSBASE project-generated catalog media: new-balance-9060-rain-cloud:3",
             "verified_at": "2026-08-02T00:00:00Z"
           },
-          "sha256": "483afadf3c3b2cf7f8752652d6c8017cc3e04e482968750da6884cc12c90929c"
+          "sha256": "e410cf7cc411f10461827e25f6dc2a7dde93b1fbf14588205f2a36bf0e63baa6"
         },
         {
           "position": 4,
@@ -5529,8 +5529,8 @@
           "position": 3,
           "file": "public/storefront-media/approved/products/new-balance-two-wxy-v5/02-three-quarter.png",
           "role": "gallery",
-          "angle": "front",
-          "composition": "single-or-pair",
+          "angle": "three-quarter",
+          "composition": "pair",
           "origin_kind": "project-generated-original",
           "origin_reference": "catalog-media/approved-storefront-media.json",
           "origin_hash_mode": "text-lf",
@@ -5721,19 +5721,19 @@
           "position": 3,
           "file": "public/catalog/gallery/nike-air-force-1-07-white-3.webp",
           "role": "gallery",
-          "angle": "front",
-          "composition": "single-or-pair",
-          "origin_kind": "project-generated-original",
-          "origin_reference": "scripts/generate_catalog_art.py",
-          "origin_hash_mode": "text-lf",
-          "origin_sha256": "2cb84eaceb65213438aa6b7c3577e85d999cea768809201b3491558f5b20778b",
-          "generator": "scripts/generate_catalog_art.py",
+          "angle": "three-quarter",
+          "composition": "pair",
+          "origin_kind": "project-generated-derivative",
+          "origin_reference": "catalog-media/generated-reference/unified-front-pairs/nike-air-force-1-07-white-front-three-quarter-pair.webp",
+          "origin_hash_mode": "binary",
+          "origin_sha256": "558cad3a67c5fd74d1b5d25911b79f4843f226d0169dcd82f274d74e3118ce3d",
+          "generator": "scripts/build_footwear_front_pair_overrides.py",
           "rights": {
             "status": "owned",
             "license_reference": "KICKSBASE project-generated catalog media: nike-air-force-1-07-white:3",
             "verified_at": "2026-08-02T00:00:00Z"
           },
-          "sha256": "36dc51946549ed78a13b419559e73c0f37b21ecd7995831884b6a9ddb167acce"
+          "sha256": "7d1b8a314d5a5e8dd5018c2e6d6a452c05f43719e6e0317db5051371eca77c0a"
         },
         {
           "position": 4,
@@ -5817,19 +5817,19 @@
           "position": 3,
           "file": "public/catalog/gallery/nike-air-max-95-black-anthracite-3.webp",
           "role": "gallery",
-          "angle": "front",
-          "composition": "single-or-pair",
-          "origin_kind": "project-generated-original",
-          "origin_reference": "scripts/generate_catalog_art.py",
-          "origin_hash_mode": "text-lf",
-          "origin_sha256": "2cb84eaceb65213438aa6b7c3577e85d999cea768809201b3491558f5b20778b",
-          "generator": "scripts/generate_catalog_art.py",
+          "angle": "three-quarter",
+          "composition": "pair",
+          "origin_kind": "project-generated-derivative",
+          "origin_reference": "catalog-media/generated-reference/unified-front-pairs/nike-air-max-95-black-anthracite-front-three-quarter-pair.webp",
+          "origin_hash_mode": "binary",
+          "origin_sha256": "a52e22d1969f8dae08e97eed26041e8b0007ab453b2174ab951f92a734fa19c5",
+          "generator": "scripts/build_footwear_front_pair_overrides.py",
           "rights": {
             "status": "owned",
             "license_reference": "KICKSBASE project-generated catalog media: nike-air-max-95-black-anthracite:3",
             "verified_at": "2026-08-02T00:00:00Z"
           },
-          "sha256": "6eb7b60052c0e44b0a9d27fe54faf45af3f8240f816d94df78e7b8207c78bfb0"
+          "sha256": "1b29add4bd1140caf5d5cd4414ee58341245d10828f1454ac816d871bf89bfd6"
         },
         {
           "position": 4,
@@ -5913,8 +5913,8 @@
           "position": 3,
           "file": "public/storefront-media/approved/products/nike-aone/02-three-quarter.png",
           "role": "gallery",
-          "angle": "front",
-          "composition": "single-or-pair",
+          "angle": "three-quarter",
+          "composition": "pair",
           "origin_kind": "project-generated-original",
           "origin_reference": "catalog-media/approved-storefront-media.json",
           "origin_hash_mode": "text-lf",
@@ -6201,19 +6201,19 @@
           "position": 3,
           "file": "public/catalog/gallery/nike-calm-slide-3.webp",
           "role": "gallery",
-          "angle": "front",
+          "angle": "three-quarter",
           "composition": "pair",
-          "origin_kind": "project-generated-original",
-          "origin_reference": "scripts/generate_catalog_art.py",
-          "origin_hash_mode": "text-lf",
-          "origin_sha256": "2cb84eaceb65213438aa6b7c3577e85d999cea768809201b3491558f5b20778b",
-          "generator": "scripts/generate_catalog_art.py",
+          "origin_kind": "project-generated-derivative",
+          "origin_reference": "catalog-media/generated-reference/unified-front-pairs/nike-calm-slide-front-three-quarter-pair.webp",
+          "origin_hash_mode": "binary",
+          "origin_sha256": "70b929200540946a3f293b7d35382cb12471033f71d137157ff870bb5747db14",
+          "generator": "scripts/build_footwear_front_pair_overrides.py",
           "rights": {
             "status": "owned",
             "license_reference": "KICKSBASE project-generated catalog media: nike-calm-slide:3",
             "verified_at": "2026-08-02T00:00:00Z"
           },
-          "sha256": "7318963546a2354eac8a512d8502b0575c7373dafb29a5f57897b61e0d6992a8"
+          "sha256": "2685ffe7645876cc91d565e10d715b820604521b5665f248f8caf2fdbd2bf87d"
         },
         {
           "position": 4,
@@ -6393,19 +6393,19 @@
           "position": 3,
           "file": "public/catalog/gallery/nike-dunk-low-panda-3.webp",
           "role": "gallery",
-          "angle": "front",
-          "composition": "single-or-pair",
-          "origin_kind": "project-generated-original",
-          "origin_reference": "scripts/generate_catalog_art.py",
-          "origin_hash_mode": "text-lf",
-          "origin_sha256": "2cb84eaceb65213438aa6b7c3577e85d999cea768809201b3491558f5b20778b",
-          "generator": "scripts/generate_catalog_art.py",
+          "angle": "three-quarter",
+          "composition": "pair",
+          "origin_kind": "project-generated-derivative",
+          "origin_reference": "catalog-media/generated-reference/unified-front-pairs/nike-dunk-low-panda-front-three-quarter-pair.webp",
+          "origin_hash_mode": "binary",
+          "origin_sha256": "c1de1777974de3f234a104dfa2f7617d6c0ad5ac84dac78dc7689e245e6b81d5",
+          "generator": "scripts/build_footwear_front_pair_overrides.py",
           "rights": {
             "status": "owned",
             "license_reference": "KICKSBASE project-generated catalog media: nike-dunk-low-panda:3",
             "verified_at": "2026-08-02T00:00:00Z"
           },
-          "sha256": "9e1215325125aa683158c9bafef511e7d381ef93955764ecb7bcc778feacfbab"
+          "sha256": "f3e1e47d78c059c21d28fcac02e2e11843b976780c5622af481901e3d076dc2f"
         },
         {
           "position": 4,
@@ -6681,8 +6681,8 @@
           "position": 3,
           "file": "public/storefront-media/approved/products/nike-free-metcon-6/02-three-quarter.png",
           "role": "gallery",
-          "angle": "front",
-          "composition": "single-or-pair",
+          "angle": "three-quarter",
+          "composition": "pair",
           "origin_kind": "project-generated-original",
           "origin_reference": "catalog-media/approved-storefront-media.json",
           "origin_hash_mode": "text-lf",
@@ -6777,19 +6777,19 @@
           "position": 3,
           "file": "public/catalog/gallery/nike-gt-cut-academy-3.webp",
           "role": "gallery",
-          "angle": "front",
-          "composition": "single-or-pair",
-          "origin_kind": "project-generated-original",
-          "origin_reference": "scripts/generate_catalog_art.py",
-          "origin_hash_mode": "text-lf",
-          "origin_sha256": "2cb84eaceb65213438aa6b7c3577e85d999cea768809201b3491558f5b20778b",
-          "generator": "scripts/generate_catalog_art.py",
+          "angle": "three-quarter",
+          "composition": "pair",
+          "origin_kind": "project-generated-derivative",
+          "origin_reference": "catalog-media/generated-reference/unified-front-pairs/nike-gt-cut-academy-front-three-quarter-pair.webp",
+          "origin_hash_mode": "binary",
+          "origin_sha256": "0957b607277c8a14b1fa5526b405014bc6db39b322ba8aed3aa955558eb00709",
+          "generator": "scripts/build_footwear_front_pair_overrides.py",
           "rights": {
             "status": "owned",
             "license_reference": "KICKSBASE project-generated catalog media: nike-gt-cut-academy:3",
             "verified_at": "2026-08-02T00:00:00Z"
           },
-          "sha256": "3a10f6b34568c20061cd7d6d11df7575f23563d2ddfec634aace0003ef1eef25"
+          "sha256": "00330f9bcb4bdcfa6e4a27948f981e4bcef00f7b4adff8fd73fdcc561178bcba"
         },
         {
           "position": 4,
@@ -6969,19 +6969,19 @@
           "position": 3,
           "file": "public/catalog/gallery/nike-hyperace-3-se-3.webp",
           "role": "gallery",
-          "angle": "front",
-          "composition": "single-or-pair",
-          "origin_kind": "project-generated-original",
-          "origin_reference": "scripts/generate_catalog_art.py",
-          "origin_hash_mode": "text-lf",
-          "origin_sha256": "2cb84eaceb65213438aa6b7c3577e85d999cea768809201b3491558f5b20778b",
-          "generator": "scripts/generate_catalog_art.py",
+          "angle": "three-quarter",
+          "composition": "pair",
+          "origin_kind": "project-generated-derivative",
+          "origin_reference": "catalog-media/generated-reference/unified-front-pairs/nike-hyperace-3-se-front-three-quarter-pair.webp",
+          "origin_hash_mode": "binary",
+          "origin_sha256": "d13974cac08155f40249fce9bbb51852aaf9d52fbe5f83abf076927f86fafaeb",
+          "generator": "scripts/build_footwear_front_pair_overrides.py",
           "rights": {
             "status": "owned",
             "license_reference": "KICKSBASE project-generated catalog media: nike-hyperace-3-se:3",
             "verified_at": "2026-08-02T00:00:00Z"
           },
-          "sha256": "f60d260c5dcbfe9444c7597ce6785313bfd632bcea32ab8168ece641ca1b9724"
+          "sha256": "807170fece70375a51eea0dd60eb035c02a23a1afc02652a6eddec3cf5bd0bf1"
         },
         {
           "position": 4,
@@ -7161,19 +7161,19 @@
           "position": 3,
           "file": "public/catalog/gallery/nike-ja-3-3.webp",
           "role": "gallery",
-          "angle": "front",
-          "composition": "single-or-pair",
-          "origin_kind": "project-generated-original",
-          "origin_reference": "scripts/generate_catalog_art.py",
-          "origin_hash_mode": "text-lf",
-          "origin_sha256": "2cb84eaceb65213438aa6b7c3577e85d999cea768809201b3491558f5b20778b",
-          "generator": "scripts/generate_catalog_art.py",
+          "angle": "three-quarter",
+          "composition": "pair",
+          "origin_kind": "project-generated-derivative",
+          "origin_reference": "catalog-media/generated-reference/unified-front-pairs/nike-ja-3-front-three-quarter-pair.webp",
+          "origin_hash_mode": "binary",
+          "origin_sha256": "5a9ae7051418f9de92333058e236cac147a16e33ed689405b103156d495d0b91",
+          "generator": "scripts/build_footwear_front_pair_overrides.py",
           "rights": {
             "status": "owned",
             "license_reference": "KICKSBASE project-generated catalog media: nike-ja-3:3",
             "verified_at": "2026-08-02T00:00:00Z"
           },
-          "sha256": "0704cc491019f5fd5d342c1696e5483197551906870e0af9cfcc968563b9f44c"
+          "sha256": "a189a02023969c4a59a5db469ad858a2e24ee9164d6c1baf24e4792966fc267b"
         },
         {
           "position": 4,
@@ -7257,8 +7257,8 @@
           "position": 3,
           "file": "public/storefront-media/approved/products/nike-kd-18/02-three-quarter.png",
           "role": "gallery",
-          "angle": "front",
-          "composition": "single-or-pair",
+          "angle": "three-quarter",
+          "composition": "pair",
           "origin_kind": "project-generated-original",
           "origin_reference": "catalog-media/approved-storefront-media.json",
           "origin_hash_mode": "text-lf",
@@ -7353,19 +7353,19 @@
           "position": 3,
           "file": "public/catalog/gallery/nike-lebron-nxxt-genisus-3.webp",
           "role": "gallery",
-          "angle": "front",
-          "composition": "single-or-pair",
-          "origin_kind": "project-generated-original",
-          "origin_reference": "scripts/generate_catalog_art.py",
-          "origin_hash_mode": "text-lf",
-          "origin_sha256": "2cb84eaceb65213438aa6b7c3577e85d999cea768809201b3491558f5b20778b",
-          "generator": "scripts/generate_catalog_art.py",
+          "angle": "three-quarter",
+          "composition": "pair",
+          "origin_kind": "project-generated-derivative",
+          "origin_reference": "catalog-media/generated-reference/unified-front-pairs/nike-lebron-nxxt-genisus-front-three-quarter-pair.webp",
+          "origin_hash_mode": "binary",
+          "origin_sha256": "d6f521ce56c0eb4f9b50b00fba959c73fc7895f12df26192e66defdf2235b3e5",
+          "generator": "scripts/build_footwear_front_pair_overrides.py",
           "rights": {
             "status": "owned",
             "license_reference": "KICKSBASE project-generated catalog media: nike-lebron-nxxt-genisus:3",
             "verified_at": "2026-08-02T00:00:00Z"
           },
-          "sha256": "d4d290d58fc775bf30bf6865f7eb20f92d1ed1897376a75859101dc321e15484"
+          "sha256": "254d52c9879447c6443ce78b3926c0ee80ddcf7d2ec87cf1c1dec71d9b058b4f"
         },
         {
           "position": 4,
@@ -7449,19 +7449,19 @@
           "position": 3,
           "file": "public/catalog/gallery/nike-mind-001-slide-black-3.webp",
           "role": "gallery",
-          "angle": "front",
+          "angle": "three-quarter",
           "composition": "pair",
-          "origin_kind": "project-generated-original",
-          "origin_reference": "scripts/generate_catalog_art.py",
-          "origin_hash_mode": "text-lf",
-          "origin_sha256": "2cb84eaceb65213438aa6b7c3577e85d999cea768809201b3491558f5b20778b",
-          "generator": "scripts/generate_catalog_art.py",
+          "origin_kind": "project-generated-derivative",
+          "origin_reference": "catalog-media/generated-reference/unified-front-pairs/nike-mind-001-slide-black-front-three-quarter-pair.webp",
+          "origin_hash_mode": "binary",
+          "origin_sha256": "148baf30219e728813a6edba95fba0dbb6f128cd3fcc73256cc34482c8523e13",
+          "generator": "scripts/build_footwear_front_pair_overrides.py",
           "rights": {
             "status": "owned",
             "license_reference": "KICKSBASE project-generated catalog media: nike-mind-001-slide-black:3",
             "verified_at": "2026-08-02T00:00:00Z"
           },
-          "sha256": "e5a307bb980ec112faa62b75dba571660df0a33ed1100a082be66d59da2895c5"
+          "sha256": "d9ac306b4afc2ef9506871b082ca079f4f196a8f90537e813bcc9f123dad3479"
         },
         {
           "position": 4,
@@ -7737,8 +7737,8 @@
           "position": 3,
           "file": "public/storefront-media/approved/products/nike-sabrina-3/02-three-quarter.png",
           "role": "gallery",
-          "angle": "front",
-          "composition": "single-or-pair",
+          "angle": "three-quarter",
+          "composition": "pair",
           "origin_kind": "project-generated-original",
           "origin_reference": "catalog-media/approved-storefront-media.json",
           "origin_hash_mode": "text-lf",
@@ -8025,19 +8025,19 @@
           "position": 3,
           "file": "public/catalog/gallery/nike-zoom-hyperset-2-3.webp",
           "role": "gallery",
-          "angle": "front",
-          "composition": "single-or-pair",
-          "origin_kind": "project-generated-original",
-          "origin_reference": "scripts/generate_catalog_art.py",
-          "origin_hash_mode": "text-lf",
-          "origin_sha256": "2cb84eaceb65213438aa6b7c3577e85d999cea768809201b3491558f5b20778b",
-          "generator": "scripts/generate_catalog_art.py",
+          "angle": "three-quarter",
+          "composition": "pair",
+          "origin_kind": "project-generated-derivative",
+          "origin_reference": "catalog-media/generated-reference/unified-front-pairs/nike-zoom-hyperset-2-front-three-quarter-pair.webp",
+          "origin_hash_mode": "binary",
+          "origin_sha256": "d3b7579ecfb3ff9028d4b66077d1d0626ca8a957a62f12e6a991f3d18442ca50",
+          "generator": "scripts/build_footwear_front_pair_overrides.py",
           "rights": {
             "status": "owned",
             "license_reference": "KICKSBASE project-generated catalog media: nike-zoom-hyperset-2:3",
             "verified_at": "2026-08-02T00:00:00Z"
           },
-          "sha256": "c8ec2fac955b7987b53627251c587388cc796a011b38673ef0eb34b917ebf8a2"
+          "sha256": "0d78d5a607050edd378440371281164394418a9e6a91a43b9958c8621024b458"
         },
         {
           "position": 4,
@@ -8121,19 +8121,19 @@
           "position": 3,
           "file": "public/catalog/gallery/nike-zoom-vomero-5-photon-dust-3.webp",
           "role": "gallery",
-          "angle": "front",
-          "composition": "single-or-pair",
-          "origin_kind": "project-generated-original",
-          "origin_reference": "scripts/generate_catalog_art.py",
-          "origin_hash_mode": "text-lf",
-          "origin_sha256": "2cb84eaceb65213438aa6b7c3577e85d999cea768809201b3491558f5b20778b",
-          "generator": "scripts/generate_catalog_art.py",
+          "angle": "three-quarter",
+          "composition": "pair",
+          "origin_kind": "project-generated-derivative",
+          "origin_reference": "catalog-media/generated-reference/unified-front-pairs/nike-zoom-vomero-5-photon-dust-front-three-quarter-pair.webp",
+          "origin_hash_mode": "binary",
+          "origin_sha256": "ee67f478e8745637bf4448905c2f00cda7ee107f79be14edb9f31386ce41e239",
+          "generator": "scripts/build_footwear_front_pair_overrides.py",
           "rights": {
             "status": "owned",
             "license_reference": "KICKSBASE project-generated catalog media: nike-zoom-vomero-5-photon-dust:3",
             "verified_at": "2026-08-02T00:00:00Z"
           },
-          "sha256": "0d57e4513e33f2766c9108a8df214e98384f927d4b901716d2eea1ae2a64286c"
+          "sha256": "8ed11a5a33cf9b296bbba10345ef3f484ef1fe802d770a6ff6141934e3f16a03"
         },
         {
           "position": 4,
@@ -8409,19 +8409,19 @@
           "position": 3,
           "file": "public/catalog/gallery/oofos-ooahh-slide-3.webp",
           "role": "gallery",
-          "angle": "front",
+          "angle": "three-quarter",
           "composition": "pair",
-          "origin_kind": "project-generated-original",
-          "origin_reference": "scripts/generate_catalog_art.py",
-          "origin_hash_mode": "text-lf",
-          "origin_sha256": "2cb84eaceb65213438aa6b7c3577e85d999cea768809201b3491558f5b20778b",
-          "generator": "scripts/generate_catalog_art.py",
+          "origin_kind": "project-generated-derivative",
+          "origin_reference": "catalog-media/generated-reference/unified-front-pairs/oofos-ooahh-slide-front-three-quarter-pair.webp",
+          "origin_hash_mode": "binary",
+          "origin_sha256": "c6e80f1007698370a3be36ea248db52e3e5bcf7cf8bc64a459fcd00a6dc8e6ed",
+          "generator": "scripts/build_footwear_front_pair_overrides.py",
           "rights": {
             "status": "owned",
             "license_reference": "KICKSBASE project-generated catalog media: oofos-ooahh-slide:3",
             "verified_at": "2026-08-02T00:00:00Z"
           },
-          "sha256": "9c8f65277788b5f1194407327e78676864f89378a902eee121b016b90c40a1a4"
+          "sha256": "025b5182306e87817368f0ece79698c6fb267a5cbb9de4d7fb82961c463c68ae"
         },
         {
           "position": 4,
@@ -8505,8 +8505,8 @@
           "position": 3,
           "file": "public/catalog/gallery/puma-fuse-3-3.webp",
           "role": "gallery",
-          "angle": "front",
-          "composition": "single-or-pair",
+          "angle": "three-quarter",
+          "composition": "pair",
           "origin_kind": "project-generated-original",
           "origin_reference": "scripts/generate_catalog_art.py",
           "origin_hash_mode": "text-lf",
@@ -8697,19 +8697,19 @@
           "position": 3,
           "file": "public/catalog/gallery/salomon-xt-6-white-lunar-rock-3.webp",
           "role": "gallery",
-          "angle": "front",
-          "composition": "single-or-pair",
-          "origin_kind": "project-generated-original",
-          "origin_reference": "scripts/generate_catalog_art.py",
-          "origin_hash_mode": "text-lf",
-          "origin_sha256": "2cb84eaceb65213438aa6b7c3577e85d999cea768809201b3491558f5b20778b",
-          "generator": "scripts/generate_catalog_art.py",
+          "angle": "three-quarter",
+          "composition": "pair",
+          "origin_kind": "project-generated-derivative",
+          "origin_reference": "catalog-media/generated-reference/unified-front-pairs/salomon-xt-6-white-lunar-rock-front-three-quarter-pair.webp",
+          "origin_hash_mode": "binary",
+          "origin_sha256": "022f9ad5503234e74a533dedf7a1db7ea9bd03d6a08c3415ae87e85e6189142a",
+          "generator": "scripts/build_footwear_front_pair_overrides.py",
           "rights": {
             "status": "owned",
             "license_reference": "KICKSBASE project-generated catalog media: salomon-xt-6-white-lunar-rock:3",
             "verified_at": "2026-08-02T00:00:00Z"
           },
-          "sha256": "63859c5073a28affff9f5fe9c580ecd51ce0a8e48e162dbd1564f7c448798cc5"
+          "sha256": "b5c45ce425048d4dbbae3a033448d2c450ad56839d9dc852aee6ec13ce1862b7"
         },
         {
           "position": 4,
@@ -9081,19 +9081,19 @@
           "position": 3,
           "file": "public/catalog/gallery/timberland-field-boot-beef-broccoli-3.webp",
           "role": "gallery",
-          "angle": "front",
-          "composition": "single-or-pair",
-          "origin_kind": "project-generated-original",
-          "origin_reference": "scripts/generate_catalog_art.py",
-          "origin_hash_mode": "text-lf",
-          "origin_sha256": "2cb84eaceb65213438aa6b7c3577e85d999cea768809201b3491558f5b20778b",
-          "generator": "scripts/generate_catalog_art.py",
+          "angle": "three-quarter",
+          "composition": "pair",
+          "origin_kind": "project-generated-derivative",
+          "origin_reference": "catalog-media/generated-reference/unified-front-pairs/timberland-field-boot-beef-broccoli-front-three-quarter-pair.webp",
+          "origin_hash_mode": "binary",
+          "origin_sha256": "434a5128f758deaf3dbfebbab4fae0aba8be685e56b896e4dca7276063eade32",
+          "generator": "scripts/build_footwear_front_pair_overrides.py",
           "rights": {
             "status": "owned",
             "license_reference": "KICKSBASE project-generated catalog media: timberland-field-boot-beef-broccoli:3",
             "verified_at": "2026-08-02T00:00:00Z"
           },
-          "sha256": "27fad3eee87f3816298c4915fa71cba516d07d4f7e0847868fdc5b1e5bb008c8"
+          "sha256": "457a6fee7d18d09386145b4514d9086e313aa584931603e5fc63072100566f1c"
         },
         {
           "position": 4,
@@ -9369,19 +9369,19 @@
           "position": 3,
           "file": "public/catalog/gallery/vans-old-skool-36-black-white-3.webp",
           "role": "gallery",
-          "angle": "front",
-          "composition": "single-or-pair",
-          "origin_kind": "project-generated-original",
-          "origin_reference": "scripts/generate_catalog_art.py",
-          "origin_hash_mode": "text-lf",
-          "origin_sha256": "2cb84eaceb65213438aa6b7c3577e85d999cea768809201b3491558f5b20778b",
-          "generator": "scripts/generate_catalog_art.py",
+          "angle": "three-quarter",
+          "composition": "pair",
+          "origin_kind": "project-generated-derivative",
+          "origin_reference": "catalog-media/generated-reference/unified-front-pairs/vans-old-skool-36-black-white-front-three-quarter-pair.webp",
+          "origin_hash_mode": "binary",
+          "origin_sha256": "abcb5f82607c81ae55630f68fe5660c3f41cf2338c8a34d3c178d7b1b9142e30",
+          "generator": "scripts/build_footwear_front_pair_overrides.py",
           "rights": {
             "status": "owned",
             "license_reference": "KICKSBASE project-generated catalog media: vans-old-skool-36-black-white:3",
             "verified_at": "2026-08-02T00:00:00Z"
           },
-          "sha256": "ba001c53c048a8ebe104700c03134ed265c227a82b331016771d3f47de3a65e2"
+          "sha256": "e11c91b71d3a9363b778cbde3ad6725c89129afea944a6f9a1f673c3fdccca8a"
         },
         {
           "position": 4,
@@ -9465,19 +9465,19 @@
           "position": 3,
           "file": "public/catalog/gallery/way-of-wade-all-city-12-3.webp",
           "role": "gallery",
-          "angle": "front",
-          "composition": "single-or-pair",
-          "origin_kind": "project-generated-original",
-          "origin_reference": "scripts/generate_catalog_art.py",
-          "origin_hash_mode": "text-lf",
-          "origin_sha256": "2cb84eaceb65213438aa6b7c3577e85d999cea768809201b3491558f5b20778b",
-          "generator": "scripts/generate_catalog_art.py",
+          "angle": "three-quarter",
+          "composition": "pair",
+          "origin_kind": "project-generated-derivative",
+          "origin_reference": "catalog-media/generated-reference/unified-front-pairs/way-of-wade-all-city-12-front-three-quarter-pair.webp",
+          "origin_hash_mode": "binary",
+          "origin_sha256": "47c008d8514b4f3b7e8a75025715e4ce9a8ad892b40de10f8842374ab8146564",
+          "generator": "scripts/build_footwear_front_pair_overrides.py",
           "rights": {
             "status": "owned",
             "license_reference": "KICKSBASE project-generated catalog media: way-of-wade-all-city-12:3",
             "verified_at": "2026-08-02T00:00:00Z"
           },
-          "sha256": "f55bb346dfb7b293586a1b2022db063feca3fe57b1e9eb0e6343c14e0cd76cbb"
+          "sha256": "4acf46c58eecc652a9e868b5b0525439bd14a1350d920ebe1cc653ef56f7017e"
         },
         {
           "position": 4,
