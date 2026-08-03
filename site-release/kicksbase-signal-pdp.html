@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>KICKSBASE — товар</title>
+</head>
+<body>
+  <p><a id="continue-link" href="kicksbase-direction-03-blue-field-v2.html">Открыть товар в KICKSBASE</a></p>
+  <script>
+    (function () {
+      var params = new URLSearchParams(window.location.search);
+      var target = 'kicksbase-direction-03-blue-field-v2.html';
+      if (window.location.hash === '#cart') params.set('view', 'cart');
+      if (params.toString()) target += '?' + params.toString();
+      if (window.location.hash === '#delivery' || window.location.hash === '#authenticity') target += '#delivery';
+      document.getElementById('continue-link').href = target;
+      window.location.replace(target);
+    })();
+  </script>
+</body>
+</html>

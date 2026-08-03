@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light" />
+  <title>KICKSBASE — кроссовки и экипировка</title>
+  <link rel="stylesheet" href="kicksbase-direction-03-blue-field-v2.css" />
+</head>
+<body>
+  <a class="skip-link" href="#main">Перейти к содержанию</a>
+
+  <header class="site-header" data-od-id="site-header">
+    <div class="header-bar container">
+      <button class="icon-button menu-button" type="button" data-menu-toggle data-od-id="menu-button" aria-label="Открыть меню" aria-expanded="false" title="Меню">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"></path></svg>
+      </button>
+
+      <a class="brand" href="#main" data-od-id="brand-link" aria-label="KICKSBASE — главная">
+        <img class="brand-mark" src="assets/kicksbase-signal/kicksbase-logo.webp" alt="" width="720" height="720" />
+        <span class="brand-copy">
+          <span class="brand-name">KICKSBASE</span>
+          <span class="brand-note">обувь и экипировка</span>
+        </span>
+      </a>
+
+      <nav class="desktop-nav" data-od-id="primary-navigation" aria-label="Основная навигация">
+        <span class="nav-highlight" aria-hidden="true"></span>
+        <a href="#popular" aria-current="page" data-od-id="nav-catalog">Каталог</a>
+        <a href="#finder" data-od-id="nav-finder">Подобрать</a>
+        <a href="#delivery" data-od-id="nav-delivery-and-returns">Доставка и возврат</a>
+        <a href="#about" data-od-id="nav-about">О нас</a>
+        <a href="#contacts" data-od-id="nav-contacts">Контакты</a>
+      </nav>
+
+      <div class="header-actions" data-od-id="header-actions">
+        <button class="icon-button" type="button" data-dialog-open="search-dialog" data-od-id="search-button" aria-label="Открыть поиск" title="Поиск">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.8"></circle><path d="m16 16 4 4"></path></svg>
+        </button>
+        <button class="icon-button login-button" type="button" data-dialog-open="login-dialog" data-od-id="login-button" aria-label="Войти по SMS" title="Войти">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.2"></circle><path d="M5.5 20c.7-4 3-6 6.5-6s5.8 2 6.5 6"></path></svg>
+        </button>
+        <button class="icon-button" type="button" data-dialog-open="favorites-dialog" data-favorites-button data-od-id="favorites-button" aria-label="Открыть избранное" title="Избранное">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 8.8c0 5.2-8.5 10.3-8.5 10.3S3.5 14 3.5 8.8A4.4 4.4 0 0 1 12 7.2a4.4 4.4 0 0 1 8.5 1.6Z"></path></svg>
+          <span class="action-count" data-favorites-count aria-label="Товаров в избранном">0</span>
+        </button>
+        <button class="icon-button" type="button" data-dialog-open="cart-dialog" data-od-id="cart-button" aria-label="Открыть корзину" title="Корзина">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8.5h14l-1.2 10H6.2L5 8.5Z"></path><path d="M9 9V7.2a3 3 0 0 1 6 0V9"></path></svg>
+          <span class="action-count" data-cart-count aria-label="Товаров в корзине">0</span>
+        </button>
+      </div>
+    </div>
+
+    <nav class="mobile-menu" data-mobile-menu data-od-id="mobile-navigation" aria-label="Мобильная навигация">
+      <a href="#popular">Каталог</a>
+      <a href="#finder">Подобрать</a>
+      <a href="#delivery">Доставка и возврат</a>
+      <a href="#about">О нас</a>
+      <a href="#contacts">Контакты</a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <div class="hero-wrap container">
+      <section class="hero" data-od-id="hero" aria-labelledby="hero-title">
+        <div class="hero-copy">
+          <p class="eyebrow">Кроссовки и экипировка</p>
+          <h1 id="hero-title" data-od-id="hero-title">Выберите пару под свой запрос.</h1>
+          <p class="hero-lead">Подберите модель по задаче, размеру и бюджету до перехода к оплате.</p>
+          <a class="hero-action" href="#finder" data-od-id="hero-primary-cta">Подобрать модель</a>
+        </div>
+
+        <div class="hero-media" data-od-id="hero-product-stage">
+          <img src="assets/blue-field-v2/nike-kd-18-hero-cutout-v2.png" alt="Кроссовки Nike KD 18, боковой профиль целиком" />
+        </div>
+      </section>
+    </div>
+
+    <section class="finder-section container" id="finder" data-od-id="finder-section" aria-labelledby="finder-title">
+      <div class="finder">
+        <div>
+          <p class="eyebrow">Подбор по задаче</p>
+          <h2 id="finder-title" data-od-id="finder-title">Опишите, как вы тренируетесь</h2>
+          <p class="finder-copy">Укажите задачу и бюджет — покажем подходящие модели из каталога.</p>
+        </div>
+
+        <form class="finder-form" data-finder-form>
+          <div class="scenario-row" aria-label="Быстрые сценарии">
+            <button class="scenario" type="button" data-query="Нужны кроссовки для игры в зале до 25 000 ₽" aria-pressed="false">Для игры в зале</button>
+            <button class="scenario" type="button" data-query="Нужны кроссовки для регулярных тренировок до 22 000 ₽" aria-pressed="false">Для тренировок</button>
+            <button class="scenario" type="button" data-query="Нужна женская модель для зала до 25 000 ₽" aria-pressed="false">Женская посадка</button>
+          </div>
+          <div class="finder-input-row">
+            <label>
+              <span class="skip-link">Опишите задачу</span>
+              <input class="text-input" name="task" data-finder-input placeholder="Например: кроссовки для зала до 25 000 ₽" autocomplete="off" />
+            </label>
+            <button class="primary-button" type="submit" data-od-id="finder-submit">Показать модели</button>
+          </div>
+          <div class="finder-results" data-finder-results aria-live="polite"></div>
+        </form>
+      </div>
+    </section>
+
+    <section class="popular container" id="popular" data-od-id="popular-products" aria-labelledby="popular-title">
+      <div class="section-head section-head--catalog">
+        <div>
+          <p class="eyebrow">Популярные модели</p>
+          <h2 class="section-title" id="popular-title" data-od-id="popular-title">Сейчас выбирают</h2>
+        </div>
+      </div>
+
+      <div class="product-grid" data-od-id="popular-product-grid">
+        <article class="product-card product-card--normalized" data-product data-type="Кроссовки" data-brand="Nike" data-name="KD 18" data-price="31400" data-category="basketball" data-category-label="Для зала" data-description="Кроссовки для игры в зале с мягкой амортизацией и уверенным сцеплением." data-use="Для игры в зале" data-supply="Доставка 10–18 дней" data-od-id="product-card-nike-kd-18" data-image="assets/blue-field-v2/nike-kd-18-stage.png" data-gallery-slug="nike-kd-18" data-sizes="36,37,38,39,40,41,42,43,44,45,46">
+          <button class="product-open" type="button" data-product-open aria-label="Открыть кроссовки Nike KD 18">
+            <span class="product-media"><span class="badge-stack"><span class="product-badge badge-choice">Выбор клиентов</span></span><img src="assets/blue-field-v2/nike-kd-18-stage.png" alt="Кроссовки Nike KD 18, боковой профиль, носок влево" loading="lazy" /></span>
+            <span class="product-info"><span class="product-name">Кроссовки Nike KD 18</span><span class="product-use">Для игры в зале</span><span class="product-price">31 400 ₽</span><span class="product-supply">Доставка 10–18 дней</span></span>
+          </button>
+          <button class="favorite-button" type="button" data-favorite aria-label="Добавить кроссовки Nike KD 18 в избранное" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 8.8c0 5.2-8.5 10.3-8.5 10.3S3.5 14 3.5 8.8A4.4 4.4 0 0 1 12 7.2a4.4 4.4 0 0 1 8.5 1.6Z"></path></svg></button>
+          <div class="card-sizes"><span>Размеры EU</span><div class="card-size-options" data-card-sizes></div></div>
+        </article>
+
+        <article class="product-card product-card--normalized" data-product data-type="Кроссовки" data-brand="Nike" data-name="Sabrina 3" data-price="27000" data-category="basketball" data-category-label="Для зала" data-description="Лёгкие кроссовки для быстрых смен направления на площадке." data-use="Для быстрых движений в зале" data-supply="Доставка 10–18 дней" data-image="assets/blue-field-v2/nike-sabrina-3-stage.png" data-gallery-slug="nike-sabrina-3" data-sizes="36,37,38,39,40,41,42,43,44,45,46" data-od-id="product-card-nike-sabrina-3">
+          <button class="product-open" type="button" data-product-open aria-label="Открыть кроссовки Nike Sabrina 3">
+            <span class="product-media"><span class="badge-stack"><span class="product-badge badge-choice">Выбор клиентов</span></span><img src="assets/blue-field-v2/nike-sabrina-3-stage.png" alt="Кроссовки Nike Sabrina 3, боковой профиль, носок влево" loading="lazy" /></span>
+            <span class="product-info"><span class="product-name">Кроссовки Nike Sabrina 3</span><span class="product-use">Для быстрых движений в зале</span><span class="product-price">27 000 ₽</span><span class="product-supply">Доставка 10–18 дней</span></span>
+          </button>
+          <button class="favorite-button" type="button" data-favorite aria-label="Добавить кроссовки Nike Sabrina 3 в избранное" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 8.8c0 5.2-8.5 10.3-8.5 10.3S3.5 14 3.5 8.8A4.4 4.4 0 0 1 12 7.2a4.4 4.4 0 0 1 8.5 1.6Z"></path></svg></button>
+          <div class="card-sizes"><span>Размеры EU</span><div class="card-size-options" data-card-sizes></div></div>
+        </article>
+
+        <article class="product-card product-card--normalized" data-product data-type="Кроссовки" data-brand="Nike" data-name="A'One" data-price="22100" data-category="basketball" data-category-label="Для зала" data-description="Кроссовки для игры в зале и быстрых перемещений по площадке." data-use="Для игры в зале" data-supply="Доставка 10–18 дней" data-image="assets/blue-field-v2/nike-aone-stage.png" data-gallery-slug="nike-aone" data-sizes="36,37,38,39,40,41,42,43,44,45,46" data-od-id="product-card-nike-aone">
+          <button class="product-open" type="button" data-product-open aria-label="Открыть кроссовки Nike A'One"><span class="product-media"><span class="badge-stack"></span><img src="assets/blue-field-v2/nike-aone-stage.png" alt="Кроссовки Nike A'One, боковой профиль, носок влево" loading="lazy" /></span><span class="product-info"><span class="product-name">Кроссовки Nike A'One</span><span class="product-use">Для игры в зале</span><span class="product-price">22 100 ₽</span><span class="product-supply">Доставка 10–18 дней</span></span></button>
+          <button class="favorite-button" type="button" data-favorite aria-label="Добавить кроссовки Nike A'One в избранное" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 8.8c0 5.2-8.5 10.3-8.5 10.3S3.5 14 3.5 8.8A4.4 4.4 0 0 1 12 7.2a4.4 4.4 0 0 1 8.5 1.6Z"></path></svg></button><div class="card-sizes"><span>Размеры EU</span><div class="card-size-options" data-card-sizes></div></div>
+        </article>
+
+        <article class="product-card product-card--normalized" data-product data-type="Кроссовки" data-brand="ASICS" data-name="SKY ELITE FF 3" data-price="27000" data-category="volleyball" data-category-label="Для зала" data-description="Кроссовки для уверенного движения и устойчивости на площадке." data-use="Для игры в зале" data-supply="Доставка 10–18 дней" data-image="assets/blue-field-v2/asics-sky-elite-ff-3-stage.png" data-gallery-slug="asics-sky-elite-ff-3" data-sizes="36,37,38,39,40,41,42,43,44,45,46" data-od-id="product-card-asics-sky-elite-ff-3">
+          <button class="product-open" type="button" data-product-open aria-label="Открыть кроссовки ASICS SKY ELITE FF 3"><span class="product-media"><span class="badge-stack"></span><img src="assets/blue-field-v2/asics-sky-elite-ff-3-stage.png" alt="Кроссовки ASICS SKY ELITE FF 3, боковой профиль, носок влево" loading="lazy" /></span><span class="product-info"><span class="product-name">Кроссовки ASICS SKY ELITE FF 3</span><span class="product-use">Для игры в зале</span><span class="product-price">27 000 ₽</span><span class="product-supply">Доставка 10–18 дней</span></span></button>
+          <button class="favorite-button" type="button" data-favorite aria-label="Добавить кроссовки ASICS SKY ELITE FF 3 в избранное" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 8.8c0 5.2-8.5 10.3-8.5 10.3S3.5 14 3.5 8.8A4.4 4.4 0 0 1 12 7.2a4.4 4.4 0 0 1 8.5 1.6Z"></path></svg></button><div class="card-sizes"><span>Размеры EU</span><div class="card-size-options" data-card-sizes></div></div>
+        </article>
+
+        <article class="product-card product-card--normalized" data-product data-type="Кроссовки" data-brand="Li-Ning" data-name="Wade 808 4 Ultra" data-price="27000" data-category="basketball" data-category-label="Для зала" data-description="Низкие кроссовки для быстрых движений и уверенной посадки в зале." data-use="Для быстрых движений в зале" data-supply="Доставка 10–18 дней" data-image="assets/blue-field-v2/li-ning-wade-808-4-ultra-stage.png" data-gallery-slug="li-ning-wade-808-4-ultra" data-sizes="36,37,38,39,40,41,42,43,44,45,46" data-od-id="product-card-li-ning-wade-808">
+          <button class="product-open" type="button" data-product-open aria-label="Открыть кроссовки Li-Ning Wade 808 4 Ultra"><span class="product-media"><span class="badge-stack"></span><img src="assets/blue-field-v2/li-ning-wade-808-4-ultra-stage.png" alt="Кроссовки Li-Ning Wade 808 4 Ultra, боковой профиль, носок влево" loading="lazy" /></span><span class="product-info"><span class="product-name">Кроссовки Li-Ning Wade 808 4 Ultra</span><span class="product-use">Для быстрых движений в зале</span><span class="product-price">27 000 ₽</span><span class="product-supply">Доставка 10–18 дней</span></span></button>
+          <button class="favorite-button" type="button" data-favorite aria-label="Добавить кроссовки Li-Ning Wade 808 4 Ultra в избранное" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 8.8c0 5.2-8.5 10.3-8.5 10.3S3.5 14 3.5 8.8A4.4 4.4 0 0 1 12 7.2a4.4 4.4 0 0 1 8.5 1.6Z"></path></svg></button><div class="card-sizes"><span>Размеры EU</span><div class="card-size-options" data-card-sizes></div></div>
+        </article>
+
+        <article class="product-card product-card--normalized" data-product data-type="Кроссовки" data-brand="New Balance" data-name="TWO WXY v5" data-price="22100" data-category="basketball" data-category-label="Для зала" data-description="Универсальные кроссовки для тренировок и игры в зале." data-use="Для тренировок и игры в зале" data-supply="Доставка 10–18 дней" data-image="assets/blue-field-v2/new-balance-two-wxy-v5-stage.png" data-gallery-slug="new-balance-two-wxy-v5" data-sizes="36,37,38,39,40,41,42,43,44,45,46" data-od-id="product-card-new-balance-two-wxy-v5">
+          <button class="product-open" type="button" data-product-open aria-label="Открыть кроссовки New Balance TWO WXY v5"><span class="product-media"><span class="badge-stack"></span><img src="assets/blue-field-v2/new-balance-two-wxy-v5-stage.png" alt="Кроссовки New Balance TWO WXY v5, боковой профиль, носок влево" loading="lazy" /></span><span class="product-info"><span class="product-name">Кроссовки New Balance TWO WXY v5</span><span class="product-use">Для тренировок и игры в зале</span><span class="product-price">22 100 ₽</span><span class="product-supply">Доставка 10–18 дней</span></span></button>
+          <button class="favorite-button" type="button" data-favorite aria-label="Добавить кроссовки New Balance TWO WXY v5 в избранное" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 8.8c0 5.2-8.5 10.3-8.5 10.3S3.5 14 3.5 8.8A4.4 4.4 0 0 1 12 7.2a4.4 4.4 0 0 1 8.5 1.6Z"></path></svg></button><div class="card-sizes"><span>Размеры EU</span><div class="card-size-options" data-card-sizes></div></div>
+        </article>
+
+        <article class="product-card product-card--normalized" data-product data-type="Кроссовки" data-brand="ANTA" data-name="KAI 1" data-price="22500" data-category="basketball" data-category-label="Для зала" data-description="Кроссовки для игры в зале с уверенным сцеплением на площадке." data-use="Для игры в зале" data-supply="Доставка 10–18 дней" data-image="assets/blue-field-v2/anta-kai-1-stage.png" data-gallery-slug="anta-kai-1" data-sizes="36,37,38,39,40,41,42,43,44,45,46" data-od-id="product-card-anta-kai-1">
+          <button class="product-open" type="button" data-product-open aria-label="Открыть кроссовки ANTA KAI 1"><span class="product-media"><span class="badge-stack"></span><img src="assets/blue-field-v2/anta-kai-1-stage.png" alt="Кроссовки ANTA KAI 1, боковой профиль, носок влево" loading="lazy" /></span><span class="product-info"><span class="product-name">Кроссовки ANTA KAI 1</span><span class="product-use">Для игры в зале</span><span class="product-price">22 500 ₽</span><span class="product-supply">Доставка 10–18 дней</span></span></button>
+          <button class="favorite-button" type="button" data-favorite aria-label="Добавить кроссовки ANTA KAI 1 в избранное" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 8.8c0 5.2-8.5 10.3-8.5 10.3S3.5 14 3.5 8.8A4.4 4.4 0 0 1 12 7.2a4.4 4.4 0 0 1 8.5 1.6Z"></path></svg></button><div class="card-sizes"><span>Размеры EU</span><div class="card-size-options" data-card-sizes></div></div>
+        </article>
+
+        <article class="product-card product-card--normalized" data-product data-type="Кроссовки" data-brand="Nike" data-name="Free Metcon 6" data-price="19000" data-category="training" data-category-label="Для тренировок" data-description="Кроссовки для тренировок в зале и силовых упражнений." data-use="Для тренировок в зале" data-supply="Доставка 10–18 дней" data-image="assets/blue-field-v2/nike-free-metcon-6-stage.png" data-gallery-slug="nike-free-metcon-6" data-sizes="36,37,38,39,40,41,42,43,44,45,46" data-od-id="product-card-nike-free-metcon-6">
+          <button class="product-open" type="button" data-product-open aria-label="Открыть кроссовки Nike Free Metcon 6"><span class="product-media"><span class="badge-stack"></span><img src="assets/blue-field-v2/nike-free-metcon-6-stage.png" alt="Кроссовки Nike Free Metcon 6, боковой профиль, носок влево" loading="lazy" /></span><span class="product-info"><span class="product-name">Кроссовки Nike Free Metcon 6</span><span class="product-use">Для тренировок в зале</span><span class="product-price">19 000 ₽</span><span class="product-supply">Доставка 10–18 дней</span></span></button>
+          <button class="favorite-button" type="button" data-favorite aria-label="Добавить кроссовки Nike Free Metcon 6 в избранное" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 8.8c0 5.2-8.5 10.3-8.5 10.3S3.5 14 3.5 8.8A4.4 4.4 0 0 1 12 7.2a4.4 4.4 0 0 1 8.5 1.6Z"></path></svg></button><div class="card-sizes"><span>Размеры EU</span><div class="card-size-options" data-card-sizes></div></div>
+        </article>
+      </div>
+
+      <div class="catalog-link-row" data-od-id="catalog-link-row">
+        <span class="catalog-total">Нужна другая модель?</span>
+        <a class="catalog-link" href="kicksbase-signal-catalog-v4.html" data-od-id="catalog-link">Открыть весь каталог <span aria-hidden="true">→</span></a>
+      </div>
+
+    </section>
+
+    <section class="trust" id="delivery" data-od-id="delivery-and-returns" aria-labelledby="trust-title">
+      <div class="trust-grid container">
+        <h2 class="trust-title" id="trust-title">Условия — до оформления</h2>
+        <div class="trust-card" data-od-id="trust-price">
+          <strong>Итоговая цена</strong>
+          <p>Стоимость товара и расчёт заказа видны до перехода к оплате.</p>
+        </div>
+        <div class="trust-card" data-od-id="trust-delivery">
+          <strong>Доставка</strong>
+          <p>Срок и итоговую стоимость показываем до оплаты. Для большинства позиций ориентир 10–18 дней до Москвы.</p>
+        </div>
+        <div class="trust-card" data-od-id="trust-returns">
+          <strong>Возврат и размер</strong>
+          <p>Условия обмена и возврата доступны до выбора размера и оплаты.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="contacts container" id="contacts" data-od-id="contacts" aria-labelledby="contacts-title">
+      <div class="contacts-copy">
+        <p class="eyebrow">Связаться с KICKSBASE</p>
+        <h2 id="contacts-title" data-od-id="contacts-title">Контакты</h2>
+        <p>По вопросам заказа и наличия можно написать напрямую.</p>
+      </div>
+      <div class="contact-list" data-od-id="contact-list">
+        <a class="contact-item" href="mailto:kik.beyz@mail.ru" data-od-id="contact-email">
+          <span>Почта</span>
+          <strong>kik.beyz@mail.ru</strong>
+        </a>
+        <a class="contact-item" href="https://t.me/kicksbase_officialbot" target="_blank" rel="noreferrer" data-od-id="contact-telegram-bot">
+          <span>Telegram-бот</span>
+          <strong>@kicksbase_officialbot</strong>
+        </a>
+        <span class="contact-item is-pending" aria-disabled="true" data-od-id="contact-telegram-channel">
+          <span>Telegram-канал</span>
+          <strong>Ссылка не указана</strong>
+        </span>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer" id="about" data-od-id="site-footer">
+    <div class="footer-grid container">
+      <div>
+        <a class="brand" href="#main" aria-label="KICKSBASE — главная">
+          <img class="brand-mark" src="assets/kicksbase-signal/kicksbase-logo.webp" alt="" width="720" height="720" />
+          <span class="brand-copy"><span class="brand-name">KICKSBASE</span></span>
+        </a>
+        <p class="footer-copy">Оригинальная экипировка для зала, тренировок и восстановления. На каждой странице показываем цену, размеры и срок поставки.</p>
+      </div>
+      <nav class="footer-links" aria-label="Юридическая информация">
+        <a href="#delivery">Доставка и возврат</a>
+        <a href="kicksbase-legal.html">Публичная оферта</a>
+        <a href="kicksbase-legal.html">Политика данных</a>
+        <a href="#contacts">Контакты</a>
+      </nav>
+    </div>
+  </footer>
+
+  <dialog class="modal" id="search-dialog" data-od-id="search-dialog">
+    <div class="modal-shell">
+      <div class="modal-head">
+        <h2>Поиск</h2>
+        <button class="icon-button modal-close" type="button" data-dialog-close aria-label="Закрыть поиск">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"></path></svg>
+        </button>
+      </div>
+      <label>
+        <span class="skip-link">Название модели или бренд</span>
+        <input class="text-input" type="search" data-search-input placeholder="Nike, ASICS или название модели" autocomplete="off" />
+      </label>
+      <p class="modal-help">Введите бренд, модель или тип товара.</p>
+      <div class="search-results" data-search-results aria-live="polite"></div>
+    </div>
+  </dialog>
+
+  <dialog class="modal" id="login-dialog" data-od-id="login-dialog">
+    <div class="modal-shell">
+      <div class="modal-head">
+        <h2>Войти по SMS</h2>
+        <button class="icon-button modal-close" type="button" data-dialog-close aria-label="Закрыть вход">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"></path></svg>
+        </button>
+      </div>
+      <form class="login-form" data-phone-form>
+        <label>
+          <span>Номер телефона</span>
+          <input class="text-input" type="tel" name="phone" placeholder="+7 999 000-00-00" autocomplete="tel" required />
+        </label>
+        <button class="dialog-primary" type="submit">Получить код</button>
+        <p class="modal-help">Код нужен для входа и сохранения корзины.</p>
+      </form>
+      <form class="code-form" data-code-form hidden>
+        <label>
+          <span>Код из SMS</span>
+          <input class="text-input" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" placeholder="0000" required />
+        </label>
+        <button class="dialog-primary" type="submit">Войти</button>
+        <p class="modal-help" data-login-status aria-live="polite">Введите четыре цифры из сообщения.</p>
+      </form>
+    </div>
+  </dialog>
+
+  <dialog class="modal" id="cart-dialog" data-od-id="cart-dialog">
+    <div class="modal-shell">
+      <div class="modal-head">
+        <h2>Корзина</h2>
+        <button class="icon-button modal-close" type="button" data-dialog-close aria-label="Закрыть корзину">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"></path></svg>
+        </button>
+      </div>
+      <div class="cart-list" data-cart-list></div>
+      <p class="empty-state" data-cart-empty>В корзине пока нет товаров.</p>
+      <div class="cart-total" data-cart-total hidden><span>Итого</span><span data-cart-total-value>0 ₽</span></div>
+      <section class="payment-methods" data-payment-methods hidden data-od-id="payment-methods" aria-labelledby="payment-methods-title">
+        <p id="payment-methods-title">Оплата на следующем шаге</p>
+        <div class="payment-method-list">
+          <button class="payment-method" type="button" data-payment-method="sbp" aria-pressed="true">
+            <span class="payment-mark payment-mark--sbp" aria-hidden="true"><img src="assets/brand/sbp-sign-official.png" alt="" /></span><span>СБП</span>
+          </button>
+          <button class="payment-method" type="button" data-payment-method="card" aria-pressed="false">
+            <span class="payment-mark payment-mark--card" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M3 10h18M7 15h4"></path></svg></span><span>Банковская карта</span>
+          </button>
+        </div>
+      </section>
+      <button class="dialog-primary add-button" type="button" data-checkout disabled>Перейти к оплате</button>
+    </div>
+  </dialog>
+
+  <dialog class="modal" id="payment-dialog" data-od-id="payment-dialog">
+    <div class="modal-shell payment-shell">
+      <div class="modal-head">
+        <div>
+          <p class="dialog-eyebrow">Номер заказа <span data-payment-order>—</span></p>
+          <h2>Оплата</h2>
+        </div>
+        <button class="icon-button modal-close" type="button" data-dialog-close aria-label="Закрыть оплату">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"></path></svg>
+        </button>
+      </div>
+      <div class="payment-review" data-od-id="payment-review">
+        <span>К оплате</span><strong data-payment-total>0 ₽</strong>
+      </div>
+      <div class="payment-choice" data-od-id="payment-choice">
+        <span class="payment-mark payment-mark--sbp" aria-hidden="true" data-payment-mark><img src="assets/brand/sbp-sign-official.png" alt="" /></span>
+        <div><strong data-payment-method-name>СБП</strong><p>Переход на защищённую форму оплаты.</p></div>
+      </div>
+      <button class="dialog-primary" type="button" data-start-payment>Продолжить с СБП</button>
+      <p class="modal-help" data-payment-status aria-live="polite">Проверьте сумму и способ оплаты перед переходом.</p>
+    </div>
+  </dialog>
+
+  <dialog class="modal" id="favorites-dialog" data-od-id="favorites-dialog">
+    <div class="modal-shell">
+      <div class="modal-head">
+        <div>
+          <p class="dialog-eyebrow">Сохранённые модели</p>
+          <h2 data-od-id="favorites-title">Избранное</h2>
+        </div>
+        <button class="icon-button modal-close" type="button" data-dialog-close aria-label="Закрыть избранное">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"></path></svg>
+        </button>
+      </div>
+      <div class="favorites-list" data-favorites-list></div>
+      <p class="empty-state" data-favorites-empty>В избранном пока нет моделей.</p>
+    </div>
+  </dialog>
+
+  <dialog class="sheet" id="product-dialog" data-od-id="product-dialog">
+      <div class="product-sheet-grid">
+      <div class="sheet-media">
+        <div class="sheet-gallery" data-sheet-gallery data-od-id="product-gallery" aria-label="Галерея товара">
+          <div class="sheet-gallery-main"><img data-sheet-image src="assets/blue-field-v2/gallery/nike-kd-18.webp" alt="" /></div>
+          <div class="sheet-gallery-thumbs" data-sheet-gallery-thumbs></div>
+        </div>
+        <p class="sheet-photo-caption" data-sheet-photo-caption>Фото товара</p>
+      </div>
+      <div class="sheet-copy">
+        <div class="sheet-head">
+          <div>
+            <h2 data-sheet-name>Кроссовки Nike KD 18</h2>
+          </div>
+          <button class="icon-button modal-close" type="button" data-dialog-close aria-label="Закрыть товар">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"></path></svg>
+          </button>
+        </div>
+        <p class="sheet-category" data-sheet-category></p>
+        <p class="sheet-description" data-sheet-description></p>
+        <p class="sheet-price" data-sheet-price></p>
+        <p class="sheet-supply" data-sheet-supply></p>
+        <section class="sheet-spec-section" data-od-id="product-short-specs" aria-labelledby="sheet-spec-title">
+          <h3 id="sheet-spec-title">Краткие характеристики</h3>
+          <dl class="sheet-specs" data-sheet-specs></dl>
+        </section>
+        <p class="size-label">Выберите размер EU</p>
+        <div class="size-grid" data-size-grid></div>
+        <button class="dialog-primary add-button" type="button" data-add-to-cart disabled>Выберите размер</button>
+        <p class="modal-help">Цена, выбранный размер и срок поставки будут сохранены в заказе.</p>
+      </div>
+    </div>
+  </dialog>
+
+  <script src="kicksbase-direction-03-blue-field-v2.js"></script>
+</body>
+</html>
+
+

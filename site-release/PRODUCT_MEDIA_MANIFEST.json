@@ -1,0 +1,289 @@
+{
+  "version": 7,
+  "updatedAt": "2026-08-01",
+  "brandAssets": {
+    "primaryLogo": {
+      "path": "assets/kicksbase-signal/kicksbase-logo.webp",
+      "sourcePath": "kicksbase-redesign-worktree/public/brand/kicksbase-logo.webp",
+      "width": 720,
+      "height": 720,
+      "sha256": "4eb353e1aee0056d9aab17724c384228f650e5ae8d4d7f5c19335915470ef83b"
+    }
+  },
+  "policy": {
+    "generatedProductGeometryAllowed": false,
+    "duplicateAnglesAllowed": false,
+    "productionRightsReviewRequired": true,
+    "qaPublishGateRequired": true,
+    "qaSourceOfTruth": "KICKSBASE_CARD_QA_TASK_RU.md",
+    "minimumSourceShortSide": 1200,
+    "cardPresentationAspectRatio": "4:3",
+    "footwearCardDirection": "left",
+    "cardMediaStandard": {
+      "canvas": [1600, 1200],
+      "alignment": "center",
+      "imageFit": "contain",
+      "productCrop": "forbidden",
+      "safeContentRule": "Весь товар и его тень остаются внутри кадра; внешнее поле сохраняется со всех сторон.",
+      "backgroundRgb": [242, 243, 243]
+    },
+    "activeBlueFieldGallery": {
+      "frameCount": 5,
+      "frameOrder": ["side-profile", "front-pair", "three-quarter", "rear", "outsole"],
+      "sourceImport": [
+        "poizon-select-site/public/catalog",
+        "assets/kicksbase-signal/official",
+        "assets/blue-field-v2/sabrina-review"
+      ],
+      "targetDirectory": "assets/blue-field-v2/gallery",
+      "normalizedGalleryDirectory": "assets/blue-field-v2/gallery/normalized",
+      "mainFrameDirectory": "assets/blue-field-v2",
+      "hoverFrameDirectory": "assets/blue-field-v2/hover",
+      "hoverFrameFileSuffix": "-front-pair-bg.png",
+      "frontPairFrame": {
+        "position": 2,
+        "description": "Полная пара спереди под лёгким углом; обувь развёрнута, прямоугольный кадр не повёрнут и не обрезан.",
+        "colorwayRule": "Вторая фотография повторяет цвет, материалы и детали первого кадра той же модели.",
+        "canvasRule": "1600×1200, центрированная пара, единые безопасные поля и фон RGB(242,243,243).",
+        "prototypeOnly": true,
+        "productionRequirement": "Заменить на подтверждённый исходник бренда или Poizon после ручной проверки деталей модели."
+      },
+      "duplicateFramesAllowed": false,
+      "masterReference": {
+        "sku": "nike-aone",
+        "use": "Эталон для пропорции 4:3, центрирования пары, масштаба, безопасных полей и нейтрального фона."
+      },
+      "activeSlugs": ["nike-kd-18", "nike-sabrina-3", "nike-aone", "asics-sky-elite-ff-3", "li-ning-wade-808-4-ultra", "new-balance-two-wxy-v5", "anta-kai-1", "nike-free-metcon-6"]
+    },
+    "studioBackground": {
+      "rgb": [242, 243, 243],
+      "cssToken": "--product-stage",
+      "method": "deterministic-background-removal-and-proportional-placement"
+    },
+    "mainAngleByType": {
+      "footwear": "чистый боковой профиль, носок направлен влево, предмет целиком",
+      "apparel": "фронтальный вид, вещь расправлена, края не обрезаны",
+      "accessory": "фронтальный или боковой предметный вид, объект целиком"
+    }
+  },
+  "products": [
+    {
+      "sku": "1051A080-100",
+      "productKind": "footwear",
+      "cardDirection": "left",
+      "directionProfile": "blue-field-v2-left",
+      "sourceSize": [1800, 1350],
+      "brand": "ASICS",
+      "model": "SKY ELITE FF 3",
+      "sourcePage": "https://www.asics.com/",
+      "sourceHost": "images.asics.com",
+      "rightsStatus": "brand-source-review-required",
+      "qa": {
+        "revision": 1,
+        "status": "blocked",
+        "blockers": ["rights-review", "visual-quality-review", "server-product-snapshot", "responsive-review"]
+      },
+      "cardAsset": "assets/kicksbase-signal/studio/asics-sky-elite-ff-3-side-studio.png",
+      "assets": [
+        {
+          "path": "assets/kicksbase-signal/studio/asics-sky-elite-ff-3-side-studio.png",
+          "sourceAsset": "assets/kicksbase-signal/official/asics-sky-elite-ff-3-side.jpg",
+          "role": "card-main",
+          "angle": "side",
+          "width": 1600,
+          "height": 1600,
+          "sha256": "71e70298399e1857c9bd5e91ea85e44ae13c8b1bbc3aed29b7c97a7fac48e705"
+        },
+        {
+          "path": "assets/kicksbase-signal/studio/asics-sky-elite-ff-3-front-studio.png",
+          "sourceAsset": "assets/kicksbase-signal/official/asics-sky-elite-ff-3-front.jpg",
+          "role": "gallery",
+          "angle": "front-three-quarter",
+          "width": 1600,
+          "height": 1600,
+          "sha256": "9273eb88bdb1c2f15cdf7ebbad3aa2e4bc6746e1a57b978659ae675e2944fe68"
+        },
+        {
+          "path": "assets/kicksbase-signal/studio/asics-sky-elite-ff-3-alt-studio.png",
+          "sourceAsset": "assets/kicksbase-signal/official/asics-sky-elite-ff-3-alt.jpg",
+          "role": "gallery",
+          "angle": "inner-side",
+          "width": 1600,
+          "height": 1600,
+          "sha256": "5a81f4855241817f0e7f65223c772cf92564aa8a3242b123a17ce1a06402c90d"
+        },
+        {
+          "path": "assets/kicksbase-signal/studio/asics-sky-elite-ff-3-outsole-studio.png",
+          "sourceAsset": "assets/kicksbase-signal/official/asics-sky-elite-ff-3-outsole.jpg",
+          "role": "gallery",
+          "angle": "outsole",
+          "width": 1600,
+          "height": 1600,
+          "sha256": "316977c883eccfff9cb78781ae3fc83f1ecf4b7377bb3b6cd0d397e01ab95006"
+        }
+      ]
+    },
+    {
+      "sku": "IB6684-400",
+      "productKind": "footwear",
+      "cardDirection": "right",
+      "sourceSize": [1872, 2340],
+      "brand": "Nike",
+      "model": "KD18 International Blue",
+      "sourcePage": "https://www.nike.com/pt/en/t/kd18-chet-holmgren-thunder-and-reign-basketball-shoes-9zhUuyOK",
+      "sourceHost": "static.nike.com",
+      "rightsStatus": "brand-source-review-required",
+      "qa": {
+        "revision": 1,
+        "status": "blocked",
+        "blockers": ["rights-review", "visual-quality-review", "unique-gallery-angles", "server-product-snapshot", "responsive-review"]
+      },
+      "cardAsset": "assets/blue-field-v2/nike-kd-18-normalized.png",
+      "assets": [
+        {
+          "path": "assets/blue-field-v2/nike-kd-18-normalized.png",
+          "sourceAsset": "assets/blue-field-v2/nike-kd-18.png",
+          "role": "card-main",
+          "angle": "side",
+          "width": 1448,
+          "height": 1086,
+          "sha256": "a5645d959bd83abc2e2a3147bbb61162d0bfe0232a9ace81dd0ebd878fb4cd1b",
+          "processing": "ai-assisted-background-and-placement-normalization",
+          "productGeometryEditRequested": false,
+          "productDetailReviewRequired": true,
+          "cardCropApproved": true
+        },
+        {
+          "path": "assets/blue-field-v2/nike-kd-18-hero-cutout-v2.png",
+          "sourceAsset": "assets/blue-field-v2/nike-kd-18.png",
+          "role": "hero",
+          "angle": "side",
+          "width": 1448,
+          "height": 1086,
+          "sha256": "dcf3c4bff3807db3e55481dc9c421b60839b9a751219358a227de17f6a296da5",
+          "processing": "ai-assisted-chroma-key-background-extraction",
+          "productGeometryEditRequested": false,
+          "productDetailReviewRequired": true,
+          "alphaValidated": true
+        },
+        {
+          "path": "assets/kicksbase-signal/studio/nike-kd-18-side-studio.png",
+          "sourceAsset": "assets/kicksbase-signal/official/nike-kd-18-side.png",
+          "role": "source-reference",
+          "angle": "side",
+          "sourceWidth": 1872,
+          "sourceHeight": 2340,
+          "width": 1600,
+          "height": 1600,
+          "sha256": "6056c0318453865eee817daf810b72dfdb2eedfcf6affb6eaa6ca986680442aa"
+        }
+      ]
+    },
+    {
+      "sku": "IQ5082-501",
+      "productKind": "footwear",
+      "cardDirection": "left",
+      "directionProfile": "blue-field-v2-left",
+      "sourceSize": [1728, 1728],
+      "brand": "Nike",
+      "model": "Sabrina 3 Flowers",
+      "sourcePage": "https://www.nike.com/t/sabrina-3-warning-label-basketball-shoes-LArVJUMq/IQ5082-501",
+      "sourceHost": "static.nike.com",
+      "rightsStatus": "brand-source-review-required",
+      "qa": {
+        "revision": 1,
+        "status": "blocked",
+        "blockers": ["rights-review", "visual-quality-review", "server-product-snapshot", "responsive-review"]
+      },
+      "cardAsset": "assets/blue-field-v2/nike-sabrina-3-side-normalized.png",
+      "assets": [
+        {
+          "path": "assets/blue-field-v2/nike-sabrina-3-side-normalized.png",
+          "sourceAsset": "assets/blue-field-v2/nike-sabrina-3-side.jpg",
+          "role": "card-main",
+          "angle": "side",
+          "sourceWidth": 1728,
+          "sourceHeight": 1728,
+          "width": 1448,
+          "height": 1086,
+          "sha256": "631c3bc19247edd534f573b41f4eac595734f4cba09951e8ea80185788da51a0",
+          "processing": "ai-assisted-background-and-placement-normalization",
+          "productGeometryEditRequested": false,
+          "productDetailReviewRequired": true,
+          "cardCropApproved": true
+        },
+        {
+          "path": "assets/blue-field-v2/nike-sabrina-3-side.jpg",
+          "sourceUrl": "https://static.nike.com/a/images/t_PDP_1728_v1/f_auto,q_auto:eco,u_9ddf04c7-2a9a-4d76-add1-d15af8f0263d,c_scale,fl_relative,w_1.0,h_1.0,fl_layer_apply/4fe83cfc-bf97-4ff1-aec5-6b30612706bf/SABRINA+3+SE.png",
+          "role": "source-reference",
+          "angle": "side",
+          "sourceWidth": 1728,
+          "sourceHeight": 1728,
+          "width": 1728,
+          "height": 1728,
+          "sha256": "9db17a4499a32957b3fe0b99323feb4b407b7d8e94cb833efaa53bea5bb84522"
+        }
+      ]
+    },
+    {
+      "sku": "GRID-1.0-BLK",
+      "productKind": "recovery",
+      "cardDirection": "front",
+      "sourceSize": [2000, 2000],
+      "brand": "TriggerPoint",
+      "model": "GRID 1.0 Foam Roller",
+      "sourcePage": "https://tptherapy.com/",
+      "sourceHost": "cdn.shopify.com",
+      "rightsStatus": "brand-source-review-required",
+      "qa": {
+        "revision": 1,
+        "status": "blocked",
+        "blockers": ["rights-review", "visual-quality-review", "unique-gallery-angles", "server-product-snapshot", "responsive-review"]
+      },
+      "cardAsset": "assets/kicksbase-signal/studio/triggerpoint-grid-side-studio.png",
+      "assets": [
+        {
+          "path": "assets/kicksbase-signal/studio/triggerpoint-grid-side-studio.png",
+          "sourceAsset": "assets/kicksbase-signal/official/triggerpoint-grid-side.jpg",
+          "role": "card-main",
+          "angle": "front",
+          "sourceWidth": 2000,
+          "sourceHeight": 2000,
+          "width": 1600,
+          "height": 1600,
+          "sha256": "d83d39b5fdbf58b237c4da4c325e36d02b37b6ac24e2fbdc83d10e8078738455"
+        }
+      ]
+    },
+    {
+      "sku": "HZ4298",
+      "productKind": "apparel",
+      "cardDirection": "front",
+      "sourceSize": [1200, 1200],
+      "brand": "adidas",
+      "model": "Match Shorts",
+      "sourcePage": "https://www.adidas.jp/%E3%83%86%E3%83%8B%E3%82%B9-%E3%83%9E%E3%83%83%E3%83%81-%E3%82%B7%E3%83%A7%E3%83%BC%E3%83%84/HZ4298.html",
+      "sourceHost": "adidas.jp",
+      "rightsStatus": "brand-source-review-required",
+      "qa": {
+        "revision": 1,
+        "status": "blocked",
+        "blockers": ["rights-review", "visual-quality-review", "unique-gallery-angles", "server-product-snapshot", "server-price", "responsive-review"]
+      },
+      "cardAsset": "assets/kicksbase-signal/studio/adidas-match-shorts-front-studio.png",
+      "assets": [
+        {
+          "path": "assets/kicksbase-signal/studio/adidas-match-shorts-front-studio.png",
+          "sourceAsset": "assets/kicksbase-signal/official/adidas-match-shorts-front.jpg",
+          "role": "card-main",
+          "angle": "front",
+          "sourceWidth": 1200,
+          "sourceHeight": 1200,
+          "width": 1600,
+          "height": 1600,
+          "sha256": "8bc7b2b69b559cfa3068075ec581feae9a42adfa09c221180513b22e7b316250"
+        }
+      ]
+    }
+  ]
+}

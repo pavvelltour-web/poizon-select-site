@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="light" />
+  <title>Каталог — KICKSBASE</title>
+  <link rel="stylesheet" href="kicksbase-direction-03-blue-field-v2.css" />
+  <style>
+    .catalog-page .catalog-main { padding: clamp(42px, 7vw, 88px) 0 96px; container-type: inline-size; }
+    .visually-hidden { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+    .catalog-intro { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, .7fr); gap: 48px; align-items: end; padding: clamp(36px, 6vw, 72px) 0 34px; border-bottom: 1px solid var(--border); }
+    .catalog-intro h1 { max-width: 10ch; margin: 0; font-family: var(--font-display); font-size: clamp(50px, 7vw, 92px); font-weight: 600; letter-spacing: -.03em; line-height: .93; }
+    .catalog-intro p { max-width: 40ch; margin: 0; color: var(--muted); font-size: 17px; line-height: 1.5; }
+    .catalog-controls { display: grid; grid-template-columns: minmax(0, 1fr) 200px; gap: 12px; margin: 0 0 32px; }
+    .catalog-search { display: flex; align-items: center; min-height: 52px; gap: 10px; padding: 0 15px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+    .catalog-search svg { width: 18px; height: 18px; flex: 0 0 auto; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; }
+    .catalog-search input, .catalog-sort select { width: 100%; min-width: 0; border: 0; outline: 0; color: var(--fg); background: transparent; }
+    .catalog-sort { min-height: 52px; padding: 0 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+    .catalog-sort select { height: 50px; cursor: pointer; }
+    .catalog-status { display: flex; justify-content: space-between; align-items: baseline; gap: 20px; margin: 0 0 20px; }
+    .catalog-status h2 { margin: 0; font-family: var(--font-display); font-size: clamp(28px, 3vw, 42px); font-weight: 600; letter-spacing: -.02em; }
+    .catalog-status p { margin: 0; color: var(--muted); font-size: 14px; }
+    .catalog-card { text-decoration: none; }
+    .catalog-card .product-info { padding-bottom: 10px; }
+    .catalog-page .desktop-nav .nav-highlight { display: none; }
+    .catalog-page .desktop-nav a[aria-current="page"] { border-bottom: 2px solid var(--fg); }
+    .catalog-empty { display: grid; min-height: 260px; place-items: center; margin-top: 24px; border: 1px dashed var(--border); border-radius: 18px; color: var(--muted); text-align: center; }
+    .catalog-empty p { margin: 0; }
+    .catalog-footer { padding: 36px 0 48px; border-top: 1px solid var(--border); }
+    .catalog-footer-grid { display: flex; align-items: center; justify-content: space-between; gap: 18px; color: var(--muted); font-size: 14px; }
+    .catalog-footer a { color: var(--fg); text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+    @media (max-width: 920px) { .catalog-intro { grid-template-columns: 1fr; gap: 22px; } .catalog-intro h1 { max-width: 12ch; } }
+    @media (max-width: 680px) { .catalog-page .catalog-main { padding-top: 38px; } .catalog-intro { padding: 38px 0 26px; } .catalog-intro h1 { font-size: clamp(44px, 14vw, 64px); } .catalog-intro p { font-size: 16px; } .catalog-controls { grid-template-columns: 1fr; } .catalog-status { align-items: flex-start; flex-direction: column; gap: 4px; } .catalog-footer-grid { align-items: flex-start; flex-direction: column; } }
+  </style>
+</head>
+<body class="catalog-page">
+  <a class="skip-link" href="#catalog">Перейти к каталогу</a>
+
+  <header class="site-header" data-od-id="catalog-header">
+    <div class="header-bar container">
+      <button class="icon-button menu-button" type="button" data-catalog-menu-toggle data-od-id="catalog-menu-button" aria-label="Открыть меню" aria-expanded="false" title="Меню"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"></path></svg></button>
+      <a class="brand" href="kicksbase-direction-03-blue-field-v2.html#main" data-od-id="catalog-brand" aria-label="KICKSBASE — главная"><img class="brand-mark" src="assets/kicksbase-signal/kicksbase-logo.webp" alt="" width="720" height="720" /><span class="brand-copy"><span class="brand-name">KICKSBASE</span><span class="brand-note">обувь и экипировка</span></span></a>
+      <nav class="desktop-nav" data-od-id="catalog-navigation" aria-label="Основная навигация"><span class="nav-highlight" aria-hidden="true"></span><a href="#catalog" aria-current="page">Каталог</a><a href="kicksbase-direction-03-blue-field-v2.html#finder">Подобрать</a><a href="kicksbase-direction-03-blue-field-v2.html#delivery">Доставка и возврат</a><a href="kicksbase-direction-03-blue-field-v2.html#about">О нас</a><a href="kicksbase-direction-03-blue-field-v2.html#contacts">Контакты</a></nav>
+      <div class="header-actions" data-od-id="catalog-header-actions">
+        <button class="icon-button" type="button" data-catalog-search data-od-id="catalog-search-button" aria-label="Поиск по каталогу" title="Поиск"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.8"></circle><path d="m16 16 4 4"></path></svg></button>
+        <a class="icon-button" href="kicksbase-direction-03-blue-field-v2.html?view=login" data-od-id="catalog-login-button" aria-label="Войти по SMS" title="Войти"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="3.2"></circle><path d="M5.5 20c.7-4 3-6 6.5-6s5.8 2 6.5 6"></path></svg></a>
+        <a class="icon-button" href="kicksbase-direction-03-blue-field-v2.html?view=favorites" data-od-id="catalog-favorites-button" aria-label="Открыть избранное" title="Избранное"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 8.8c0 5.2-8.5 10.3-8.5 10.3S3.5 14 3.5 8.8A4.4 4.4 0 0 1 12 7.2a4.4 4.4 0 0 1 8.5 1.6Z"></path></svg></a>
+        <a class="icon-button" href="kicksbase-direction-03-blue-field-v2.html?view=cart" data-od-id="catalog-cart-button" aria-label="Открыть корзину" title="Корзина"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8.5h14l-1.2 10H6.2L5 8.5Z"></path><path d="M9 9V7.2a3 3 0 0 1 6 0V9"></path></svg></a>
+      </div>
+    </div>
+    <nav class="mobile-menu" data-catalog-mobile-menu data-od-id="catalog-mobile-navigation" aria-label="Мобильная навигация"><a href="#catalog">Каталог</a><a href="kicksbase-direction-03-blue-field-v2.html#finder">Подобрать</a><a href="kicksbase-direction-03-blue-field-v2.html#delivery">Доставка и возврат</a><a href="kicksbase-direction-03-blue-field-v2.html#about">О нас</a><a href="kicksbase-direction-03-blue-field-v2.html#contacts">Контакты</a></nav>
+  </header>
+
+  <main>
+    <section class="catalog-intro container" data-od-id="catalog-intro" aria-labelledby="catalog-title"><h1 id="catalog-title">Каталог<br />KICKSBASE</h1></section>
+    <section class="catalog-main container" id="catalog" data-od-id="catalog-products" aria-labelledby="catalog-products-title">
+      <div class="catalog-controls" data-od-id="catalog-controls"><label class="catalog-search" for="catalog-search-input"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.8"></circle><path d="m16 16 4 4"></path></svg><input id="catalog-search-input" type="search" placeholder="Найти бренд или модель" autocomplete="off" /></label><label class="catalog-sort"><span class="visually-hidden">Сортировка</span><select id="catalog-sort-select" aria-label="Сортировка"><option value="popular">Сначала популярные</option><option value="price-asc">Сначала дешевле</option><option value="price-desc">Сначала дороже</option></select></label></div>
+      <div class="catalog-status"><h2 id="catalog-products-title">Все модели</h2><p data-catalog-count aria-live="polite">8 моделей</p></div>
+      <div class="product-grid" data-catalog-grid data-od-id="catalog-product-grid">
+        <article class="product-card product-card--normalized" data-catalog-card data-sizes="36,37,38,39,40,41,42,43,44,45,46" data-search="nike kd 18 кроссовки" data-price="31400" data-od-id="catalog-product-nike-kd-18"><a class="product-open catalog-card" href="kicksbase-direction-03-blue-field-v2.html?product=nike-kd-18" aria-label="Открыть кроссовки Nike KD 18"><span class="product-media"><span class="badge-stack"><span class="product-badge badge-choice">Выбор клиентов</span></span><img src="assets/blue-field-v2/nike-kd-18-stage.png" alt="Кроссовки Nike KD 18, боковой профиль, носок влево" /></span><span class="product-info"><span class="product-name">Кроссовки Nike KD 18</span><span class="product-use">Для игры в зале</span><span class="product-price">31 400 ₽</span><span class="product-supply">Доставка 10–18 дней</span></span></a></article>
+        <article class="product-card product-card--normalized" data-catalog-card data-sizes="36,37,38,39,40,41,42,43,44,45,46" data-search="nike sabrina 3 кроссовки" data-price="27000" data-od-id="catalog-product-nike-sabrina-3"><a class="product-open catalog-card" href="kicksbase-direction-03-blue-field-v2.html?product=nike-sabrina-3" aria-label="Открыть кроссовки Nike Sabrina 3"><span class="product-media"><span class="badge-stack"><span class="product-badge badge-choice">Выбор клиентов</span></span><img src="assets/blue-field-v2/nike-sabrina-3-stage.png" alt="Кроссовки Nike Sabrina 3, боковой профиль, носок влево" /></span><span class="product-info"><span class="product-name">Кроссовки Nike Sabrina 3</span><span class="product-use">Для быстрых движений в зале</span><span class="product-price">27 000 ₽</span><span class="product-supply">Доставка 10–18 дней</span></span></a></article>
+        <article class="product-card product-card--normalized" data-catalog-card data-sizes="36,37,38,39,40,41,42,43,44,45,46" data-search="nike aone a one кроссовки" data-price="22100" data-od-id="catalog-product-nike-aone"><a class="product-open catalog-card" href="kicksbase-direction-03-blue-field-v2.html?product=nike-aone" aria-label="Открыть кроссовки Nike A'One"><span class="product-media"><img src="assets/blue-field-v2/nike-aone-stage.png" alt="Кроссовки Nike A'One, боковой профиль, носок влево" /></span><span class="product-info"><span class="product-name">Кроссовки Nike A'One</span><span class="product-use">Для игры в зале</span><span class="product-price">22 100 ₽</span><span class="product-supply">Доставка 10–18 дней</span></span></a></article>
+        <article class="product-card product-card--normalized" data-catalog-card data-sizes="36,37,38,39,40,41,42,43,44,45,46" data-search="asics sky elite ff 3 кроссовки" data-price="27000" data-od-id="catalog-product-asics-sky-elite"><a class="product-open catalog-card" href="kicksbase-direction-03-blue-field-v2.html?product=asics-sky-elite-ff-3" aria-label="Открыть кроссовки ASICS SKY ELITE FF 3"><span class="product-media"><img src="assets/blue-field-v2/asics-sky-elite-ff-3-stage.png" alt="Кроссовки ASICS SKY ELITE FF 3, боковой профиль, носок влево" /></span><span class="product-info"><span class="product-name">Кроссовки ASICS SKY ELITE FF 3</span><span class="product-use">Для игры в зале</span><span class="product-price">27 000 ₽</span><span class="product-supply">Доставка 10–18 дней</span></span></a></article>
+        <article class="product-card product-card--normalized" data-catalog-card data-sizes="36,37,38,39,40,41,42,43,44,45,46" data-search="li ning wade 808 4 ultra кроссовки" data-price="27000" data-od-id="catalog-product-li-ning-wade"><a class="product-open catalog-card" href="kicksbase-direction-03-blue-field-v2.html?product=li-ning-wade-808" aria-label="Открыть кроссовки Li-Ning Wade 808 4 Ultra"><span class="product-media"><img src="assets/blue-field-v2/li-ning-wade-808-4-ultra-stage.png" alt="Кроссовки Li-Ning Wade 808 4 Ultra, боковой профиль, носок влево" /></span><span class="product-info"><span class="product-name">Кроссовки Li-Ning Wade 808 4 Ultra</span><span class="product-use">Для быстрых движений в зале</span><span class="product-price">27 000 ₽</span><span class="product-supply">Доставка 10–18 дней</span></span></a></article>
+        <article class="product-card product-card--normalized" data-catalog-card data-sizes="36,37,38,39,40,41,42,43,44,45,46" data-search="new balance two wxy v5 кроссовки" data-price="22100" data-od-id="catalog-product-new-balance-two-wxy"><a class="product-open catalog-card" href="kicksbase-direction-03-blue-field-v2.html?product=new-balance-two-wxy-v5" aria-label="Открыть кроссовки New Balance TWO WXY v5"><span class="product-media"><img src="assets/blue-field-v2/new-balance-two-wxy-v5-stage.png" alt="Кроссовки New Balance TWO WXY v5, боковой профиль, носок влево" /></span><span class="product-info"><span class="product-name">Кроссовки New Balance TWO WXY v5</span><span class="product-use">Для тренировок и игры в зале</span><span class="product-price">22 100 ₽</span><span class="product-supply">Доставка 10–18 дней</span></span></a></article>
+        <article class="product-card product-card--normalized" data-catalog-card data-sizes="36,37,38,39,40,41,42,43,44,45,46" data-search="anta kai 1 кроссовки" data-price="22500" data-od-id="catalog-product-anta-kai"><a class="product-open catalog-card" href="kicksbase-direction-03-blue-field-v2.html?product=anta-kai-1" aria-label="Открыть кроссовки ANTA KAI 1"><span class="product-media"><img src="assets/blue-field-v2/anta-kai-1-stage.png" alt="Кроссовки ANTA KAI 1, боковой профиль, носок влево" /></span><span class="product-info"><span class="product-name">Кроссовки ANTA KAI 1</span><span class="product-use">Для игры в зале</span><span class="product-price">22 500 ₽</span><span class="product-supply">Доставка 10–18 дней</span></span></a></article>
+        <article class="product-card product-card--normalized" data-catalog-card data-sizes="36,37,38,39,40,41,42,43,44,45,46" data-search="nike free metcon 6 кроссовки" data-price="19000" data-od-id="catalog-product-nike-free-metcon"><a class="product-open catalog-card" href="kicksbase-direction-03-blue-field-v2.html?product=nike-free-metcon-6" aria-label="Открыть кроссовки Nike Free Metcon 6"><span class="product-media"><img src="assets/blue-field-v2/nike-free-metcon-6-stage.png" alt="Кроссовки Nike Free Metcon 6, боковой профиль, носок влево" /></span><span class="product-info"><span class="product-name">Кроссовки Nike Free Metcon 6</span><span class="product-use">Для тренировок в зале</span><span class="product-price">19 000 ₽</span><span class="product-supply">Доставка 10–18 дней</span></span></a></article>
+      </div>
+      <div class="catalog-empty" data-catalog-empty hidden data-od-id="catalog-empty"><p>Ничего не нашли. Проверьте название модели или бренд.</p></div>
+    </section>
+  </main>
+
+  <footer class="catalog-footer" data-od-id="catalog-footer"><div class="container catalog-footer-grid"><span>Нужна помощь с выбором?</span><a href="mailto:kik.beyz@mail.ru">kik.beyz@mail.ru</a></div></footer>
+
+  <script>
+    (function () {
+      var search = document.getElementById("catalog-search-input");
+      var sort = document.getElementById("catalog-sort-select");
+      var grid = document.querySelector("[data-catalog-grid]");
+      var cards = Array.prototype.slice.call(document.querySelectorAll("[data-catalog-card]"));
+      var count = document.querySelector("[data-catalog-count]");
+      var empty = document.querySelector("[data-catalog-empty]");
+      var favoriteStoreKey = "kicksbase:blue-field:favorites";
+      var favoriteKeys = new Set();
+
+      cards.forEach(function (card, index) { card.dataset.order = String(index); });
+      try {
+        var saved = JSON.parse(localStorage.getItem(favoriteStoreKey) || "[]");
+        if (Array.isArray(saved)) favoriteKeys = new Set(saved);
+      } catch (_) {}
+
+      function productId(card) {
+        return new URL(card.querySelector("a").href).searchParams.get("product");
+      }
+
+      function productKey(card) {
+        return card.querySelector(".product-name").textContent.trim();
+      }
+
+      function compactPurchaseMeta(card) {
+        var info = card.querySelector(".product-info");
+        var price = info.querySelector(".product-price");
+        var supply = info.querySelector(".product-supply");
+        var row = document.createElement("span");
+        row.className = "product-price-row";
+        info.insertBefore(row, price);
+        row.appendChild(price);
+        row.appendChild(supply);
+      }
+
+      function makePairPreview(card) {
+        var media = card.querySelector(".product-media");
+        var source = media.querySelector(":scope > img");
+        var product = productId(card);
+        var kind = card.dataset.productKind || "footwear";
+        var hoverSlugs = {
+          "li-ning-wade-808": "li-ning-wade-808-4-ultra",
+          "new-balance-two-wxy-v5": "new-balance-two-wxy-v5"
+        };
+        var pair = document.createElement("span");
+        pair.className = "product-pair";
+        pair.setAttribute("aria-hidden", "true");
+        var image = source.cloneNode(false);
+        image.className = "product-pair-view";
+        var hoverProduct = hoverSlugs[product] || product;
+        var hoverFile = hoverProduct === "nike-aone"
+          ? "nike-aone-front-pair-bg-v2.png"
+          : hoverProduct + "-front-pair-bg.png";
+        image.src = kind === "footwear"
+          ? "assets/blue-field-v2/hover/" + hoverFile
+          : source.src;
+        image.alt = "";
+        image.loading = "lazy";
+        pair.appendChild(image);
+        media.appendChild(pair);
+      }
+
+      function makeFavorite(card) {
+        var key = productKey(card);
+        var button = document.createElement("button");
+        button.type = "button";
+        button.className = "favorite-button";
+        button.dataset.catalogFavorite = "";
+        button.dataset.odId = "catalog-favorite-" + productId(card);
+        button.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 8.8c0 5.2-8.5 10.3-8.5 10.3S3.5 14 3.5 8.8A4.4 4.4 0 0 1 12 7.2a4.4 4.4 0 0 1 8.5 1.6Z"></path></svg>';
+        button.addEventListener("click", function () {
+          if (favoriteKeys.has(key)) favoriteKeys.delete(key); else favoriteKeys.add(key);
+          try { localStorage.setItem(favoriteStoreKey, JSON.stringify(Array.from(favoriteKeys))); } catch (_) {}
+          renderFavorites();
+        });
+        card.appendChild(button);
+      }
+
+      function makeSizeChoices(card) {
+        var sizes = card.dataset.sizes.split(",");
+        var product = productId(card);
+        var name = card.querySelector(".product-name").textContent.trim();
+        var disclosure = document.createElement("div");
+        disclosure.className = "card-sizes";
+        disclosure.innerHTML = "<span>Размер EU</span>";
+        var options = document.createElement("div");
+        options.className = "card-size-options";
+        [sizes[2], sizes[4], sizes[6]].filter(Boolean).forEach(function (size) {
+          var button = document.createElement("button");
+          button.type = "button";
+          button.className = "card-size-button";
+          button.textContent = size;
+          button.dataset.odId = "catalog-size-" + product + "-" + size;
+          button.setAttribute("aria-label", "Открыть " + name + ", размер EU " + size);
+          button.addEventListener("click", function () { window.location.href = "kicksbase-direction-03-blue-field-v2.html?product=" + encodeURIComponent(product) + "&size=" + encodeURIComponent(size); });
+          options.appendChild(button);
+        });
+        var all = document.createElement("button");
+        all.type = "button";
+        all.className = "card-size-button card-size-button--all";
+        all.textContent = "Все";
+        all.dataset.odId = "catalog-size-" + product + "-all";
+        all.setAttribute("aria-label", "Открыть все размеры: " + name);
+        all.addEventListener("click", function () { window.location.href = "kicksbase-direction-03-blue-field-v2.html?product=" + encodeURIComponent(product); });
+        options.appendChild(all);
+        disclosure.appendChild(options);
+        card.appendChild(disclosure);
+      }
+
+      function renderFavorites() {
+        cards.forEach(function (card) {
+          var button = card.querySelector("[data-catalog-favorite]");
+          var active = favoriteKeys.has(productKey(card));
+          button.setAttribute("aria-pressed", String(active));
+          button.setAttribute("aria-label", (active ? "Убрать из избранного: " : "Добавить в избранное: ") + productKey(card));
+        });
+      }
+
+      function applyCatalog() {
+        var query = search.value.trim().toLocaleLowerCase("ru");
+        var visible = cards.filter(function (card) {
+          var show = card.dataset.search.includes(query);
+          card.hidden = !show;
+          return show;
+        });
+        visible.sort(function (first, second) {
+          if (sort.value === "price-asc") return Number(first.dataset.price) - Number(second.dataset.price);
+          if (sort.value === "price-desc") return Number(second.dataset.price) - Number(first.dataset.price);
+          return Number(first.dataset.order) - Number(second.dataset.order);
+        }).forEach(function (card) { grid.appendChild(card); });
+        count.textContent = visible.length === 1 ? "1 модель" : visible.length + " моделей";
+        empty.hidden = visible.length > 0;
+      }
+
+      cards.forEach(function (card) { compactPurchaseMeta(card); makePairPreview(card); makeFavorite(card); makeSizeChoices(card); });
+      search.addEventListener("input", applyCatalog);
+      sort.addEventListener("change", applyCatalog);
+      document.querySelector("[data-catalog-search]").addEventListener("click", function () { search.focus(); });
+      var menuButton = document.querySelector("[data-catalog-menu-toggle]");
+      var menu = document.querySelector("[data-catalog-mobile-menu]");
+      menuButton.addEventListener("click", function () { var open = menu.classList.toggle("is-open"); menuButton.setAttribute("aria-expanded", String(open)); menuButton.setAttribute("aria-label", open ? "Закрыть меню" : "Открыть меню"); });
+      menu.querySelectorAll("a").forEach(function (link) { link.addEventListener("click", function () { menu.classList.remove("is-open"); menuButton.setAttribute("aria-expanded", "false"); }); });
+      renderFavorites();
+      applyCatalog();
+    })();
+  </script>
+</body>
+</html>
