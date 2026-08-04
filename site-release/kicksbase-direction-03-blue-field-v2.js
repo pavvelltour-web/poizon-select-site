@@ -25,6 +25,7 @@
         return {
           element: card,
           id: card.dataset.odId.replace(/^product-card-/, ""),
+          kind: card.dataset.productKind || "footwear",
           type: card.dataset.type,
           brand: card.dataset.brand,
           name: card.dataset.name,
@@ -291,8 +292,9 @@
       }
 
       function cardHoverImage(product) {
-        var type = product.type.toLocaleLowerCase("ru");
-        if (type.includes("кроссов")) return product.gallery[1] && product.gallery[1].src;
+        var kind = (product.kind || "").toLocaleLowerCase("ru");
+        var type = (product.type || "").toLocaleLowerCase("ru");
+        if (kind.includes("footwear") || kind.includes("кроссов")) return product.gallery[1] && product.gallery[1].src;
         if (type.includes("одеж") || type.includes("майк") || type.includes("шорт")) return product.gallery[0] && product.gallery[0].src;
         return product.gallery[0] && product.gallery[0].src;
       }
