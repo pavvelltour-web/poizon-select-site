@@ -1,4 +1,4 @@
-import { AlertCircle, CreditCard, Minus, Plus, Send, ShoppingBag, Trash2, X } from "lucide-react"
+import { AlertCircle, CreditCard, Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react"
 import { motion } from "motion/react"
 import { useRef } from "react"
 
@@ -37,7 +37,6 @@ export function CartDrawer({ storefront }: CartDrawerProps) {
   const catalogIsReady = storefront.catalogPriceState.status === "ready"
   const orderCreationEnabled = storefront.catalogPriceState.orderCreationEnabled
   const onlinePaymentEnabled = storefront.catalogPriceState.onlinePaymentEnabled
-  const legacyCheckoutDisabled = catalogIsReady && !orderCreationEnabled
   const cartHasConfirmedPrices = storefront.cartLines.length > 0 && storefront.cartLines.every(
     (line) => getEffectiveLinePrice(
       line.product,
@@ -50,6 +49,7 @@ export function CartDrawer({ storefront }: CartDrawerProps) {
   const canSubmit =
     catalogIsReady &&
     orderCreationEnabled &&
+    cartHasConfirmedPrices &&
     !hasInvalidLines &&
     storefront.cartLines.length > 0 &&
     storefront.checkoutCustomer.fullName.trim().length >= 2 &&
@@ -90,26 +90,7 @@ export function CartDrawer({ storefront }: CartDrawerProps) {
           </button>
         </div>
 
-        {legacyCheckoutDisabled ? (
-          <div className="cart-empty" role="status">
-            <h3>Оформление на сайте перенесено в Telegram.</h3>
-            <p>
-              Старые статические цены и сохранённая корзина не используются. Бот
-              заново подтвердит карточку Poizon, размер, наличие и итоговую цену.
-            </p>
-            {storefront.botUrl ? (
-              <a
-                className="button button--primary"
-                href={storefront.botUrl}
-                target="_blank"
-                rel="noreferrer"
-              >
-                <Send aria-hidden="true" size={18} />
-                Продолжить в Telegram
-              </a>
-            ) : null}
-          </div>
-        ) : storefront.cartLines.length === 0 ? (
+        {storefront.cartLines.length === 0 ? (
           <div className="cart-empty">
             {storefront.checkoutResult.message ? (
               <p className="checkout-form__status" role="alert">
@@ -131,11 +112,11 @@ export function CartDrawer({ storefront }: CartDrawerProps) {
               >
                 <AlertCircle aria-hidden="true" size={17} />
                 {storefront.catalogPriceState.status === "ready" && !orderCreationEnabled
-                  ? "Цена и размеры видны. Оформление заказа сейчас отключено."
+                  ? "12-часовой snapshot Poizon получен, но оформление заказа сейчас отключено."
                   : storefront.catalogPriceState.status === "ready" && !onlinePaymentEnabled
                     ? "Заказ можно оформить. Онлайн-оплата пока недоступна."
                     : storefront.catalogPriceState.status === "ready"
-                      ? "Цена и размеры сверены. После оформления откроется защищённая страница оплаты."
+                      ? "Цена и размеры Poizon зафиксированы на 12 часов. Заказ будет передан в CRM."
                   : storefront.catalogPriceState.status === "loading"
                     ? "Проверяем цену и размеры на сервере. До проверки оформить заказ нельзя."
                     : "Серверный каталог недоступен. Оформление заказа временно заблокировано."}
@@ -216,7 +197,7 @@ export function CartDrawer({ storefront }: CartDrawerProps) {
               <div className="cart-total checkout-form__total">
                 <span>Товары сейчас</span>
                 <strong>{cartHasConfirmedPrices ? formatRub(storefront.cartTotalRub) : "Уточняется"}</strong>
-                <small>Итог для живой карточки Poizon подтверждается в Telegram.</small>
+                <small>Цена и размеры из 12-часового snapshot Poizon. Доставка не добавляется к этому итогу повторно.</small>
               </div>
 
               <section className="payment-methods" data-od-id="payment-methods" aria-labelledby="payment-methods-title">

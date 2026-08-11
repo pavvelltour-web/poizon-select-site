@@ -34,12 +34,16 @@ export interface PublishedCatalogItem {
   productKind: "footwear" | "apparel" | "accessory"
   sizes: string[]
   priceRub: number
+  priceVersion: string
   imageUrl: string
+  images: readonly string[]
   fulfillmentMode: "made_to_order" | "in_stock"
   availability: string
   etaMinDays: number | null
   etaMaxDays: number | null
   liveProviderVerified: boolean
+  observedAt: string
+  expiresAt: string
   sizeOffers: readonly PublishedSizeOffer[]
 }
 
@@ -47,7 +51,10 @@ export interface PublishedSizeOffer {
   skuId: string
   sizeEu: string
   sizeRu: string | null
+  sizeUs: string | null
+  sizeCn: string | null
   priceRub: number
+  priceVersion: string
   available: boolean
   checkoutConfirmed: boolean
   liveProviderVerified: boolean
@@ -145,6 +152,7 @@ export interface CheckoutCatalogSnapshot {
   items: PublishedCatalogMap
   lookup: CatalogPriceMap
   version: string
+  snapshotHours: 12 | null
   personalDataConsentVersion: string | null
   orderCreationEnabled: boolean
   onlinePaymentEnabled: boolean
@@ -509,10 +517,21 @@ export function parseCheckoutCatalog(payload: unknown): CheckoutCatalogSnapshot 
       items: {},
       lookup: {},
       version,
+      snapshotHours: null,
       personalDataConsentVersion: optionalString(source.personal_data_consent_version),
       orderCreationEnabled: false,
       onlinePaymentEnabled: false,
     }
+  }
+
+  // Static cards are published only from the CRM's curated Poizon snapshot.
+  // A response without this exact contract is not allowed to revive the old
+  // bundled catalogue prices or sizes in the browser.
+  if (
+    source.catalog_mode !== "curated_live_poizon" ||
+    source.snapshot_hours !== 12
+  ) {
+    return null
   }
 
   const items: PublishedCatalogMap = {}
@@ -523,12 +542,23 @@ export function parseCheckoutCatalog(payload: unknown): CheckoutCatalogSnapshot 
     const slug = optionalString(item.slug)
     const name = optionalString(item.name)
     const brand = optionalString(item.brand)
-    const imageUrl = optionalString(item.image_url)
     const priceRub = finitePositiveNumber(item.price_rub)
+    const priceVersion = optionalString(item.price_version)
     const productKind = optionalString(item.product_kind)
     const fulfillmentMode = optionalString(item.fulfillment_mode)
     const availability = optionalString(item.availability)
-    const sizes = Array.isArray(item.sizes)
+    const observedAt = optionalString(item.observed_at)
+    const expiresAt = optionalString(item.expires_at)
+    const observedAtMs = parseQuoteTimestamp(item.observed_at)
+    const expiresAtMs = parseQuoteTimestamp(item.expires_at)
+    const images = Array.isArray(item.images)
+      ? item.images
+        .map(safeHttpsUrl)
+        .filter((image): image is string => !!image)
+        .slice(0, 5)
+      : []
+    const imageUrl = safeHttpsUrl(item.image_url) ?? images[0] ?? null
+    const declaredSizes = Array.isArray(item.sizes)
       ? [...new Set(item.sizes.map(optionalString).filter((size): size is string => !!size))]
       : []
     if (
@@ -537,15 +567,27 @@ export function parseCheckoutCatalog(payload: unknown): CheckoutCatalogSnapshot 
       !brand ||
       !imageUrl ||
       !priceRub ||
+      !priceVersion ||
+      priceVersion !== `storefront:${slug}` ||
       !availability ||
-      sizes.length === 0 ||
+      images.length === 0 ||
+      !observedAt ||
+      !expiresAt ||
+      !observedAtMs ||
+      !expiresAtMs ||
+      observedAtMs > Date.now() + quoteClockSkewMs ||
+      expiresAtMs <= Date.now() ||
+      expiresAtMs <= observedAtMs ||
+      Math.abs(expiresAtMs - observedAtMs - 12 * 60 * 60 * 1000) > quoteClockSkewMs ||
+      item.catalog_source !== "poizon_curated_snapshot" ||
+      item.live_provider_verified !== true ||
+      availability !== "supplier_verified" ||
       !["footwear", "apparel", "accessory"].includes(productKind || "") ||
       !["made_to_order", "in_stock"].includes(fulfillmentMode || "")
     ) {
       continue
     }
 
-    const itemLiveProviderVerified = item.live_provider_verified === true
     const sizeOffers = Array.isArray(item.size_offers)
       ? item.size_offers.flatMap((rawOffer): PublishedSizeOffer[] => {
         if (!rawOffer || typeof rawOffer !== "object") return []
@@ -554,21 +596,44 @@ export function parseCheckoutCatalog(payload: unknown): CheckoutCatalogSnapshot 
         const sizeEu = optionalString(offer.size_eu) ?? optionalString(offer.size)
         const price = finitePositiveNumber(offer.price_rub)
         const offerAvailable = offer.available === true
-        if (!skuId || !sizeEu || !price || !offerAvailable || !sizes.includes(sizeEu)) return []
+        const offerPriceVersion = optionalString(offer.price_version)
+        if (
+          !skuId ||
+          !sizeEu ||
+          !price ||
+          !offerAvailable ||
+          offer.checkout_confirmed !== true ||
+          offer.live_provider_verified !== true ||
+          offerPriceVersion !== priceVersion
+        ) {
+          return []
+        }
         return [{
           skuId,
           sizeEu,
           sizeRu: optionalString(offer.size_ru) ?? optionalString(offer.ru),
+          sizeUs: optionalString(offer.size_us) ?? optionalString(offer.us),
+          sizeCn: optionalString(offer.size_cn) ?? optionalString(offer.cn),
           priceRub: price,
+          priceVersion: offerPriceVersion,
           available: true,
-          checkoutConfirmed: offer.checkout_confirmed === true,
-          liveProviderVerified:
-            offer.live_provider_verified === true || itemLiveProviderVerified,
+          checkoutConfirmed: true,
+          liveProviderVerified: true,
           observedAt: optionalString(offer.observed_at),
           expiresAt: optionalString(offer.expires_at),
         }]
       })
       : []
+    const sizes = declaredSizes.length > 0
+      ? declaredSizes.filter((size) => sizeOffers.some((offer) => offer.sizeEu === size))
+      : [...new Set(sizeOffers.map((offer) => offer.sizeEu))]
+    if (
+      sizes.length === 0 ||
+      sizeOffers.length === 0 ||
+      new Set(sizeOffers.map((offer) => offer.sizeEu)).size !== sizeOffers.length
+    ) {
+      continue
+    }
     const normalized: PublishedCatalogItem = {
       slug,
       name,
@@ -576,29 +641,28 @@ export function parseCheckoutCatalog(payload: unknown): CheckoutCatalogSnapshot 
       productKind: productKind as PublishedCatalogItem["productKind"],
       sizes,
       priceRub,
+      priceVersion,
       imageUrl,
+      images,
       fulfillmentMode: fulfillmentMode as PublishedCatalogItem["fulfillmentMode"],
       availability,
       etaMinDays: finitePositiveNumber(item.eta_min_days),
       etaMaxDays: finitePositiveNumber(item.eta_max_days),
-      liveProviderVerified: itemLiveProviderVerified,
+      liveProviderVerified: true,
+      observedAt,
+      expiresAt,
       sizeOffers,
     }
     items[slug] = normalized
-    const confirmedSizeOffers = sizeOffers.filter(
-      (offer) => offer.available && offer.checkoutConfirmed,
-    )
-    lookup[slug] = confirmedSizeOffers.length > 0
-      ? Math.min(...confirmedSizeOffers.map((offer) => offer.priceRub))
-      : priceRub
+    lookup[slug] = Math.min(...sizeOffers.map((offer) => offer.priceRub))
   }
 
-  if (Object.keys(items).length === 0) return null
   const orderCreationEnabled = source.order_creation_enabled === true
   return {
     items,
     lookup,
     version,
+    snapshotHours: 12,
     personalDataConsentVersion: optionalString(source.personal_data_consent_version),
     orderCreationEnabled,
     onlinePaymentEnabled:
@@ -646,28 +710,9 @@ export function getEffectiveLinePrice(
   return sizeOffer?.priceRub ?? null
 }
 
-function canonicalSize(value: string): string {
-  return value.trim().replace(",", ".").toUpperCase()
-}
-
 function numericSize(value: string): number | null {
-  const parsed = Number(canonicalSize(value))
+  const parsed = Number(value.trim().replace(",", "."))
   return Number.isFinite(parsed) ? parsed : null
-}
-
-function formatSize(value: number): string {
-  return Number.isInteger(value) ? String(value) : String(value).replace(".", ",")
-}
-
-function nikeRuFallback(brand: string, sizeEu: string): string | null {
-  if (brand.trim().toLowerCase() !== "nike") return null
-  const eu = numericSize(sizeEu)
-  return eu === null ? null : formatSize(eu - 1)
-}
-
-function displayRuSize(value: string | null): string | null {
-  if (!value) return null
-  return numericSize(value) === null ? value.trim() : canonicalSize(value).replace(".", ",")
 }
 
 function sortSizeLabels(values: readonly string[]): string[] {
@@ -685,59 +730,46 @@ export function getPublishedSizeOffer(
   item: PublishedCatalogItem | undefined,
   sizeEu: string,
 ): PublishedSizeOffer | null {
-  if (!item) return null
+  if (!item?.liveProviderVerified) return null
   const matchingOffers = item.sizeOffers.filter(
     (offer) =>
       offer.available &&
       offer.checkoutConfirmed &&
+      offer.liveProviderVerified &&
       offer.sizeEu === sizeEu,
   )
   return matchingOffers.length === 1 ? matchingOffers[0] ?? null : null
 }
 
 export function buildProductSizeOffers(
-  sizeUniverse: readonly string[],
-  brand: string,
+  _sizeUniverse: readonly string[],
+  _brand: string,
   checkoutItem: PublishedCatalogItem | undefined,
 ): ProductSizeOffer[] {
-  const sizeLabels = new Map<string, string>()
-  for (const size of sizeUniverse) {
-    const normalized = canonicalSize(size)
-    if (normalized) sizeLabels.set(normalized, size.trim())
-  }
+  // Size labels are source data, not an editorial size chart. In particular,
+  // do not infer RU values from EU values or add bundled sizes the snapshot
+  // did not explicitly approve for checkout.
+  const sizeLabels = [...new Set(
+    (checkoutItem?.sizeOffers ?? [])
+      .filter((offer) =>
+        offer.available && offer.checkoutConfirmed && offer.liveProviderVerified,
+      )
+      .map((offer) => offer.sizeEu),
+  )]
 
-  for (const offer of checkoutItem?.sizeOffers ?? []) {
-    if (!offer.available || !offer.checkoutConfirmed) continue
-    sizeLabels.set(canonicalSize(offer.sizeEu), offer.sizeEu)
-  }
-
-  return sortSizeLabels([...sizeLabels.values()]).map((sizeEu) => {
+  return sortSizeLabels(sizeLabels).flatMap((sizeEu): ProductSizeOffer[] => {
     const checkoutOffer = getPublishedSizeOffer(checkoutItem, sizeEu)
-
-    if (checkoutOffer) {
-      return {
-        skuId: checkoutOffer.skuId,
-        sizeEu: checkoutOffer.sizeEu,
-        sizeRu: displayRuSize(checkoutOffer.sizeRu) ??
-          nikeRuFallback(brand, checkoutOffer.sizeEu),
-        sizeUs: null,
-        sizeCn: null,
-        priceRub: checkoutOffer.priceRub,
-        available: true,
-        checkoutConfirmed: true,
-      }
-    }
-
-    return {
-      skuId: null,
-      sizeEu,
-      sizeRu: nikeRuFallback(brand, sizeEu),
-      sizeUs: null,
-      sizeCn: null,
-      priceRub: null,
-      available: false,
-      checkoutConfirmed: false,
-    }
+    if (!checkoutOffer) return []
+    return [{
+      skuId: checkoutOffer.skuId,
+      sizeEu: checkoutOffer.sizeEu,
+      sizeRu: checkoutOffer.sizeRu,
+      sizeUs: checkoutOffer.sizeUs,
+      sizeCn: checkoutOffer.sizeCn,
+      priceRub: checkoutOffer.priceRub,
+      available: true,
+      checkoutConfirmed: true,
+    }]
   })
 }
 
@@ -832,7 +864,7 @@ export function reconcileCartLines(
 ): CartLine[] {
   return lines.map((line) => ({
     ...line,
-    validation: catalogItems[line.product.slug]?.availability === "catalog_listed" &&
+    validation: catalogItems[line.product.slug]?.availability === "supplier_verified" &&
       Boolean(getPublishedSizeOffer(catalogItems[line.product.slug], line.size))
       ? "valid"
       : "invalid",
@@ -845,14 +877,14 @@ export function buildCheckoutPayload(
   consents: CheckoutConsents,
   delivery: CheckoutDelivery,
   catalogItems: PublishedCatalogMap,
-  priceVersion: string = CATALOG_PRICE_VERSION,
+  _priceVersion: string = CATALOG_PRICE_VERSION,
 ) {
   const items = lines.map((line) => {
     const offer = catalogItems[line.product.slug]
     const sizeOffer = getPublishedSizeOffer(offer, line.size)
     if (
       !offer ||
-      offer.availability !== "catalog_listed" ||
+      offer.availability !== "supplier_verified" ||
       !sizeOffer ||
       line.validation !== "valid"
     ) {
@@ -866,7 +898,9 @@ export function buildCheckoutPayload(
       size_eu: sizeOffer.sizeEu,
       sku_id: sizeOffer.skuId,
       price_rub: sizeOffer.priceRub,
-      price_version: priceVersion || CATALOG_PRICE_VERSION,
+      // The order carries the exact version paired with this source SKU, not
+      // the release-wide catalogue version or an editorial fallback price.
+      price_version: sizeOffer.priceVersion,
       quantity: line.quantity,
       image_url: offer.imageUrl,
     }

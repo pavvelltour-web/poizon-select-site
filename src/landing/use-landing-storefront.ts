@@ -90,7 +90,7 @@ const LIVE_SEARCH_UNAVAILABLE =
   "Живая цена Poizon сейчас недоступна. Статическая витрина не подменяет цену или наличие поставщика."
 
 function crmEndpoint(path: "search" | "storefront-prices"): string | null {
-  // The browser talks only to our same-origin CRM proxy.  The supplier API is
+  // The browser talks only to our same-origin CRM proxy. The supplier API is
   // never exposed to a visitor or to a browser extension.
   const configured = (import.meta.env.VITE_CRM_API_BASE_URL || "/api").trim()
   if (!configured.startsWith("/") || configured.startsWith("//")) return null
@@ -162,11 +162,19 @@ function isLiveProduct(value: unknown): value is LivePoizonProduct {
 function isStorefrontPoizonPrice(value: unknown): value is StorefrontPoizonPrice {
   if (!value || typeof value !== "object") return false
   const price = value as Record<string, unknown>
+  const observedAt = typeof price.observed_at === "string" ? Date.parse(price.observed_at) : NaN
+  const expiresAt = typeof price.expires_at === "string" ? Date.parse(price.expires_at) : NaN
+  const now = Date.now()
+  const quoteClockSkewMs = 5 * 60 * 1000
+  const twelveHoursMs = 12 * 60 * 60 * 1000
   return (
-    typeof price.slug === "string" && typeof price.source_query === "string" &&
-    typeof price.product_name === "string" &&
-    typeof price.total_rub === "number" && Number.isFinite(price.total_rub) &&
-    typeof price.observed_at === "string" && typeof price.expires_at === "string"
+    typeof price.slug === "string" && price.slug.trim().length > 0 &&
+    typeof price.source_query === "string" && typeof price.product_name === "string" &&
+    typeof price.total_rub === "number" && Number.isFinite(price.total_rub) && price.total_rub > 0 &&
+    typeof price.observed_at === "string" && typeof price.expires_at === "string" &&
+    Number.isFinite(observedAt) && Number.isFinite(expiresAt) &&
+    observedAt <= now + quoteClockSkewMs && expiresAt > now &&
+    Math.abs(expiresAt - observedAt - twelveHoursMs) <= quoteClockSkewMs
   )
 }
 
@@ -205,10 +213,10 @@ export function useLandingStorefront(
   const [liveSearchResults, setLiveSearchResults] = useState<LivePoizonProduct[]>([])
   const [liveSearchMessage, setLiveSearchMessage] = useState<string | null>(null)
   const [liveSearchNormalizedQuery, setLiveSearchNormalizedQuery] = useState<string | null>(null)
-  const [catalogPoizonPrices, setCatalogPoizonPrices] = useState<
+  const [storefrontPoizonPrices, setStorefrontPoizonPrices] = useState<
     Record<string, StorefrontPoizonPrice>
   >({})
-  const [catalogPoizonPricesReady, setCatalogPoizonPricesReady] = useState(false)
+  const [storefrontPoizonPricesReady, setStorefrontPoizonPricesReady] = useState(false)
   const [catalogSearch, setCatalogSearch] = useState<CatalogSearchState>(
     emptyCatalogSearchState,
   )
@@ -298,14 +306,50 @@ export function useLandingStorefront(
   const selectedSizeOptions = selectedSizeOffers
     .filter((offer) => offer.available)
     .map((offer) => offer.sizeEu)
+  const checkoutSnapshotPrices = useMemo<Record<string, StorefrontPoizonPrice>>(
+    () => Object.fromEntries(
+      Object.values(catalogPriceState.items).flatMap((item) => {
+        if (!item.liveProviderVerified || item.availability !== "supplier_verified") return []
+        const prices = item.sizeOffers
+          .filter((offer) =>
+            offer.available && offer.checkoutConfirmed && offer.liveProviderVerified,
+          )
+          .map((offer) => offer.priceRub)
+        if (prices.length === 0) return []
+        return [[item.slug, {
+          slug: item.slug,
+          source_query: "checkout-catalog",
+          product_name: item.name,
+          total_rub: Math.min(...prices),
+          observed_at: item.observedAt,
+          expires_at: item.expiresAt,
+        }]]
+      }),
+    ),
+    [catalogPriceState.items],
+  )
+  // A quote can be shown without an in-stock checkout offer. The checkout
+  // snapshot below remains the sole authority for size selection and orders.
+  const catalogPoizonPrices = useMemo(
+    () => ({ ...storefrontPoizonPrices, ...checkoutSnapshotPrices }),
+    [checkoutSnapshotPrices, storefrontPoizonPrices],
+  )
+  const catalogPoizonPricesReady = storefrontPoizonPricesReady
   const getPoizonDisplayPrice = useCallback(
-    (product: CatalogProduct) => {
-      const quote = catalogPoizonPrices[product.slug]
+    (product: CatalogProduct, size?: string | null) => {
+      const item = catalogPriceState.items[product.slug]
+      const sizeOffer = size ? getPublishedSizeOffer(item, size) : null
+      const catalogQuote = catalogPoizonPrices[product.slug]
+      const quote = sizeOffer?.priceRub ?? catalogQuote?.total_rub
       if (quote) {
         return {
           label: "Poizon · цена зафиксирована на 12 часов",
-          value: formatRub(quote.total_rub),
-          detail: "Включает доставку по РФ и все сервисные расходы.",
+          value: formatRub(quote),
+          detail: sizeOffer
+            ? `Подтверждённая цена размера EU ${sizeOffer.sizeEu} из серверного snapshot.`
+            : catalogQuote?.source_query === "checkout-catalog"
+              ? "Минимальная подтверждённая цена среди размеров из серверного snapshot."
+              : "Подтверждённая цена Poizon; наличие и размер проверяются отдельно.",
         }
       }
       return catalogPoizonPricesReady
@@ -320,9 +364,11 @@ export function useLandingStorefront(
           detail: "Получаем подтверждённую котировку Poizon.",
         }
     },
-    [catalogPoizonPrices, catalogPoizonPricesReady],
+    [catalogPoizonPrices, catalogPoizonPricesReady, catalogPriceState.items],
   )
-  const selectedProductPrice = selectedProduct ? getPoizonDisplayPrice(selectedProduct) : null
+  const selectedProductPrice = selectedProduct
+    ? getPoizonDisplayPrice(selectedProduct, selectedSize)
+    : null
   const selectedImageDisplayIndex =
     selectedVisibleGallery.length === 0 ? 0 : selectedImageIndex + 1
   const filteredProducts = useMemo(
@@ -405,9 +451,9 @@ export function useLandingStorefront(
         onlinePaymentEnabled: nextPriceState.onlinePaymentEnabled,
         error: null,
       })
-      setCartLines((lines) => nextPriceState.orderCreationEnabled
-        ? reconcileCartLines(lines, nextPriceState.items)
-        : [])
+      setCartLines((lines) => nextPriceState.snapshotHours === null
+        ? []
+        : reconcileCartLines(lines, nextPriceState.items))
       return nextPriceState
     } catch (error) {
       if (signal?.aborted) return null
@@ -433,7 +479,7 @@ export function useLandingStorefront(
   useEffect(() => {
     const endpoint = crmEndpoint("storefront-prices")
     if (!endpoint) {
-      setCatalogPoizonPricesReady(true)
+      setStorefrontPoizonPricesReady(true)
       return
     }
     let active = true
@@ -450,16 +496,16 @@ export function useLandingStorefront(
         const items = Array.isArray((payload as Record<string, unknown>).items)
           ? (payload as Record<string, unknown>).items as unknown[]
           : []
-        setCatalogPoizonPrices(
+        setStorefrontPoizonPrices(
           Object.fromEntries(
             items.filter(isStorefrontPoizonPrice).map((item) => [item.slug, item]),
           ),
         )
       } catch {
-        // The display remains explicitly unpriced; bundled estimates must not
-        // be presented as a provider quote after a source failure.
+        // An unavailable quote is explicitly rendered as "Уточняется";
+        // editorial catalogue values are never promoted to Poizon prices.
       } finally {
-        if (active) setCatalogPoizonPricesReady(true)
+        if (active) setStorefrontPoizonPricesReady(true)
       }
     }
     void load()
@@ -826,7 +872,7 @@ export function useLandingStorefront(
     if (
       catalogPriceState.status !== "ready" ||
       !offer ||
-      offer.availability !== "catalog_listed" ||
+      offer.availability !== "supplier_verified" ||
       !confirmedSizeOffer
     ) {
       setCheckoutResult(

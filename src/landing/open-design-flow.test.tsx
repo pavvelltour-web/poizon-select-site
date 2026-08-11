@@ -9,7 +9,9 @@ const approvedRoot = "/storefront-media/approved/products"
 
 function checkoutCatalogPayload() {
   return {
-    version: "2026-08-02-v3",
+    version: "poizon-live-v1",
+    catalog_mode: "curated_live_poizon",
+    snapshot_hours: 12,
     personal_data_consent_version: "pd-2026-08",
     order_creation_enabled: true,
     online_payment_enabled: true,
@@ -21,11 +23,16 @@ function checkoutCatalogPayload() {
         product_kind: "footwear",
         sizes: ["36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46"],
         price_rub: 31400,
+        price_version: "storefront:nike-kd-18",
         image_url: `${approvedRoot}/nike-kd-18/01-side.png`,
+        images: ["https://kicksbase.ru/catalog/nike-kd-18.webp"],
         fulfillment_mode: "made_to_order",
-        availability: "catalog_listed",
+        availability: "supplier_verified",
         eta_min_days: 10,
         eta_max_days: 18,
+        observed_at: new Date(Date.now() - 60_000).toISOString(),
+        expires_at: new Date(Date.now() + 12 * 60 * 60 * 1000 - 60_000).toISOString(),
+        catalog_source: "poizon_curated_snapshot",
         live_provider_verified: true,
         size_offers: [
           {
@@ -33,6 +40,7 @@ function checkoutCatalogPayload() {
             size_eu: "40",
             size_ru: "39",
             price_rub: 31400,
+            price_version: "storefront:nike-kd-18",
             available: true,
             checkout_confirmed: true,
             live_provider_verified: true,
@@ -42,6 +50,7 @@ function checkoutCatalogPayload() {
             size_eu: "42",
             size_ru: "41",
             price_rub: 32900,
+            price_version: "storefront:nike-kd-18",
             available: true,
             checkout_confirmed: true,
             live_provider_verified: true,
@@ -164,7 +173,7 @@ describe("approved Open Design product flow", () => {
       dialog.querySelectorAll<HTMLImageElement>(".sheet-gallery-thumb img")[3]?.getAttribute("src"),
     ).toContain(`${approvedRoot}/nike-kd-18/04-rear.png`)
     const selectedSize = await within(dialog).findByRole("button", {
-      name: "39 RU, 40 EU. Цену размера уточнит Telegram-бот.",
+      name: "39 RU, 40 EU, 31 400 ₽. Цена Poizon зафиксирована на 12 часов.",
     })
     expect(selectedSize).toHaveAttribute("aria-pressed", "true")
     expect(within(dialog).getByText("Размер: RU (EU)")).toBeInTheDocument()
@@ -176,20 +185,19 @@ describe("approved Open Design product flow", () => {
     // bundled catalogue's nearby EU values must not become fabricated,
     // disabled "availability" buttons in the live card.
     expect(within(dialog).queryByRole("button", {
-      name: "40 RU, 41 EU. Цену размера уточнит Telegram-бот.",
+      name: "40 RU, 41 EU, 31 400 ₽. Цена Poizon зафиксирована на 12 часов.",
     })).toBeNull()
     expect(within(dialog).queryByRole("button", {
-      name: "34,5 RU, 35.5 EU. Цену размера уточнит Telegram-бот.",
+      name: "34,5 RU, 35.5 EU, 31 400 ₽. Цена Poizon зафиксирована на 12 часов.",
     })).toBeNull()
 
     const nextSize = within(dialog).getByRole("button", {
-      name: "41 RU, 42 EU. Цену размера уточнит Telegram-бот.",
+      name: "41 RU, 42 EU, 32 900 ₽. Цена Poizon зафиксирована на 12 часов.",
     })
     await user.click(nextSize)
     expect(nextSize).toHaveAttribute("aria-pressed", "true")
-    expect(within(dialog).getAllByText("Уточнить").length).toBeGreaterThan(1)
-    expect(within(dialog).getByRole("link", { name: "Продолжить заказ в Telegram" }))
-      .toHaveAttribute("href", "https://t.me/SelectBuyerBot?start=sku_nike-kd-18")
+    expect(within(dialog).getAllByText("32 900 ₽").length).toBeGreaterThan(1)
+    expect(within(dialog).getByRole("button", { name: "Добавить в корзину" })).toBeEnabled()
 
     expect(vi.mocked(fetch).mock.calls.filter(
       ([url, options]) =>

@@ -20,7 +20,9 @@ function checkoutCatalogPayload(
   },
 ) {
   return {
-    version: "2026-08-02-v3",
+    version: "poizon-live-v1",
+    catalog_mode: "curated_live_poizon",
+    snapshot_hours: 12,
     personal_data_consent_version: "pd-2026-08",
     order_creation_enabled: capabilities.orderCreationEnabled,
     online_payment_enabled: capabilities.onlinePaymentEnabled,
@@ -32,17 +34,23 @@ function checkoutCatalogPayload(
         product_kind: "footwear",
         sizes,
         price_rub: 24500,
+        price_version: "storefront:nike-gt-cut-academy",
         image_url: "https://kicksbase.ru/catalog/nike-gt-cut-academy.webp",
+        images: ["https://kicksbase.ru/catalog/nike-gt-cut-academy.webp"],
         fulfillment_mode: "made_to_order",
-        availability: "catalog_listed",
+        availability: "supplier_verified",
         eta_min_days: 10,
         eta_max_days: 18,
-        live_provider_verified: false,
+        observed_at: new Date(Date.now() - 60_000).toISOString(),
+        expires_at: new Date(Date.now() + 12 * 60 * 60 * 1000 - 60_000).toISOString(),
+        catalog_source: "poizon_curated_snapshot",
+        live_provider_verified: true,
         size_offers: sizes.map((size) => ({
           sku_id: `gt-cut-${size}`,
           size_eu: size,
           size_ru: String(Number(size) - 1),
           price_rub: 24500,
+          price_version: "storefront:nike-gt-cut-academy",
           available: true,
           checkout_confirmed: true,
           live_provider_verified: true,
@@ -60,6 +68,19 @@ function livePoizonOnlyCheckoutPayload() {
     online_payment_enabled: false,
     items: [],
     prices: {},
+  }
+}
+
+function storefrontPricePayload() {
+  return {
+    items: [{
+      slug: "nike-gt-cut-academy",
+      source_query: "Nike G.T. Cut Academy",
+      product_name: "G.T. Cut Academy",
+      total_rub: 24500,
+      observed_at: new Date(Date.now() - 60_000).toISOString(),
+      expires_at: new Date(Date.now() + 12 * 60 * 60 * 1000 - 60_000).toISOString(),
+    }],
   }
 }
 
@@ -727,7 +748,7 @@ describe("LandingPage", () => {
     })
   })
 
-  it("opens the configured bot with the canonical catalog SKU without a provider lookup", async () => {
+  it("uses the CRM snapshot for a published product without a direct provider lookup", async () => {
     const fetchMock = vi.fn(async (url: string) => ({
       ok: true,
       status: 200,
@@ -739,15 +760,35 @@ describe("LandingPage", () => {
     window.history.replaceState(null, "", "/product/nike-gt-cut-academy")
     render(<LandingPage configuredBotUsername="@SelectBuyerBot" />)
 
-    expect(await screen.findByRole("link", {
-      name: "Продолжить заказ в Telegram",
-    })).toHaveAttribute("href", "https://t.me/SelectBuyerBot?start=sku_nike-gt-cut-academy")
+    expect((await screen.findAllByText("Poizon · цена зафиксирована на 12 часов")).length).toBeGreaterThan(0)
     expect(fetchMock.mock.calls.filter(([url]) =>
       String(url).endsWith("/api/catalog/search"),
     )).toHaveLength(0)
   })
 
-  it("keeps ordering in Telegram instead of submitting a stale site-cart total", async () => {
+  it("shows a valid 12-hour storefront price without unlocking checkout sizes", async () => {
+    const fetchMock = vi.fn(async (url: string) => ({
+      ok: true,
+      status: 200,
+      json: async () => url.includes("/api/catalog/storefront-prices")
+        ? storefrontPricePayload()
+        : livePoizonOnlyCheckoutPayload(),
+    }))
+    vi.stubGlobal("fetch", fetchMock)
+    window.history.replaceState(null, "", "/product/nike-gt-cut-academy")
+
+    render(<LandingPage configuredBotUsername="@SelectBuyerBot" />)
+
+    expect((await screen.findAllByText("Poizon · цена зафиксирована на 12 часов")).length)
+      .toBeGreaterThan(0)
+    expect(screen.getAllByText("24 500 ₽").length).toBeGreaterThan(0)
+    expect(screen.queryByRole("button", { name: "Добавить в корзину" })).toBeNull()
+    expect((await screen.findAllByRole("link", { name: "Продолжить в Telegram" }))[0])
+      .toHaveAttribute("href", "https://t.me/SelectBuyerBot?start=sku_nike-gt-cut-academy")
+  })
+
+  it("puts a selected snapshot size in the site cart without submitting a stale total", async () => {
+    const user = userEvent.setup()
     const fetchMock = vi.fn(async (_url: string, _options?: RequestInit) => ({
       ok: true,
       status: 200,
@@ -757,8 +798,11 @@ describe("LandingPage", () => {
     window.history.replaceState(null, "", "/product/nike-gt-cut-academy")
     render(<LandingPage configuredBotUsername="@SelectBuyerBot" />)
 
-    expect(await screen.findByRole("link", { name: "Продолжить заказ в Telegram" }))
-      .toHaveAttribute("href", "https://t.me/SelectBuyerBot?start=sku_nike-gt-cut-academy")
+    await user.click(await screen.findByRole("button", {
+      name: "43 RU, 44 EU, 24 500 ₽. Цена Poizon зафиксирована на 12 часов.",
+    }))
+    await user.click(screen.getByRole("button", { name: "Добавить в корзину" }))
+    expect(screen.getByRole("dialog", { name: "Корзина" })).toBeInTheDocument()
     expect(fetchMock.mock.calls.some(
       (call) => call[1]?.method === "POST" && String(call[0]).endsWith("/api/checkout/orders"),
     )).toBe(false)
@@ -777,7 +821,7 @@ describe("LandingPage", () => {
 
     render(<LandingPage configuredBotUsername="@SelectBuyerBot" />)
 
-    expect(await screen.findByRole("link", { name: "Продолжить заказ в Telegram" }))
+    expect((await screen.findAllByRole("link", { name: "Продолжить в Telegram" }))[0])
       .toHaveAttribute("href", "https://t.me/SelectBuyerBot?start=sku_nike-gt-cut-academy")
     expect(screen.queryByRole("dialog", { name: "Корзина" })).toBeNull()
     expect(fetchMock.mock.calls.some(
@@ -785,7 +829,7 @@ describe("LandingPage", () => {
     )).toBe(false)
   })
 
-  it("clears a persisted legacy cart and routes the customer to Telegram", async () => {
+  it("clears a persisted legacy cart without reviving a bundled price", async () => {
     localStorage.setItem(
       "kicksbase-cart-v1",
       JSON.stringify([{ slug: "nike-gt-cut-academy", size: "44", quantity: 1 }]),
@@ -801,9 +845,7 @@ describe("LandingPage", () => {
     render(<LandingPage configuredBotUsername="@SelectBuyerBot" />)
 
     const cart = await screen.findByRole("dialog", { name: "Корзина" })
-    expect(await within(cart).findByText("Оформление на сайте перенесено в Telegram.")).toBeInTheDocument()
-    expect(within(cart).getByRole("link", { name: "Продолжить в Telegram" }))
-      .toHaveAttribute("href", "https://t.me/SelectBuyerBot")
+    expect(await within(cart).findByText("В заказе пока нет товаров.")).toBeInTheDocument()
     expect(within(cart).queryByText("24 500 ₽")).toBeNull()
     await waitFor(() => {
       expect(JSON.parse(localStorage.getItem("kicksbase-cart-v1") || "null")).toEqual([])

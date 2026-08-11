@@ -143,7 +143,7 @@ export interface StorefrontState {
   selectedSizeOfferStatus: "idle" | "loading" | "ready" | "failed"
   selectedSizeOfferError: string | null
   selectedProductPrice: DisplayPrice | null
-  getPoizonDisplayPrice: (product: CatalogProduct) => DisplayPrice
+  getPoizonDisplayPrice: (product: CatalogProduct, size?: string | null) => DisplayPrice
   catalogPriceState: CatalogPriceState
   cartLines: CartLine[]
   cartCount: number

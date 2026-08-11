@@ -71,12 +71,13 @@ export function ProductDetailPage({ product, storefront }: ProductDetailPageProp
     )
   }
 
-  const price = storefront.getPoizonDisplayPrice(product)
+  const price = storefront.getPoizonDisplayPrice(product, selectedSize)
   const botOrderUrl = buildTelegramBotUrl(storefront.botUsername, `sku_${product.slug}`)
   const publishedOffer = storefront.catalogPriceState.items[product.slug]
   const catalogReady =
     storefront.catalogPriceState.status === "ready" &&
-    publishedOffer?.availability === "catalog_listed"
+    publishedOffer?.availability === "supplier_verified" &&
+    publishedOffer.liveProviderVerified
   const sizeOptions = catalogReady ? publishedOffer.sizes : []
   const orderCreationEnabled =
     catalogReady && storefront.catalogPriceState.orderCreationEnabled

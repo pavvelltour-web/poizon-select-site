@@ -12,6 +12,7 @@ import {
 import { motion } from "motion/react"
 import { useEffect, useRef, useState } from "react"
 
+import { formatRub } from "../../catalog/catalog"
 import {
   getProductGalleryAngleLabel,
   getProductTypeLabel,
@@ -62,7 +63,6 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
 
   const price = storefront.selectedProductPrice
   const botUrl = storefront.selectedProductBotUrl ?? storefront.botUrl
-  const botUsername = storefront.botUsername
   const selectedImageSrc = selectedImageSrcKey || product.fallbackImage
   const selectedImageAlt = storefront.selectedImage?.alt ?? `${product.brand} ${product.name}`
   const selectedImageAngleLabel = getProductGalleryAngleLabel(
@@ -81,15 +81,24 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
     ),
   )
   const livePoizonQuote = Boolean(storefront.catalogPoizonPrices[product.slug])
-  const sourcingMode = publishedOffer
-    ? publishedOffer.fulfillmentMode === "in_stock"
-      ? "В наличии в России"
-      : "Под заказ из Китая"
+  const canAddSelectedToCart = Boolean(
+    selectedSizeOffer &&
+    publishedOffer?.availability === "supplier_verified" &&
+    storefront.catalogPriceState.orderCreationEnabled,
+  )
+  const sourcingMode = livePoizonQuote && publishedOffer
+    ? `${publishedOffer.fulfillmentMode === "in_stock" ? "В наличии в России" : "Под заказ из Китая"} · цена и размеры Poizon зафиксированы на 12 часов`
     : livePoizonQuote
-      ? "Цена Poizon зафиксирована, наличие уточняется"
+      ? "Цена Poizon зафиксирована на 12 часов · наличие и размер уточняются"
     : storefront.catalogPriceState.status === "loading"
       ? "Проверяем данные"
-      : "Недоступно для заказа"
+      : "Нет активной котировки Poizon"
+
+  const addSelectedToCart = () => {
+    if (!canAddSelectedToCart) return
+    storefront.addSelectedToCart()
+    storefront.openCart()
+  }
 
   return (
     <>
@@ -280,7 +289,7 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
                   className="size-price-cell"
                   type="button"
                   data-od-id={`sheet-size-${product.slug}-${offer.sizeEu.replaceAll(".", "-")}`}
-                  aria-label={`${offer.sizeRu ?? "Размер RU не указан"} RU, ${offer.sizeEu} EU. Цену размера уточнит Telegram-бот.`}
+                  aria-label={`${offer.sizeRu ?? "Размер RU не указан"} RU, ${offer.sizeEu} EU, ${formatRub(offer.priceRub ?? 0)}. Цена Poizon зафиксирована на 12 часов.`}
                   aria-pressed={storefront.selectedSize === offer.sizeEu}
                   disabled={!offer.available}
                   onClick={() => storefront.setSelectedSize(offer.sizeEu)}
@@ -290,7 +299,7 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
                     <small>({offer.sizeEu})</small>
                   </span>
                   <span className="size-price-cell__price">
-                    Уточнить
+                    {offer.priceRub === null ? "Уточняется" : formatRub(offer.priceRub)}
                   </span>
                 </button>
               ))}
@@ -303,12 +312,12 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
               </p>
             ) : !storefront.selectedSizeOffers.some((offer) => offer.available) ? (
               <p className="product-size__status" role="status">
-                Размеры и наличие не подтверждены Poizon. Откройте Telegram: бот покажет живую карточку и доступные размеры.
+                Для этой карточки нет активного 12-часового snapshot Poizon. Откройте прямой поиск Poizon, чтобы продолжить в Telegram.
               </p>
             ) : null}
             {selectedSizeOffer && !selectedSizeOffer.checkoutConfirmed ? (
               <p className="product-size__status sr-only" role="status">
-                Цена ещё не подтверждена для оплаты. Оформите запрос менеджеру.
+                Цена ещё не подтверждена для оплаты. Откройте прямой поиск Poizon.
               </p>
             ) : null}
           </div>
@@ -319,19 +328,33 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
               <strong>{price?.value}</strong>
               <em>{price?.detail}</em>
             </span>
-            {botUrl ? (
+            {canAddSelectedToCart ? (
+              <button
+                className="dialog-primary add-button button button--primary"
+                type="button"
+                onClick={addSelectedToCart}
+                data-selected-size={storefront.selectedSize ?? ""}
+                data-display-price={price?.value ?? ""}
+              >
+                <ShoppingCart aria-hidden="true" size={18} />
+                Добавить в корзину
+              </button>
+            ) : botUrl ? (
               <a
                 className="dialog-primary add-button button button--primary"
                 href={botUrl}
                 target="_blank"
                 rel="noreferrer"
-                data-selected-size={storefront.selectedSize ?? ""}
-                data-display-price={price?.value ?? ""}
               >
                 <Send aria-hidden="true" size={18} />
-                Продолжить заказ в Telegram
+                Продолжить в Telegram
               </a>
-            ) : null}
+            ) : (
+              <button className="dialog-primary add-button button button--primary" type="button" disabled>
+                <ShoppingCart aria-hidden="true" size={18} />
+                Выберите подтверждённый размер
+              </button>
+            )}
             {storefront.checkoutResult.status === "failed" ? (
               <p className="product-sheet__feedback" role="alert">
                 {storefront.checkoutResult.message}
@@ -365,7 +388,7 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
           </section>
 
           <p className="product-sheet__fineprint">
-            Для живой карточки Poizon итог уже включает фиксированную доставку по РФ 1 000 ₽. Бот подтвердит товар, размер и наличие перед заказом.
+            Цена статической карточки фиксируется сервером на 12 часов. Доступные размеры для заказа публикуются отдельно; прямой поиск Poizon проверяется заново и продолжается в Telegram.
           </p>
           <p className="product-sheet__order-proof">
             Оплата проходит на защищённой странице банка.
@@ -376,32 +399,24 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
             <textarea readOnly value={storefront.request} rows={3} />
           </label>
 
-          {botUrl ? (
-            <div className="product-sheet__actions">
-              <button type="button" className="button button--quiet" onClick={storefront.copyRequest}>
-                <Copy aria-hidden="true" size={18} />
-                {storefront.copyState === "copied" ? "Запрос готов" : "Скопировать запрос"}
-              </button>
-              <a className="button button--primary" href={botUrl} target="_blank" rel="noreferrer">
-                <Send aria-hidden="true" size={18} />
-                Открыть заказ в @{botUsername}
-              </a>
-            </div>
-          ) : (
-            <div className="product-sheet__actions">
-              <button type="button" className="button button--quiet" onClick={storefront.copyRequest}>
-                <Copy aria-hidden="true" size={18} />
-                {storefront.copyState === "copied" ? "Запрос готов" : "Скопировать запрос"}
-              </button>
+          <div className="product-sheet__actions">
+            {selectedProductInCart ? (
               <button type="button" className="button button--primary" onClick={storefront.openCart}>
                 <ShoppingCart aria-hidden="true" size={18} />
-                Открыть заказ
+                Открыть корзину
               </button>
-              <p className="product-sheet__demo">
-                Оформление и оплата доступны в корзине сайта.
-              </p>
-            </div>
-          )}
+            ) : null}
+            {!livePoizonQuote && botUrl ? (
+              <a className="button button--primary" href={botUrl} target="_blank" rel="noreferrer">
+                <Send aria-hidden="true" size={18} />
+                Продолжить в Telegram
+              </a>
+            ) : null}
+            <button type="button" className="button button--quiet" onClick={storefront.copyRequest}>
+              <Copy aria-hidden="true" size={18} />
+              {storefront.copyState === "copied" ? "Запрос готов" : "Скопировать запрос"}
+            </button>
+          </div>
 
           {storefront.copyState === "failed" ? (
             <p className="product-sheet__feedback" role="alert">

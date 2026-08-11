@@ -52,7 +52,7 @@ export function ProductCard({
     : []
   const cardSizes = (sizes.length >= 7 ? [sizes[2], sizes[4], sizes[6]] : sizes.slice(0, 3))
     .filter((size): size is string => Boolean(size))
-  const sourceSizesConfirmed = cardSizes.length > 0 && publishedOffer?.availability === "catalog_listed"
+  const sourceSizesConfirmed = cardSizes.length > 0 && publishedOffer?.availability === "supplier_verified"
   const eta = sourceSizesConfirmed && publishedOffer?.etaMinDays && publishedOffer.etaMaxDays
     ? `Доставка ${publishedOffer.etaMinDays}–${publishedOffer.etaMaxDays} дней`
     : "Размеры и наличие уточнит Telegram"

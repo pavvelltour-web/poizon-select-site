@@ -10,8 +10,13 @@ import {
   reconcileCartLines,
 } from "./cart"
 
+const snapshotObservedAt = new Date(Date.now() - 60_000).toISOString()
+const snapshotExpiresAt = new Date(Date.now() + 12 * 60 * 60 * 1000 - 60_000).toISOString()
+
 const catalogPayload = {
-  version: "2026-08-02-v3",
+  version: "poizon-live-v1",
+  catalog_mode: "curated_live_poizon",
+  snapshot_hours: 12,
   personal_data_consent_version: "pd-2026-08",
   order_creation_enabled: true,
   online_payment_enabled: true,
@@ -23,30 +28,37 @@ const catalogPayload = {
       product_kind: "footwear",
       sizes: ["43", "44"],
       price_rub: 25100,
+      price_version: "storefront:nike-gt-cut-academy",
       image_url: "https://kicksbase.ru/catalog/server.webp",
+      images: ["https://kicksbase.ru/catalog/server.webp"],
       fulfillment_mode: "made_to_order",
-      availability: "catalog_listed",
+      availability: "supplier_verified",
       eta_min_days: 10,
       eta_max_days: 18,
-      live_provider_verified: false,
+      observed_at: snapshotObservedAt,
+      expires_at: snapshotExpiresAt,
+      catalog_source: "poizon_curated_snapshot",
+      live_provider_verified: true,
       size_offers: [
         {
           sku_id: "server-43",
           size_eu: "43",
           size_ru: "42",
           price_rub: 25100,
+          price_version: "storefront:nike-gt-cut-academy",
           available: true,
           checkout_confirmed: true,
-          live_provider_verified: false,
+          live_provider_verified: true,
         },
         {
           sku_id: "server-44",
           size_eu: "44",
           size_ru: "43",
           price_rub: 25100,
+          price_version: "storefront:nike-gt-cut-academy",
           available: true,
           checkout_confirmed: true,
-          live_provider_verified: false,
+          live_provider_verified: true,
         },
       ],
     },
@@ -160,7 +172,7 @@ describe("checkout catalogue v10", () => {
   it("parses the complete published offer and rejects a prices-only payload", () => {
     const parsed = parseCheckoutCatalog(catalogPayload)
 
-    expect(parsed?.version).toBe("2026-08-02-v3")
+    expect(parsed?.version).toBe("poizon-live-v1")
     expect(parsed).toMatchObject({
       orderCreationEnabled: true,
       onlinePaymentEnabled: true,
@@ -169,16 +181,30 @@ describe("checkout catalogue v10", () => {
       priceRub: 25100,
       sizes: ["43", "44"],
       fulfillmentMode: "made_to_order",
-      liveProviderVerified: false,
+      liveProviderVerified: true,
     })
     expect(parsed?.items["nike-gt-cut-academy"]?.sizeOffers).toContainEqual(
       expect.objectContaining({
         skuId: "server-43",
         checkoutConfirmed: true,
-        liveProviderVerified: false,
+        liveProviderVerified: true,
       }),
     )
+    expect(parsed?.items["nike-gt-cut-academy"]?.priceVersion)
+      .toBe("storefront:nike-gt-cut-academy")
     expect(parseCheckoutCatalog({ version: "v1", prices: { shoe: 1 } })).toBeNull()
+  })
+
+  it("rejects a snapshot whose source version does not belong to its storefront slug", () => {
+    const parsed = parseCheckoutCatalog({
+      ...catalogPayload,
+      items: [{
+        ...catalogPayload.items[0],
+        price_version: "storefront:other-product",
+      }],
+    })
+
+    expect(parsed?.items["nike-gt-cut-academy"]).toBeUndefined()
   })
 
   it("accepts the disabled live-Poizon-only checkout response as an empty snapshot", () => {
@@ -195,36 +221,41 @@ describe("checkout catalogue v10", () => {
       items: {},
       lookup: {},
       version: "live-poizon-only-v1",
+      snapshotHours: null,
       personalDataConsentVersion: null,
       orderCreationEnabled: false,
       onlinePaymentEnabled: false,
     })
   })
 
-  it("keeps the size matrix separate from live search metadata", () => {
+  it("uses only verified snapshot sizes and their server prices", () => {
     const checkout = parseCheckoutCatalog({
       ...catalogPayload,
       items: [{
         ...catalogPayload.items[0],
-        sizes: ["42", "43", "44"],
-        live_provider_verified: false,
+        sizes: ["42", "43"],
         size_offers: [
           {
             sku_id: "sku-42",
             size_eu: "42",
             size_ru: "41",
+            size_us: "8.5",
+            size_cn: "265",
             price_rub: 24900,
+            price_version: "storefront:nike-gt-cut-academy",
             available: true,
             checkout_confirmed: true,
-            live_provider_verified: false,
+            live_provider_verified: true,
           },
           {
             sku_id: "sku-43",
             size_eu: "43",
+            size_ru: "42",
             price_rub: 27000,
+            price_version: "storefront:nike-gt-cut-academy",
             available: true,
             checkout_confirmed: true,
-            live_provider_verified: false,
+            live_provider_verified: true,
           },
         ],
       }],
@@ -241,6 +272,8 @@ describe("checkout catalogue v10", () => {
         skuId: "sku-42",
         sizeEu: "42",
         sizeRu: "41",
+        sizeUs: "8.5",
+        sizeCn: "265",
         priceRub: 24900,
         available: true,
         checkoutConfirmed: true,
@@ -253,64 +286,21 @@ describe("checkout catalogue v10", () => {
         available: true,
         checkoutConfirmed: true,
       }),
-      expect.objectContaining({
-        skuId: null,
-        sizeEu: "44",
-        sizeRu: "43",
-        priceRub: null,
-        available: false,
-        checkoutConfirmed: false,
-      }),
     ])
   })
 
-  it("uses a confirmed server size offer despite an unverified live provider", () => {
+  it("fails closed when the item or a size is not provider-verified", () => {
     const product = publicCatalogProducts.find(
       (candidate) => candidate.slug === "nike-gt-cut-academy",
     )!
-    const parsed = parseCheckoutCatalog({
+    const unverifiedItem = parseCheckoutCatalog({
       ...catalogPayload,
       items: [{
         ...catalogPayload.items[0],
         live_provider_verified: false,
-        size_offers: [{
-          sku_id: "sku-44",
-          size_eu: "44",
-          price_rub: 26900,
-          available: true,
-          checkout_confirmed: true,
-          live_provider_verified: false,
-        }],
       }],
     })!
-    const lines = reconcileCartLines(addOrIncrementCartLine([], product, "44"), parsed.items)
-    const payload = buildCheckoutPayload(
-      lines,
-      { fullName: "Павел", phone: "+79990000000", email: "" },
-      { offerAccepted: true, personalDataAccepted: true },
-      {
-        method: "cdek_pvz",
-        city: "Москва",
-        postalCode: "119607",
-        address: "",
-        pvzCode: "MSK123",
-      },
-      parsed.items,
-      parsed.version,
-    )
-
-    expect(payload.items[0]).toMatchObject({
-      sku_id: "sku-44",
-      size_eu: "44",
-      price_rub: 26900,
-    })
-  })
-
-  it("fails closed when a server offer is available but not checkout-confirmed", () => {
-    const product = publicCatalogProducts.find(
-      (candidate) => candidate.slug === "nike-gt-cut-academy",
-    )!
-    const parsed = parseCheckoutCatalog({
+    const unverifiedSize = parseCheckoutCatalog({
       ...catalogPayload,
       items: [{
         ...catalogPayload.items[0],
@@ -318,35 +308,16 @@ describe("checkout catalogue v10", () => {
           sku_id: "unconfirmed-44",
           size_eu: "44",
           price_rub: 26900,
+          price_version: "storefront:nike-gt-cut-academy",
           available: true,
-          checkout_confirmed: false,
-          live_provider_verified: true,
+          checkout_confirmed: true,
+          live_provider_verified: false,
         }],
       }],
     })!
-    const lines = reconcileCartLines(addOrIncrementCartLine([], product, "44"), parsed.items)
 
-    expect(parsed.items[product.slug]?.sizeOffers[0]).toMatchObject({
-      checkoutConfirmed: false,
-      liveProviderVerified: true,
-    })
-    expect(lines[0]?.validation).toBe("invalid")
-    expect(() =>
-      buildCheckoutPayload(
-        lines,
-        { fullName: "Павел", phone: "+79990000000", email: "" },
-        { offerAccepted: true, personalDataAccepted: true },
-        {
-          method: "cdek_pvz",
-          city: "Москва",
-          postalCode: "119607",
-          address: "",
-          pvzCode: "MSK123",
-        },
-        parsed.items,
-        parsed.version,
-      ),
-    ).toThrow(/без подтверждения сервера/)
+    expect(unverifiedItem.items[product.slug]).toBeUndefined()
+    expect(unverifiedSize.items[product.slug]).toBeUndefined()
   })
 
   it("requires one exact confirmed server offer for each cart size", () => {
@@ -362,8 +333,10 @@ describe("checkout catalogue v10", () => {
           sku_id: "server-44-point-0",
           size_eu: "44.0",
           price_rub: 25100,
+          price_version: "storefront:nike-gt-cut-academy",
           available: true,
           checkout_confirmed: true,
+          live_provider_verified: true,
         }],
       }],
     })!
@@ -376,8 +349,10 @@ describe("checkout catalogue v10", () => {
           sku_id,
           size_eu: "44",
           price_rub: 25100,
+          price_version: "storefront:nike-gt-cut-academy",
           available: true,
           checkout_confirmed: true,
+          live_provider_verified: true,
         })),
       }],
     })!
@@ -445,6 +420,7 @@ describe("checkout catalogue v10", () => {
       product_kind: "footwear",
       sku_id: "server-44",
       price_rub: 25100,
+      price_version: "storefront:nike-gt-cut-academy",
       image_url: "https://kicksbase.ru/catalog/server.webp",
     })
     expect(payload.delivery).toEqual({
