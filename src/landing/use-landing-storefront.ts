@@ -10,6 +10,7 @@ import {
 } from "../catalog/catalog"
 import {
   buildOrderRequest,
+  buildLiveSearchTelegramBotUrl,
   buildTelegramBotUrl,
   copyOrderRequest,
   resolveBotUsername,
@@ -142,6 +143,7 @@ export function useLandingStorefront(
   const [liveSearchMessage, setLiveSearchMessage] = useState<string | null>(null)
   const [catalogPrices, setCatalogPrices] = useState<Record<string, StorefrontPoizonPrice>>({})
   const [catalogPricesReady, setCatalogPricesReady] = useState(false)
+  const [liveSearchNormalizedQuery, setLiveSearchNormalizedQuery] = useState<string | null>(null)
   const productTriggerRef = useRef<HTMLButtonElement | null>(null)
   const sheetHeadingRef = useRef<HTMLHeadingElement | null>(null)
   const liveSearchAbortRef = useRef<AbortController | null>(null)
@@ -151,6 +153,7 @@ export function useLandingStorefront(
     configuredBotUsername ?? import.meta.env.VITE_BOT_USERNAME,
   )
   const botUrl = buildTelegramBotUrl(botUsername)
+  const liveSearchBotUrl = buildLiveSearchTelegramBotUrl(botUsername, liveSearchNormalizedQuery)
 
   const selectedProduct = findProductBySlug(selectedSlug)
   const selectedProductBotUrl = selectedProduct
@@ -365,6 +368,7 @@ export function useLandingStorefront(
       setLiveSearchStatus("idle")
       setLiveSearchMessage(null)
       setLiveSearchResults([])
+      setLiveSearchNormalizedQuery(null)
     }
   }
 
@@ -390,6 +394,7 @@ export function useLandingStorefront(
     const requestId = liveSearchRequestIdRef.current + 1
     liveSearchRequestIdRef.current = requestId
     setLiveSearchResults([])
+    setLiveSearchNormalizedQuery(null)
     setLiveSearchStatus("loading")
     setLiveSearchMessage(null)
 
@@ -407,6 +412,11 @@ export function useLandingStorefront(
       const results = Array.isArray(data?.results) ? data.results.filter(isLiveProduct) : []
       if (response.ok && data?.status === "ready" && results.length > 0) {
         setLiveSearchResults(results)
+        setLiveSearchNormalizedQuery(
+          typeof data.normalized_query === "string" && data.normalized_query.trim().length >= 2
+            ? data.normalized_query.trim()
+            : query,
+        )
         setLiveSearchStatus("ready")
         return
       }
@@ -477,6 +487,8 @@ export function useLandingStorefront(
     sort,
     taskInput,
     liveSearchQuery,
+    liveSearchNormalizedQuery,
+    liveSearchBotUrl,
     liveSearchStatus,
     liveSearchResults,
     liveSearchMessage,

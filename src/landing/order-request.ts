@@ -1,6 +1,8 @@
 import type { CatalogProduct } from "../catalog/catalog"
 
 const telegramUsernamePattern = /^[A-Za-z][A-Za-z0-9_]{4,31}$/
+const telegramStartPayloadLimit = 64
+const liveSearchPayloadPrefix = "live_"
 
 function cleanLine(value: string): string {
   return value
@@ -31,6 +33,32 @@ export function buildTelegramBotUrl(
   // server validates this again and resolves only a known catalogue slug.
   if (!/^[A-Za-z0-9_-]{1,64}$/.test(startPayload)) return null
   return `https://t.me/${validatedUsername}?start=${startPayload}`
+}
+
+function encodeBase64Url(value: string): string | null {
+  try {
+    const bytes = new TextEncoder().encode(value)
+    let binary = ""
+    for (const byte of bytes) binary += String.fromCharCode(byte)
+    return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "")
+  } catch {
+    return null
+  }
+}
+
+export function buildLiveSearchTelegramBotUrl(
+  username: string | null,
+  normalizedQuery: string | null,
+): string | null {
+  const validatedUsername = resolveBotUsername(username)
+  const query = typeof normalizedQuery === "string" ? cleanLine(normalizedQuery) : ""
+  if (!validatedUsername || query.length < 2 || query.length > 120) return null
+
+  const token = encodeBase64Url(query)
+  const payload = token ? `${liveSearchPayloadPrefix}${token}` : ""
+  if (!payload || payload.length > telegramStartPayloadLimit) return null
+
+  return `https://t.me/${validatedUsername}?start=${payload}`
 }
 
 export function buildOrderRequest(

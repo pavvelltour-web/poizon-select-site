@@ -150,8 +150,8 @@ export function LivePoizonSearch({ storefront }: LivePoizonSearchProps) {
                   Цена и курс зафиксированы {fixedUntil(product.expires_at)}.
                 </p>
                 <PriceBreakdown offer={offer} />
-                {storefront.botUrl ? (
-                  <a className="button button--quiet" href={storefront.botUrl}>
+                {storefront.liveSearchBotUrl ? (
+                  <a className="button button--quiet" href={storefront.liveSearchBotUrl}>
                     Продолжить в Telegram
                   </a>
                 ) : null}

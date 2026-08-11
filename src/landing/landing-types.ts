@@ -85,6 +85,8 @@ export interface StorefrontState {
   sort: CatalogSort
   taskInput: string
   liveSearchQuery: string
+  liveSearchNormalizedQuery: string | null
+  liveSearchBotUrl: string | null
   liveSearchStatus: LivePoizonSearchStatus
   liveSearchResults: LivePoizonProduct[]
   liveSearchMessage: string | null

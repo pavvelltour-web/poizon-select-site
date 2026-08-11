@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest"
 import { catalogProducts } from "../catalog/catalog"
 import {
   buildOrderRequest,
+  buildLiveSearchTelegramBotUrl,
   buildTelegramBotUrl,
   resolveBotUsername,
 } from "./order-request"
@@ -28,6 +29,14 @@ describe("Telegram order handoff", () => {
     expect(buildTelegramBotUrl(null)).toBeNull()
     expect(buildTelegramBotUrl("../outside")).toBeNull()
     expect(buildTelegramBotUrl("https://evil.test/namebot")).toBeNull()
+  })
+
+  it("hands a bounded live Poizon query to the bot through Telegram start", () => {
+    expect(buildLiveSearchTelegramBotUrl("MyBuyerBot", "Nike Air Force 1")).toBe(
+      "https://t.me/MyBuyerBot?start=live_TmlrZSBBaXIgRm9yY2UgMQ",
+    )
+    expect(buildLiveSearchTelegramBotUrl("MyBuyerBot", "x".repeat(120))).toBeNull()
+    expect(buildLiveSearchTelegramBotUrl(null, "Nike Air Force 1")).toBeNull()
   })
 
   it("creates the exact one-line bot search query without an envelope", () => {
