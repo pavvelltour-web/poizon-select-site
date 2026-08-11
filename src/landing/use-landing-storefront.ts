@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 import {
   catalogProducts,
@@ -23,9 +23,73 @@ import {
   isSort,
   readUrlState,
 } from "./landing-data"
-import type { ActiveCategory, StorefrontState, UrlState } from "./landing-types"
+import type {
+  ActiveCategory,
+  LivePoizonOffer,
+  LivePoizonPriceBreakdown,
+  LivePoizonProduct,
+  StorefrontState,
+  UrlState,
+} from "./landing-types"
 
 export type LandingStorefront = StorefrontState
+
+const LIVE_SEARCH_UNAVAILABLE =
+  "Живая цена Poizon сейчас недоступна. Статический каталог не подменяет цену или наличие поставщика."
+
+function crmSearchEndpoint(): string | null {
+  // VITE_* values are public. Keep this same-origin so browsers call the CRM
+  // reverse proxy only, never the Batch Sync provider directly.
+  const configured = (import.meta.env.VITE_CRM_API_BASE_URL || "/api").trim()
+  if (!configured.startsWith("/") || configured.startsWith("//")) return null
+  return `${configured.replace(/\/+$/, "") || "/api"}/catalog/search`
+}
+
+function isPriceBreakdown(value: unknown): value is LivePoizonPriceBreakdown {
+  if (!value || typeof value !== "object") return false
+  const breakdown = value as Record<string, unknown>
+  return (
+    typeof breakdown.purchase_rub === "number" &&
+    typeof breakdown.conversion_fee === "number" &&
+    typeof breakdown.first_six_percent_fee === "number" &&
+    typeof breakdown.service_markup === "number" &&
+    typeof breakdown.final_six_percent_fee === "number" &&
+    typeof breakdown.delivery_rub === "number" &&
+    typeof breakdown.total_rub === "number" &&
+    typeof breakdown.markup_tier === "string"
+  )
+}
+
+function isLiveOffer(value: unknown): value is LivePoizonOffer {
+  if (!value || typeof value !== "object") return false
+  const offer = value as Record<string, unknown>
+  return (
+    typeof offer.sku_id === "string" &&
+    typeof offer.size === "string" &&
+    offer.currency === "CNY" &&
+    typeof offer.price_cny === "number" &&
+    typeof offer.quote_rub === "number" &&
+    typeof offer.rf_delivery === "number" &&
+    (typeof offer.total_rub === "number" || offer.total_rub === null) &&
+    (offer.price_breakdown === null || isPriceBreakdown(offer.price_breakdown))
+  )
+}
+
+function isLiveProduct(value: unknown): value is LivePoizonProduct {
+  if (!value || typeof value !== "object") return false
+  const product = value as Record<string, unknown>
+  return (
+    product.provider_source === "poizon_batch_sync_api" &&
+    typeof product.provider_product_id === "string" &&
+    (typeof product.brand === "string" || product.brand === null) &&
+    typeof product.name === "string" &&
+    (typeof product.article === "string" || product.article === null) &&
+    (product.kind === "footwear" || product.kind === "apparel" || product.kind === "accessory") &&
+    Array.isArray(product.offers) &&
+    product.offers.every(isLiveOffer) &&
+    typeof product.yuan_rate === "number"
+  )
+}
 
 export function useLandingStorefront(
   configuredBotUsername?: string | null,
@@ -41,8 +105,16 @@ export function useLandingStorefront(
   const [selectedSize, setSelectedSizeState] = useState<string | null>(null)
   const [copyState, setCopyState] = useState<"idle" | "copied" | "failed">("idle")
   const [taskInput, setTaskInputState] = useState("")
+  const [liveSearchQuery, setLiveSearchQueryState] = useState("")
+  const [liveSearchStatus, setLiveSearchStatus] = useState<
+    "idle" | "loading" | "ready" | "unavailable"
+  >("idle")
+  const [liveSearchResults, setLiveSearchResults] = useState<LivePoizonProduct[]>([])
+  const [liveSearchMessage, setLiveSearchMessage] = useState<string | null>(null)
   const productTriggerRef = useRef<HTMLButtonElement | null>(null)
   const sheetHeadingRef = useRef<HTMLHeadingElement | null>(null)
+  const liveSearchAbortRef = useRef<AbortController | null>(null)
+  const liveSearchRequestIdRef = useRef(0)
 
   const botUsername = resolveBotUsername(
     configuredBotUsername ?? import.meta.env.VITE_BOT_USERNAME,
@@ -152,6 +224,13 @@ export function useLandingStorefront(
     }
   }, [selectedProduct, selectedVisibleGallery.length])
 
+  useEffect(
+    () => () => {
+      liveSearchAbortRef.current?.abort()
+    },
+    [],
+  )
+
   const selectCategory = (nextCategory: ActiveCategory) => {
     setCategory(nextCategory)
     setSelectedSlug(null)
@@ -199,6 +278,72 @@ export function useLandingStorefront(
   }
 
   const setTaskInput = (task: string) => setTaskInputState(task)
+
+  const setLiveSearchQuery = (query: string) => {
+    setLiveSearchQueryState(query)
+    if (liveSearchStatus !== "idle") {
+      setLiveSearchStatus("idle")
+      setLiveSearchMessage(null)
+      setLiveSearchResults([])
+    }
+  }
+
+  const submitLiveSearch = useCallback(async () => {
+    const query = liveSearchQuery.trim().replace(/\s+/g, " ")
+    const endpoint = crmSearchEndpoint()
+    if (query.length < 2) {
+      setLiveSearchResults([])
+      setLiveSearchStatus("unavailable")
+      setLiveSearchMessage("Введите название или артикул минимум из двух символов.")
+      return
+    }
+    if (!endpoint) {
+      setLiveSearchResults([])
+      setLiveSearchStatus("unavailable")
+      setLiveSearchMessage(LIVE_SEARCH_UNAVAILABLE)
+      return
+    }
+
+    liveSearchAbortRef.current?.abort()
+    const controller = new AbortController()
+    liveSearchAbortRef.current = controller
+    const requestId = liveSearchRequestIdRef.current + 1
+    liveSearchRequestIdRef.current = requestId
+    setLiveSearchResults([])
+    setLiveSearchStatus("loading")
+    setLiveSearchMessage(null)
+
+    try {
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        credentials: "omit",
+        signal: controller.signal,
+        body: JSON.stringify({ query, limit: 4 }),
+      })
+      const payload: unknown = await response.json()
+      if (requestId !== liveSearchRequestIdRef.current) return
+      const data = payload && typeof payload === "object" ? (payload as Record<string, unknown>) : null
+      const results = Array.isArray(data?.results) ? data.results.filter(isLiveProduct) : []
+      if (response.ok && data?.status === "ready" && results.length > 0) {
+        setLiveSearchResults(results)
+        setLiveSearchStatus("ready")
+        return
+      }
+      setLiveSearchResults([])
+      setLiveSearchStatus("unavailable")
+      setLiveSearchMessage(
+        typeof data?.clarification === "string" && data.clarification.trim()
+          ? data.clarification
+          : LIVE_SEARCH_UNAVAILABLE,
+      )
+    } catch {
+      if (controller.signal.aborted || requestId !== liveSearchRequestIdRef.current) return
+      setLiveSearchResults([])
+      setLiveSearchStatus("unavailable")
+      setLiveSearchMessage(LIVE_SEARCH_UNAVAILABLE)
+    }
+  }, [liveSearchQuery])
 
   const openProduct = (product: CatalogProduct, trigger: HTMLButtonElement) => {
     productTriggerRef.current = trigger
@@ -250,6 +395,10 @@ export function useLandingStorefront(
     search,
     sort,
     taskInput,
+    liveSearchQuery,
+    liveSearchStatus,
+    liveSearchResults,
+    liveSearchMessage,
     heroProducts,
     filteredProducts,
     selectedProduct,
@@ -270,6 +419,8 @@ export function useLandingStorefront(
     applyQuickFilter,
     resetCatalog,
     setTaskInput,
+    setLiveSearchQuery,
+    submitLiveSearch,
     openProduct,
     closeProduct,
     selectProductImage,

@@ -24,6 +24,42 @@ export interface TaskMatch {
 
 export type CopyState = "idle" | "copied" | "failed"
 
+export type LivePoizonSearchStatus = "idle" | "loading" | "ready" | "unavailable"
+
+/** Customer-safe subset of the CRM quote; no provider address or secret. */
+export interface LivePoizonPriceBreakdown {
+  purchase_rub: number
+  conversion_fee: number
+  first_six_percent_fee: number
+  service_markup: number
+  final_six_percent_fee: number
+  delivery_rub: number
+  total_rub: number
+  markup_tier: string
+}
+
+export interface LivePoizonOffer {
+  sku_id: string
+  size: string
+  currency: "CNY"
+  price_cny: number
+  quote_rub: number
+  rf_delivery: number
+  total_rub: number | null
+  price_breakdown: LivePoizonPriceBreakdown | null
+}
+
+export interface LivePoizonProduct {
+  provider_source: "poizon_batch_sync_api"
+  provider_product_id: string
+  brand: string | null
+  name: string
+  article: string | null
+  kind: "footwear" | "apparel" | "accessory"
+  offers: LivePoizonOffer[]
+  yuan_rate: number
+}
+
 export interface StorefrontState {
   botUsername: string | null
   botUrl: string | null
@@ -31,6 +67,10 @@ export interface StorefrontState {
   search: string
   sort: CatalogSort
   taskInput: string
+  liveSearchQuery: string
+  liveSearchStatus: LivePoizonSearchStatus
+  liveSearchResults: LivePoizonProduct[]
+  liveSearchMessage: string | null
   heroProducts: CatalogProduct[]
   filteredProducts: CatalogProduct[]
   selectedProduct: CatalogProduct | null
@@ -55,6 +95,8 @@ export interface StorefrontState {
   }) => void
   resetCatalog: () => void
   setTaskInput: (task: string) => void
+  setLiveSearchQuery: (query: string) => void
+  submitLiveSearch: () => Promise<void>
   openProduct: (product: CatalogProduct, trigger: HTMLButtonElement) => void
   closeProduct: () => void
   selectProductImage: (index: number) => void

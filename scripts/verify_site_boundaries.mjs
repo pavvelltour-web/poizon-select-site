@@ -3,7 +3,11 @@ import { fileURLToPath } from "node:url"
 import path from "node:path"
 
 const siteRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
-const allowedBrowserEnv = new Set(["VITE_BOT_USERNAME"])
+const allowedBrowserEnv = new Set([
+  "VITE_BOT_USERNAME",
+  // Public same-origin path only. It must never contain a provider endpoint.
+  "VITE_CRM_API_BASE_URL",
+])
 const auditedTextExtensions = new Set([
   ".css",
   ".html",
@@ -46,10 +50,12 @@ const envKeys = envExample
   .filter((line) => line && !line.startsWith("#"))
   .map((line) => line.split("=", 1)[0])
 if (
-  envKeys.length !== 1 ||
-  envKeys[0] !== "VITE_BOT_USERNAME"
+  envKeys.length !== 2 ||
+  envKeys[0] !== "VITE_BOT_USERNAME" ||
+  envKeys[1] !== "VITE_CRM_API_BASE_URL" ||
+  !/^VITE_CRM_API_BASE_URL=\/api$/m.test(envExample)
 ) {
-  fail(".env.example may contain only VITE_BOT_USERNAME")
+  fail(".env.example may contain only VITE_BOT_USERNAME and VITE_CRM_API_BASE_URL=/api")
 }
 
 const dockerIgnore = await text(".dockerignore")
@@ -88,6 +94,7 @@ const dockerfile = await text("Dockerfile")
 for (const required of [
   "npm ci --ignore-scripts",
   'ARG VITE_BOT_USERNAME=""',
+  'ARG VITE_CRM_API_BASE_URL="/api"',
   "npm run build:production",
   "USER nginx",
   "EXPOSE 8080",
@@ -107,7 +114,7 @@ for (const image of ["node:24-alpine", "nginx:1.29-alpine"]) {
 const nginx = await text("nginx.conf")
 for (const required of [
   "default-src 'self'",
-  "connect-src 'none'",
+  "connect-src 'self'",
   "form-action 'none'",
   "frame-ancestors 'none'",
   "object-src 'none'",
@@ -120,6 +127,13 @@ for (const required of [
 ]) {
   const target = required === "USER nginx" ? dockerfile : nginx
   if (!target.includes(required)) fail(`deployment policy is missing ${required}`)
+}
+for (const required of [
+  "location ^~ /api/",
+  "proxy_pass http://api:8000",
+  "proxy_set_header Host api",
+]) {
+  if (!nginx.includes(required)) fail(`Nginx is missing the same-origin CRM proxy: ${required}`)
 }
 
 const browserFiles = await sourceFiles(path.join(siteRoot, "src"))
@@ -214,13 +228,21 @@ for (const file of browserFiles) {
   ) {
     fail(`${path.relative(siteRoot, file)} contains a dangerous browser sink`)
   }
-  if (
+  const relativeFile = path.relative(siteRoot, file).split(path.sep).join("/")
+  const hasRuntimeNetworkCall =
     /\bfetch\s*\(|\bXMLHttpRequest\b|\bWebSocket\s*\(|\bEventSource\s*\(|\bnavigator\s*\.\s*sendBeacon\s*\(/.test(
       source,
     )
-  ) {
+  const isAllowedSameOriginSearch =
+    relativeFile === "src/landing/use-landing-storefront.ts" &&
+    source.includes("function crmSearchEndpoint()") &&
+    source.includes('configured.startsWith("/")') &&
+    source.includes('configured.startsWith("//")') &&
+    source.includes("/catalog/search") &&
+    source.includes('credentials: "omit"')
+  if (hasRuntimeNetworkCall && !isAllowedSameOriginSearch) {
     fail(
-      `${path.relative(siteRoot, file)} contains a forbidden runtime network call`,
+      `${relativeFile} contains a forbidden runtime network call`,
     )
   }
 
