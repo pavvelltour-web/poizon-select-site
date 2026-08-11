@@ -138,7 +138,7 @@ export function CatalogSection({
         ) : null}
 
         <div className="catalog-status" aria-live="polite">
-          <h2 id="catalog-products-title">Все модели</h2>
+          <h2 id="catalog-products-title">В нашем каталоге</h2>
           <p>{storefront.filteredProducts.length} товаров{remainingProducts > 0 ? `, показано ${visibleProducts.length}` : ""}</p>
         </div>
 
@@ -352,7 +352,7 @@ function SearchResults({
 
       {showEmpty ? (
         <p className="live-search__empty" role="status">
-          По Poizon по этому запросу ничего не найдено. Уточните модель или артикул.
+          По этому запросу ничего не найдено. Уточните модель или артикул.
         </p>
       ) : null}
     </div>
@@ -366,7 +366,7 @@ function formatSearchSize(offer: CatalogSearchOffer): string {
     offer.us ? `US ${offer.us}` : null,
     offer.cn ? `CN ${offer.cn}` : null,
   ].filter((label): label is string => !!label)
-  return labels.length > 0 ? labels.join(" · ") : `Размер Poizon: ${offer.size}`
+  return labels.length > 0 ? labels.join(" · ") : `Размер: ${offer.size}`
 }
 
 function LiveSearchResultCard({
@@ -399,25 +399,25 @@ function LiveSearchResultCard({
       <div className="live-search-card__content">
         <p className="live-search-card__source">
           <BadgeCheck aria-hidden="true" size={16} />
-          Poizon · цена проверена сейчас
+          Цена проверена сейчас
         </p>
         <h3>{title}</h3>
         {result.article ? <p className="live-search-card__article">Артикул: {result.article}</p> : null}
         {result.color ? <p className="live-search-card__article">Цвет: {result.color}</p> : null}
         {result.description ? <p className="live-search-card__description">{result.description}</p> : null}
-        {result.inStock === true ? <p className="live-search-card__availability">В наличии по данным Poizon.</p> : null}
-        {result.inStock === false ? <p className="live-search-card__availability">Сейчас нет в наличии по данным Poizon.</p> : null}
+        {result.inStock === true ? <p className="live-search-card__availability">В наличии по данным поставщика.</p> : null}
+        {result.inStock === false ? <p className="live-search-card__availability">Сейчас нет в наличии по данным поставщика.</p> : null}
         {result.sizeContext ? <p className="live-search-card__sizes">{result.sizeContext}</p> : null}
         {result.sizeChart ? <p className="live-search-card__sizes">{result.sizeChart}</p> : null}
         {result.sizeImage ? (
           <figure className="live-search-card__size-image">
             <img
               src={result.sizeImage}
-              alt={`Таблица размеров Poizon для ${title}`}
+              alt={`Таблица размеров для ${title}`}
               loading="lazy"
               referrerPolicy="no-referrer"
             />
-            <figcaption>Таблица размеров от Poizon</figcaption>
+            <figcaption>Таблица размеров</figcaption>
           </figure>
         ) : null}
         <p className="live-search-card__sizes">

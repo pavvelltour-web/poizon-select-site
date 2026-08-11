@@ -112,11 +112,11 @@ export function CartDrawer({ storefront }: CartDrawerProps) {
               >
                 <AlertCircle aria-hidden="true" size={17} />
                 {storefront.catalogPriceState.status === "ready" && !orderCreationEnabled
-                  ? "12-часовой snapshot Poizon получен, но оформление заказа сейчас отключено."
+                  ? "Подтверждённая 12-часовая цена получена, но оформление заказа сейчас отключено."
                   : storefront.catalogPriceState.status === "ready" && !onlinePaymentEnabled
                     ? "Заказ можно оформить. Онлайн-оплата пока недоступна."
                     : storefront.catalogPriceState.status === "ready"
-                      ? "Цена и размеры Poizon зафиксированы на 12 часов. Заказ будет передан в CRM."
+                      ? "Цена и размеры зафиксированы на 12 часов. Заказ будет передан в CRM."
                   : storefront.catalogPriceState.status === "loading"
                     ? "Проверяем цену и размеры на сервере. До проверки оформить заказ нельзя."
                     : "Серверный каталог недоступен. Оформление заказа временно заблокировано."}
@@ -197,7 +197,7 @@ export function CartDrawer({ storefront }: CartDrawerProps) {
               <div className="cart-total checkout-form__total">
                 <span>Товары сейчас</span>
                 <strong>{cartHasConfirmedPrices ? formatRub(storefront.cartTotalRub) : "Уточняется"}</strong>
-                <small>Цена и размеры из 12-часового snapshot Poizon. Доставка не добавляется к этому итогу повторно.</small>
+                <small>Цена и размеры подтверждены на 12 часов. Доставка не добавляется к этому итогу повторно.</small>
               </div>
 
               <section className="payment-methods" data-od-id="payment-methods" aria-labelledby="payment-methods-title">

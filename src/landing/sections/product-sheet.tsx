@@ -87,12 +87,12 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
     storefront.catalogPriceState.orderCreationEnabled,
   )
   const sourcingMode = livePoizonQuote && publishedOffer
-    ? `${publishedOffer.fulfillmentMode === "in_stock" ? "В наличии в России" : "Под заказ из Китая"} · цена и размеры Poizon зафиксированы на 12 часов`
+    ? `${publishedOffer.fulfillmentMode === "in_stock" ? "В наличии в России" : "Под заказ из Китая"} · цена и размеры зафиксированы на 12 часов`
     : livePoizonQuote
-      ? "Цена Poizon зафиксирована на 12 часов · наличие и размер уточняются"
+      ? "Цена зафиксирована на 12 часов · наличие и размер уточняются"
     : storefront.catalogPriceState.status === "loading"
       ? "Проверяем данные"
-      : "Нет активной котировки Poizon"
+      : "Нет активной котировки"
 
   const addSelectedToCart = () => {
     if (!canAddSelectedToCart) return
@@ -289,7 +289,7 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
                   className="size-price-cell"
                   type="button"
                   data-od-id={`sheet-size-${product.slug}-${offer.sizeEu.replaceAll(".", "-")}`}
-                  aria-label={`${offer.sizeRu ?? "Размер RU не указан"} RU, ${offer.sizeEu} EU, ${formatRub(offer.priceRub ?? 0)}. Цена Poizon зафиксирована на 12 часов.`}
+                  aria-label={`${offer.sizeRu ?? "Размер RU не указан"} RU, ${offer.sizeEu} EU, ${formatRub(offer.priceRub ?? 0)}. Цена зафиксирована на 12 часов.`}
                   aria-pressed={storefront.selectedSize === offer.sizeEu}
                   disabled={!offer.available}
                   onClick={() => storefront.setSelectedSize(offer.sizeEu)}
@@ -312,12 +312,12 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
               </p>
             ) : !storefront.selectedSizeOffers.some((offer) => offer.available) ? (
               <p className="product-size__status" role="status">
-                Для этой карточки нет активного 12-часового snapshot Poizon. Откройте прямой поиск Poizon, чтобы продолжить в Telegram.
+                Для этой карточки нет активной 12-часовой цены. Откройте поиск, чтобы продолжить в Telegram.
               </p>
             ) : null}
             {selectedSizeOffer && !selectedSizeOffer.checkoutConfirmed ? (
               <p className="product-size__status sr-only" role="status">
-                Цена ещё не подтверждена для оплаты. Откройте прямой поиск Poizon.
+                Цена ещё не подтверждена для оплаты. Откройте поиск.
               </p>
             ) : null}
           </div>
@@ -388,7 +388,7 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
           </section>
 
           <p className="product-sheet__fineprint">
-            Цена статической карточки фиксируется сервером на 12 часов. Доступные размеры для заказа публикуются отдельно; прямой поиск Poizon проверяется заново и продолжается в Telegram.
+            Цена статической карточки фиксируется сервером на 12 часов. Доступные размеры для заказа публикуются отдельно; поиск проверяется заново и продолжается в Telegram.
           </p>
           <p className="product-sheet__order-proof">
             Оплата проходит на защищённой странице банка.

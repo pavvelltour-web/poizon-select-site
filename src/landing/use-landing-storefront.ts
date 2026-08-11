@@ -88,7 +88,7 @@ function emptyCatalogSearchState(): CatalogSearchState {
 }
 
 const LIVE_SEARCH_UNAVAILABLE =
-  "Живая цена Poizon сейчас недоступна. Статическая витрина не подменяет цену или наличие поставщика."
+  "Подтверждённая цена сейчас недоступна. Статическая витрина не подменяет цену или наличие поставщика."
 
 function crmEndpoint(path: "search" | "storefront-prices"): string | null {
   // The browser talks only to our same-origin CRM proxy. The supplier API is
@@ -356,25 +356,25 @@ export function useLandingStorefront(
       const quote = sizeOffer?.priceRub ?? catalogQuote?.total_rub
       if (quote) {
         return {
-          label: "Poizon · цена зафиксирована на 12 часов",
+          label: "Цена зафиксирована на 12 часов",
           value: formatRub(quote),
           detail: sizeOffer
             ? `Подтверждённая цена размера EU ${sizeOffer.sizeEu} из серверного snapshot.`
             : catalogQuote?.source_query === "checkout-catalog"
               ? "Минимальная подтверждённая цена среди размеров из серверного snapshot."
-              : "Подтверждённая цена Poizon; наличие и размер проверяются отдельно.",
+              : "Подтверждённая цена; наличие и размер проверяются отдельно.",
         }
       }
       return catalogPoizonPricesReady
         ? {
-          label: "Poizon · цена",
+          label: "Цена",
           value: "Уточняется",
           detail: "Поставщик не подтвердил цену. Статическая витрина не подменяет её.",
         }
         : {
-          label: "Poizon · цена",
+          label: "Цена",
           value: "Сверяем…",
-          detail: "Получаем подтверждённую котировку Poizon.",
+          detail: "Получаем подтверждённую котировку.",
         }
     },
     [catalogPoizonPrices, catalogPoizonPricesReady, catalogPriceState.items],

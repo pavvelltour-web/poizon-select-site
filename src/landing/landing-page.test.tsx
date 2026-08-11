@@ -128,7 +128,7 @@ function readySearchPayload(normalizedQuery = "Nike Air Force 1") {
         description: null,
         images: ["https://cdn.poizon.example/air-force-1.webp"],
         in_stock: true,
-        size_context: "Размеры указаны в системе Poizon.",
+        size_context: "Размеры указаны поставщиком.",
         size_chart: "Сверьте длину стопы с таблицей производителя.",
         size_image: "https://cdn.poizon.example/air-force-1-size-chart.webp",
         observed_at: observedAt,
@@ -201,7 +201,7 @@ describe("LandingPage", () => {
       "href",
       "/catalog",
     )
-    expect(screen.queryByText("по запросу")).toBeNull()
+    expect(screen.getByText("Другие товары по запросу")).toBeInTheDocument()
     const firstCard = productLinks()[0]
     expect(firstCard).toHaveAccessibleName(/Nike KD 18/)
     expect(within(firstCard).getByText("Кроссовки Nike KD 18")).toBeInTheDocument()
@@ -221,6 +221,7 @@ describe("LandingPage", () => {
     window.history.replaceState(null, "", "/catalog")
     render(<LandingPage configuredBotUsername={null} />)
     expect(productLinks()).toHaveLength(CATALOG_PAGE_SIZE)
+    expect(screen.getByRole("heading", { name: "В нашем каталоге" })).toBeInTheDocument()
     expect(
       screen.getByText(`${publicCatalogProducts.length} товаров, показано 24`),
     ).toBeInTheDocument()
@@ -531,7 +532,7 @@ describe("LandingPage", () => {
       "href",
       "/product/nike-air-force-1-07-white",
     )
-    expect(screen.queryByText("Проверка Poizon временно недоступна.")).toBeNull()
+    expect(screen.queryByText("Проверка поставщика временно недоступна.")).toBeNull()
 
     view.unmount()
     window.history.replaceState(null, "", "/")
@@ -715,8 +716,8 @@ describe("LandingPage", () => {
     expect(screen.getByText("Белые кроссовки из натуральной кожи.")).toBeInTheDocument()
     expect(screen.getByText("Чёрные кроссовки для повседневной носки.")).toBeInTheDocument()
     expect(screen.getByText(/RU 41 · EU 42 · US 8\.5 · CN 265 · 17\s?700 ₽ · в наличии/u)).toBeInTheDocument()
-    expect(screen.getAllByText("В наличии по данным Poizon.")).toHaveLength(2)
-    expect(screen.getAllByText("Размеры указаны в системе Poizon.")).toHaveLength(2)
+    expect(screen.getAllByText("В наличии по данным поставщика.")).toHaveLength(2)
+    expect(screen.getAllByText("Размеры указаны поставщиком.")).toHaveLength(2)
     expect(screen.getAllByText("Сверьте длину стопы с таблицей производителя.")).toHaveLength(2)
     expect(screen.getAllByRole("link", { name: "Выбрать в Telegram" })).toHaveLength(2)
     expect(document.body.textContent).not.toContain("¥")
@@ -744,17 +745,17 @@ describe("LandingPage", () => {
     vi.stubGlobal("fetch", fetchMock)
     render(<LandingPage configuredBotUsername="@SelectBuyerBot" />)
 
-    await user.type(screen.getByRole("searchbox", { name: "Поиск в Poizon" }), "Nike Air Force 1")
-    await user.click(screen.getByRole("button", { name: "Найти в Poizon" }))
+    await user.type(screen.getByRole("searchbox", { name: "Поиск товаров по запросу" }), "Nike Air Force 1")
+    await user.click(screen.getByRole("button", { name: "Найти товары" }))
 
     expect(await screen.findByText("Белые кроссовки из натуральной кожи.")).toBeInTheDocument()
     expect(screen.getByRole("img", { name: "Air Force 1 '07 White" }))
       .toHaveAttribute("src", "https://cdn.poizon.example/air-force-1.webp")
     expect(screen.getByText(/RU 41 · EU 42 · US 8\.5 · CN 265 · 17\s?700 ₽ · в наличии/u)).toBeInTheDocument()
-    expect(screen.getByText(/Размер Poizon: 43 · 18\s?300 ₽ · наличие уточняется/u)).toBeInTheDocument()
-    expect(screen.getByText("В наличии по данным Poizon.")).toBeInTheDocument()
-    expect(screen.getByText("Размеры указаны в системе Poizon.")).toBeInTheDocument()
-    expect(screen.getByRole("img", { name: "Таблица размеров Poizon для Air Force 1 '07 White" }))
+    expect(screen.getByText(/Размер: 43 · 18\s?300 ₽ · наличие уточняется/u)).toBeInTheDocument()
+    expect(screen.getByText("В наличии по данным поставщика.")).toBeInTheDocument()
+    expect(screen.getByText("Размеры указаны поставщиком.")).toBeInTheDocument()
+    expect(screen.getByRole("img", { name: "Таблица размеров для Air Force 1 '07 White" }))
       .toHaveAttribute("src", "https://cdn.poizon.example/air-force-1-size-chart.webp")
     expect(screen.getByRole("link", { name: "Выбрать и заказать в Telegram" }))
       .toHaveAttribute("href", "https://t.me/SelectBuyerBot?start=live_RFYwNzg4LTEwNA")
@@ -801,8 +802,8 @@ describe("LandingPage", () => {
     vi.stubGlobal("fetch", fetchMock)
     render(<LandingPage configuredBotUsername="@SelectBuyerBot" />)
 
-    await user.type(screen.getByRole("searchbox", { name: "Поиск в Poizon" }), "найк аир макс")
-    await user.click(screen.getByRole("button", { name: "Найти в Poizon" }))
+    await user.type(screen.getByRole("searchbox", { name: "Поиск товаров по запросу" }), "найк аир макс")
+    await user.click(screen.getByRole("button", { name: "Найти товары" }))
 
     expect(await screen.findByText("Какая версия Air Max нужна?")).toBeInTheDocument()
     expect(screen.getByRole("button", { name: "Air Max 95" })).toBeInTheDocument()
@@ -850,11 +851,11 @@ describe("LandingPage", () => {
     vi.stubGlobal("fetch", fetchMock)
     render(<LandingPage configuredBotUsername="@SelectBuyerBot" />)
 
-    await user.type(screen.getByRole("searchbox", { name: "Поиск в Poizon" }), "Nike Air Force 1")
-    await user.click(screen.getByRole("button", { name: "Найти в Poizon" }))
+    await user.type(screen.getByRole("searchbox", { name: "Поиск товаров по запросу" }), "Nike Air Force 1")
+    await user.click(screen.getByRole("button", { name: "Найти товары" }))
 
     expect(await screen.findByRole("heading", { name: "Nike Air Force 1 '07 White" })).toBeInTheDocument()
-    expect(screen.getByRole("img", { name: "Таблица размеров Poizon для Nike Air Force 1 '07 White" }))
+    expect(screen.getByRole("img", { name: "Таблица размеров для Nike Air Force 1 '07 White" }))
       .toHaveAttribute("src", sizeChartUrl)
     expect(screen.queryByText(sizeChartUrl)).not.toBeInTheDocument()
   })
@@ -967,7 +968,7 @@ describe("LandingPage", () => {
     window.history.replaceState(null, "", "/product/nike-gt-cut-academy")
     render(<LandingPage configuredBotUsername="@SelectBuyerBot" />)
 
-    expect((await screen.findAllByText("Poizon · цена зафиксирована на 12 часов")).length).toBeGreaterThan(0)
+    expect((await screen.findAllByText("Цена зафиксирована на 12 часов")).length).toBeGreaterThan(0)
     expect(fetchMock.mock.calls.filter(([url]) =>
       String(url).endsWith("/api/catalog/search"),
     )).toHaveLength(0)
@@ -986,7 +987,7 @@ describe("LandingPage", () => {
 
     render(<LandingPage configuredBotUsername="@SelectBuyerBot" />)
 
-    expect((await screen.findAllByText("Poizon · цена зафиксирована на 12 часов")).length)
+    expect((await screen.findAllByText("Цена зафиксирована на 12 часов")).length)
       .toBeGreaterThan(0)
     expect(screen.getAllByText("24 500 ₽").length).toBeGreaterThan(0)
     expect(screen.queryByRole("button", { name: "Добавить в корзину" })).toBeNull()
@@ -1006,7 +1007,7 @@ describe("LandingPage", () => {
     render(<LandingPage configuredBotUsername="@SelectBuyerBot" />)
 
     await user.click(await screen.findByRole("button", {
-      name: "43 RU, 44 EU, 24 500 ₽. Цена Poizon зафиксирована на 12 часов.",
+      name: "43 RU, 44 EU, 24 500 ₽. Цена зафиксирована на 12 часов.",
     }))
     await user.click(screen.getByRole("button", { name: "Добавить в корзину" }))
     expect(screen.getByRole("dialog", { name: "Корзина" })).toBeInTheDocument()

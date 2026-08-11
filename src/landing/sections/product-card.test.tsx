@@ -29,7 +29,7 @@ describe("ProductCard hover media", () => {
     const card = screen.getByText(`Кроссовки ${product.brand} ${product.name}`).closest("article")
     if (!card) throw new Error("Product card was not rendered")
 
-    expect(card).toHaveTextContent("Уточнить в Telegram по живой карточке Poizon")
+    expect(card).toHaveTextContent("Уточнить в Telegram по актуальному запросу")
     expect(card).not.toHaveTextContent("Размеры EU")
     expect(card.querySelectorAll(".card-size-button")).toHaveLength(0)
   })

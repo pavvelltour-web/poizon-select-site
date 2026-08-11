@@ -111,7 +111,7 @@ export function ProductCard({
           <span className="product-price-row">
             <span className="product-price">{displayPrice}</span>
             <span className="product-supply">
-              {catalogPoizonPrice ? "Poizon · цена на 12 часов" : eta}
+              {catalogPoizonPrice ? "Цена на 12 часов" : eta}
             </span>
           </span>
         </span>
@@ -136,7 +136,7 @@ export function ProductCard({
             <button className="card-size-button card-size-button--all" type="button" data-od-id={`size-${product.slug}-all`} onClick={(event) => openProduct(event)}>Все</button>
           </div>
         ) : (
-          <p className="card-size-unverified">Уточнить в Telegram по живой карточке Poizon</p>
+          <p className="card-size-unverified">Уточнить в Telegram по актуальному запросу</p>
         )}
       </div>
     </article>

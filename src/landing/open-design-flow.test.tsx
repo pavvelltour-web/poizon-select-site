@@ -173,7 +173,7 @@ describe("approved Open Design product flow", () => {
       dialog.querySelectorAll<HTMLImageElement>(".sheet-gallery-thumb img")[3]?.getAttribute("src"),
     ).toContain(`${approvedRoot}/nike-kd-18/04-rear.png`)
     const selectedSize = await within(dialog).findByRole("button", {
-      name: "39 RU, 40 EU, 31 400 ₽. Цена Poizon зафиксирована на 12 часов.",
+      name: "39 RU, 40 EU, 31 400 ₽. Цена зафиксирована на 12 часов.",
     })
     expect(selectedSize).toHaveAttribute("aria-pressed", "true")
     expect(within(dialog).getByText("Размер: RU (EU)")).toBeInTheDocument()
@@ -185,14 +185,14 @@ describe("approved Open Design product flow", () => {
     // bundled catalogue's nearby EU values must not become fabricated,
     // disabled "availability" buttons in the live card.
     expect(within(dialog).queryByRole("button", {
-      name: "40 RU, 41 EU, 31 400 ₽. Цена Poizon зафиксирована на 12 часов.",
+      name: "40 RU, 41 EU, 31 400 ₽. Цена зафиксирована на 12 часов.",
     })).toBeNull()
     expect(within(dialog).queryByRole("button", {
-      name: "34,5 RU, 35.5 EU, 31 400 ₽. Цена Poizon зафиксирована на 12 часов.",
+      name: "34,5 RU, 35.5 EU, 31 400 ₽. Цена зафиксирована на 12 часов.",
     })).toBeNull()
 
     const nextSize = within(dialog).getByRole("button", {
-      name: "41 RU, 42 EU, 32 900 ₽. Цена Poizon зафиксирована на 12 часов.",
+      name: "41 RU, 42 EU, 32 900 ₽. Цена зафиксирована на 12 часов.",
     })
     await user.click(nextSize)
     expect(nextSize).toHaveAttribute("aria-pressed", "true")

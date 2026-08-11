@@ -26,7 +26,7 @@ function formatLiveSize(offer: LivePoizonOffer): string {
     offer.us ? `US ${offer.us}` : null,
     offer.cn ? `CN ${offer.cn}` : null,
   ].filter((label): label is string => !!label)
-  return labels.length > 0 ? labels.join(" · ") : `Размер Poizon: ${offer.size}`
+  return labels.length > 0 ? labels.join(" · ") : `Размер: ${offer.size}`
 }
 
 function populatedText(value: string | null | undefined): string | null {
@@ -47,8 +47,8 @@ function liveProductTitle(brand: string | null | undefined, name: string): strin
 }
 
 function stockLabel(inStock: boolean | null | undefined): string | null {
-  if (inStock === true) return "В наличии по данным Poizon."
-  if (inStock === false) return "Сейчас нет в наличии по данным Poizon."
+  if (inStock === true) return "В наличии по данным поставщика."
+  if (inStock === false) return "Сейчас нет в наличии по данным поставщика."
   return null
 }
 
@@ -99,11 +99,11 @@ export function LivePoizonSearch({ storefront }: LivePoizonSearchProps) {
     <section className="live-poizon-search" aria-labelledby="live-poizon-search-title">
       <div className="live-poizon-search__heading">
         <div>
-          <p className="eyebrow">Живой Poizon</p>
+          <p className="eyebrow">Другие товары по запросу</p>
           <h3 id="live-poizon-search-title">Проверьте цену модели, которой нет в витрине.</h3>
         </div>
         <p>
-          Проверяем Poizon через наш сервер. Показываем только итог в ₽ по
+          Проверяем товары через наш сервер. Показываем только итог в ₽ по
           единой формуле для сайта и Telegram.
         </p>
       </div>
@@ -116,7 +116,7 @@ export function LivePoizonSearch({ storefront }: LivePoizonSearchProps) {
         }}
       >
         <label className="live-poizon-search__input">
-          <span className="sr-only">Поиск в Poizon</span>
+          <span className="sr-only">Поиск товаров по запросу</span>
           <Search aria-hidden="true" size={18} />
           <input
             type="search"
@@ -132,7 +132,7 @@ export function LivePoizonSearch({ storefront }: LivePoizonSearchProps) {
           ) : (
             <Search aria-hidden="true" size={18} />
           )}
-          {loading ? "Считаем…" : "Найти в Poizon"}
+          {loading ? "Считаем…" : "Найти товары"}
         </button>
       </form>
 
@@ -163,7 +163,7 @@ export function LivePoizonSearch({ storefront }: LivePoizonSearchProps) {
       </div>
 
       {storefront.liveSearchStatus === "ready" ? (
-        <div className="live-poizon-search__results" aria-label="Результаты живого поиска Poizon">
+        <div className="live-poizon-search__results" aria-label="Результаты поиска по запросу">
           {storefront.liveSearchResults.map((product) => {
             const offers = product.offers
             const availability = stockLabel(product.in_stock)
@@ -206,7 +206,7 @@ export function LivePoizonSearch({ storefront }: LivePoizonSearchProps) {
                   />
                 ) : null}
                 <div className="live-poizon-search__result-heading">
-                  <span>Цена Poizon проверена сейчас</span>
+                  <span>Цена проверена сейчас</span>
                   <small>Выберите размер</small>
                 </div>
                 <h4>{liveProductTitle(product.brand, product.name)}</h4>
@@ -220,18 +220,18 @@ export function LivePoizonSearch({ storefront }: LivePoizonSearchProps) {
                   <figure key={image} className="live-poizon-search__size-image">
                     <img
                       src={image}
-                      alt={`Таблица размеров Poizon для ${product.name}`}
+                      alt={`Таблица размеров для ${product.name}`}
                       loading="lazy"
                       referrerPolicy="no-referrer"
                     />
-                    <figcaption>Таблица размеров от Poizon</figcaption>
+                    <figcaption>Таблица размеров</figcaption>
                   </figure>
                 ))}
                 <strong className="live-poizon-search__total">
                   от {formatRub(lowestOffer.total_rub)}
                 </strong>
                 <p className="live-poizon-search__fixed-until">
-                  Цена и курс получены по текущему запросу Poizon. Перед оформлением
+                  Цена и курс получены по текущему запросу. Перед оформлением
                   выбранный размер перепроверяется.
                 </p>
                 <div className="live-poizon-search__sizes" aria-label={`Размеры ${product.name}`}>
