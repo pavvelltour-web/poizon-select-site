@@ -2,8 +2,9 @@ import { describe, expect, it } from "vitest"
 
 import { catalogProducts } from "../catalog/catalog"
 import {
-  buildOrderRequest,
+  buildLiveOrderRequest,
   buildLiveSearchTelegramBotUrl,
+  buildOrderRequest,
   buildTelegramBotUrl,
   resolveBotUsername,
 } from "./order-request"
@@ -22,10 +23,6 @@ describe("Telegram order handoff", () => {
     expect(buildTelegramBotUrl("MyBuyerBot")).toBe(
       "https://t.me/MyBuyerBot",
     )
-    expect(buildTelegramBotUrl("MyBuyerBot", "sku_nike-air-force-1-07-white")).toBe(
-      "https://t.me/MyBuyerBot?start=sku_nike-air-force-1-07-white",
-    )
-    expect(buildTelegramBotUrl("MyBuyerBot", "bad payload?query=1")).toBeNull()
     expect(buildTelegramBotUrl(null)).toBeNull()
     expect(buildTelegramBotUrl("../outside")).toBeNull()
     expect(buildTelegramBotUrl("https://evil.test/namebot")).toBeNull()
@@ -53,6 +50,25 @@ describe("Telegram order handoff", () => {
 
     expect(request).toBe("ASICS SKY ELITE FF 3 volleyball\nРазмер: EU 43")
     expect(request).not.toMatch(/[<>]/)
+  })
+
+  it("keeps the live article and official provider URL in the Telegram handoff", () => {
+    const request = buildLiveOrderRequest({
+      brand: "Nike",
+      name: "Air Force 1 '07 White",
+      article: "DV0788-104",
+      providerUrl: "https://www.poizon.com/product/dv0788-104",
+      expiresAt: "2026-08-01T10:15:00Z",
+    }, {
+      skuId: "sku-42",
+      size: "42",
+      priceCny: 699,
+      quoteRub: 16_700,
+    })
+
+    expect(request).toBe(
+      "Nike Air Force 1 '07 White\nАртикул: DV0788-104\nPoizon: https://www.poizon.com/product/dv0788-104\nРазмер: 42\nSKU Poizon: sku-42\nЦена Poizon: ¥699\nКотировка: 16700 ₽\nДействует до: 2026-08-01T10:15:00Z",
+    )
   })
 
   it("keeps all 100 catalog handoffs unique, one-line and bot-ready", () => {

@@ -1,106 +1,144 @@
-import { MoveRight } from "lucide-react"
-import type { CSSProperties } from "react"
+import { Heart } from "lucide-react"
+import { useState, type MouseEvent } from "react"
 
 import type { CatalogProduct } from "../../catalog/catalog"
+import type { PublishedCatalogItem } from "../cart"
 import {
-  getProductBadge,
-  getProductTags,
+  getProductPath,
+  getProductTypeLabel,
   getProductUse,
-  kindLabels,
   resolveAssetUrl,
   setImageFallback,
 } from "../landing-data"
-import type { DisplayPrice } from "../landing-types"
+import { formatRub } from "../../catalog/catalog"
+import type { StorefrontPoizonPrice } from "../landing-types"
 
 interface ProductCardProps {
   featured: boolean
   index: number
   product: CatalogProduct
-  price: DisplayPrice
-  openProduct: (product: CatalogProduct, trigger: HTMLButtonElement) => void
+  catalogPoizonPrice: StorefrontPoizonPrice | null
+  catalogPoizonPricesReady: boolean
+  catalogStatus: "loading" | "ready" | "failed"
+  publishedOffer: PublishedCatalogItem | null
+  favorite?: boolean
+  onToggleFavorite?: (slug: string) => void
+  onOpen?: (product: CatalogProduct, trigger: HTMLElement, preferredSize?: string) => void
 }
 
-const HOVER_PREVIEW_IMAGE_INDEX = 2
+function fallbackSizes(kind: CatalogProduct["kind"]): readonly string[] {
+  if (kind === "apparel") return ["XS", "S", "M", "L", "XL"]
+  if (kind === "accessory") return ["Один размер"]
+  return ["36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46"]
+}
 
 export function ProductCard({
-  featured,
   index,
   product,
-  price,
-  openProduct,
+  catalogPoizonPrice,
+  catalogPoizonPricesReady,
+  catalogStatus,
+  publishedOffer,
+  favorite = false,
+  onToggleFavorite,
+  onOpen,
 }: ProductCardProps) {
-  const tags = getProductTags(product)
-  const galleryPreview =
-    product.gallery[HOVER_PREVIEW_IMAGE_INDEX]?.src ??
-    product.gallery[1]?.src ??
-    product.fallbackImage
-  const hoverLabel = `Фото товара ${HOVER_PREVIEW_IMAGE_INDEX + 1} из 5`
+  const [mediaReady, setMediaReady] = useState(false)
+  const displayPrice = catalogPoizonPrice
+    ? formatRub(catalogPoizonPrice.total_rub)
+    : catalogPoizonPricesReady ? "Уточняется" : "Сверяем…"
+  const primaryImage = resolveAssetUrl(product.image)
+  // The third frame is the canonical front three-quarter pair view for footwear.
+  // Keep the second gallery image untouched for its own product-gallery position.
+  const hoverImageIndex = product.kind === "footwear" ? 2 : 1
+  const hoverImage = resolveAssetUrl(product.gallery[hoverImageIndex]?.src ?? product.image)
+  const sizes = publishedOffer?.sizes.length ? publishedOffer.sizes : fallbackSizes(product.kind)
+  const cardSizes = (sizes.length >= 7 ? [sizes[2], sizes[4], sizes[6]] : sizes.slice(0, 3))
+    .filter((size): size is string => Boolean(size))
+  const available = Boolean(catalogPoizonPrice) || catalogStatus !== "ready" ||
+    publishedOffer?.availability === "catalog_listed"
+  const eta = publishedOffer?.etaMinDays && publishedOffer.etaMaxDays
+    ? `Доставка ${publishedOffer.etaMinDays}–${publishedOffer.etaMaxDays} дней`
+    : "Доставка 10–18 дней"
+
+  const openProduct = (event: MouseEvent<HTMLElement>, preferredSize?: string) => {
+    if (!onOpen || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return
+    event.preventDefault()
+    onOpen(product, event.currentTarget, preferredSize)
+  }
 
   return (
-    <button
-      className={`product-card ${featured ? "product-card--feature" : ""}`}
-      type="button"
+    <article
+      className="product-card product-card--normalized"
       data-category={product.category}
-      style={{ "--card-index": index } as CSSProperties}
-      onClick={(event) => openProduct(product, event.currentTarget)}
-      aria-label={`Открыть карточку: ${product.brand} ${product.name}`}
+      data-kind={product.kind}
+      data-od-id={`product-card-${product.slug}`}
     >
-      <span className="product-card__visual">
-        <img
-          className="product-card__image product-card__image--primary"
-          src={resolveAssetUrl(product.image)}
-          width="1200"
-          height="900"
-          loading={index < 8 ? "eager" : "lazy"}
-          decoding="async"
-          alt=""
-          onError={(event) => {
-            setImageFallback(event, product.fallbackImage)
-          }}
-        />
-        <img
-          className="product-card__image product-card__image--alt"
-          src={resolveAssetUrl(galleryPreview)}
-          width="1200"
-          height="900"
-          loading="lazy"
-          decoding="async"
-          alt=""
-          onError={(event) => {
-            setImageFallback(event, product.fallbackImage)
-          }}
-        />
-        <span className="product-card__angle-strip" aria-hidden="true">
-          <span>{hoverLabel}</span>
+      <a
+        className="product-open product-card__link"
+        href={getProductPath(product)}
+        data-od-id={`open-product-${product.slug}`}
+        aria-label={`Открыть товар: ${product.brand} ${product.name}. Цена ${displayPrice}${available ? "" : ". Нет в продаже"}`}
+        onClick={openProduct}
+      >
+        <span className={`product-media ${mediaReady ? "is-ready" : ""}`}>
+          {index < 2 ? <span className="badge-stack"><span className="product-badge badge-choice">Выбор клиентов</span></span> : null}
+          <img
+            className="product-card__image"
+            src={primaryImage}
+            width="1600"
+            height="1200"
+            loading="lazy"
+            decoding="async"
+            alt=""
+            onLoad={() => setMediaReady(true)}
+            onError={(event) => {
+              setImageFallback(event, product.fallbackImage)
+              setMediaReady(true)
+            }}
+          />
+          <span className="product-pair" aria-hidden="true" data-hover-frame={hoverImageIndex + 1}>
+            <img
+              src={hoverImage}
+              width="1600"
+              height="1200"
+              alt=""
+              loading="lazy"
+              onError={(event) => setImageFallback(event, product.fallbackImage)}
+            />
+          </span>
         </span>
-        <span className="product-card__badge">{getProductBadge(product)}</span>
-        <span className="product-card__category">{product.categoryLabel}</span>
-        <span className="product-card__price-chip">{price.value}</span>
-      </span>
-      <span className="product-card__body">
-        <span className="product-card__topline">
-          <span className="product-card__brand">{product.brand}</span>
-          <span className="product-card__kind">{kindLabels[product.kind]}</span>
+        <span className="product-info">
+          <span className="sr-only product-card__type">{getProductTypeLabel(product)}</span>
+          <span className="product-name">{product.kind === "footwear" ? "Кроссовки " : ""}{product.brand} {product.name}</span>
+          <span className="product-use">{getProductUse(product)}</span>
+          <span className="product-price-row">
+            <span className="product-price">{displayPrice}</span>
+            <span className="product-supply">
+              {catalogPoizonPrice ? "Poizon · 12 часов" : available ? eta : "Проверяем Poizon"}
+            </span>
+          </span>
         </span>
-        <strong>{product.name}</strong>
-        <span className="product-card__meta">{getProductUse(product)}</span>
-        <span className="product-card__tags">
-          {tags.map((tag) => (
-            <span key={tag}>{tag}</span>
+      </a>
+      <button
+        className={`favorite-button ${favorite ? "is-active" : ""}`}
+        type="button"
+        data-od-id={`favorite-product-${product.slug}`}
+        aria-label={`${favorite ? "Удалить" : "Добавить"} ${product.brand} ${product.name} ${favorite ? "из избранного" : "в избранное"}`}
+        aria-pressed={favorite}
+        onClick={() => onToggleFavorite?.(product.slug)}
+      >
+        <Heart aria-hidden="true" />
+      </button>
+      <div className="card-sizes">
+        <span>Размеры {product.kind === "footwear" ? "EU" : ""}</span>
+        <div className="card-size-options">
+          {cardSizes.map((size) => (
+            <button className="card-size-button" key={size} type="button" data-od-id={`size-${product.slug}-${size.replaceAll(".", "-")}`} onClick={(event) => openProduct(event, size)}>{size}</button>
           ))}
-        </span>
-        <span className="product-card__bottom">
-          <span>
-            <small>{price.label}</small>
-            <b>{price.value}</b>
-            <em>{price.detail}</em>
-          </span>
-          <span className="product-card__cta">
-            Открыть
-            <MoveRight aria-hidden="true" size={16} />
-          </span>
-        </span>
-      </span>
-    </button>
+          <button className="card-size-button card-size-button--all" type="button" data-od-id={`size-${product.slug}-all`} onClick={(event) => openProduct(event)}>Все</button>
+        </div>
+      </div>
+    </article>
   )
 }

@@ -1,14 +1,31 @@
 import { describe, expect, it } from "vitest"
 
 import {
+  canonicalCatalogMediaUrl,
   catalogProducts,
+  dedupeCatalogGallery,
   filterCatalog,
   findProductBySlug,
   formatRub,
+  isPublicCatalogProduct,
   MARKET_PRICE_BASIS,
   PRICE_FORMULA_BASIS,
+  publicCatalogProducts,
   sortCatalog,
 } from "./catalog"
+
+const approvedStorefrontSlugs = [
+  "nike-kd-18",
+  "nike-sabrina-3",
+  "nike-aone",
+  "asics-sky-elite-ff-3",
+  "li-ning-wade-808-4-ultra",
+  "new-balance-two-wxy-v5",
+  "anta-kai-1",
+  "nike-free-metcon-6",
+] as const
+
+const approvedStorefrontMediaRoot = "/storefront-media/approved/products"
 
 describe("catalogProducts", () => {
   it("contains exactly 100 unique products in the requested category split", () => {
@@ -61,6 +78,14 @@ describe("catalogProducts", () => {
     )
   })
 
+  it("publishes all footwear, apparel and accessories to the public storefront", () => {
+    expect(publicCatalogProducts).toHaveLength(100)
+    expect(publicCatalogProducts).toEqual(
+      catalogProducts.filter(isPublicCatalogProduct),
+    )
+    expect(publicCatalogProducts.filter((product) => product.kind === "accessory")).toHaveLength(25)
+  })
+
   it("keeps every product field useful with consistent local gallery sets", () => {
     const imagePaths = new Set<string>()
 
@@ -81,25 +106,85 @@ describe("catalogProducts", () => {
       expect(product.brand.length).toBeGreaterThan(1)
       expect(product.name.trim()).toBe(product.name)
       expect(product.name.length).toBeGreaterThan(2)
-      expect(product.categoryLabel).toContain("·")
+      expect(product.categoryLabel.length).toBeGreaterThan(2)
       expect(product.query.length).toBeGreaterThan(8)
       expect(product.fallbackImage).toMatch(/^catalog\/[a-z0-9-]+\.webp$/)
       expect(product.gallery).toHaveLength(5)
       expect(product.image).toBe(product.gallery[0]?.src)
-      const galleryPaths = product.gallery.map((image) => image.src)
-      expect(galleryPaths).toContain(product.fallbackImage)
-      expect(new Set(galleryPaths).size).toBe(5)
-      expect(galleryPaths.every((path) => fallbackGallery.includes(path))).toBe(true)
-      expect(
-        product.gallery.every(
-          (image) => image.source === "Project-generated studio reference",
-        ),
-      ).toBe(true)
+      if (!approvedStorefrontSlugs.includes(product.slug as typeof approvedStorefrontSlugs[number])) {
+        expect(product.gallery.map((image) => image.src)).toContain(product.fallbackImage)
+        expect(product.image).toBe(product.fallbackImage)
+        expect(
+          product.gallery.every((image) => fallbackGallery.includes(image.src)),
+        ).toBe(true)
+      }
+      expect(new Set(product.gallery.map((image) => image.contentSignal)).size).toBe(
+        product.gallery.length,
+      )
+      if (!approvedStorefrontSlugs.includes(product.slug as typeof approvedStorefrontSlugs[number])) {
+        expect(
+          product.gallery.every(
+            (image) => image.source === "Project-generated studio reference",
+          ),
+        ).toBe(true)
+      }
       imagePaths.add(product.fallbackImage)
       expect(Boolean(product.marketPrice || product.orderQuote)).toBe(true)
     }
 
     expect(imagePaths.size).toBe(100)
+    expect(catalogProducts.every((product) => product.gallery.length === 5)).toBe(true)
+  })
+
+  it("keeps the approved preview, product sheet and PDP on the same five images", () => {
+    for (const slug of approvedStorefrontSlugs) {
+      const product = findProductBySlug(slug)
+      const expectedGallery = [
+        `${approvedStorefrontMediaRoot}/${slug}/01-side.png`,
+        `${approvedStorefrontMediaRoot}/${slug}/03-side.png`,
+        `${approvedStorefrontMediaRoot}/${slug}/02-three-quarter.png`,
+        `${approvedStorefrontMediaRoot}/${slug}/04-rear.png`,
+        `${approvedStorefrontMediaRoot}/${slug}/05-sole.png`,
+      ]
+
+      expect(product, slug).not.toBeNull()
+      expect(product?.image, slug).toBe(expectedGallery[0])
+      expect(product?.gallery.map((image) => image.src), slug).toEqual(expectedGallery)
+      expect(product?.gallery[3]?.alt, slug).toContain("вид сзади")
+    }
+  })
+
+  it("deduplicates media by content signal and canonical source URL", () => {
+    const transformedNikeA =
+      "https://static.nike.com/a/images/t_default/example/product.webp?wid=800&q_auto=eco"
+    const transformedNikeB =
+      "https://static.nike.com/a/images/t_PDP_1728_v1/example/product.webp?wid=1728"
+
+    expect(canonicalCatalogMediaUrl(transformedNikeA)).toBe(
+      canonicalCatalogMediaUrl(transformedNikeB),
+    )
+    expect(
+      dedupeCatalogGallery([
+        { src: transformedNikeA, alt: "A", source: "Nike" },
+        { src: transformedNikeB, alt: "B", source: "Nike" },
+      ]),
+    ).toHaveLength(1)
+    expect(
+      dedupeCatalogGallery([
+        { src: "catalog/a.webp", alt: "A", source: "Project", contentSignal: "same" },
+        { src: "catalog/b.webp", alt: "B", source: "Project", contentSignal: "same" },
+      ]),
+    ).toHaveLength(1)
+  })
+
+  it("uses concise public descriptions without performance jargon", () => {
+    const visibleCopy = publicCatalogProducts
+      .map((product) => `${product.categoryLabel} ${product.note}`)
+      .join(" ")
+
+    expect(visibleCopy).not.toMatch(
+      /guard|performance|альтернатив|impact|grip|recovery-зон/iu,
+    )
   })
 
   it("calculates buyer-facing order quotes with the backend component formula", () => {
@@ -111,34 +196,61 @@ describe("catalogProducts", () => {
       yuanRate: 13,
       paymentFeePercent: 2.5,
       internationalLogistics: 3000,
-      serviceFeePercent: 30,
-      marginTargetPercent: 30,
-      marginFloorPercent: 25,
+      serviceFeePercent: 35,
+      marginTargetPercent: 35,
+      marginFloorPercent: 30,
     })
-    expect(formatRub(gtCut?.orderQuote?.totalRub ?? 0)).toBe("22 100 ₽")
+    expect(formatRub(gtCut?.orderQuote?.totalRub ?? 0)).toBe("24 500 ₽")
   })
 
   it("filters by category and a case-insensitive search phrase", () => {
-    expect(filterCatalog(catalogProducts, "volleyball", "")).toHaveLength(23)
-    expect(filterCatalog(catalogProducts, "court-shoes", "")).toHaveLength(37)
-    expect(filterCatalog(catalogProducts, "sneakers", "")).toHaveLength(22)
-    expect(filterCatalog(catalogProducts, "protection", "")).toHaveLength(9)
-    expect(filterCatalog(catalogProducts, "balls", "")).toHaveLength(6)
-    expect(filterCatalog(catalogProducts, "all", "ronaldinho")).toHaveLength(1)
-    expect(filterCatalog(catalogProducts, "basketball", "NIKE")).toHaveLength(7)
-    expect(filterCatalog(catalogProducts, "recovery", "not-a-real-product")).toEqual(
-      [],
+    expect(filterCatalog(publicCatalogProducts, "volleyball", "")).toHaveLength(19)
+    expect(filterCatalog(publicCatalogProducts, "court-shoes", "")).toHaveLength(37)
+    expect(filterCatalog(publicCatalogProducts, "sneakers", "")).toHaveLength(22)
+    expect(filterCatalog(publicCatalogProducts, "apparel", "")).toHaveLength(16)
+    expect(filterCatalog(publicCatalogProducts, "accessories", "")).toHaveLength(25)
+    expect(filterCatalog(publicCatalogProducts, "all", "ronaldinho")).toHaveLength(1)
+    expect(filterCatalog(publicCatalogProducts, "all", "Force Nike Air").map((product) => product.slug)).toEqual([
+      "nike-air-force-1-07-white",
+    ])
+    expect(filterCatalog(publicCatalogProducts, "all", "sabr").map((product) => product.slug)).toContain(
+      "nike-sabrina-3",
     )
+    expect(filterCatalog(publicCatalogProducts, "all", "Nike Metcon 10")).toEqual([])
+    expect(filterCatalog(publicCatalogProducts, "all", "волейбольный мяч").map((product) => product.slug)).toEqual([
+      "molten-v5m5000-flistatec",
+      "molten-v5m4500-volleyball",
+      "mikasa-v200w-volleyball",
+    ])
+    expect(filterCatalog(publicCatalogProducts, "basketball", "NIKE")).toHaveLength(6)
+    const nikeSlugs = filterCatalog(publicCatalogProducts, "all", "Nike").map(
+      (product) => product.slug,
+    )
+    expect(filterCatalog(publicCatalogProducts, "all", "найк").map((product) => product.slug)).toEqual(
+      nikeSlugs,
+    )
+    expect(filterCatalog(publicCatalogProducts, "all", "наик").map((product) => product.slug)).toEqual(
+      nikeSlugs,
+    )
+    expect(
+      filterCatalog(publicCatalogProducts, "recovery", "not-a-real-product"),
+    ).toEqual([])
   })
 
   it("sorts deterministically with prices for every catalog item", () => {
-    const trainingNike = filterCatalog(catalogProducts, "training", "NIKE")
+    const courtNike = filterCatalog(publicCatalogProducts, "court-shoes", "NIKE")
 
-    expect(sortCatalog(trainingNike, "featured").map((product) => product.slug)).toEqual([
-      "nike-pro-compression-shorts",
+    expect(sortCatalog(courtNike, "featured").map((product) => product.slug)).toEqual([
+      "nike-kd-18",
+      "nike-gt-cut-academy",
+      "nike-sabrina-3",
+      "nike-zoom-hyperset-2",
+      "nike-hyperace-3-se",
+      "nike-lebron-nxxt-genisus",
+      "nike-calm-slide",
+      "nike-aone",
       "nike-free-metcon-6",
-      "nike-resistance-band-heavy",
-      "nike-hyperfuel-water-bottle",
+      "nike-ja-3",
     ])
     expect(sortCatalog(catalogProducts, "price-asc")[0].slug).toBe(
       "adidas-crazyflight-shorts",

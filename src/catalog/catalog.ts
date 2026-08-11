@@ -1,15 +1,12 @@
 export const catalogCategories = [
   { id: "all", label: "Всё" },
-  { id: "court-shoes", label: "Заловая обувь" },
-  { id: "sneakers", label: "Кроссовки и кеды" },
+  { id: "court-shoes", label: "Для зала" },
   { id: "volleyball", label: "Волейбол" },
   { id: "basketball", label: "Баскетбол" },
+  { id: "recovery", label: "Восстановление" },
   { id: "apparel", label: "Одежда" },
-  { id: "protection", label: "Защита" },
-  { id: "balls", label: "Мячи" },
-  { id: "training", label: "Инвентарь" },
-  { id: "recovery", label: "Recovery" },
-  { id: "bags", label: "Сумки и мелочи" },
+  { id: "accessories", label: "Аксессуары" },
+  { id: "sneakers", label: "Базовый стиль" },
 ] as const
 
 export type CatalogCategory = Exclude<
@@ -32,15 +29,21 @@ export type ProductKind = "footwear" | "apparel" | "accessory"
 export type CatalogSort = "featured" | "price-asc" | "price-desc" | "name"
 
 export const MARKET_PRICE_BASIS =
-  "Редакционный ориентир · рынок РФ 28.07.2026"
+  "Редакционный ориентир · рынок РФ 30.07.2026"
 
 export const PRICE_FORMULA_BASIS =
-  "Расчет по текущей формуле заказа"
+  "УСН 6%, ракета до Москвы, резерв, эквайринг и маржа KICKSBASE"
+
+export const CATALOG_PRICE_VERSION = "2026-08-02-v3"
+
+export const PUBLIC_CATALOG_POLICY =
+  "Публичная витрина показывает все 100 SKU: обувь, одежду, защиту, мячи, сумки и другие аксессуары."
 
 export interface CatalogImage {
   src: string
   alt: string
   source?: string
+  contentSignal?: string
 }
 
 export interface PriceQuote {
@@ -111,14 +114,14 @@ const pricingDefaults = {
   usnTaxPercent: 6,
   vatProfile: "vat_exempt" as const,
   vatPercent: 22,
-  roundToRub: 100,
+  roundToRub: 500,
   rfDelivery: 0,
 } as const
 
 const marginTiers = [
-  { max: 8_000, target: 40, floor: 35 },
-  { max: 20_000, target: 30, floor: 25 },
-  { max: Number.POSITIVE_INFINITY, target: 25, floor: 20 },
+  { max: 8_000, target: 45, floor: 35 },
+  { max: 20_000, target: 35, floor: 30 },
+  { max: Number.POSITIVE_INFINITY, target: 30, floor: 25 },
 ] as const
 
 function money(value: number): number {
@@ -224,6 +227,65 @@ export function formatRub(amount: number): string {
     .replace(/\u00a0/g, " ")} ₽`
 }
 
+function asicsGallery(code: string, label: string): CatalogImage[] {
+  const views = [
+    ["SR_RT_GLB", "side"],
+    ["SB_FR_GLB", "front"],
+    ["SB_FL_GLB", "side alternate"],
+    ["SB_BT_GLB", "outsole"],
+  ] as const
+
+  return views.map(([view, angle]) => ({
+    src: `https://images.asics.com/is/image/asics/${code}_${view}?$sfcc-product$&wid=1200&hei=900`,
+    alt: `${label} · ${angle}`,
+    source: "ASICS product media",
+  }))
+}
+
+function nikeGallery(name: string, urls: readonly string[]): CatalogImage[] {
+  return urls.slice(0, 7).map((src, index) => ({
+    src,
+    alt: `${name} · ракурс ${index + 1}`,
+    source: "Nike product media",
+  }))
+}
+
+export function canonicalCatalogMediaUrl(src: string): string {
+  const trimmed = src.trim()
+  if (!/^https?:\/\//iu.test(trimmed)) return trimmed.replace(/^\/+/, "")
+
+  try {
+    const url = new URL(trimmed)
+    const host = url.hostname.toLowerCase()
+    const pathParts = url.pathname.split("/").filter(Boolean)
+
+    if (host === "static.nike.com" && pathParts.length >= 2) {
+      return `${host}/${pathParts.slice(-2).join("/")}`
+    }
+
+    const ignoredParams = /^(?:utm_.+|f_auto|q_auto|wid|hei|w|h|fit|fmt)$/iu
+    const params = [...url.searchParams.entries()]
+      .filter(([key]) => !ignoredParams.test(key))
+      .sort(([left], [right]) => left.localeCompare(right))
+    const query = new URLSearchParams(params).toString()
+    return `${host}${url.pathname}${query ? `?${query}` : ""}`
+  } catch {
+    return trimmed
+  }
+}
+
+export function dedupeCatalogGallery(images: readonly CatalogImage[]): CatalogImage[] {
+  const seen = new Set<string>()
+  return images.filter((image) => {
+    const key = image.contentSignal?.trim()
+      ? `content:${image.contentSignal.trim()}`
+      : `url:${canonicalCatalogMediaUrl(image.src)}`
+    if (seen.has(key)) return false
+    seen.add(key)
+    return true
+  })
+}
+
 function projectGallery(product: ProductSource): CatalogImage[] {
   const assetSlug = product.assetSlug ?? product.slug
   const frames = [
@@ -234,11 +296,14 @@ function projectGallery(product: ProductSource): CatalogImage[] {
     `catalog/gallery/${assetSlug}-5.webp`,
   ]
 
-  return frames.map((src, index) => ({
-    src,
-    alt: `${product.brand} ${product.name} · ракурс ${index + 1}`,
-    source: "Project-generated studio reference",
-  }))
+  return dedupeCatalogGallery(
+    frames.map((src, index) => ({
+      src,
+      alt: `${product.brand} ${product.name} · ракурс ${index + 1}`,
+      source: "Project-generated studio reference",
+      contentSignal: `${assetSlug}:${index}`,
+    })),
+  )
 }
 
 const sportProducts: readonly ProductSource[] = [
@@ -255,6 +320,7 @@ const sportProducts: readonly ProductSource[] = [
     marketPrice: "17,5–20,5 тыс. ₽",
     priceBasis: MARKET_PRICE_BASIS,
     chinaPriceYuan: 980,
+    gallery: asicsGallery("1051A080_100", "ASICS SKY ELITE FF 3"),
   },
   {
     slug: "asics-sky-elite-ff-mt-3",
@@ -269,6 +335,7 @@ const sportProducts: readonly ProductSource[] = [
     marketPrice: "20–22,5 тыс. ₽",
     priceBasis: MARKET_PRICE_BASIS,
     chinaPriceYuan: 1080,
+    gallery: asicsGallery("1051A081_100", "ASICS SKY ELITE FF MT 3"),
   },
   {
     slug: "asics-metarise-2",
@@ -283,6 +350,7 @@ const sportProducts: readonly ProductSource[] = [
     marketPrice: "24–34 тыс. ₽",
     priceBasis: MARKET_PRICE_BASIS,
     chinaPriceYuan: 1500,
+    gallery: asicsGallery("1051A089_100", "ASICS METARISE 2"),
   },
   {
     slug: "asics-netburner-ballistic-ff-4",
@@ -310,6 +378,7 @@ const sportProducts: readonly ProductSource[] = [
     marketPrice: "14–16 тыс. ₽",
     priceBasis: MARKET_PRICE_BASIS,
     chinaPriceYuan: 760,
+    gallery: asicsGallery("1071A102_100", "ASICS GEL-TACTIC 13"),
   },
   {
     slug: "mizuno-wave-lightning-z8",
@@ -402,6 +471,12 @@ const sportProducts: readonly ProductSource[] = [
     marketPrice: "24–25 тыс. ₽",
     priceBasis: MARKET_PRICE_BASIS,
     chinaPriceYuan: 1180,
+    gallery: nikeGallery("Nike ZOOM HYPERSET 2", [
+      "https://static.nike.com/a/images/t_web_pdp_936_v2/f_auto,u_9ddf04c7-2a9a-4d76-add1-d15af8f0263d,c_scale,fl_relative,w_1.0,h_1.0,fl_layer_apply/f8bf3cba-270d-47c7-87e4-d7e8b69d2f38/NIKE+ZOOM+HYPERSET+2+SE.png",
+      "https://static.nike.com/a/images/t_default/f8bf3cba-270d-47c7-87e4-d7e8b69d2f38/NIKE+ZOOM+HYPERSET+2+SE.png",
+      "https://static.nike.com/a/images/t_PDP_144_v1/f_auto,q_auto:eco/f8bf3cba-270d-47c7-87e4-d7e8b69d2f38/NIKE+ZOOM+HYPERSET+2+SE.png",
+      "https://static.nike.com/a/images/t_web_pdp_535_v2/f_auto,u_9ddf04c7-2a9a-4d76-add1-d15af8f0263d,c_scale,fl_relative,w_1.0,h_1.0,fl_layer_apply/f8bf3cba-270d-47c7-87e4-d7e8b69d2f38/NIKE+ZOOM+HYPERSET+2+SE.png",
+    ]),
   },
   {
     slug: "nike-hyperace-3-se",
@@ -451,7 +526,7 @@ const sportProducts: readonly ProductSource[] = [
     kind: "footwear",
     sportPriority: true,
     query: "Reebok NANO X5 training",
-    note: "Функциональный тренинг · широкий сценарий",
+    note: "Функциональный тренинг для многоразовых нагрузок",
     marketPrice: "10–13,5 тыс. ₽",
     priceBasis: MARKET_PRICE_BASIS,
   },
@@ -490,7 +565,7 @@ const sportProducts: readonly ProductSource[] = [
     kind: "footwear",
     sportPriority: true,
     query: "HOKA ORA RECOVERY SLIDE 3",
-    note: "После тренировки · мягкий recovery-сценарий",
+    note: "Для восстановления после интенсивной сессии",
     marketPrice: "5,5–7,7 тыс. ₽",
     priceBasis: MARKET_PRICE_BASIS,
   },
@@ -698,12 +773,12 @@ const existingProducts: readonly ProductSource[] = [
   {
     slug: "new-balance-2002r-protection-pack",
     brand: "New Balance",
-    name: "2002R Protection Pack Rain Cloud",
+    name: "2002R Rain Cloud",
     category: "lifestyle",
     categoryLabel: "Лайфстайл · кроссовки",
     kind: "footwear",
     sportPriority: false,
-    query: "New Balance 2002R Protection Pack Rain Cloud M2002RDA",
+    query: "New Balance 2002R Rain Cloud M2002RDA",
     note: "Необработанные края · сложная фактура",
   },
   {
@@ -1144,12 +1219,12 @@ const expandedProducts: readonly ProductSource[] = [
   {
     slug: "oofos-ooahh-slide",
     brand: "OOFOS",
-    name: "OOHH Slide",
+    name: "OOahh Slide",
     category: "recovery",
     categoryLabel: "Восстановление · слайды",
     kind: "footwear",
     sportPriority: true,
-    query: "OOFOS OOHH Slide recovery sandal",
+    query: "OOFOS OOahh Slide recovery sandal",
     note: "Классический recovery-слайд после зала · премиум-дополнение к Nike Calm",
     marketPrice: "6–10 тыс. ₽",
     priceBasis: MARKET_PRICE_BASIS,
@@ -1164,7 +1239,7 @@ const expandedProducts: readonly ProductSource[] = [
     kind: "footwear",
     sportPriority: true,
     query: "Crocs Mellow Recovery Slide",
-    note: "Массовый recovery-сценарий · мягкая пена и понятный размерный спрос",
+    note: "Универсальная модель для восстановления и повседневного комфорта",
     marketPrice: "4,5–8 тыс. ₽",
     priceBasis: MARKET_PRICE_BASIS,
     chinaPriceYuan: 260,
@@ -1646,51 +1721,6 @@ const performanceBasketballOverrides: Record<string, Partial<ProductSource>> = {
   },
 }
 
-function mergeGalleryImages(
-  sourceGallery: readonly CatalogImage[],
-  fallbackGallery: readonly CatalogImage[],
-): readonly CatalogImage[] {
-  const bySource = new Map<string, CatalogImage>()
-  for (const image of [...sourceGallery, ...fallbackGallery]) {
-    if (bySource.has(image.src)) continue
-    bySource.set(image.src, image)
-  }
-  return [...bySource.values()].slice(0, 5)
-}
-
-const catalogGalleryOrders: Record<string, readonly number[]> = {
-  "oofos-ooahh-slide": [1, 0, 2, 3, 4],
-  "nike-sabrina-3": [0, 1, 3, 2, 4],
-  "nike-kd-18": [0, 1, 3, 2, 4],
-}
-
-function applyGalleryOrder(
-  slug: string,
-  gallery: readonly CatalogImage[],
-): readonly CatalogImage[] {
-  const order = catalogGalleryOrders[slug]
-  if (!order) return gallery
-
-  const seen = new Set<number>()
-  const reordered = order
-    .map((index) => {
-      const image = gallery[index]
-      if (image) {
-        seen.add(index)
-      }
-      return image
-    })
-    .filter((entry): entry is CatalogImage => Boolean(entry))
-
-  for (let index = 0; index < gallery.length; index += 1) {
-    if (!seen.has(index)) {
-      reordered.push(gallery[index]!)
-    }
-  }
-
-  return reordered
-}
-
 const requestPriceGuides: Record<string, string> = {
   "asics-gel-1130-black-pure-silver": "11–16 тыс. ₽",
   "asics-gel-nyc-cream-oyster-grey": "14–21 тыс. ₽",
@@ -1723,17 +1753,74 @@ const requestPriceGuides: Record<string, string> = {
 
 function withFallbackGallery(product: ProductSource): CatalogProduct {
   const fallbackImage = `catalog/${product.assetSlug ?? product.slug}.webp`
-  const sourceGallery = product.gallery ?? []
-  const orderedGallery = applyGalleryOrder(product.slug, sourceGallery)
-  const fallbackGallery = projectGallery(product)
-  const gallery = mergeGalleryImages(orderedGallery, fallbackGallery)
+  const gallery = projectGallery(product)
   const orderQuote =
     product.chinaPriceYuan === undefined
       ? undefined
       : calculateOrderQuote(product.chinaPriceYuan, product.kind)
 
+  const publicCopy =
+    product.kind === "apparel"
+      ? {
+          categoryLabel: "Одежда",
+          note: "Для тренировок и повседневной носки.",
+        }
+      : product.kind === "accessory" && product.category === "protection"
+        ? {
+            categoryLabel: "Защита",
+            note: "Для игр и тренировок в зале.",
+          }
+        : product.kind === "accessory" && product.category === "balls"
+          ? {
+              categoryLabel: "Мячи",
+              note: "Для игр и регулярных тренировок.",
+            }
+          : product.kind === "accessory" && product.category === "bags"
+            ? {
+                categoryLabel: "Сумки и мелочи",
+                note: "Для тренировок и поездок.",
+              }
+            : product.kind === "accessory" && product.category === "recovery"
+              ? {
+                  categoryLabel: "Восстановление",
+                  note: "Для отдыха после тренировки.",
+                }
+              : product.kind === "accessory"
+                ? {
+                    categoryLabel: "Аксессуары",
+                    note: "Для разминки и тренировок.",
+                  }
+      : product.kind === "footwear" && product.category === "volleyball"
+        ? {
+            categoryLabel: "Для матча",
+            note: "Для тренировок и матчевых дней в зале.",
+          }
+        : product.kind === "footwear" && product.category === "basketball"
+          ? {
+              categoryLabel: "Для движения",
+              note: "Для тренировок и игр в зале.",
+            }
+          : product.kind === "footwear" && product.category === "recovery"
+            ? {
+                categoryLabel: "После тренировки",
+                note: "Для отдыха после тренировки.",
+              }
+            : product.kind === "footwear" && product.category === "training"
+              ? {
+                  categoryLabel: "Для зала",
+                  note: "Для регулярных тренировок в зале.",
+                }
+              : product.kind === "footwear"
+                ? {
+                    categoryLabel: "На каждый день",
+                    note: "Для города и повседневной носки.",
+                  }
+                : null
+
   return {
     ...product,
+    categoryLabel: publicCopy?.categoryLabel ?? product.categoryLabel,
+    note: publicCopy?.note ?? product.note,
     fallbackImage,
     formulaBasis: product.chinaPriceYuan ? PRICE_FORMULA_BASIS : undefined,
     gallery,
@@ -1742,9 +1829,34 @@ function withFallbackGallery(product: ProductSource): CatalogProduct {
   }
 }
 
+const approvedStorefrontMediaRoot = "/storefront-media/approved/products"
+const approvedStorefrontSlugs = new Set([
+  "anta-kai-1",
+  "asics-sky-elite-ff-3",
+  "li-ning-wade-808-4-ultra",
+  "new-balance-two-wxy-v5",
+  "nike-aone",
+  "nike-free-metcon-6",
+  "nike-kd-18",
+  "nike-sabrina-3",
+])
+
+function withApprovedStorefrontGallery(product: CatalogProduct): CatalogProduct {
+  if (!approvedStorefrontSlugs.has(product.slug)) return product
+  const gallery = [
+    { src: `${approvedStorefrontMediaRoot}/${product.slug}/01-side.png`, alt: `${product.brand} ${product.name}, боковой профиль`, source: "KICKSBASE approved normalized release", contentSignal: `${product.slug}-approved-1` },
+    { src: `${approvedStorefrontMediaRoot}/${product.slug}/03-side.png`, alt: `${product.brand} ${product.name}, противоположный боковой профиль`, source: "KICKSBASE approved normalized release", contentSignal: `${product.slug}-approved-2` },
+    { src: `${approvedStorefrontMediaRoot}/${product.slug}/02-three-quarter.png`, alt: `${product.brand} ${product.name}, фронтальный ракурс`, source: "KICKSBASE approved normalized release", contentSignal: `${product.slug}-approved-3` },
+    { src: `${approvedStorefrontMediaRoot}/${product.slug}/04-rear.png`, alt: `${product.brand} ${product.name}, вид сзади`, source: "KICKSBASE approved normalized release", contentSignal: `${product.slug}-approved-4` },
+    { src: `${approvedStorefrontMediaRoot}/${product.slug}/05-sole.png`, alt: `${product.brand} ${product.name}, подошва`, source: "KICKSBASE approved normalized release", contentSignal: `${product.slug}-approved-5` },
+  ] as const
+
+  return { ...product, gallery, image: gallery[0].src }
+}
+
 export const catalogProducts: readonly CatalogProduct[] = catalogProductSource.map(
   (product) =>
-    withFallbackGallery({
+    withApprovedStorefrontGallery(withFallbackGallery({
       ...product,
       ...performanceBasketballOverrides[product.slug],
       ...(requestPriceGuides[product.slug]
@@ -1753,39 +1865,93 @@ export const catalogProducts: readonly CatalogProduct[] = catalogProductSource.m
             priceBasis: MARKET_PRICE_BASIS,
           }
         : {}),
-    }),
+    })),
 )
+
+export function isPublicCatalogProduct(product: CatalogProduct): boolean {
+  return product.kind === "footwear" || product.kind === "apparel" || product.kind === "accessory"
+}
+
+function marketPriceCeilingRub(price: string): number | null {
+  const values = [...price.matchAll(/\d+(?:[,.]\d+)?/gu)]
+    .map((match) => Number.parseFloat(match[0].replace(",", ".")))
+    .filter((value) => Number.isFinite(value) && value > 0)
+  if (values.length === 0) return null
+  return Math.ceil(Math.max(...values) * 1000 / 500) * 500
+}
+
+export function getCatalogPriceRub(product: CatalogProduct): number {
+  if (product.orderQuote) return Math.round(product.orderQuote.totalRub)
+  if (product.marketPrice) {
+    const ceiling = marketPriceCeilingRub(product.marketPrice)
+    if (ceiling) return ceiling
+  }
+  return product.kind === "apparel" ? 12_000 : 18_000
+}
+
+export const publicCatalogProducts: readonly CatalogProduct[] =
+  catalogProducts.filter(isPublicCatalogProduct)
+
+const catalogSearchAliases: Readonly<Record<string, string>> = {
+  найк: "nike",
+  наик: "nike",
+  адидас: "adidas",
+  асикс: "asics",
+  мизуно: "mizuno",
+  кроссовки: "footwear",
+  обувь: "footwear",
+  одежда: "apparel",
+  аксессуар: "accessory",
+  аксессуары: "accessory",
+  волейбол: "volleyball",
+  волейбола: "volleyball",
+  волейбольный: "volleyball",
+  баскетбол: "basketball",
+  баскетбола: "basketball",
+  баскетбольный: "basketball",
+  мяч: "balls",
+  мячи: "balls",
+  сумка: "bags",
+  сумки: "bags",
+  рюкзак: "bags",
+  рюкзаки: "bags",
+  защита: "protection",
+  наколенники: "protection",
+  налокотники: "protection",
+}
+
+function catalogSearchTokens(value: string): string[] {
+  return (value.toLocaleLowerCase("ru").replace(/ё/gu, "е").match(/[\p{L}\p{N}]+/gu) ?? [])
+    .map((token) => catalogSearchAliases[token] ?? token)
+}
 
 export function filterCatalog(
   products: readonly CatalogProduct[],
   category: "all" | CatalogCategory,
   search: string,
 ): CatalogProduct[] {
-  const normalizedSearch = search.trim().toLocaleLowerCase("ru")
+  const searchTokens = catalogSearchTokens(search.trim())
 
   return products.filter((product) => {
     if (category !== "all" && !matchesCatalogCategory(product, category)) {
       return false
     }
-    if (!normalizedSearch) return true
+    if (searchTokens.length === 0) return true
 
-    return [
-      product.brand,
-      product.name,
-      product.query,
-      product.categoryLabel,
-      product.kind,
-      product.note,
-      product.marketPrice ?? "",
-    ]
-      .join(" ")
-      .toLocaleLowerCase("ru")
-      .includes(normalizedSearch)
+    const productTokens = new Set(catalogSearchTokens(
+      [
+        product.brand,
+        product.name,
+        product.query,
+        product.categoryLabel,
+        product.kind,
+        product.note,
+      ].join(" "),
+    ))
+    return searchTokens.every((token) =>
+      [...productTokens].some((productToken) => productToken === token || productToken.startsWith(token)),
+    )
   })
-}
-
-function textIncludes(product: CatalogProduct, pattern: RegExp): boolean {
-  return pattern.test(`${product.brand} ${product.name} ${product.categoryLabel} ${product.note}`)
 }
 
 function matchesCatalogCategory(
@@ -1803,42 +1969,37 @@ function matchesCatalogCategory(
     category === "basketball" ||
     category === "recovery"
   ) {
-    return product.category === category
+    return product.kind === "footwear" && product.category === category
   }
   if (category === "apparel") {
     return product.kind === "apparel"
   }
-  if (category === "protection") {
-    return (
-      product.category === "protection" ||
-      (product.kind === "accessory" &&
-        textIncludes(product, /наколен|налокот|sleeve|support|strap|tape|тейп/i))
-    )
-  }
-  if (category === "balls") {
-    return (
-      product.category === "balls" ||
-      (product.kind === "accessory" &&
-        textIncludes(product, /мяч|volleyball|basketball|molten|mikasa|wilson/i))
-    )
-  }
-  if (category === "training") {
-    return product.category === "training" || textIncludes(product, /resistance|band|bottle|резин/i)
-  }
-  if (category === "bags") {
-    return product.category === "bags" || textIncludes(product, /bag|backpack|duffel|нос|кепк|cap|сумк|рюкзак/i)
+  if (category === "accessories") {
+    return product.kind === "accessory"
   }
   return false
 }
 
 function priceRank(product: CatalogProduct): number {
-  if (product.orderQuote) return product.orderQuote.totalRub / 1000
-  if (!product.marketPrice) return Number.POSITIVE_INFINITY
+  return getCatalogPriceRub(product) / 1000
+}
 
-  const [rawValue] = product.marketPrice.match(/\d+(?:[,.]\d+)?/u) ?? []
-  if (!rawValue) return Number.POSITIVE_INFINITY
+const featuredProductOrder = [
+  "nike-kd-18",
+  "nike-gt-cut-academy",
+  "nike-sabrina-3",
+  "asics-sky-elite-ff-3",
+  "mizuno-wave-lightning-z8",
+  "adidas-crazyflight-shorts",
+  "hoka-ora-recovery-slide-3",
+] as const
 
-  return Number.parseFloat(rawValue.replace(",", "."))
+const featuredProductRanks = new Map<string, number>(
+  featuredProductOrder.map((slug, index) => [slug, index]),
+)
+
+function featuredRank(product: CatalogProduct, fallback: number): number {
+  return featuredProductRanks.get(product.slug) ?? featuredProductOrder.length + fallback
 }
 
 export function sortCatalog(
@@ -1848,7 +2009,9 @@ export function sortCatalog(
   const indexedProducts = products.map((product, index) => ({ product, index }))
 
   indexedProducts.sort((left, right) => {
-    if (sort === "featured") return left.index - right.index
+    if (sort === "featured") {
+      return featuredRank(left.product, left.index) - featuredRank(right.product, right.index)
+    }
     if (sort === "name") {
       const byBrand = left.product.brand.localeCompare(right.product.brand, "ru")
       if (byBrand !== 0) return byBrand
@@ -1879,5 +2042,8 @@ export function findProductBySlug(slug: string | null): CatalogProduct | null {
   return catalogProducts.find((product) => product.slug === slug) ?? null
 }
 
+export function findPublicProductBySlug(slug: string | null): CatalogProduct | null {
+  if (!slug) return null
 
-
+  return publicCatalogProducts.find((product) => product.slug === slug) ?? null
+}

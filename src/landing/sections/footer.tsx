@@ -1,41 +1,26 @@
+const logoSrc = "/storefront-media/approved/assets/kicksbase-signal/kicksbase-logo.webp"
+
 export function Footer() {
   return (
-    <footer className="kb-footer">
-      <div className="kb-footer__intro">
-        <a className="kb-brand" href="/" aria-label="KICKSBASE">
-          <img src="brand/kicksbase-logo.webp" width="80" height="80" alt="" />
-          <span>
-            <strong>KICKSBASE</strong>
-            <small>Заловая экипировка</small>
-          </span>
-        </a>
-        <p>
-          Витрина для быстрого выбора экипировки под заказ через Telegram. Вы
-          выбираете товар и получаете размер, бирки, упаковку и финальную сумму до оплаты.
-        </p>
-      </div>
-
-      <div className="kb-footer__grid" aria-label="Уточнения по заказу">
-        <article>
-          <strong>Детали заказа</strong>
-          <p>SKU, продавец, размер, цвет и наличие.</p>
-        </article>
-        <article>
-          <strong>Расчет</strong>
-          <p>Цена выкупа, комиссия, логистика и итог.</p>
-        </article>
-        <article>
-          <strong>Поддержка</strong>
-          <p>Фото товара, бирки и упаковка перед оплатой.</p>
-        </article>
-      </div>
-
-      <div className="kb-footer__bottom">
-        <p>
-          Товарные знаки принадлежат их владельцам. Финальное подтверждение по
-          заказу всегда делает менеджер перед оплатой.
-        </p>
-        <a href="#catalog">Открыть каталог</a>
+    <footer className="site-footer" id="about" data-od-id="site-footer">
+      <div className="footer-grid container">
+        <div>
+          <a className="brand" href="/" aria-label="KICKSBASE - главная">
+            <img className="brand-mark" src={logoSrc} alt="" width="720" height="720" />
+            <span className="brand-copy"><span className="brand-name">KICKSBASE</span></span>
+          </a>
+          <p className="footer-copy">Оригинальная экипировка для зала, тренировок и восстановления. На каждой странице показываем цену, размеры и срок поставки.</p>
+          <div className="sr-only" aria-label="Способы оплаты">
+            <span>МИР</span><span>СБП</span><span>Visa</span><span>Mastercard</span>
+          </div>
+        </div>
+        <nav className="footer-links" aria-label="Юридическая информация">
+          <a href="/delivery-returns">Доставка и возврат</a>
+          <a href="/offer">Публичная оферта</a>
+          <a href="/privacy">Политика данных</a>
+          <a href="/personal-data-consent">Согласие</a>
+          <a href="/#contacts">Контакты</a>
+        </nav>
       </div>
     </footer>
   )

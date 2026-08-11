@@ -1,5 +1,17 @@
 import type { CatalogCategory, CatalogProduct, CatalogSort } from "../catalog/catalog"
 import type { RefObject } from "react"
+import type {
+  CartLine,
+  CheckoutDelivery,
+  CheckoutConsents,
+  CheckoutCustomer,
+  CheckoutResult,
+  CatalogSearchFallback,
+  CatalogSearchResponse,
+  CatalogPriceMap,
+  ProductSizeOffer,
+  PublishedCatalogMap,
+} from "./cart"
 
 export type ActiveCategory = "all" | CatalogCategory
 
@@ -8,6 +20,7 @@ export interface UrlState {
   search: string
   sort: CatalogSort
   productSlug: string | null
+  cartOpen: boolean
 }
 
 export interface DisplayPrice {
@@ -16,17 +29,35 @@ export interface DisplayPrice {
   detail: string
 }
 
+export interface CatalogPriceState {
+  status: "loading" | "ready" | "failed"
+  lookup: CatalogPriceMap | null
+  items: PublishedCatalogMap
+  version: string
+  personalDataConsentVersion: string | null
+  orderCreationEnabled: boolean
+  onlinePaymentEnabled: boolean
+  error: string | null
+}
+
 export interface TaskMatch {
   product: CatalogProduct
   score: number
   reason: string
 }
 
+export interface CatalogSearchState {
+  status: "idle" | "loading" | "ready" | "failed"
+  response: CatalogSearchResponse | null
+  fallback: readonly CatalogSearchFallback[]
+  error: string | null
+}
+
 export type CopyState = "idle" | "copied" | "failed"
 
 export type LivePoizonSearchStatus = "idle" | "loading" | "ready" | "unavailable"
 
-/** Customer-safe subset of the CRM quote; no provider address or secret. */
+/** Customer-safe data from the verified Batch Sync quote. */
 export interface LivePoizonPriceBreakdown {
   purchase_rub: number
   conversion_fee: number
@@ -64,7 +95,6 @@ export interface LivePoizonProduct {
   expires_at: string
 }
 
-/** One server-synchronised 12-hour price for an owner-published catalogue item. */
 export interface StorefrontPoizonPrice {
   slug: string
   source_query: string
@@ -90,9 +120,8 @@ export interface StorefrontState {
   liveSearchStatus: LivePoizonSearchStatus
   liveSearchResults: LivePoizonProduct[]
   liveSearchMessage: string | null
-  catalogPricesReady: boolean
-  catalogPriceCount: number
-  heroProducts: CatalogProduct[]
+  catalogPoizonPrices: Record<string, StorefrontPoizonPrice>
+  catalogPoizonPricesReady: boolean
   filteredProducts: CatalogProduct[]
   selectedProduct: CatalogProduct | null
   selectedImage: { src: string; alt: string } | null
@@ -101,11 +130,24 @@ export interface StorefrontState {
   selectedVisibleGallery: readonly { src: string; alt: string }[]
   selectedSize: string | null
   selectedSizeOptions: readonly string[]
+  selectedSizeOffers: readonly ProductSizeOffer[]
+  selectedSizeOfferStatus: "idle" | "loading" | "ready" | "failed"
+  selectedSizeOfferError: string | null
   selectedProductPrice: DisplayPrice | null
-  getCatalogDisplayPrice: (product: CatalogProduct) => DisplayPrice
+  getPoizonDisplayPrice: (product: CatalogProduct) => DisplayPrice
+  catalogPriceState: CatalogPriceState
+  cartLines: CartLine[]
+  cartCount: number
+  cartTotalRub: number
+  isCartOpen: boolean
+  checkoutCustomer: CheckoutCustomer
+  checkoutDelivery: CheckoutDelivery
+  checkoutConsents: CheckoutConsents
+  checkoutResult: CheckoutResult
   request: string
   copyState: CopyState
-  taskMatches: TaskMatch[]
+  catalogSearch: CatalogSearchState
+  taskSearch: CatalogSearchState
   sheetHeadingRef: RefObject<HTMLHeadingElement | null>
   selectCategory: (category: ActiveCategory) => void
   setSearchValue: (search: string) => void
@@ -119,11 +161,23 @@ export interface StorefrontState {
   setTaskInput: (task: string) => void
   setLiveSearchQuery: (query: string) => void
   submitLiveSearch: () => Promise<void>
-  openProduct: (product: CatalogProduct, trigger: HTMLButtonElement) => void
+  openProduct: (product: CatalogProduct, trigger: HTMLElement, preferredSize?: string) => void
   closeProduct: () => void
   selectProductImage: (index: number) => void
   showPreviousProductImage: () => void
   showNextProductImage: () => void
   setSelectedSize: (size: string) => void
+  addProductToCart: (product: CatalogProduct, size: string) => void
+  addSelectedToCart: () => void
+  openCart: () => void
+  closeCart: () => void
+  closePayment: () => void
+  removeCartLine: (id: string) => void
+  setCartLineQuantity: (id: string, quantity: number) => void
+  updateCheckoutCustomer: (field: keyof CheckoutCustomer, value: string) => void
+  updateCheckoutDelivery: (field: keyof CheckoutDelivery, value: string) => void
+  updateCheckoutConsent: (field: keyof CheckoutConsents, value: boolean) => void
+  submitCartCheckout: () => Promise<void>
+  refreshPersonalDataConsentVersion: () => Promise<string | null>
   copyRequest: () => Promise<void>
 }

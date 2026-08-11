@@ -110,7 +110,11 @@ for (const image of ["node:24-alpine", "nginx:1.29-alpine"]) {
     fail(`${image} must be pinned to an immutable digest`)
   }
 }
-const productionStage = dockerfile.split("FROM runtime-base AS production\n")[1]
+// The repository is edited from both Windows and Linux. Normalise line endings
+// before inspecting build-stage ordering so the security gate is platform-neutral.
+const productionStage = dockerfile
+  .replace(/\r\n/g, "\n")
+  .split("FROM runtime-base AS production\n")[1]
 const legacyReleaseCopy = productionStage?.indexOf(
   "COPY site-release/ /usr/share/nginx/html/",
 )
@@ -249,14 +253,30 @@ for (const file of browserFiles) {
     /\bfetch\s*\(|\bXMLHttpRequest\b|\bWebSocket\s*\(|\bEventSource\s*\(|\bnavigator\s*\.\s*sendBeacon\s*\(/.test(
       source,
     )
-  const isAllowedSameOriginSearch =
+  const isAllowedSameOriginCatalogRequest =
     relativeFile === "src/landing/use-landing-storefront.ts" &&
-    source.includes("function crmSearchEndpoint()") &&
+    source.includes("function crmEndpoint(") &&
     source.includes('configured.startsWith("/")') &&
     source.includes('configured.startsWith("//")') &&
-    source.includes("/catalog/search") &&
+    source.includes('crmEndpoint("search")') &&
+    source.includes('crmEndpoint("storefront-prices")') &&
     source.includes('credentials: "omit"')
-  if (hasRuntimeNetworkCall && !isAllowedSameOriginSearch) {
+  const isAllowedSameOriginCheckoutRequest =
+    relativeFile === "src/landing/cart.ts" &&
+    source.includes("function sameOriginApiEndpoint(path: string)") &&
+    source.includes('return `/api/${path.replace(/^\\/+/, "")}`') &&
+    source.includes('credentials: "same-origin"')
+  const isAllowedSameOriginAuthRequest =
+    relativeFile === "src/landing/sections/header.tsx" &&
+    source.includes('fetch("/api/auth/sms/request"') &&
+    source.includes('fetch("/api/auth/sms/verify"') &&
+    source.includes('credentials: "same-origin"')
+  if (
+    hasRuntimeNetworkCall &&
+    !isAllowedSameOriginCatalogRequest &&
+    !isAllowedSameOriginCheckoutRequest &&
+    !isAllowedSameOriginAuthRequest
+  ) {
     fail(
       `${relativeFile} contains a forbidden runtime network call`,
     )
