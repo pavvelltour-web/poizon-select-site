@@ -2,7 +2,10 @@ import react from "@vitejs/plugin-react"
 import { defineConfig } from "vitest/config"
 
 export default defineConfig({
-  base: "./",
+  // The SPA is served from the domain root while product pages use history
+  // routes such as /product/:slug. Root-relative assets keep direct/deep-link
+  // loads from incorrectly requesting /product/assets/*.
+  base: "/",
   plugins: [react()],
   server: {
     proxy: {

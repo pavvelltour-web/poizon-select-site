@@ -42,18 +42,27 @@ if (htmlReferences.length < 3) fail("index.html has too few asset references")
 
 for (const reference of htmlReferences) {
   if (
-    reference.startsWith("/") ||
     reference.startsWith("//") ||
     /^[a-z][a-z0-9+.-]*:/i.test(reference)
   ) {
-    fail(`index.html contains a non-portable asset reference: ${reference}`)
+    fail(`index.html contains an external asset reference: ${reference}`)
   }
-  const mounted = new URL(reference, "https://example.test/demo/index.html")
-  if (!mounted.pathname.startsWith("/demo/")) {
-    fail(`asset escapes a /demo/ subpath: ${reference}`)
+  const mounted = new URL(reference, "https://example.test/")
+  const relative = decodeURIComponent(mounted.pathname.slice(1))
+  if (!relative || relative.includes("..")) {
+    fail(`asset has an invalid root path: ${reference}`)
   }
-  const relative = decodeURIComponent(mounted.pathname.slice("/demo/".length))
   await access(path.join(distRoot, relative))
+}
+
+const executableReferences = htmlReferences.filter((reference) =>
+  /\.(?:css|js)(?:\?|$)/i.test(reference),
+)
+if (
+  executableReferences.length < 2 ||
+  executableReferences.some((reference) => !reference.startsWith("/assets/"))
+) {
+  fail("entry CSS/JS must use root-relative /assets paths for product deep links")
 }
 
 const files = await filesBelow(distRoot)
@@ -125,5 +134,5 @@ for (const file of catalogFiles) {
 }
 
 console.log(
-  `Built site verified: relative assets, /demo/ compatible, ${expectedCatalogFiles} local catalog images, ${expectedGalleryFiles} gallery images, third-party notice, no source maps`,
+  `Built site verified: root-safe deep-link assets, ${expectedCatalogFiles} local catalog images, ${expectedGalleryFiles} gallery images, third-party notice, no source maps`,
 )
