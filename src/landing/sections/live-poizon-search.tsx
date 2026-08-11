@@ -29,7 +29,13 @@ function fixedUntil(value: string) {
 }
 
 function formatLiveSize(offer: LivePoizonOffer): string {
-  return `Размер Poizon: ${offer.size}`
+  const labels = [
+    offer.ru ? `RU ${offer.ru}` : null,
+    offer.eu ? `EU ${offer.eu}` : null,
+    offer.us ? `US ${offer.us}` : null,
+    offer.cn ? `CN ${offer.cn}` : null,
+  ].filter((label): label is string => !!label)
+  return labels.length > 0 ? labels.join(" · ") : `Размер Poizon: ${offer.size}`
 }
 
 function populatedText(value: string | null | undefined): string | null {
@@ -41,6 +47,10 @@ function stockLabel(inStock: boolean | null | undefined): string | null {
   if (inStock === true) return "В наличии по данным Poizon."
   if (inStock === false) return "Сейчас нет в наличии по данным Poizon."
   return null
+}
+
+function offerStockLabel(offer: LivePoizonOffer): string {
+  return offer.available === null ? " · наличие уточняется" : " · в наличии"
 }
 
 function PriceBreakdown({ offer }: { offer: LivePoizonOffer }) {
@@ -195,6 +205,7 @@ export function LivePoizonSearch({ storefront }: LivePoizonSearchProps) {
                   {offers.map((offer) => (
                     <span key={`${product.product_ref}:${offer.size}`}>
                       {formatLiveSize(offer)} · {formatRub(offer.total_rub)}
+                      {offerStockLabel(offer)}
                     </span>
                   ))}
                 </div>

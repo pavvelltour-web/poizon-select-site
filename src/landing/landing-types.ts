@@ -71,6 +71,13 @@ export interface LivePoizonPriceBreakdown {
 
 export interface LivePoizonOffer {
   size: string
+  /** Source-provided size labels. They are never converted or inferred in the UI. */
+  eu: string | null
+  ru: string | null
+  us: string | null
+  cn: string | null
+  /** `null` means Poizon did not report stock for this size. */
+  available: boolean | null
   quote_rub: number
   rf_delivery: number
   total_rub: number

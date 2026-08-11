@@ -330,7 +330,13 @@ function SearchResults({ state, botUsername, className }: SearchResultsProps) {
 }
 
 function formatSearchSize(offer: CatalogSearchOffer): string {
-  return offer.size
+  const labels = [
+    offer.ru ? `RU ${offer.ru}` : null,
+    offer.eu ? `EU ${offer.eu}` : null,
+    offer.us ? `US ${offer.us}` : null,
+    offer.cn ? `CN ${offer.cn}` : null,
+  ].filter((label): label is string => !!label)
+  return labels.length > 0 ? labels.join(" · ") : `Размер Poizon: ${offer.size}`
 }
 
 function LiveSearchResultCard({
@@ -385,7 +391,7 @@ function LiveSearchResultCard({
           </figure>
         ) : null}
         <p className="live-search-card__sizes">
-          Размеры Poizon: {sizes.join(", ")}
+          Доступные размеры: {sizes.join(", ")}
         </p>
         <p className="live-search-card__price">
           <span>Итог от</span>
@@ -397,7 +403,8 @@ function LiveSearchResultCard({
         <div className="live-search-card__offers" aria-label={`Размеры и итоговые цены ${title}`}>
           {result.offers.map((offer) => (
             <span key={`${result.productRef}:${offer.size}`}>
-              Размер Poizon: {formatSearchSize(offer)} · {formatRub(offer.totalRub)}
+              {formatSearchSize(offer)} · {formatRub(offer.totalRub)}
+              {offer.available === null ? " · наличие уточняется" : " · в наличии"}
             </span>
           ))}
         </div>

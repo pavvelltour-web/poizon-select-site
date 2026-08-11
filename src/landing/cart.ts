@@ -77,6 +77,13 @@ export interface CatalogSearchPriceBreakdown {
 
 export interface CatalogSearchOffer {
   size: string
+  /** Source-provided size labels. They are never converted or inferred in the UI. */
+  eu: string | null
+  ru: string | null
+  us: string | null
+  cn: string | null
+  /** `null` means the supplier did not report stock for this size. */
+  available: boolean | null
   quoteRub: number
   rfDelivery: number
   totalRub: number
@@ -355,7 +362,8 @@ function parseCatalogSearchResult(value: unknown): CatalogSearchResult | null {
     ? source.offers.flatMap((rawOffer): CatalogSearchOffer[] => {
       if (!rawOffer || typeof rawOffer !== "object") return []
       const offer = rawOffer as Record<string, unknown>
-      const size = optionalString(offer.size)
+      const size = optionalString(offer.size) ?? optionalString(offer.eu)
+      const available = typeof offer.available === "boolean" ? offer.available : null
       const quoteRub = finitePositiveNumber(offer.quote_rub)
       const rfDelivery = finitePositiveNumber(offer.rf_delivery)
       const totalRub = finitePositiveNumber(offer.total_rub)
@@ -367,12 +375,18 @@ function parseCatalogSearchResult(value: unknown): CatalogSearchResult | null {
         !quoteRub ||
         !rfDelivery ||
         !totalRub ||
+        available === false ||
         (offer.price_breakdown !== null && !priceBreakdown)
       ) {
         return []
       }
       return [{
         size,
+        eu: optionalString(offer.eu),
+        ru: optionalString(offer.ru),
+        us: optionalString(offer.us),
+        cn: optionalString(offer.cn),
+        available,
         quoteRub,
         rfDelivery,
         totalRub,

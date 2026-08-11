@@ -141,7 +141,7 @@ describe("checkout catalogue v10", () => {
       sizeContext: "Размеры указаны в системе Poizon.",
       sizeChart: "Сверьте длину стопы с таблицей производителя.",
       sizeImage: null,
-      offers: [{ size: "42", totalRub: 17700 }, { size: "43", totalRub: 18200 }],
+      offers: [{ size: "42", ru: "41", totalRub: 17700, available: true }],
     })
     expect(parsed?.results[0]).not.toHaveProperty("providerProductId")
     expect(parsed?.results[0]).not.toHaveProperty("providerUrl")

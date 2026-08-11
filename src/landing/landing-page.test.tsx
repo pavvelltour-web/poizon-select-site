@@ -127,10 +127,10 @@ function readySearchPayload(normalizedQuery = "Nike Air Force 1") {
           },
           {
             size: "43",
-            eu: "43",
-            ru: "42",
-            us: "9",
-            cn: "270",
+            eu: null,
+            ru: null,
+            us: null,
+            cn: null,
             available: null,
             quote_rub: 17300,
             rf_delivery: 1000,
@@ -581,8 +581,7 @@ describe("LandingPage", () => {
     })
     expect(screen.getByText("Белые кроссовки из натуральной кожи.")).toBeInTheDocument()
     expect(screen.getByText("Чёрные кроссовки для повседневной носки.")).toBeInTheDocument()
-    expect(screen.getByText(/Размер Poizon: 42 · 17\s?700 ₽/)).toBeInTheDocument()
-    expect(screen.queryByText(/RU 41 · EU 42 · US 8\.5 · CN 265/u)).toBeNull()
+    expect(screen.getByText(/RU 41 · EU 42 · US 8\.5 · CN 265 · 17\s?700 ₽ · в наличии/u)).toBeInTheDocument()
     expect(screen.getAllByText("В наличии по данным Poizon.")).toHaveLength(2)
     expect(screen.getAllByText("Размеры указаны в системе Poizon.")).toHaveLength(2)
     expect(screen.getAllByText("Сверьте длину стопы с таблицей производителя.")).toHaveLength(2)
@@ -618,8 +617,8 @@ describe("LandingPage", () => {
     expect(await screen.findByText("Белые кроссовки из натуральной кожи.")).toBeInTheDocument()
     expect(screen.getByRole("img", { name: "Air Force 1 '07 White" }))
       .toHaveAttribute("src", "https://cdn.poizon.example/air-force-1.webp")
-    expect(screen.getByText(/Размер Poizon: 42 · 17\s?700 ₽/)).toBeInTheDocument()
-    expect(screen.queryByText(/RU 41 · EU 42 · US 8\.5 · CN 265/u)).toBeNull()
+    expect(screen.getByText(/RU 41 · EU 42 · US 8\.5 · CN 265 · 17\s?700 ₽ · в наличии/u)).toBeInTheDocument()
+    expect(screen.getByText(/Размер Poizon: 43 · 18\s?300 ₽ · наличие уточняется/u)).toBeInTheDocument()
     expect(screen.getByText("В наличии по данным Poizon.")).toBeInTheDocument()
     expect(screen.getByText("Размеры указаны в системе Poizon.")).toBeInTheDocument()
     expect(screen.getByRole("img", { name: "Таблица размеров Poizon для Air Force 1 '07 White" }))

@@ -117,6 +117,12 @@ function isLiveOffer(value: unknown): value is LivePoizonOffer {
   const offer = value as Record<string, unknown>
   return (
     typeof offer.size === "string" &&
+    (typeof offer.eu === "string" || offer.eu === null) &&
+    (typeof offer.ru === "string" || offer.ru === null) &&
+    (typeof offer.us === "string" || offer.us === null) &&
+    (typeof offer.cn === "string" || offer.cn === null) &&
+    (typeof offer.available === "boolean" || offer.available === null) &&
+    offer.available !== false &&
     typeof offer.quote_rub === "number" &&
     typeof offer.rf_delivery === "number" &&
     typeof offer.total_rub === "number" &&
