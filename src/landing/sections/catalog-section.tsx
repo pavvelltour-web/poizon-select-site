@@ -369,7 +369,7 @@ function LiveSearchResultCard({
       <div className="live-search-card__content">
         <p className="live-search-card__source">
           <BadgeCheck aria-hidden="true" size={16} />
-          Poizon · цена зафиксирована
+          Poizon · цена проверена сейчас
         </p>
         <h3>{title}</h3>
         {result.article ? <p className="live-search-card__article">Артикул: {result.article}</p> : null}
@@ -391,7 +391,7 @@ function LiveSearchResultCard({
           </figure>
         ) : null}
         <p className="live-search-card__sizes">
-          Доступные размеры: {sizes.join(", ")}
+          Варианты размеров: {sizes.join(", ")}
         </p>
         <p className="live-search-card__price">
           <span>Итог от</span>
@@ -404,7 +404,11 @@ function LiveSearchResultCard({
           {result.offers.map((offer) => (
             <span key={`${result.productRef}:${offer.size}`}>
               {formatSearchSize(offer)} · {formatRub(offer.totalRub)}
-              {offer.available === null ? " · наличие уточняется" : " · в наличии"}
+              {offer.available === true
+                ? " · в наличии"
+                : offer.available === false
+                  ? " · нет в наличии"
+                  : " · наличие уточняется"}
             </span>
           ))}
         </div>

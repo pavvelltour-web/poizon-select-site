@@ -19,15 +19,6 @@ function formatRub(value: number) {
   return rub.format(value)
 }
 
-function fixedUntil(value: string) {
-  const date = new Date(value)
-  if (Number.isNaN(date.getTime())) return "на 12 часов"
-  return `до ${new Intl.DateTimeFormat("ru-RU", {
-    dateStyle: "short",
-    timeStyle: "short",
-  }).format(date)}`
-}
-
 function formatLiveSize(offer: LivePoizonOffer): string {
   const labels = [
     offer.ru ? `RU ${offer.ru}` : null,
@@ -50,7 +41,9 @@ function stockLabel(inStock: boolean | null | undefined): string | null {
 }
 
 function offerStockLabel(offer: LivePoizonOffer): string {
-  return offer.available === null ? " · наличие уточняется" : " · в наличии"
+  if (offer.available === true) return " · в наличии"
+  if (offer.available === false) return " · нет в наличии"
+  return " · наличие уточняется"
 }
 
 function PriceBreakdown({ offer }: { offer: LivePoizonOffer }) {
@@ -174,7 +167,7 @@ export function LivePoizonSearch({ storefront }: LivePoizonSearchProps) {
                   />
                 ) : null}
                 <div className="live-poizon-search__result-heading">
-                  <span>Цена Poizon зафиксирована</span>
+                  <span>Цена Poizon проверена сейчас</span>
                   <small>Выберите размер</small>
                 </div>
                 <h4>{[product.brand, product.name].filter(Boolean).join(" ")}</h4>
@@ -199,7 +192,8 @@ export function LivePoizonSearch({ storefront }: LivePoizonSearchProps) {
                   от {formatRub(lowestOffer.total_rub)}
                 </strong>
                 <p className="live-poizon-search__fixed-until">
-                  Цена и курс зафиксированы {fixedUntil(product.expires_at)}.
+                  Цена и курс получены по текущему запросу Poizon. Перед оформлением
+                  выбранный размер перепроверяется.
                 </p>
                 <div className="live-poizon-search__sizes" aria-label={`Размеры ${product.name}`}>
                   {offers.map((offer) => (
