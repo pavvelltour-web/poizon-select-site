@@ -70,10 +70,7 @@ export interface LivePoizonPriceBreakdown {
 }
 
 export interface LivePoizonOffer {
-  sku_id: string
   size: string
-  currency: "CNY"
-  price_cny: number
   quote_rub: number
   rf_delivery: number
   total_rub: number | null
@@ -81,8 +78,7 @@ export interface LivePoizonOffer {
 }
 
 export interface LivePoizonProduct {
-  provider_source: "poizon_batch_sync_api"
-  provider_product_id: string
+  product_ref: string
   brand: string | null
   name: string
   article: string | null
@@ -90,7 +86,6 @@ export interface LivePoizonProduct {
   description: string | null
   images: string[]
   offers: LivePoizonOffer[]
-  yuan_rate: number
   observed_at: string
   expires_at: string
 }
@@ -98,9 +93,7 @@ export interface LivePoizonProduct {
 export interface StorefrontPoizonPrice {
   slug: string
   source_query: string
-  provider_product_id: string
   product_name: string
-  price_cny: number
   total_rub: number
   observed_at: string
   expires_at: string

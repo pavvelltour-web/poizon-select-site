@@ -2810,6 +2810,8 @@ button:disabled,
 .live-poizon-search__total { color: var(--kb-accent); font-weight: 850; }
 .live-poizon-search__total { font-size: 1.55rem; }
 .live-poizon-search__fixed-until { font-size: .82rem; }
+.live-poizon-search__sizes { display: flex; flex-wrap: wrap; gap: 7px; }
+.live-poizon-search__sizes span { border: 1px solid var(--kb-line-strong); border-radius: 999px; padding: 6px 9px; color: var(--kb-text-soft); font-size: .82rem; font-weight: 700; }
 .live-poizon-search__breakdown { display: grid; gap: 6px; margin: 0; border-top: 1px solid var(--kb-line); padding-top: 12px; }
 .live-poizon-search__breakdown div { display: flex; justify-content: space-between; gap: 10px; color: var(--kb-muted); font-size: .82rem; }
 .live-poizon-search__breakdown dt,

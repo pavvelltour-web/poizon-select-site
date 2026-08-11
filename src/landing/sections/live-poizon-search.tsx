@@ -13,8 +13,6 @@ const rub = new Intl.NumberFormat("ru-RU", {
   maximumFractionDigits: 0,
 })
 
-const yuan = new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 0 })
-
 function formatRub(value: number) {
   return rub.format(value)
 }
@@ -35,7 +33,7 @@ function PriceBreakdown({ offer }: { offer: LivePoizonOffer }) {
   return (
     <dl className="live-poizon-search__breakdown">
       <div>
-        <dt>Poizon · ¥{yuan.format(offer.price_cny)} × курс ЦБ</dt>
+        <dt>Базовая стоимость товара</dt>
         <dd>{formatRub(breakdown.purchase_rub)}</dd>
       </div>
       <div>
@@ -73,8 +71,8 @@ export function LivePoizonSearch({ storefront }: LivePoizonSearchProps) {
           <h3 id="live-poizon-search-title">Проверьте цену модели, которой нет в витрине.</h3>
         </div>
         <p>
-          Проверяем Poizon через наш сервер и считаем по курсу ЦБ. Подтверждённая
-          цена фиксируется на 12 часов для сайта и Telegram.
+          Проверяем Poizon через наш сервер. Показываем только итог в ₽ по
+          единой формуле для сайта и Telegram.
         </p>
       </div>
 
@@ -107,7 +105,7 @@ export function LivePoizonSearch({ storefront }: LivePoizonSearchProps) {
       </form>
 
       <div className="live-poizon-search__status" aria-live="polite">
-        {loading ? <p>Получаем CNY-цену и свежий курс ЦБ…</p> : null}
+        {loading ? <p>Получаем подтверждённую цену и размеры…</p> : null}
         {storefront.liveSearchStatus === "unavailable" && storefront.liveSearchMessage ? (
           <p role="status">{storefront.liveSearchMessage}</p>
         ) : null}
@@ -115,10 +113,20 @@ export function LivePoizonSearch({ storefront }: LivePoizonSearchProps) {
 
       {storefront.liveSearchStatus === "ready" ? (
         <div className="live-poizon-search__results" aria-label="Результаты живого поиска Poizon">
-          {storefront.liveSearchResults.flatMap((product) =>
-            product.offers.map((offer) => (
+          {storefront.liveSearchResults.map((product) => {
+            const offers = product.offers
+            const lowestOffer = offers.reduce<LivePoizonOffer | null>(
+              (lowest, offer) =>
+                !lowest || (offer.total_rub ?? offer.quote_rub + offer.rf_delivery) <
+                  (lowest.total_rub ?? lowest.quote_rub + lowest.rf_delivery)
+                  ? offer
+                  : lowest,
+              null,
+            )
+            if (!lowestOffer) return null
+            return (
               <article
-                key={`${product.provider_product_id}:${offer.sku_id}`}
+                key={product.product_ref}
                 className="live-poizon-search__result"
               >
                 {product.images[0] ? (
@@ -132,32 +140,33 @@ export function LivePoizonSearch({ storefront }: LivePoizonSearchProps) {
                 ) : null}
                 <div className="live-poizon-search__result-heading">
                   <span>Цена Poizon зафиксирована</span>
-                  <small>Размер: {offer.size}</small>
+                  <small>Выберите размер</small>
                 </div>
                 <h4>{[product.brand, product.name].filter(Boolean).join(" ")}</h4>
                 {product.description ? <p>{product.description}</p> : null}
-                {product.article ? (
-                  <p>
-                    {product.article} · курс ЦБ: {product.yuan_rate.toFixed(2)} ₽/¥
-                  </p>
-                ) : (
-                  <p>Курс ЦБ: {product.yuan_rate.toFixed(2)} ₽/¥</p>
-                )}
+                {product.article ? <p>Артикул: {product.article}</p> : null}
                 <strong className="live-poizon-search__total">
-                  {formatRub(offer.total_rub ?? offer.quote_rub + offer.rf_delivery)}
+                  от {formatRub(lowestOffer.total_rub ?? lowestOffer.quote_rub + lowestOffer.rf_delivery)}
                 </strong>
                 <p className="live-poizon-search__fixed-until">
                   Цена и курс зафиксированы {fixedUntil(product.expires_at)}.
                 </p>
-                <PriceBreakdown offer={offer} />
+                <div className="live-poizon-search__sizes" aria-label={`Размеры ${product.name}`}>
+                  {offers.map((offer) => (
+                    <span key={`${product.product_ref}:${offer.size}`}>
+                      {offer.size} · {formatRub(offer.total_rub ?? offer.quote_rub + offer.rf_delivery)}
+                    </span>
+                  ))}
+                </div>
+                <PriceBreakdown offer={lowestOffer} />
                 {storefront.liveSearchBotUrl ? (
                   <a className="button button--quiet" href={storefront.liveSearchBotUrl}>
-                    Продолжить в Telegram
+                    Выбрать и заказать в Telegram
                   </a>
                 ) : null}
               </article>
-            )),
-          )}
+            )
+          })}
         </div>
       ) : null}
     </section>

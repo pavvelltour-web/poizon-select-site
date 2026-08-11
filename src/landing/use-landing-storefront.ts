@@ -117,10 +117,7 @@ function isLiveOffer(value: unknown): value is LivePoizonOffer {
   if (!value || typeof value !== "object") return false
   const offer = value as Record<string, unknown>
   return (
-    typeof offer.sku_id === "string" &&
     typeof offer.size === "string" &&
-    offer.currency === "CNY" &&
-    typeof offer.price_cny === "number" &&
     typeof offer.quote_rub === "number" &&
     typeof offer.rf_delivery === "number" &&
     (typeof offer.total_rub === "number" || offer.total_rub === null) &&
@@ -132,8 +129,7 @@ function isLiveProduct(value: unknown): value is LivePoizonProduct {
   if (!value || typeof value !== "object") return false
   const product = value as Record<string, unknown>
   return (
-    product.provider_source === "poizon_batch_sync_api" &&
-    typeof product.provider_product_id === "string" &&
+    typeof product.product_ref === "string" &&
     (typeof product.brand === "string" || product.brand === null) &&
     typeof product.name === "string" &&
     (typeof product.article === "string" || product.article === null) &&
@@ -141,7 +137,6 @@ function isLiveProduct(value: unknown): value is LivePoizonProduct {
     (typeof product.description === "string" || product.description === null) &&
     Array.isArray(product.images) && product.images.every((image) => typeof image === "string") &&
     Array.isArray(product.offers) && product.offers.every(isLiveOffer) &&
-    typeof product.yuan_rate === "number" &&
     typeof product.observed_at === "string" && typeof product.expires_at === "string"
   )
 }
@@ -151,8 +146,7 @@ function isStorefrontPoizonPrice(value: unknown): value is StorefrontPoizonPrice
   const price = value as Record<string, unknown>
   return (
     typeof price.slug === "string" && typeof price.source_query === "string" &&
-    typeof price.provider_product_id === "string" && typeof price.product_name === "string" &&
-    typeof price.price_cny === "number" && Number.isFinite(price.price_cny) &&
+    typeof price.product_name === "string" &&
     typeof price.total_rub === "number" && Number.isFinite(price.total_rub) &&
     typeof price.observed_at === "string" && typeof price.expires_at === "string"
   )
@@ -294,7 +288,7 @@ export function useLandingStorefront(
         return {
           label: "Poizon · цена зафиксирована на 12 часов",
           value: formatRub(quote.total_rub),
-          detail: `¥${quote.price_cny.toLocaleString("ru-RU")} · включает доставку по РФ`,
+          detail: "Включает доставку по РФ и все сервисные расходы.",
         }
       }
       return catalogPoizonPricesReady
