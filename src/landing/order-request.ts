@@ -20,11 +20,17 @@ export function resolveBotUsername(value: unknown): string | null {
   return username
 }
 
-export function buildTelegramBotUrl(username: string | null): string | null {
+export function buildTelegramBotUrl(
+  username: string | null,
+  startPayload?: string | null,
+): string | null {
   const validatedUsername = resolveBotUsername(username)
   if (!validatedUsername) return null
-
-  return `https://t.me/${validatedUsername}`
+  if (!startPayload) return `https://t.me/${validatedUsername}`
+  // Telegram start payloads are capped at 64 URL-safe characters.  The
+  // server validates this again and resolves only a known catalogue slug.
+  if (!/^[A-Za-z0-9_-]{1,64}$/.test(startPayload)) return null
+  return `https://t.me/${validatedUsername}?start=${startPayload}`
 }
 
 export function buildOrderRequest(

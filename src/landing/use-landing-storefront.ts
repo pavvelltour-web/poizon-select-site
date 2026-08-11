@@ -28,6 +28,7 @@ import type {
   LivePoizonOffer,
   LivePoizonPriceBreakdown,
   LivePoizonProduct,
+  StorefrontPoizonPrice,
   StorefrontState,
   UrlState,
 } from "./landing-types"
@@ -43,6 +44,12 @@ function crmSearchEndpoint(): string | null {
   const configured = (import.meta.env.VITE_CRM_API_BASE_URL || "/api").trim()
   if (!configured.startsWith("/") || configured.startsWith("//")) return null
   return `${configured.replace(/\/+$/, "") || "/api"}/catalog/search`
+}
+
+function storefrontPricesEndpoint(): string | null {
+  const configured = (import.meta.env.VITE_CRM_API_BASE_URL || "/api").trim()
+  if (!configured.startsWith("/") || configured.startsWith("//")) return null
+  return `${configured.replace(/\/+$/, "") || "/api"}/catalog/storefront-prices`
 }
 
 function isPriceBreakdown(value: unknown): value is LivePoizonPriceBreakdown {
@@ -96,6 +103,23 @@ function isLiveProduct(value: unknown): value is LivePoizonProduct {
   )
 }
 
+function isStorefrontPoizonPrice(value: unknown): value is StorefrontPoizonPrice {
+  if (!value || typeof value !== "object") return false
+  const price = value as Record<string, unknown>
+  return (
+    typeof price.slug === "string" &&
+    typeof price.source_query === "string" &&
+    typeof price.provider_product_id === "string" &&
+    typeof price.product_name === "string" &&
+    typeof price.price_cny === "number" &&
+    Number.isFinite(price.price_cny) &&
+    typeof price.total_rub === "number" &&
+    Number.isFinite(price.total_rub) &&
+    typeof price.observed_at === "string" &&
+    typeof price.expires_at === "string"
+  )
+}
+
 export function useLandingStorefront(
   configuredBotUsername?: string | null,
 ): StorefrontState {
@@ -116,6 +140,8 @@ export function useLandingStorefront(
   >("idle")
   const [liveSearchResults, setLiveSearchResults] = useState<LivePoizonProduct[]>([])
   const [liveSearchMessage, setLiveSearchMessage] = useState<string | null>(null)
+  const [catalogPrices, setCatalogPrices] = useState<Record<string, StorefrontPoizonPrice>>({})
+  const [catalogPricesReady, setCatalogPricesReady] = useState(false)
   const productTriggerRef = useRef<HTMLButtonElement | null>(null)
   const sheetHeadingRef = useRef<HTMLHeadingElement | null>(null)
   const liveSearchAbortRef = useRef<AbortController | null>(null)
@@ -127,6 +153,9 @@ export function useLandingStorefront(
   const botUrl = buildTelegramBotUrl(botUsername)
 
   const selectedProduct = findProductBySlug(selectedSlug)
+  const selectedProductBotUrl = selectedProduct
+    ? buildTelegramBotUrl(botUsername, `sku_${selectedProduct.slug}`)
+    : null
   const selectedVisibleGallery = selectedProduct?.gallery.slice(0, 5) ?? []
   const selectedImage =
     selectedVisibleGallery[selectedImageIndex] ??
@@ -134,9 +163,12 @@ export function useLandingStorefront(
     (selectedProduct
       ? { src: selectedProduct.fallbackImage, alt: selectedProduct.name }
       : null)
-  const selectedProductPrice = selectedProduct
-    ? getDisplayPrice(selectedProduct)
-    : null
+  const getCatalogDisplayPrice = useCallback(
+    (product: CatalogProduct) =>
+      getDisplayPrice(product, catalogPrices[product.slug], catalogPricesReady),
+    [catalogPrices, catalogPricesReady],
+  )
+  const selectedProductPrice = selectedProduct ? getCatalogDisplayPrice(selectedProduct) : null
   const selectedSizeOptions = selectedProduct ? getSizeOptions(selectedProduct) : []
   const selectedImageDisplayIndex =
     selectedVisibleGallery.length === 0 ? 0 : selectedImageIndex + 1
@@ -235,6 +267,49 @@ export function useLandingStorefront(
     },
     [],
   )
+
+  useEffect(() => {
+    const endpoint = storefrontPricesEndpoint()
+    if (!endpoint) {
+      setCatalogPricesReady(true)
+      return
+    }
+    let active = true
+    const controller = new AbortController()
+
+    const load = async () => {
+      try {
+        const response = await fetch(endpoint, {
+          headers: { Accept: "application/json" },
+          credentials: "omit",
+          signal: controller.signal,
+        })
+        const payload: unknown = await response.json()
+        if (!active) return
+        const data = payload && typeof payload === "object" ? (payload as Record<string, unknown>) : null
+        const items = Array.isArray(data?.items)
+          ? data.items.filter(isStorefrontPoizonPrice)
+          : []
+        if (response.ok) {
+          setCatalogPrices(
+            Object.fromEntries(items.map((item) => [item.slug, item])),
+          )
+        }
+      } catch {
+        // The UI deliberately leaves a price in the explicit "Сверяем" /
+        // "Уточняется" state instead of falling back to bundled estimates.
+      } finally {
+        if (!active) return
+        setCatalogPricesReady(true)
+      }
+    }
+
+    void load()
+    return () => {
+      active = false
+      controller.abort()
+    }
+  }, [])
 
   const selectCategory = (nextCategory: ActiveCategory) => {
     setCategory(nextCategory)
@@ -396,6 +471,7 @@ export function useLandingStorefront(
   return {
     botUsername,
     botUrl,
+    selectedProductBotUrl,
     category,
     search,
     sort,
@@ -404,6 +480,8 @@ export function useLandingStorefront(
     liveSearchStatus,
     liveSearchResults,
     liveSearchMessage,
+    catalogPricesReady,
+    catalogPriceCount: Object.keys(catalogPrices).length,
     heroProducts,
     filteredProducts,
     selectedProduct,
@@ -414,6 +492,7 @@ export function useLandingStorefront(
     selectedSize,
     selectedSizeOptions,
     selectedProductPrice,
+    getCatalogDisplayPrice,
     request,
     copyState,
     taskMatches,

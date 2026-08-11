@@ -4,18 +4,19 @@ import type { CSSProperties } from "react"
 import type { CatalogProduct } from "../../catalog/catalog"
 import {
   getProductBadge,
-  getDisplayPrice,
   getProductTags,
   getProductUse,
   kindLabels,
   resolveAssetUrl,
   setImageFallback,
 } from "../landing-data"
+import type { DisplayPrice } from "../landing-types"
 
 interface ProductCardProps {
   featured: boolean
   index: number
   product: CatalogProduct
+  price: DisplayPrice
   openProduct: (product: CatalogProduct, trigger: HTMLButtonElement) => void
 }
 
@@ -25,9 +26,9 @@ export function ProductCard({
   featured,
   index,
   product,
+  price,
   openProduct,
 }: ProductCardProps) {
-  const price = getDisplayPrice(product)
   const tags = getProductTags(product)
   const galleryPreview =
     product.gallery[HOVER_PREVIEW_IMAGE_INDEX]?.src ??

@@ -64,9 +64,22 @@ export interface LivePoizonProduct {
   expires_at: string
 }
 
+/** One server-synchronised 12-hour price for an owner-published catalogue item. */
+export interface StorefrontPoizonPrice {
+  slug: string
+  source_query: string
+  provider_product_id: string
+  product_name: string
+  price_cny: number
+  total_rub: number
+  observed_at: string
+  expires_at: string
+}
+
 export interface StorefrontState {
   botUsername: string | null
   botUrl: string | null
+  selectedProductBotUrl: string | null
   category: ActiveCategory
   search: string
   sort: CatalogSort
@@ -75,6 +88,8 @@ export interface StorefrontState {
   liveSearchStatus: LivePoizonSearchStatus
   liveSearchResults: LivePoizonProduct[]
   liveSearchMessage: string | null
+  catalogPricesReady: boolean
+  catalogPriceCount: number
   heroProducts: CatalogProduct[]
   filteredProducts: CatalogProduct[]
   selectedProduct: CatalogProduct | null
@@ -85,6 +100,7 @@ export interface StorefrontState {
   selectedSize: string | null
   selectedSizeOptions: readonly string[]
   selectedProductPrice: DisplayPrice | null
+  getCatalogDisplayPrice: (product: CatalogProduct) => DisplayPrice
   request: string
   copyState: CopyState
   taskMatches: TaskMatch[]

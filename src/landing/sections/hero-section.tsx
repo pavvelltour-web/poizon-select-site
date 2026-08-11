@@ -2,7 +2,6 @@ import { BadgeCheck, Medal, MoveRight, Send, ShoppingBag } from "lucide-react"
 
 import { catalogCategories, catalogProducts } from "../../catalog/catalog"
 import {
-  getDisplayPrice,
   getProductBadge,
   resolveAssetUrl,
   setImageFallback,
@@ -85,7 +84,7 @@ export function HeroSection({ storefront }: HeroSectionProps) {
           <small>3 быстрых входа</small>
         </div>
         {storefront.heroProducts.map((product) => {
-          const price = getDisplayPrice(product)
+          const price = storefront.getCatalogDisplayPrice(product)
 
           return (
             <button

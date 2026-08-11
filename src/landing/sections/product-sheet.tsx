@@ -16,7 +16,7 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
   if (!product) return null
 
   const price = storefront.selectedProductPrice
-  const botUrl = storefront.botUrl
+  const botUrl = storefront.selectedProductBotUrl ?? storefront.botUrl
   const botUsername = storefront.botUsername
 
   return (

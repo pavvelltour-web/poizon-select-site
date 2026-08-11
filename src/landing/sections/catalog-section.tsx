@@ -9,7 +9,6 @@ import {
   categoryDetails,
   categoryIcons,
   categoryTone,
-  getDisplayPrice,
   quickFilters,
   resolveAssetUrl,
   scenarioTiles,
@@ -49,7 +48,10 @@ export function CatalogSection({ storefront }: CatalogSectionProps) {
 
       <div className="catalog-status" aria-live="polite">
         <strong>{storefront.filteredProducts.length} позиций</strong>
-        <span>{categoryCopy[storefront.category]}</span>
+        <span>
+          {categoryCopy[storefront.category]} · {storefront.catalogPriceCount} цен Poizon
+          {storefront.catalogPricesReady ? " синхронизировано" : " загружается"}
+        </span>
       </div>
 
       {storefront.filteredProducts.length > 0 ? (
@@ -58,6 +60,7 @@ export function CatalogSection({ storefront }: CatalogSectionProps) {
             <ProductCard
               key={product.slug}
               product={product}
+              price={storefront.getCatalogDisplayPrice(product)}
               featured={index === 0}
               index={index}
               openProduct={storefront.openProduct}
@@ -113,7 +116,7 @@ function TaskFinder({ storefront }: CatalogSectionProps) {
         <div className="task-finder__results" aria-live="polite">
           {storefront.taskMatches.length > 0 ? (
             storefront.taskMatches.slice(0, 4).map((match) => {
-              const price = getDisplayPrice(match.product)
+              const price = storefront.getCatalogDisplayPrice(match.product)
 
               return (
                 <button

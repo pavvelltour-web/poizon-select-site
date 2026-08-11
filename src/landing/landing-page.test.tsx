@@ -16,16 +16,17 @@ afterEach(() => {
 })
 
 describe("LandingPage", () => {
-  it("renders all items with a visible price floor", () => {
+  it("renders all items without exposing a bundled static catalogue price", () => {
     render(<LandingPage configuredBotUsername={null} />)
 
     expect(screen.getByRole("heading", { name: "KICKSBASE" })).toBeInTheDocument()
     expect(productButtons()).toHaveLength(100)
     expect(screen.queryByText("по запросу")).toBeNull()
-    expect(screen.getAllByText("Цена от")).toHaveLength(100)
-    expect(screen.getAllByText("от 22 100 ₽").length).toBeGreaterThan(0)
-    expect(screen.getAllByText("от 45 тыс. ₽").length).toBeGreaterThan(0)
-    expect(screen.getAllByText("от 4 тыс. ₽").length).toBeGreaterThan(0)
+    expect(screen.getAllByText("Цена Poizon")).toHaveLength(100)
+    expect(screen.getAllByText(/^(Сверяем|Уточняется)$/).length).toBeGreaterThan(0)
+    expect(screen.queryByText("от 22 100 ₽")).toBeNull()
+    expect(screen.queryByText("от 45 тыс. ₽")).toBeNull()
+    expect(screen.queryByText("от 4 тыс. ₽")).toBeNull()
     expect(
       screen.getByText(/Перед оплатой всё должно быть понятно/),
     ).toBeInTheDocument()
@@ -45,7 +46,7 @@ describe("LandingPage", () => {
       ),
     )
     expect(productButtons()).toHaveLength(23)
-    expect(screen.getByText("Пары и экипировка под волейбольный зал")).toBeInTheDocument()
+    expect(screen.getByText(/Пары и экипировка под волейбольный зал/)).toBeInTheDocument()
     expect(window.location.search).toBe("?category=volleyball")
 
     await user.type(screen.getByRole("searchbox", { name: "Поиск по каталогу" }), "nike")

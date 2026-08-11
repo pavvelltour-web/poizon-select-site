@@ -21,6 +21,10 @@ describe("Telegram order handoff", () => {
     expect(buildTelegramBotUrl("MyBuyerBot")).toBe(
       "https://t.me/MyBuyerBot",
     )
+    expect(buildTelegramBotUrl("MyBuyerBot", "sku_nike-air-force-1-07-white")).toBe(
+      "https://t.me/MyBuyerBot?start=sku_nike-air-force-1-07-white",
+    )
+    expect(buildTelegramBotUrl("MyBuyerBot", "bad payload?query=1")).toBeNull()
     expect(buildTelegramBotUrl(null)).toBeNull()
     expect(buildTelegramBotUrl("../outside")).toBeNull()
     expect(buildTelegramBotUrl("https://evil.test/namebot")).toBeNull()

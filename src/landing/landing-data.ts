@@ -23,7 +23,13 @@ import {
   type CatalogSort,
   type ProductKind,
 } from "../catalog/catalog"
-import type { ActiveCategory, DisplayPrice, TaskMatch, UrlState } from "./landing-types"
+import type {
+  ActiveCategory,
+  DisplayPrice,
+  StorefrontPoizonPrice,
+  TaskMatch,
+  UrlState,
+} from "./landing-types"
 import type { LucideIcon } from "lucide-react"
 import type { SyntheticEvent } from "react"
 
@@ -205,12 +211,6 @@ export const kindLabels: Record<ProductKind, string> = {
   accessory: "Экипировка",
 }
 
-const fallbackFromPrices: Record<ProductKind, string> = {
-  footwear: "от 22 тыс. ₽",
-  apparel: "от 4 тыс. ₽",
-  accessory: "от 3 тыс. ₽",
-}
-
 const footwearSizes = [
   "36",
   "37",
@@ -250,33 +250,34 @@ export function setImageFallback(
   event.currentTarget.src = fallbackUrl
 }
 
-function marketPriceToFrom(price: string): string {
-  const firstNumber = price.match(/^\d+(?:[.,]\d+)?/)?.[0]
-  if (!firstNumber) return price
-  return `от ${firstNumber.replace(".", ",")} тыс. ₽`
-}
-
-export function getDisplayPrice(product: CatalogProduct): DisplayPrice {
-  if (product.orderQuote) {
+export function getDisplayPrice(
+  _product: CatalogProduct,
+  livePrice?: StorefrontPoizonPrice,
+  pricesReady = false,
+): DisplayPrice {
+  if (livePrice) {
     return {
       label: "Цена от",
-      value: `от ${formatRub(product.orderQuote.totalRub)}`,
-      detail: "расчет до оплаты",
+      value: formatRub(livePrice.total_rub),
+      detail: "Poizon · зафиксирована на 12 часов",
     }
   }
 
-  if (product.marketPrice) {
+  // The owner catalogue is a navigation/editing layer.  Its bundled market
+  // estimates are never shown as a purchasable price while the server is
+  // waiting for, or cannot obtain, the verified Poizon snapshot.
+  if (pricesReady) {
     return {
-      label: "Цена от",
-      value: marketPriceToFrom(product.marketPrice),
-      detail: product.priceBasis ?? "ориентир",
+      label: "Цена Poizon",
+      value: "Уточняется",
+      detail: "Проверяем актуальную цену у Poizon",
     }
   }
 
   return {
-    label: "Цена от",
-    value: fallbackFromPrices[product.kind],
-    detail: "уточним по размеру",
+    label: "Цена Poizon",
+    value: "Сверяем",
+    detail: "Загружаем 12-часовую котировку",
   }
 }
 
