@@ -652,6 +652,37 @@ describe("LandingPage", () => {
     ]))
   })
 
+  it("renders a Poizon size-chart URL as an image and does not duplicate a brand in the title", async () => {
+    const user = userEvent.setup()
+    const payload = readySearchPayload("Nike Air Force 1")
+    const sizeChartUrl = "https://cdn.poizon.example/air-force-1-size-chart-from-chart.webp"
+    const fetchMock = vi.fn(async (url: string, options?: RequestInit) => ({
+      ok: true,
+      status: 200,
+      json: async () => url.endsWith("/api/catalog/search") && options?.method === "POST"
+        ? {
+          ...payload,
+          results: [{
+            ...payload.results[0],
+            name: "Nike Air Force 1 '07 White",
+            size_chart: sizeChartUrl,
+            size_image: null,
+          }],
+        }
+        : livePoizonOnlyCheckoutPayload(),
+    }))
+    vi.stubGlobal("fetch", fetchMock)
+    render(<LandingPage configuredBotUsername="@SelectBuyerBot" />)
+
+    await user.type(screen.getByRole("searchbox", { name: "Поиск в Poizon" }), "Nike Air Force 1")
+    await user.click(screen.getByRole("button", { name: "Найти в Poizon" }))
+
+    expect(await screen.findByRole("heading", { name: "Nike Air Force 1 '07 White" })).toBeInTheDocument()
+    expect(screen.getByRole("img", { name: "Таблица размеров Poizon для Nike Air Force 1 '07 White" }))
+      .toHaveAttribute("src", sizeChartUrl)
+    expect(screen.queryByText(sizeChartUrl)).not.toBeInTheDocument()
+  })
+
   it("does not look up a provider when a customer opens a published product card", async () => {
     const fetchMock = vi.fn(async (url: string, _options?: RequestInit) => ({
       ok: url.includes("/api/checkout/orders?mode=catalog"),

@@ -34,6 +34,18 @@ function populatedText(value: string | null | undefined): string | null {
   return text || null
 }
 
+function liveProductTitle(brand: string | null | undefined, name: string): string {
+  const normalizedBrand = populatedText(brand)
+  const normalizedName = name.trim()
+  if (!normalizedBrand) return normalizedName
+
+  // Batch Sync product names sometimes already include the brand. Keep the
+  // card title natural instead of rendering e.g. “Nike Nike Air Force 1”.
+  return normalizedName.toLocaleLowerCase().startsWith(normalizedBrand.toLocaleLowerCase())
+    ? normalizedName
+    : `${normalizedBrand} ${normalizedName}`
+}
+
 function stockLabel(inStock: boolean | null | undefined): string | null {
   if (inStock === true) return "В наличии по данным Poizon."
   if (inStock === false) return "Сейчас нет в наличии по данным Poizon."
@@ -139,6 +151,14 @@ export function LivePoizonSearch({ storefront }: LivePoizonSearchProps) {
             const sizeContext = populatedText(product.size_context)
             const sizeChart = populatedText(product.size_chart)
             const sizeImage = safeHttpsUrl(product.size_image)
+            // The documented source uses both a text chart and a URL in this
+            // field depending on the seller. Render a verified URL as the
+            // chart itself rather than exposing an unhelpful raw link.
+            const sizeChartImage = safeHttpsUrl(sizeChart)
+            const sizeChartText = sizeChartImage ? null : sizeChart
+            const sizeImages = [...new Set(
+              [sizeImage, sizeChartImage].filter((image): image is string => Boolean(image)),
+            )]
             const lowestOffer = offers.reduce<LivePoizonOffer | null>(
               (lowest, offer) =>
                 !lowest || offer.total_rub < lowest.total_rub
@@ -170,24 +190,24 @@ export function LivePoizonSearch({ storefront }: LivePoizonSearchProps) {
                   <span>Цена Poizon проверена сейчас</span>
                   <small>Выберите размер</small>
                 </div>
-                <h4>{[product.brand, product.name].filter(Boolean).join(" ")}</h4>
+                <h4>{liveProductTitle(product.brand, product.name)}</h4>
                 {product.description ? <p>{product.description}</p> : null}
                 {product.article ? <p>Артикул: {product.article}</p> : null}
                 {product.color ? <p>Цвет: {product.color}</p> : null}
                 {availability ? <p className="live-poizon-search__availability">{availability}</p> : null}
                 {sizeContext ? <p className="live-poizon-search__size-context">{sizeContext}</p> : null}
-                {sizeChart ? <p className="live-poizon-search__size-chart">{sizeChart}</p> : null}
-                {sizeImage ? (
-                  <figure className="live-poizon-search__size-image">
+                {sizeChartText ? <p className="live-poizon-search__size-chart">{sizeChartText}</p> : null}
+                {sizeImages.map((image) => (
+                  <figure key={image} className="live-poizon-search__size-image">
                     <img
-                      src={sizeImage}
+                      src={image}
                       alt={`Таблица размеров Poizon для ${product.name}`}
                       loading="lazy"
                       referrerPolicy="no-referrer"
                     />
                     <figcaption>Таблица размеров от Poizon</figcaption>
                   </figure>
-                ) : null}
+                ))}
                 <strong className="live-poizon-search__total">
                   от {formatRub(lowestOffer.total_rub)}
                 </strong>
