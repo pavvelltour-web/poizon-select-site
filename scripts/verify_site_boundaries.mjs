@@ -110,6 +110,22 @@ for (const image of ["node:24-alpine", "nginx:1.29-alpine"]) {
     fail(`${image} must be pinned to an immutable digest`)
   }
 }
+const productionStage = dockerfile.split("FROM runtime-base AS production\n")[1]
+const legacyReleaseCopy = productionStage?.indexOf(
+  "COPY site-release/ /usr/share/nginx/html/",
+)
+const reactDistCopy = productionStage?.indexOf(
+  "COPY --from=production-build /app/dist /usr/share/nginx/html",
+)
+if (
+  !productionStage ||
+  legacyReleaseCopy === undefined ||
+  reactDistCopy === undefined ||
+  legacyReleaseCopy < 0 ||
+  reactDistCopy <= legacyReleaseCopy
+) {
+  fail("production Dockerfile must preserve the React index after legacy release files")
+}
 
 const nginx = await text("nginx.conf")
 for (const required of [

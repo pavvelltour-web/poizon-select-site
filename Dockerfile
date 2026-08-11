@@ -26,6 +26,6 @@ FROM build-base AS production-build
 RUN npm run build:production
 
 FROM runtime-base AS production
-COPY --from=production-build /app/dist /usr/share/nginx/html
 COPY site-release/ /usr/share/nginx/html/
+COPY --from=production-build /app/dist /usr/share/nginx/html
 USER nginx
