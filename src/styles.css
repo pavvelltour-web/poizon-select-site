@@ -904,6 +904,20 @@ img {
   background: var(--kb-bg-2);
 }
 
+.live-poizon-search__image {
+  aspect-ratio: 1 / 1;
+  width: 100%;
+  border-radius: 0.9rem;
+  object-fit: cover;
+  background: var(--kb-panel);
+}
+
+.live-poizon-search__fixed-until {
+  margin: -0.2rem 0 0;
+  font-size: 0.78rem;
+  color: var(--kb-muted);
+}
+
 .live-poizon-search__result-heading {
   display: flex;
   align-items: center;

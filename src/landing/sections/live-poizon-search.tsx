@@ -19,6 +19,15 @@ function formatRub(value: number) {
   return rub.format(value)
 }
 
+function fixedUntil(value: string) {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return "на 12 часов"
+  return `до ${new Intl.DateTimeFormat("ru-RU", {
+    dateStyle: "short",
+    timeStyle: "short",
+  }).format(date)}`
+}
+
 function PriceBreakdown({ offer }: { offer: LivePoizonOffer }) {
   const breakdown = offer.price_breakdown
   if (!breakdown) return null
@@ -64,8 +73,8 @@ export function LivePoizonSearch({ storefront }: LivePoizonSearchProps) {
           <h3 id="live-poizon-search-title">Проверьте цену модели, которой нет в витрине.</h3>
         </div>
         <p>
-          Ищем в Poizon через наш сервер и считаем по актуальному курсу ЦБ. Результат
-          не является статической ценой каталога.
+          Проверяем Poizon через наш сервер и считаем по курсу ЦБ. Подтверждённая
+          цена фиксируется на 12 часов для сайта и Telegram.
         </p>
       </div>
 
@@ -112,11 +121,21 @@ export function LivePoizonSearch({ storefront }: LivePoizonSearchProps) {
                 key={`${product.provider_product_id}:${offer.sku_id}`}
                 className="live-poizon-search__result"
               >
+                {product.images[0] ? (
+                  <img
+                    className="live-poizon-search__image"
+                    src={product.images[0]}
+                    alt={product.name}
+                    loading="lazy"
+                    referrerPolicy="no-referrer"
+                  />
+                ) : null}
                 <div className="live-poizon-search__result-heading">
-                  <span>Цена Poizon сейчас</span>
+                  <span>Цена Poizon зафиксирована</span>
                   <small>Размер: {offer.size}</small>
                 </div>
                 <h4>{[product.brand, product.name].filter(Boolean).join(" ")}</h4>
+                {product.description ? <p>{product.description}</p> : null}
                 {product.article ? (
                   <p>
                     {product.article} · курс ЦБ: {product.yuan_rate.toFixed(2)} ₽/¥
@@ -127,6 +146,9 @@ export function LivePoizonSearch({ storefront }: LivePoizonSearchProps) {
                 <strong className="live-poizon-search__total">
                   {formatRub(offer.total_rub ?? offer.quote_rub + offer.rf_delivery)}
                 </strong>
+                <p className="live-poizon-search__fixed-until">
+                  Цена и курс зафиксированы {fixedUntil(product.expires_at)}.
+                </p>
                 <PriceBreakdown offer={offer} />
                 {storefront.botUrl ? (
                   <a className="button button--quiet" href={storefront.botUrl}>

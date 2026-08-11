@@ -56,8 +56,12 @@ export interface LivePoizonProduct {
   name: string
   article: string | null
   kind: "footwear" | "apparel" | "accessory"
+  description: string | null
+  images: string[]
   offers: LivePoizonOffer[]
   yuan_rate: number
+  observed_at: string
+  expires_at: string
 }
 
 export interface StorefrontState {

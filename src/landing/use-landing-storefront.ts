@@ -85,9 +85,14 @@ function isLiveProduct(value: unknown): value is LivePoizonProduct {
     typeof product.name === "string" &&
     (typeof product.article === "string" || product.article === null) &&
     (product.kind === "footwear" || product.kind === "apparel" || product.kind === "accessory") &&
+    (typeof product.description === "string" || product.description === null) &&
+    Array.isArray(product.images) &&
+    product.images.every((image) => typeof image === "string") &&
     Array.isArray(product.offers) &&
     product.offers.every(isLiveOffer) &&
-    typeof product.yuan_rate === "number"
+    typeof product.yuan_rate === "number" &&
+    typeof product.observed_at === "string" &&
+    typeof product.expires_at === "string"
   )
 }
 
