@@ -132,6 +132,11 @@ if (
 }
 
 const nginx = await text("nginx.conf")
+const allowedPoizonImageSources =
+  "img-src 'self' data: https://cdn.poizon.com https://oversea-shanghai-enhance.oss-cn-shanghai.aliyuncs.com"
+if (!nginx.includes(allowedPoizonImageSources)) {
+  fail("deployment policy must pin the verified Poizon image CDNs")
+}
 for (const required of [
   "default-src 'self'",
   "connect-src 'self'",
