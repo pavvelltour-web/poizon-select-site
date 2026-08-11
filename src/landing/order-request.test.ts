@@ -39,7 +39,7 @@ describe("Telegram order handoff", () => {
   it("creates the exact one-line bot search query without an envelope", () => {
     const request = buildOrderRequest(catalogProducts[0])
 
-    expect(request).toBe("ASICS SKY ELITE FF 3 volleyball")
+    expect(request).toBe("ASICS SKY ELITE FF 3 1051A080-100 volleyball")
     expect(request).not.toContain("\n")
     expect(request).not.toContain("Поисковый запрос:")
     expect(request).not.toMatch(/[<>]/)
@@ -48,7 +48,9 @@ describe("Telegram order handoff", () => {
   it("adds a selected size as a clean second line", () => {
     const request = buildOrderRequest(catalogProducts[0], "EU 43")
 
-    expect(request).toBe("ASICS SKY ELITE FF 3 volleyball\nРазмер: EU 43")
+    expect(request).toBe(
+      "ASICS SKY ELITE FF 3 1051A080-100 volleyball\nРазмер: EU 43",
+    )
     expect(request).not.toMatch(/[<>]/)
   })
 
