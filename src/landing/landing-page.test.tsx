@@ -557,6 +557,118 @@ describe("LandingPage", () => {
     )
   })
 
+  it("continues a catalog-toolbar clarification only after the customer chooses a model", async () => {
+    const user = userEvent.setup()
+    const ready = readySearchPayload("Nike Air Max 95")
+    const fetchMock = vi.fn(async (url: string, options?: RequestInit) => {
+      if (url.endsWith("/api/catalog/search") && options?.method === "POST") {
+        const body = JSON.parse(String(options.body)) as { query: string }
+        if (body.query === "найк аир макс") {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              status: "clarification",
+              normalized_query: "Nike Air Max",
+              clarification: "Какая версия Air Max нужна?",
+              clarification_options: [
+                { label: "Air Max 95", query: "Nike Air Max 95" },
+                { label: "Air Max Plus", query: "Nike Air Max Plus" },
+              ],
+              results: [],
+              fallback: [],
+            }),
+          }
+        }
+        return { ok: true, status: 200, json: async () => ready }
+      }
+      return { ok: true, status: 200, json: async () => livePoizonOnlyCheckoutPayload() }
+    })
+    vi.stubGlobal("fetch", fetchMock)
+    window.history.replaceState(null, "", "/catalog")
+    render(<LandingPage configuredBotUsername="@SelectBuyerBot" />)
+
+    await user.type(screen.getByRole("searchbox", { name: "Поиск по товарам" }), "найк аир макс")
+
+    expect(await screen.findByText("Какая версия Air Max нужна?")).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Air Max 95" })).toBeInTheDocument()
+    const callsBeforeChoice = fetchMock.mock.calls.filter(
+      ([url, options]) => String(url).endsWith("/api/catalog/search") && options?.method === "POST",
+    )
+    expect(callsBeforeChoice).toHaveLength(1)
+    expect(JSON.parse(String(callsBeforeChoice[0][1]?.body))).toEqual({
+      query: "найк аир макс",
+      limit: 4,
+    })
+
+    await user.click(screen.getByRole("button", { name: "Air Max 95" }))
+
+    expect(await screen.findByRole("heading", { name: "Nike Air Force 1 '07 White" })).toBeInTheDocument()
+    const calls = fetchMock.mock.calls.filter(
+      ([url, options]) => String(url).endsWith("/api/catalog/search") && options?.method === "POST",
+    )
+    expect(calls).toHaveLength(2)
+    expect(JSON.parse(String(calls[1][1]?.body))).toEqual({
+      query: "Nike Air Max 95",
+      limit: 4,
+    })
+  })
+
+  it("continues a task-finder clarification only after the customer chooses a model", async () => {
+    const user = userEvent.setup()
+    const ready = readySearchPayload("Nike Air Max Plus")
+    const fetchMock = vi.fn(async (url: string, options?: RequestInit) => {
+      if (url.endsWith("/api/catalog/search") && options?.method === "POST") {
+        const body = JSON.parse(String(options.body)) as { query: string }
+        if (body.query === "найк аир макс") {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              status: "clarification",
+              normalized_query: "Nike Air Max",
+              clarification: "Какая версия Air Max нужна?",
+              clarification_options: [
+                { label: "Air Max Plus", query: "Nike Air Max Plus" },
+              ],
+              results: [],
+              fallback: [],
+            }),
+          }
+        }
+        return { ok: true, status: 200, json: async () => ready }
+      }
+      return { ok: true, status: 200, json: async () => livePoizonOnlyCheckoutPayload() }
+    })
+    vi.stubGlobal("fetch", fetchMock)
+    render(<LandingPage configuredBotUsername="@SelectBuyerBot" />)
+
+    const finder = screen.getByLabelText("Помощь с выбором")
+    await user.type(
+      within(finder).getByRole("searchbox", { name: "Опишите задачу для подбора" }),
+      "найк аир макс",
+    )
+
+    expect(await within(finder).findByText("Какая версия Air Max нужна?")).toBeInTheDocument()
+    await user.click(within(finder).getByRole("button", { name: "Air Max Plus" }))
+
+    await waitFor(() => {
+      expect(within(finder).getByTestId("live-search-result")).toBeInTheDocument()
+    })
+    const calls = fetchMock.mock.calls.filter(
+      ([url, options]) => String(url).endsWith("/api/catalog/search") && options?.method === "POST",
+    )
+    expect(calls).toHaveLength(2)
+    expect(JSON.parse(String(calls[0][1]?.body))).toEqual({
+      query: "найк аир макс",
+      limit: 4,
+    })
+    expect(JSON.parse(String(calls[1][1]?.body))).toEqual({
+      query: "Nike Air Max Plus",
+      limit: 4,
+    })
+  })
+
   it("renders several public Poizon cards with Russian details, sizes and RUB totals only", async () => {
     const user = userEvent.setup()
     const first = readySearchPayload("Nike Air Force 1")
@@ -650,6 +762,70 @@ describe("LandingPage", () => {
       "/api/catalog/search",
       expect.objectContaining({ method: "POST" }),
     ]))
+  })
+
+  it("asks for an Air Max version before it requests fresh Poizon cards", async () => {
+    const user = userEvent.setup()
+    const ready = {
+      ...readySearchPayload("Nike Air Max 95"),
+      results: [{
+        ...readySearchPayload("Nike Air Max 95").results[0],
+        product_ref: "air-max-95",
+        name: "Air Max 95",
+      }],
+    }
+    const fetchMock = vi.fn(async (url: string, options?: RequestInit) => {
+      if (url.endsWith("/api/catalog/search") && options?.method === "POST") {
+        const body = JSON.parse(String(options.body)) as { query: string }
+        if (body.query === "найк аир макс") {
+          return {
+            ok: true,
+            status: 200,
+            json: async () => ({
+              status: "clarification",
+              normalized_query: "найк аир макс",
+              clarification: "Какая версия Air Max нужна?",
+              clarification_options: [
+                { label: "Air Max 95", query: "Nike Air Max 95" },
+                { label: "Air Max Plus", query: "Nike Air Max Plus" },
+              ],
+              results: [],
+              fallback: [],
+            }),
+          }
+        }
+        return { ok: true, status: 200, json: async () => ready }
+      }
+      return { ok: true, status: 200, json: async () => livePoizonOnlyCheckoutPayload() }
+    })
+    vi.stubGlobal("fetch", fetchMock)
+    render(<LandingPage configuredBotUsername="@SelectBuyerBot" />)
+
+    await user.type(screen.getByRole("searchbox", { name: "Поиск в Poizon" }), "найк аир макс")
+    await user.click(screen.getByRole("button", { name: "Найти в Poizon" }))
+
+    expect(await screen.findByText("Какая версия Air Max нужна?")).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Air Max 95" })).toBeInTheDocument()
+    const sourceCallsBeforeChoice = fetchMock.mock.calls.filter(
+      ([url, options]) => String(url).endsWith("/api/catalog/search") && options?.method === "POST",
+    )
+    expect(sourceCallsBeforeChoice).toHaveLength(1)
+    expect(JSON.parse(String(sourceCallsBeforeChoice[0][1]?.body))).toEqual({
+      query: "найк аир макс",
+      limit: 4,
+    })
+
+    await user.click(screen.getByRole("button", { name: "Air Max 95" }))
+
+    expect(await screen.findByRole("heading", { name: "Nike Air Max 95" })).toBeInTheDocument()
+    const sourceCalls = fetchMock.mock.calls.filter(
+      ([url, options]) => String(url).endsWith("/api/catalog/search") && options?.method === "POST",
+    )
+    expect(sourceCalls).toHaveLength(2)
+    expect(JSON.parse(String(sourceCalls[1][1]?.body))).toEqual({
+      query: "Nike Air Max 95",
+      limit: 4,
+    })
   })
 
   it("renders a Poizon size-chart URL as an image and does not duplicate a brand in the title", async () => {

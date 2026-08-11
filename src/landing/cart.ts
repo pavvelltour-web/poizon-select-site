@@ -140,10 +140,21 @@ export interface CatalogSearchFallback {
   availability: "unverified"
 }
 
+/**
+ * A server-whitelisted next question for an ambiguous model family. The
+ * browser renders ``label`` and submits only ``query`` after an explicit
+ * customer click; it never constructs a supplier query itself.
+ */
+export interface CatalogSearchClarificationOption {
+  label: string
+  query: string
+}
+
 export interface CatalogSearchResponse {
   status: CatalogSearchStatus
   normalizedQuery: string
   clarification: string | null
+  clarificationOptions: readonly CatalogSearchClarificationOption[]
   results: readonly CatalogSearchResult[]
   fallback: readonly CatalogSearchFallback[]
 }
@@ -468,6 +479,33 @@ function parseCatalogSearchFallback(value: unknown): CatalogSearchFallback | nul
   }
 }
 
+function hasControlCharacter(value: string) {
+  return Array.from(value).some((character) => {
+    const codePoint = character.codePointAt(0)
+    return codePoint !== undefined && (codePoint <= 0x1f || codePoint === 0x7f)
+  })
+}
+
+function parseCatalogSearchClarificationOption(
+  value: unknown,
+): CatalogSearchClarificationOption | null {
+  if (!value || typeof value !== "object") return null
+  const source = value as Record<string, unknown>
+  const label = optionalString(source.label)
+  const query = optionalString(source.query)
+  if (
+    !label ||
+    !query ||
+    label.length > 80 ||
+    query.length > 160 ||
+    hasControlCharacter(label) ||
+    hasControlCharacter(query)
+  ) {
+    return null
+  }
+  return { label, query }
+}
+
 export function parseCatalogSearch(payload: unknown): CatalogSearchResponse | null {
   if (!payload || typeof payload !== "object") return null
   const source = payload as Record<string, unknown>
@@ -481,10 +519,21 @@ export function parseCatalogSearch(payload: unknown): CatalogSearchResponse | nu
     return null
   }
 
+  const clarificationOptions = status === "clarification" && Array.isArray(source.clarification_options)
+    ? source.clarification_options
+      .map(parseCatalogSearchClarificationOption)
+      .filter((option): option is CatalogSearchClarificationOption => !!option)
+      .filter((option, index, options) =>
+        options.findIndex((candidate) => candidate.query === option.query) === index,
+      )
+      .slice(0, 4)
+    : []
+
   return {
     status: status as CatalogSearchStatus,
     normalizedQuery,
     clarification: optionalString(source.clarification),
+    clarificationOptions,
     results: source.results
       .map(parseCatalogSearchResult)
       .filter((result): result is CatalogSearchResult => !!result),

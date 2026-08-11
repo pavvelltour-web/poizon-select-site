@@ -49,6 +49,7 @@ import type {
   ActiveCategory,
   CatalogSearchState,
   LivePoizonOffer,
+  LivePoizonClarificationOption,
   LivePoizonPriceBreakdown,
   LivePoizonProduct,
   StorefrontPoizonPrice,
@@ -138,6 +139,15 @@ function isOptionalNullableBoolean(value: unknown): boolean {
   return value === undefined || value === null || typeof value === "boolean"
 }
 
+function isLivePoizonClarificationOption(value: unknown): value is LivePoizonClarificationOption {
+  if (!value || typeof value !== "object") return false
+  const option = value as Record<string, unknown>
+  return (
+    typeof option.label === "string" && option.label.trim().length > 0 && option.label.length <= 80 &&
+    typeof option.query === "string" && option.query.trim().length >= 2 && option.query.length <= 160
+  )
+}
+
 function isLiveProduct(value: unknown): value is LivePoizonProduct {
   if (!value || typeof value !== "object") return false
   const product = value as Record<string, unknown>
@@ -208,10 +218,13 @@ export function useLandingStorefront(
   const [taskInput, setTaskInputState] = useState("")
   const [liveSearchQuery, setLiveSearchQueryState] = useState("")
   const [liveSearchStatus, setLiveSearchStatus] = useState<
-    "idle" | "loading" | "ready" | "unavailable"
+    "idle" | "loading" | "clarification" | "ready" | "unavailable"
   >("idle")
   const [liveSearchResults, setLiveSearchResults] = useState<LivePoizonProduct[]>([])
   const [liveSearchMessage, setLiveSearchMessage] = useState<string | null>(null)
+  const [liveSearchClarificationOptions, setLiveSearchClarificationOptions] = useState<
+    LivePoizonClarificationOption[]
+  >([])
   const [liveSearchNormalizedQuery, setLiveSearchNormalizedQuery] = useState<string | null>(null)
   const [storefrontPoizonPrices, setStorefrontPoizonPrices] = useState<
     Record<string, StorefrontPoizonPrice>
@@ -725,11 +738,12 @@ export function useLandingStorefront(
       setLiveSearchMessage(null)
       setLiveSearchResults([])
       setLiveSearchNormalizedQuery(null)
+      setLiveSearchClarificationOptions([])
     }
   }
 
-  const submitLiveSearch = useCallback(async () => {
-    const query = liveSearchQuery.trim().replace(/\s+/g, " ")
+  const submitLiveSearch = useCallback(async (queryOverride?: string) => {
+    const query = (queryOverride ?? liveSearchQuery).trim().replace(/\s+/g, " ")
     const endpoint = crmEndpoint("search")
     if (query.length < 2) {
       setLiveSearchResults([])
@@ -751,6 +765,7 @@ export function useLandingStorefront(
     liveSearchRequestIdRef.current = requestId
     setLiveSearchResults([])
     setLiveSearchNormalizedQuery(null)
+    setLiveSearchClarificationOptions([])
     setLiveSearchStatus("loading")
     setLiveSearchMessage(null)
     try {
@@ -773,6 +788,19 @@ export function useLandingStorefront(
             : query,
         )
         setLiveSearchStatus("ready")
+        return
+      }
+      const options = Array.isArray(data?.clarification_options)
+        ? data.clarification_options.filter(isLivePoizonClarificationOption).slice(0, 4)
+        : []
+      if (response.ok && data?.status === "clarification") {
+        setLiveSearchStatus("clarification")
+        setLiveSearchMessage(
+          typeof data?.clarification === "string" && data.clarification.trim()
+            ? data.clarification
+            : "Уточните модель или артикул.",
+        )
+        setLiveSearchClarificationOptions(options)
         return
       }
       setLiveSearchStatus("unavailable")
@@ -1048,6 +1076,7 @@ export function useLandingStorefront(
     liveSearchStatus,
     liveSearchResults,
     liveSearchMessage,
+    liveSearchClarificationOptions,
     catalogPoizonPrices,
     catalogPoizonPricesReady,
     catalogPriceState,

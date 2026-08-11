@@ -90,6 +90,28 @@ describe("checkout catalogue v10", () => {
     })
   })
 
+  it("keeps only bounded server-selected clarification choices", () => {
+    const parsed = parseCatalogSearch({
+      status: "clarification",
+      normalized_query: "Nike Air Max",
+      clarification: "Какая версия Air Max нужна?",
+      clarification_options: [
+        { label: "Air Max 95", query: "Nike Air Max 95" },
+        { label: "Air Max 95 again", query: "Nike Air Max 95" },
+        { label: "\u0000", query: "Nike Air Max Plus" },
+        { label: "Air Max 97", query: "\u0007invalid" },
+      ],
+      results: [],
+      fallback: [],
+    })
+
+    expect(parsed).toMatchObject({
+      status: "clarification",
+      clarification: "Какая версия Air Max нужна?",
+      clarificationOptions: [{ label: "Air Max 95", query: "Nike Air Max 95" }],
+    })
+  })
+
   it("parses the public Poizon search DTO without supplier IDs, URLs or CNY", () => {
     const observedAt = new Date(Date.now() - 60_000).toISOString()
     const expiresAt = new Date(Date.now() + 14 * 60_000).toISOString()

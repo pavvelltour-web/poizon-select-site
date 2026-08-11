@@ -138,6 +138,25 @@ export function LivePoizonSearch({ storefront }: LivePoizonSearchProps) {
 
       <div className="live-poizon-search__status" aria-live="polite">
         {loading ? <p>Получаем подтверждённую цену и размеры…</p> : null}
+        {storefront.liveSearchStatus === "clarification" && storefront.liveSearchMessage ? (
+          <div className="live-poizon-search__clarification" role="status">
+            <p>{storefront.liveSearchMessage}</p>
+            {storefront.liveSearchClarificationOptions.length > 0 ? (
+              <div className="live-poizon-search__choices" aria-label="Уточнить модель">
+                {storefront.liveSearchClarificationOptions.map((option) => (
+                  <button
+                    className="button button--quiet"
+                    key={option.query}
+                    type="button"
+                    onClick={() => void storefront.submitLiveSearch(option.query)}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+          </div>
+        ) : null}
         {storefront.liveSearchStatus === "unavailable" && storefront.liveSearchMessage ? (
           <p role="status">{storefront.liveSearchMessage}</p>
         ) : null}

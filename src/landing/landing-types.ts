@@ -55,7 +55,13 @@ export interface CatalogSearchState {
 
 export type CopyState = "idle" | "copied" | "failed"
 
-export type LivePoizonSearchStatus = "idle" | "loading" | "ready" | "unavailable"
+export type LivePoizonSearchStatus = "idle" | "loading" | "clarification" | "ready" | "unavailable"
+
+/** A bounded server-selected model option shown before a live Poizon lookup. */
+export interface LivePoizonClarificationOption {
+  label: string
+  query: string
+}
 
 /** Customer-safe data from the verified Batch Sync quote. */
 export interface LivePoizonPriceBreakdown {
@@ -129,6 +135,7 @@ export interface StorefrontState {
   liveSearchStatus: LivePoizonSearchStatus
   liveSearchResults: LivePoizonProduct[]
   liveSearchMessage: string | null
+  liveSearchClarificationOptions: LivePoizonClarificationOption[]
   catalogPoizonPrices: Record<string, StorefrontPoizonPrice>
   catalogPoizonPricesReady: boolean
   filteredProducts: CatalogProduct[]
@@ -169,7 +176,7 @@ export interface StorefrontState {
   resetCatalog: () => void
   setTaskInput: (task: string) => void
   setLiveSearchQuery: (query: string) => void
-  submitLiveSearch: () => Promise<void>
+  submitLiveSearch: (queryOverride?: string) => Promise<void>
   openProduct: (product: CatalogProduct, trigger: HTMLElement, preferredSize?: string) => void
   closeProduct: () => void
   selectProductImage: (index: number) => void

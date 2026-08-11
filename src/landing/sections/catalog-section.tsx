@@ -16,6 +16,7 @@ import {
 } from "../landing-data"
 import { buildLiveProductTelegramBotUrl } from "../order-request"
 import type {
+  CatalogSearchClarificationOption,
   CatalogSearchFallback,
   CatalogSearchOffer,
   CatalogSearchResult,
@@ -132,6 +133,7 @@ export function CatalogSection({
             state={storefront.catalogSearch}
             botUsername={storefront.botUsername}
             className="catalog-live-search"
+            onChooseClarification={(option) => storefront.setSearchValue(option.query)}
           />
         ) : null}
 
@@ -242,6 +244,7 @@ function TaskFinder({ storefront }: CatalogSectionProps) {
                 state={storefront.taskSearch}
                 botUsername={storefront.botUsername}
                 className="task-finder__results"
+                onChooseClarification={(option) => storefront.setTaskInput(option.query)}
               />
             ) : null}
           </div>
@@ -255,9 +258,15 @@ interface SearchResultsProps {
   state: CatalogSearchState
   botUsername: string | null
   className: string
+  onChooseClarification: (option: CatalogSearchClarificationOption) => void
 }
 
-function SearchResults({ state, botUsername, className }: SearchResultsProps) {
+function SearchResults({
+  state,
+  botUsername,
+  className,
+  onChooseClarification,
+}: SearchResultsProps) {
   if (state.status === "idle") return null
 
   const response = state.response
@@ -278,6 +287,9 @@ function SearchResults({ state, botUsername, className }: SearchResultsProps) {
     response?.status === "ready" &&
     liveResults.length === 0 &&
     state.fallback.length === 0
+  const clarificationOptions = response?.status === "clarification"
+    ? response.clarificationOptions
+    : []
 
   return (
     <div className={`live-search ${className}`} data-status={state.status}>
@@ -290,6 +302,24 @@ function SearchResults({ state, botUsername, className }: SearchResultsProps) {
           <AlertCircle aria-hidden="true" size={18} />
           {statusText}
         </p>
+      ) : null}
+
+      {response?.status === "clarification" && clarificationOptions.length > 0 ? (
+        <div className="live-search__clarification" aria-label="Уточнить модель">
+          <div className="live-search__choices">
+            {clarificationOptions.map((option) => (
+              <button
+                className="button button--quiet"
+                key={option.query}
+                type="button"
+                onClick={() => onChooseClarification(option)}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+          <small>Или уточните модель, цвет либо артикул в строке поиска.</small>
+        </div>
       ) : null}
 
       {liveResults.length > 0 ? (
