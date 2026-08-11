@@ -528,6 +528,7 @@ export function parseCheckoutCatalog(payload: unknown): CheckoutCatalogSnapshot 
   // A response without this exact contract is not allowed to revive the old
   // bundled catalogue prices or sizes in the browser.
   if (
+    version !== "poizon-live-v1" ||
     source.catalog_mode !== "curated_live_poizon" ||
     source.snapshot_hours !== 12
   ) {
@@ -568,7 +569,7 @@ export function parseCheckoutCatalog(payload: unknown): CheckoutCatalogSnapshot 
       !imageUrl ||
       !priceRub ||
       !priceVersion ||
-      priceVersion !== `storefront:${slug}` ||
+      priceVersion !== version ||
       !availability ||
       images.length === 0 ||
       !observedAt ||

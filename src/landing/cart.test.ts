@@ -28,7 +28,7 @@ const catalogPayload = {
       product_kind: "footwear",
       sizes: ["43", "44"],
       price_rub: 25100,
-      price_version: "storefront:nike-gt-cut-academy",
+      price_version: "poizon-live-v1",
       image_url: "https://kicksbase.ru/catalog/server.webp",
       images: ["https://kicksbase.ru/catalog/server.webp"],
       fulfillment_mode: "made_to_order",
@@ -45,7 +45,7 @@ const catalogPayload = {
           size_eu: "43",
           size_ru: "42",
           price_rub: 25100,
-          price_version: "storefront:nike-gt-cut-academy",
+          price_version: "poizon-live-v1",
           available: true,
           checkout_confirmed: true,
           live_provider_verified: true,
@@ -55,7 +55,7 @@ const catalogPayload = {
           size_eu: "44",
           size_ru: "43",
           price_rub: 25100,
-          price_version: "storefront:nike-gt-cut-academy",
+          price_version: "poizon-live-v1",
           available: true,
           checkout_confirmed: true,
           live_provider_verified: true,
@@ -191,16 +191,16 @@ describe("checkout catalogue v10", () => {
       }),
     )
     expect(parsed?.items["nike-gt-cut-academy"]?.priceVersion)
-      .toBe("storefront:nike-gt-cut-academy")
+      .toBe("poizon-live-v1")
     expect(parseCheckoutCatalog({ version: "v1", prices: { shoe: 1 } })).toBeNull()
   })
 
-  it("rejects a snapshot whose source version does not belong to its storefront slug", () => {
+  it("rejects a snapshot whose source version does not match the API contract", () => {
     const parsed = parseCheckoutCatalog({
       ...catalogPayload,
       items: [{
         ...catalogPayload.items[0],
-        price_version: "storefront:other-product",
+        price_version: "another-price-contract",
       }],
     })
 
@@ -242,7 +242,7 @@ describe("checkout catalogue v10", () => {
             size_us: "8.5",
             size_cn: "265",
             price_rub: 24900,
-            price_version: "storefront:nike-gt-cut-academy",
+            price_version: "poizon-live-v1",
             available: true,
             checkout_confirmed: true,
             live_provider_verified: true,
@@ -252,7 +252,7 @@ describe("checkout catalogue v10", () => {
             size_eu: "43",
             size_ru: "42",
             price_rub: 27000,
-            price_version: "storefront:nike-gt-cut-academy",
+            price_version: "poizon-live-v1",
             available: true,
             checkout_confirmed: true,
             live_provider_verified: true,
@@ -308,7 +308,7 @@ describe("checkout catalogue v10", () => {
           sku_id: "unconfirmed-44",
           size_eu: "44",
           price_rub: 26900,
-          price_version: "storefront:nike-gt-cut-academy",
+          price_version: "poizon-live-v1",
           available: true,
           checkout_confirmed: true,
           live_provider_verified: false,
@@ -333,7 +333,7 @@ describe("checkout catalogue v10", () => {
           sku_id: "server-44-point-0",
           size_eu: "44.0",
           price_rub: 25100,
-          price_version: "storefront:nike-gt-cut-academy",
+          price_version: "poizon-live-v1",
           available: true,
           checkout_confirmed: true,
           live_provider_verified: true,
@@ -349,7 +349,7 @@ describe("checkout catalogue v10", () => {
           sku_id,
           size_eu: "44",
           price_rub: 25100,
-          price_version: "storefront:nike-gt-cut-academy",
+          price_version: "poizon-live-v1",
           available: true,
           checkout_confirmed: true,
           live_provider_verified: true,
@@ -420,7 +420,7 @@ describe("checkout catalogue v10", () => {
       product_kind: "footwear",
       sku_id: "server-44",
       price_rub: 25100,
-      price_version: "storefront:nike-gt-cut-academy",
+      price_version: "poizon-live-v1",
       image_url: "https://kicksbase.ru/catalog/server.webp",
     })
     expect(payload.delivery).toEqual({
