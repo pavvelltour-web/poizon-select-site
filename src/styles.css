@@ -2810,6 +2810,16 @@ button:disabled,
 .live-poizon-search__total { color: var(--kb-accent); font-weight: 850; }
 .live-poizon-search__total { font-size: 1.55rem; }
 .live-poizon-search__fixed-until { font-size: .82rem; }
+.live-poizon-search__availability,
+.live-poizon-search__size-context,
+.live-poizon-search__size-chart { margin: 0; color: var(--kb-muted); font-size: .88rem; line-height: 1.45; }
+.live-poizon-search__availability { color: var(--kb-text-soft); font-weight: 750; }
+.live-poizon-search__size-image,
+.live-search-card__size-image { display: grid; gap: 6px; margin: 0; }
+.live-poizon-search__size-image img,
+.live-search-card__size-image img { width: min(100%, 520px); border: 1px solid var(--kb-line); border-radius: 10px; background: var(--kb-panel); }
+.live-poizon-search__size-image figcaption,
+.live-search-card__size-image figcaption { color: var(--kb-muted); font-size: .78rem; }
 .live-poizon-search__sizes { display: flex; flex-wrap: wrap; gap: 7px; }
 .live-poizon-search__sizes span { border: 1px solid var(--kb-line-strong); border-radius: 999px; padding: 6px 9px; color: var(--kb-text-soft); font-size: .82rem; font-weight: 700; }
 .live-poizon-search__breakdown { display: grid; gap: 6px; margin: 0; border-top: 1px solid var(--kb-line); padding-top: 12px; }
@@ -5233,12 +5243,18 @@ body {
 
 .live-search-card__article,
 .live-search-card__sizes,
+.live-search-card__availability,
 .live-search-card__description,
 .live-search-card__delivery {
   color: var(--kb-muted);
   font-size: 0.8rem;
   line-height: 1.4;
   overflow-wrap: anywhere;
+}
+
+.live-search-card__availability {
+  color: var(--kb-text-soft);
+  font-weight: 700;
 }
 
 .live-search-card__price {

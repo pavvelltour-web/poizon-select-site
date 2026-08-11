@@ -71,11 +71,6 @@ export interface LivePoizonPriceBreakdown {
 
 export interface LivePoizonOffer {
   size: string
-  eu: string | null
-  ru: string | null
-  us: string | null
-  cn: string | null
-  available: boolean | null
   quote_rub: number
   rf_delivery: number
   total_rub: number
@@ -91,6 +86,14 @@ export interface LivePoizonProduct {
   kind: "footwear" | "apparel" | "accessory"
   description: string | null
   images: string[]
+  /** Availability reported for the product by Poizon; never inferred from a size. */
+  in_stock?: boolean | null
+  /** Supplier-provided explanation for how to read the listed sizes. */
+  size_context?: string | null
+  /** Supplier-provided size-chart text. */
+  size_chart?: string | null
+  /** HTTPS size-chart image accepted by the client before rendering. */
+  size_image?: string | null
   offers: LivePoizonOffer[]
   observed_at: string
   expires_at: string

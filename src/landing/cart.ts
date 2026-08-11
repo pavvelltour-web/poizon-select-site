@@ -77,12 +77,6 @@ export interface CatalogSearchPriceBreakdown {
 
 export interface CatalogSearchOffer {
   size: string
-  eu: string | null
-  ru: string | null
-  us: string | null
-  cn: string | null
-  /** `null` means the supplier did not report stock for this size. */
-  available: boolean | null
   quoteRub: number
   rfDelivery: number
   totalRub: number
@@ -109,6 +103,14 @@ export interface CatalogSearchResult {
   kind: CatalogProduct["kind"]
   description: string | null
   images: readonly string[]
+  /** Availability reported by the supplier for the product as a whole. */
+  inStock: boolean | null
+  /** Supplier-provided explanation for the listed size values. */
+  sizeContext: string | null
+  /** Supplier-provided size-chart text. */
+  sizeChart: string | null
+  /** Validated HTTPS size-chart image. */
+  sizeImage: string | null
   observedAt: string
   expiresAt: string
   offers: readonly CatalogSearchOffer[]
@@ -246,7 +248,7 @@ function finitePositiveNumber(value: unknown): number | null {
 }
 
 // External search data is untrusted until its URL and quote metadata are validated.
-function safeHttpsUrl(value: unknown): string | null {
+export function safeHttpsUrl(value: unknown): string | null {
   const url = optionalString(value)
   if (!url) return null
 
@@ -353,8 +355,7 @@ function parseCatalogSearchResult(value: unknown): CatalogSearchResult | null {
     ? source.offers.flatMap((rawOffer): CatalogSearchOffer[] => {
       if (!rawOffer || typeof rawOffer !== "object") return []
       const offer = rawOffer as Record<string, unknown>
-      const size = optionalString(offer.size) ?? optionalString(offer.eu)
-      const available = typeof offer.available === "boolean" ? offer.available : null
+      const size = optionalString(offer.size)
       const quoteRub = finitePositiveNumber(offer.quote_rub)
       const rfDelivery = finitePositiveNumber(offer.rf_delivery)
       const totalRub = finitePositiveNumber(offer.total_rub)
@@ -366,18 +367,12 @@ function parseCatalogSearchResult(value: unknown): CatalogSearchResult | null {
         !quoteRub ||
         !rfDelivery ||
         !totalRub ||
-        available === false ||
         (offer.price_breakdown !== null && !priceBreakdown)
       ) {
         return []
       }
       return [{
         size,
-        eu: optionalString(offer.eu),
-        ru: optionalString(offer.ru),
-        us: optionalString(offer.us),
-        cn: optionalString(offer.cn),
-        available,
         quoteRub,
         rfDelivery,
         totalRub,
@@ -412,6 +407,10 @@ function parseCatalogSearchResult(value: unknown): CatalogSearchResult | null {
     kind: kind as CatalogProduct["kind"],
     description: optionalString(source.description),
     images,
+    inStock: typeof source.in_stock === "boolean" ? source.in_stock : null,
+    sizeContext: optionalString(source.size_context),
+    sizeChart: optionalString(source.size_chart),
+    sizeImage: safeHttpsUrl(source.size_image),
     observedAt,
     expiresAt,
     offers,

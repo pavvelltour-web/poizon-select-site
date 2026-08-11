@@ -94,6 +94,10 @@ describe("checkout catalogue v10", () => {
           kind: "footwear",
           description: "Белые кроссовки из натуральной кожи.",
           images: ["https://cdn.poizon.example/af1.webp"],
+          in_stock: true,
+          size_context: "Размеры указаны в системе Poizon.",
+          size_chart: "Сверьте длину стопы с таблицей производителя.",
+          size_image: "javascript:alert('unsafe')",
           observed_at: observedAt,
           expires_at: expiresAt,
           offers: [
@@ -133,7 +137,11 @@ describe("checkout catalogue v10", () => {
       article: "DV0788-104",
       color: "White / University Red",
       description: "Белые кроссовки из натуральной кожи.",
-      offers: [{ size: "42", ru: "41", totalRub: 17700, available: true }],
+      inStock: true,
+      sizeContext: "Размеры указаны в системе Poizon.",
+      sizeChart: "Сверьте длину стопы с таблицей производителя.",
+      sizeImage: null,
+      offers: [{ size: "42", totalRub: 17700 }, { size: "43", totalRub: 18200 }],
     })
     expect(parsed?.results[0]).not.toHaveProperty("providerProductId")
     expect(parsed?.results[0]).not.toHaveProperty("providerUrl")

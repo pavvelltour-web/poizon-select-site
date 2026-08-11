@@ -106,6 +106,10 @@ function readySearchPayload(normalizedQuery = "Nike Air Force 1") {
         kind: "footwear",
         description: null,
         images: ["https://cdn.poizon.example/air-force-1.webp"],
+        in_stock: true,
+        size_context: "Размеры указаны в системе Poizon.",
+        size_chart: "Сверьте длину стопы с таблицей производителя.",
+        size_image: "https://cdn.poizon.example/air-force-1-size-chart.webp",
         observed_at: observedAt,
         expires_at: expiresAt,
         offers: [
@@ -577,7 +581,11 @@ describe("LandingPage", () => {
     })
     expect(screen.getByText("Белые кроссовки из натуральной кожи.")).toBeInTheDocument()
     expect(screen.getByText("Чёрные кроссовки для повседневной носки.")).toBeInTheDocument()
-    expect(screen.getByText(/RU 41 · EU 42 · US 8\.5 · CN 265 · 17\s?700 ₽/)).toBeInTheDocument()
+    expect(screen.getByText(/Размер Poizon: 42 · 17\s?700 ₽/)).toBeInTheDocument()
+    expect(screen.queryByText(/RU 41 · EU 42 · US 8\.5 · CN 265/u)).toBeNull()
+    expect(screen.getAllByText("В наличии по данным Poizon.")).toHaveLength(2)
+    expect(screen.getAllByText("Размеры указаны в системе Poizon.")).toHaveLength(2)
+    expect(screen.getAllByText("Сверьте длину стопы с таблицей производителя.")).toHaveLength(2)
     expect(screen.getAllByRole("link", { name: "Выбрать в Telegram" })).toHaveLength(2)
     expect(document.body.textContent).not.toContain("¥")
     expect(document.body.textContent).not.toContain("SKU")
@@ -610,7 +618,12 @@ describe("LandingPage", () => {
     expect(await screen.findByText("Белые кроссовки из натуральной кожи.")).toBeInTheDocument()
     expect(screen.getByRole("img", { name: "Air Force 1 '07 White" }))
       .toHaveAttribute("src", "https://cdn.poizon.example/air-force-1.webp")
-    expect(screen.getByText(/RU 41 · EU 42 · US 8\.5 · CN 265 · 17\s?700 ₽/)).toBeInTheDocument()
+    expect(screen.getByText(/Размер Poizon: 42 · 17\s?700 ₽/)).toBeInTheDocument()
+    expect(screen.queryByText(/RU 41 · EU 42 · US 8\.5 · CN 265/u)).toBeNull()
+    expect(screen.getByText("В наличии по данным Poizon.")).toBeInTheDocument()
+    expect(screen.getByText("Размеры указаны в системе Poizon.")).toBeInTheDocument()
+    expect(screen.getByRole("img", { name: "Таблица размеров Poizon для Air Force 1 '07 White" }))
+      .toHaveAttribute("src", "https://cdn.poizon.example/air-force-1-size-chart.webp")
     expect(screen.getByRole("link", { name: "Выбрать и заказать в Telegram" }))
       .toHaveAttribute("href", "https://t.me/SelectBuyerBot?start=live_RFYwNzg4LTEwNA")
     expect(fetchMock.mock.calls).toContainEqual(expect.arrayContaining([

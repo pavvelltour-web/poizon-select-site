@@ -117,17 +117,19 @@ function isLiveOffer(value: unknown): value is LivePoizonOffer {
   const offer = value as Record<string, unknown>
   return (
     typeof offer.size === "string" &&
-    (typeof offer.eu === "string" || offer.eu === null) &&
-    (typeof offer.ru === "string" || offer.ru === null) &&
-    (typeof offer.us === "string" || offer.us === null) &&
-    (typeof offer.cn === "string" || offer.cn === null) &&
-    (typeof offer.available === "boolean" || offer.available === null) &&
-    offer.available !== false &&
     typeof offer.quote_rub === "number" &&
     typeof offer.rf_delivery === "number" &&
     typeof offer.total_rub === "number" &&
     (offer.price_breakdown === null || isPriceBreakdown(offer.price_breakdown))
   )
+}
+
+function isOptionalNullableText(value: unknown): boolean {
+  return value === undefined || value === null || typeof value === "string"
+}
+
+function isOptionalNullableBoolean(value: unknown): boolean {
+  return value === undefined || value === null || typeof value === "boolean"
 }
 
 function isLiveProduct(value: unknown): value is LivePoizonProduct {
@@ -142,6 +144,10 @@ function isLiveProduct(value: unknown): value is LivePoizonProduct {
     (product.kind === "footwear" || product.kind === "apparel" || product.kind === "accessory") &&
     (typeof product.description === "string" || product.description === null) &&
     Array.isArray(product.images) && product.images.every((image) => typeof image === "string") &&
+    isOptionalNullableBoolean(product.in_stock) &&
+    isOptionalNullableText(product.size_context) &&
+    isOptionalNullableText(product.size_chart) &&
+    isOptionalNullableText(product.size_image) &&
     Array.isArray(product.offers) && product.offers.every(isLiveOffer) &&
     typeof product.observed_at === "string" && typeof product.expires_at === "string"
   )

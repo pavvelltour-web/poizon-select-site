@@ -1,5 +1,6 @@
 import { LoaderCircle, Search } from "lucide-react"
 
+import { safeHttpsUrl } from "../cart"
 import { buildLiveProductTelegramBotUrl } from "../order-request"
 import type { LivePoizonOffer } from "../landing-types"
 import type { LandingStorefront } from "../use-landing-storefront"
@@ -28,13 +29,18 @@ function fixedUntil(value: string) {
 }
 
 function formatLiveSize(offer: LivePoizonOffer): string {
-  const labels = [
-    offer.ru ? `RU ${offer.ru}` : null,
-    offer.eu ? `EU ${offer.eu}` : null,
-    offer.us ? `US ${offer.us}` : null,
-    offer.cn ? `CN ${offer.cn}` : null,
-  ].filter((label): label is string => !!label)
-  return labels.length > 0 ? labels.join(" · ") : `Размер ${offer.size}`
+  return `Размер Poizon: ${offer.size}`
+}
+
+function populatedText(value: string | null | undefined): string | null {
+  const text = typeof value === "string" ? value.trim() : ""
+  return text || null
+}
+
+function stockLabel(inStock: boolean | null | undefined): string | null {
+  if (inStock === true) return "В наличии по данным Poizon."
+  if (inStock === false) return "Сейчас нет в наличии по данным Poizon."
+  return null
 }
 
 function PriceBreakdown({ offer }: { offer: LivePoizonOffer }) {
@@ -126,6 +132,10 @@ export function LivePoizonSearch({ storefront }: LivePoizonSearchProps) {
         <div className="live-poizon-search__results" aria-label="Результаты живого поиска Poizon">
           {storefront.liveSearchResults.map((product) => {
             const offers = product.offers
+            const availability = stockLabel(product.in_stock)
+            const sizeContext = populatedText(product.size_context)
+            const sizeChart = populatedText(product.size_chart)
+            const sizeImage = safeHttpsUrl(product.size_image)
             const lowestOffer = offers.reduce<LivePoizonOffer | null>(
               (lowest, offer) =>
                 !lowest || offer.total_rub < lowest.total_rub
@@ -161,6 +171,20 @@ export function LivePoizonSearch({ storefront }: LivePoizonSearchProps) {
                 {product.description ? <p>{product.description}</p> : null}
                 {product.article ? <p>Артикул: {product.article}</p> : null}
                 {product.color ? <p>Цвет: {product.color}</p> : null}
+                {availability ? <p className="live-poizon-search__availability">{availability}</p> : null}
+                {sizeContext ? <p className="live-poizon-search__size-context">{sizeContext}</p> : null}
+                {sizeChart ? <p className="live-poizon-search__size-chart">{sizeChart}</p> : null}
+                {sizeImage ? (
+                  <figure className="live-poizon-search__size-image">
+                    <img
+                      src={sizeImage}
+                      alt={`Таблица размеров Poizon для ${product.name}`}
+                      loading="lazy"
+                      referrerPolicy="no-referrer"
+                    />
+                    <figcaption>Таблица размеров от Poizon</figcaption>
+                  </figure>
+                ) : null}
                 <strong className="live-poizon-search__total">
                   от {formatRub(lowestOffer.total_rub)}
                 </strong>
@@ -171,7 +195,6 @@ export function LivePoizonSearch({ storefront }: LivePoizonSearchProps) {
                   {offers.map((offer) => (
                     <span key={`${product.product_ref}:${offer.size}`}>
                       {formatLiveSize(offer)} · {formatRub(offer.total_rub)}
-                      {offer.available === null ? " · наличие уточняется" : " · в наличии"}
                     </span>
                   ))}
                 </div>

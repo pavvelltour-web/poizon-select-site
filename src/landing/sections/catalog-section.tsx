@@ -330,13 +330,7 @@ function SearchResults({ state, botUsername, className }: SearchResultsProps) {
 }
 
 function formatSearchSize(offer: CatalogSearchOffer): string {
-  const labels = [
-    offer.ru ? `RU ${offer.ru}` : null,
-    offer.eu ? `EU ${offer.eu}` : null,
-    offer.us ? `US ${offer.us}` : null,
-    offer.cn ? `CN ${offer.cn}` : null,
-  ].filter((label): label is string => !!label)
-  return labels.length > 0 ? labels.join(" · ") : `Размер ${offer.size}`
+  return offer.size
 }
 
 function LiveSearchResultCard({
@@ -369,14 +363,29 @@ function LiveSearchResultCard({
       <div className="live-search-card__content">
         <p className="live-search-card__source">
           <BadgeCheck aria-hidden="true" size={16} />
-          Poizon · цена зафиксирована, наличие указано по данным источника
+          Poizon · цена зафиксирована
         </p>
         <h3>{title}</h3>
         {result.article ? <p className="live-search-card__article">Артикул: {result.article}</p> : null}
         {result.color ? <p className="live-search-card__article">Цвет: {result.color}</p> : null}
         {result.description ? <p className="live-search-card__description">{result.description}</p> : null}
+        {result.inStock === true ? <p className="live-search-card__availability">В наличии по данным Poizon.</p> : null}
+        {result.inStock === false ? <p className="live-search-card__availability">Сейчас нет в наличии по данным Poizon.</p> : null}
+        {result.sizeContext ? <p className="live-search-card__sizes">{result.sizeContext}</p> : null}
+        {result.sizeChart ? <p className="live-search-card__sizes">{result.sizeChart}</p> : null}
+        {result.sizeImage ? (
+          <figure className="live-search-card__size-image">
+            <img
+              src={result.sizeImage}
+              alt={`Таблица размеров Poizon для ${title}`}
+              loading="lazy"
+              referrerPolicy="no-referrer"
+            />
+            <figcaption>Таблица размеров от Poizon</figcaption>
+          </figure>
+        ) : null}
         <p className="live-search-card__sizes">
-          Доступные размеры: {sizes.join(", ")}
+          Размеры Poizon: {sizes.join(", ")}
         </p>
         <p className="live-search-card__price">
           <span>Итог от</span>
@@ -388,8 +397,7 @@ function LiveSearchResultCard({
         <div className="live-search-card__offers" aria-label={`Размеры и итоговые цены ${title}`}>
           {result.offers.map((offer) => (
             <span key={`${result.productRef}:${offer.size}`}>
-              {formatSearchSize(offer)} · {formatRub(offer.totalRub)}
-              {offer.available === null ? " · наличие уточняется" : " · в наличии"}
+              Размер Poizon: {formatSearchSize(offer)} · {formatRub(offer.totalRub)}
             </span>
           ))}
         </div>
