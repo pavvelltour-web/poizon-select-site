@@ -19,17 +19,10 @@ interface ProductCardProps {
   product: CatalogProduct
   catalogPoizonPrice: StorefrontPoizonPrice | null
   catalogPoizonPricesReady: boolean
-  catalogStatus: "loading" | "ready" | "failed"
   publishedOffer: PublishedCatalogItem | null
   favorite?: boolean
   onToggleFavorite?: (slug: string) => void
   onOpen?: (product: CatalogProduct, trigger: HTMLElement, preferredSize?: string) => void
-}
-
-function fallbackSizes(kind: CatalogProduct["kind"]): readonly string[] {
-  if (kind === "apparel") return ["XS", "S", "M", "L", "XL"]
-  if (kind === "accessory") return ["Один размер"]
-  return ["36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46"]
 }
 
 export function ProductCard({
@@ -37,7 +30,6 @@ export function ProductCard({
   product,
   catalogPoizonPrice,
   catalogPoizonPricesReady,
-  catalogStatus,
   publishedOffer,
   favorite = false,
   onToggleFavorite,
@@ -52,14 +44,18 @@ export function ProductCard({
   // Keep the second gallery image untouched for its own product-gallery position.
   const hoverImageIndex = product.kind === "footwear" ? 2 : 1
   const hoverImage = resolveAssetUrl(product.gallery[hoverImageIndex]?.src ?? product.image)
-  const sizes = publishedOffer?.sizes.length ? publishedOffer.sizes : fallbackSizes(product.kind)
+  // A storefront price chip is not stock data.  Never render the bundled
+  // catalogue size grid as if Poizon had confirmed it; only a server-verified
+  // offer may expose actionable sizes on a static catalogue card.
+  const sizes = publishedOffer?.liveProviderVerified && publishedOffer.sizes.length
+    ? publishedOffer.sizes
+    : []
   const cardSizes = (sizes.length >= 7 ? [sizes[2], sizes[4], sizes[6]] : sizes.slice(0, 3))
     .filter((size): size is string => Boolean(size))
-  const available = Boolean(catalogPoizonPrice) || catalogStatus !== "ready" ||
-    publishedOffer?.availability === "catalog_listed"
-  const eta = publishedOffer?.etaMinDays && publishedOffer.etaMaxDays
+  const sourceSizesConfirmed = cardSizes.length > 0 && publishedOffer?.availability === "catalog_listed"
+  const eta = sourceSizesConfirmed && publishedOffer?.etaMinDays && publishedOffer.etaMaxDays
     ? `Доставка ${publishedOffer.etaMinDays}–${publishedOffer.etaMaxDays} дней`
-    : "Доставка 10–18 дней"
+    : "Размеры и наличие уточнит Telegram"
 
   const openProduct = (event: MouseEvent<HTMLElement>, preferredSize?: string) => {
     if (!onOpen || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return
@@ -78,7 +74,7 @@ export function ProductCard({
         className="product-open product-card__link"
         href={getProductPath(product)}
         data-od-id={`open-product-${product.slug}`}
-        aria-label={`Открыть товар: ${product.brand} ${product.name}. Цена ${displayPrice}${available ? "" : ". Нет в продаже"}`}
+        aria-label={`Открыть товар: ${product.brand} ${product.name}. Цена ${displayPrice}. ${sourceSizesConfirmed ? "Размеры подтверждены источником" : "Размеры и наличие требуют проверки"}`}
         onClick={openProduct}
       >
         <span className={`product-media ${mediaReady ? "is-ready" : ""}`}>
@@ -115,7 +111,7 @@ export function ProductCard({
           <span className="product-price-row">
             <span className="product-price">{displayPrice}</span>
             <span className="product-supply">
-              {catalogPoizonPrice ? "Poizon · 12 часов" : available ? eta : "Проверяем Poizon"}
+              {catalogPoizonPrice ? "Poizon · цена на 12 часов" : eta}
             </span>
           </span>
         </span>
@@ -131,13 +127,17 @@ export function ProductCard({
         <Heart aria-hidden="true" />
       </button>
       <div className="card-sizes">
-        <span>Размеры {product.kind === "footwear" ? "EU" : ""}</span>
-        <div className="card-size-options">
-          {cardSizes.map((size) => (
-            <button className="card-size-button" key={size} type="button" data-od-id={`size-${product.slug}-${size.replaceAll(".", "-")}`} onClick={(event) => openProduct(event, size)}>{size}</button>
-          ))}
-          <button className="card-size-button card-size-button--all" type="button" data-od-id={`size-${product.slug}-all`} onClick={(event) => openProduct(event)}>Все</button>
-        </div>
+        <span>{sourceSizesConfirmed ? `Размеры ${product.kind === "footwear" ? "EU" : ""}` : "Размеры и наличие"}</span>
+        {sourceSizesConfirmed ? (
+          <div className="card-size-options">
+            {cardSizes.map((size) => (
+              <button className="card-size-button" key={size} type="button" data-od-id={`size-${product.slug}-${size.replaceAll(".", "-")}`} onClick={(event) => openProduct(event, size)}>{size}</button>
+            ))}
+            <button className="card-size-button card-size-button--all" type="button" data-od-id={`size-${product.slug}-all`} onClick={(event) => openProduct(event)}>Все</button>
+          </div>
+        ) : (
+          <p className="card-size-unverified">Уточнить в Telegram по живой карточке Poizon</p>
+        )}
       </div>
     </article>
   )

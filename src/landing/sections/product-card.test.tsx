@@ -1,4 +1,4 @@
-import { render } from "@testing-library/react"
+import { render, screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 
 import { findProductBySlug } from "../../catalog/catalog"
@@ -14,7 +14,6 @@ function renderCard(slug: string) {
       <ProductCard
         catalogPoizonPrice={null}
         catalogPoizonPricesReady={false}
-        catalogStatus="loading"
         featured={false}
         index={0}
         product={product}
@@ -25,6 +24,16 @@ function renderCard(slug: string) {
 }
 
 describe("ProductCard hover media", () => {
+  it("does not invent catalogue sizes or supplier stock from a price chip", () => {
+    const { product } = renderCard("nike-air-force-1-07-white")
+    const card = screen.getByText(`Кроссовки ${product.brand} ${product.name}`).closest("article")
+    if (!card) throw new Error("Product card was not rendered")
+
+    expect(card).toHaveTextContent("Уточнить в Telegram по живой карточке Poizon")
+    expect(card).not.toHaveTextContent("Размеры EU")
+    expect(card.querySelectorAll(".card-size-button")).toHaveLength(0)
+  })
+
   it("uses logical photo three for footwear without changing photo two", () => {
     const { container, product } = renderCard("nike-sabrina-3")
     const hover = container.querySelector<HTMLImageElement>(".product-pair img")

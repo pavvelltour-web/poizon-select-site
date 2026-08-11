@@ -63,6 +63,7 @@ function liveKd18Payload() {
       brand: "Nike",
       name: "KD 18",
       article: "KD-18",
+      color: "Black / Metallic Gold",
       kind: "footwear",
       description: null,
       images: ["https://cdn.poizon.example/kd-18.webp"],
@@ -71,6 +72,11 @@ function liveKd18Payload() {
       offers: [
         {
           size: "40",
+          eu: "40",
+          ru: "39",
+          us: "7",
+          cn: "250",
+          available: true,
           quote_rub: 31400,
           rf_delivery: 1000,
           total_rub: 32400,
@@ -78,6 +84,11 @@ function liveKd18Payload() {
         },
         {
           size: "42",
+          eu: "42",
+          ru: "41",
+          us: "8.5",
+          cn: "265",
+          available: null,
           quote_rub: 32900,
           rf_delivery: 1000,
           total_rub: 33900,
@@ -161,12 +172,15 @@ describe("approved Open Design product flow", () => {
     expect(within(dialog).queryByText(/EU - размер предложения/u)).toBeNull()
     expect(within(dialog).queryByText(/RU = EU - 1/u)).toBeNull()
     expect(within(dialog).queryByText(/Посадка зависит/u)).toBeNull()
-    expect(within(dialog).getByRole("button", {
+    // A provider-verified offer may show only its actual source sizes. The
+    // bundled catalogue's nearby EU values must not become fabricated,
+    // disabled "availability" buttons in the live card.
+    expect(within(dialog).queryByRole("button", {
       name: "40 RU, 41 EU. Цену размера уточнит Telegram-бот.",
-    })).toBeDisabled()
-    expect(within(dialog).getByRole("button", {
+    })).toBeNull()
+    expect(within(dialog).queryByRole("button", {
       name: "34,5 RU, 35.5 EU. Цену размера уточнит Telegram-бот.",
-    })).toBeDisabled()
+    })).toBeNull()
 
     const nextSize = within(dialog).getByRole("button", {
       name: "41 RU, 42 EU. Цену размера уточнит Telegram-бот.",

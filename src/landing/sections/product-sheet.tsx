@@ -80,10 +80,13 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
       (line) => line.product.slug === product.slug && line.size === storefront.selectedSize,
     ),
   )
+  const livePoizonQuote = Boolean(storefront.catalogPoizonPrices[product.slug])
   const sourcingMode = publishedOffer
     ? publishedOffer.fulfillmentMode === "in_stock"
       ? "В наличии в России"
       : "Под заказ из Китая"
+    : livePoizonQuote
+      ? "Цена Poizon зафиксирована, наличие уточняется"
     : storefront.catalogPriceState.status === "loading"
       ? "Проверяем данные"
       : "Недоступно для заказа"
@@ -249,24 +252,26 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
           >
             <div className="product-size__head">
               <strong>Размер: RU (EU)</strong>
-              <details className="product-size__guide">
-                <summary>Гайд размера</summary>
-                <div>
-                  <table aria-label="Таблица размеров RU и EU">
-                    <thead>
-                      <tr><th>RU</th><th>EU</th></tr>
-                    </thead>
-                    <tbody>
-                      {storefront.selectedSizeOffers.map((offer) => (
-                        <tr key={`guide-${offer.sizeEu}`}>
-                          <td>{offer.sizeRu ?? "—"}</td>
-                          <td>{offer.sizeEu}</td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </details>
+              {storefront.selectedSizeOffers.length > 0 ? (
+                <details className="product-size__guide">
+                  <summary>Гайд размера</summary>
+                  <div>
+                    <table aria-label="Таблица размеров RU и EU">
+                      <thead>
+                        <tr><th>RU</th><th>EU</th></tr>
+                      </thead>
+                      <tbody>
+                        {storefront.selectedSizeOffers.map((offer) => (
+                          <tr key={`guide-${offer.sizeEu}`}>
+                            <td>{offer.sizeRu ?? "—"}</td>
+                            <td>{offer.sizeEu}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </details>
+              ) : null}
             </div>
             <div className="size-price-grid" aria-label="Размеры и цены на выбор">
               {storefront.selectedSizeOffers.map((offer) => (
@@ -297,7 +302,9 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
                 {storefront.selectedSizeOfferError ?? "Размеры временно недоступны."}
               </p>
             ) : !storefront.selectedSizeOffers.some((offer) => offer.available) ? (
-              <p className="product-size__status sr-only" role="status">Актуальных предложений по размерам нет.</p>
+              <p className="product-size__status" role="status">
+                Размеры и наличие не подтверждены Poizon. Откройте Telegram: бот покажет живую карточку и доступные размеры.
+              </p>
             ) : null}
             {selectedSizeOffer && !selectedSizeOffer.checkoutConfirmed ? (
               <p className="product-size__status sr-only" role="status">
@@ -358,7 +365,7 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
           </section>
 
           <p className="product-sheet__fineprint">
-            Оплата доступна после подтверждения выбранного товара. Доставка СДЭК оплачивается отдельно.
+            Для живой карточки Poizon итог уже включает фиксированную доставку по РФ 1 000 ₽. Бот подтвердит товар, размер и наличие перед заказом.
           </p>
           <p className="product-sheet__order-proof">
             Оплата проходит на защищённой странице банка.

@@ -1,5 +1,5 @@
 import type { CatalogProduct } from "../catalog/catalog"
-import type { CatalogSearchOffer, CatalogSearchResult } from "./cart"
+import type { CatalogSearchResult } from "./cart"
 
 const telegramUsernamePattern = /^[A-Za-z][A-Za-z0-9_]{4,31}$/
 const telegramStartPayloadLimit = 64
@@ -73,37 +73,27 @@ export function buildOrderRequest(
   return size ? `${query}\nРазмер: ${size}` : query
 }
 
-function cleanProviderUrl(value: string): string | null {
-  const url = cleanLine(value)
-  try {
-    const parsed = new URL(url)
-    const allowedHosts = new Set(["poizon.com", "www.poizon.com", "dewu.com", "www.dewu.com"])
-    return parsed.protocol === "https:" && !parsed.username && !parsed.password && !parsed.port && allowedHosts.has(parsed.hostname.toLowerCase())
-      ? parsed.toString()
-      : null
-  } catch {
-    return null
+/**
+ * The bot must receive a customer-safe lookup, never a supplier URL, SKU or
+ * source price.  Prefer an article because it identifies the exact colourway;
+ * fall back to the readable card name and finally the AI-normalised query.
+ */
+export function buildLiveProductTelegramBotUrl(
+  username: string | null,
+  product: Pick<CatalogSearchResult, "article" | "brand" | "name">,
+  normalizedQuery: string | null,
+): string | null {
+  const candidates = [
+    product.article,
+    [product.brand, product.name].filter(Boolean).join(" "),
+    normalizedQuery,
+  ]
+
+  for (const candidate of candidates) {
+    const url = buildLiveSearchTelegramBotUrl(username, candidate ? cleanLine(candidate) : null)
+    if (url) return url
   }
-}
-
-export function buildLiveOrderRequest(
-  product: Pick<CatalogSearchResult, "article" | "brand" | "name" | "providerUrl" | "expiresAt">,
-  offer: Pick<CatalogSearchOffer, "skuId" | "size" | "priceCny" | "quoteRub">,
-): string {
-  const name = cleanLine([product.brand, product.name].filter(Boolean).join(" "))
-  const article = product.article ? cleanLine(product.article) : ""
-  const providerUrl = cleanProviderUrl(product.providerUrl)
-  const lines = [name]
-
-  if (article) lines.push(`Артикул: ${article}`)
-  if (providerUrl) lines.push(`Poizon: ${providerUrl}`)
-  lines.push(`Размер: ${cleanLine(offer.size)}`)
-  lines.push(`SKU Poizon: ${cleanLine(offer.skuId)}`)
-  lines.push(`Цена Poizon: ¥${offer.priceCny}`)
-  lines.push(`Котировка: ${offer.quoteRub} ₽`)
-  lines.push(`Действует до: ${cleanLine(product.expiresAt)}`)
-
-  return lines.join("\n")
+  return buildTelegramBotUrl(username)
 }
 
 export async function copyOrderRequest(text: string): Promise<boolean> {

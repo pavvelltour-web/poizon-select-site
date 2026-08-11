@@ -1,7 +1,7 @@
 import { Heart, Menu, Search, ShoppingBag, UserRound, X } from "lucide-react"
 import { useEffect, useMemo, useRef, useState, type RefObject } from "react"
 
-import { formatRub, publicCatalogProducts, type CatalogProduct } from "../../catalog/catalog"
+import { publicCatalogProducts, type CatalogProduct } from "../../catalog/catalog"
 import { getProductPath, getProductTypeLabel, resolveAssetUrl } from "../landing-data"
 import { useModalDialog } from "../use-modal-dialog"
 
@@ -438,7 +438,7 @@ export function Header({
                   }}
                 >
                   <strong>{getProductTypeLabel(product)} {product.brand} {product.name}</strong>
-                  <span>{product.orderQuote ? formatRub(product.orderQuote.totalRub) : "Открыть"}</span>
+                  <span>Открыть</span>
                 </button>
               ))}
               {searchQuery.trim().length >= 2 && searchResults.length === 0 ? <p className="empty-state">Ничего не нашли.</p> : null}

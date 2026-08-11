@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest"
 
 import { catalogProducts } from "../catalog/catalog"
 import {
-  buildLiveOrderRequest,
+  buildLiveProductTelegramBotUrl,
   buildLiveSearchTelegramBotUrl,
   buildOrderRequest,
   buildTelegramBotUrl,
@@ -52,23 +52,17 @@ describe("Telegram order handoff", () => {
     expect(request).not.toMatch(/[<>]/)
   })
 
-  it("keeps the live article and official provider URL in the Telegram handoff", () => {
-    const request = buildLiveOrderRequest({
+  it("uses the article for the live Telegram handoff without source details", () => {
+    const href = buildLiveProductTelegramBotUrl("MyBuyerBot", {
       brand: "Nike",
       name: "Air Force 1 '07 White",
       article: "DV0788-104",
-      providerUrl: "https://www.poizon.com/product/dv0788-104",
-      expiresAt: "2026-08-01T10:15:00Z",
-    }, {
-      skuId: "sku-42",
-      size: "42",
-      priceCny: 699,
-      quoteRub: 16_700,
-    })
+    }, "Nike Air Force 1")
 
-    expect(request).toBe(
-      "Nike Air Force 1 '07 White\nАртикул: DV0788-104\nPoizon: https://www.poizon.com/product/dv0788-104\nРазмер: 42\nSKU Poizon: sku-42\nЦена Poizon: ¥699\nКотировка: 16700 ₽\nДействует до: 2026-08-01T10:15:00Z",
-    )
+    expect(href).toBe("https://t.me/MyBuyerBot?start=live_RFYwNzg4LTEwNA")
+    expect(href).not.toContain("poizon.com")
+    expect(href).not.toContain("sku")
+    expect(href).not.toContain("%C2%A5")
   })
 
   it("keeps all 100 catalog handoffs unique, one-line and bot-ready", () => {

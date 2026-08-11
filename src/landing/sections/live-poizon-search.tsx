@@ -1,5 +1,6 @@
 import { LoaderCircle, Search } from "lucide-react"
 
+import { buildLiveProductTelegramBotUrl } from "../order-request"
 import type { LivePoizonOffer } from "../landing-types"
 import type { LandingStorefront } from "../use-landing-storefront"
 
@@ -24,6 +25,16 @@ function fixedUntil(value: string) {
     dateStyle: "short",
     timeStyle: "short",
   }).format(date)}`
+}
+
+function formatLiveSize(offer: LivePoizonOffer): string {
+  const labels = [
+    offer.ru ? `RU ${offer.ru}` : null,
+    offer.eu ? `EU ${offer.eu}` : null,
+    offer.us ? `US ${offer.us}` : null,
+    offer.cn ? `CN ${offer.cn}` : null,
+  ].filter((label): label is string => !!label)
+  return labels.length > 0 ? labels.join(" · ") : `Размер ${offer.size}`
 }
 
 function PriceBreakdown({ offer }: { offer: LivePoizonOffer }) {
@@ -117,13 +128,17 @@ export function LivePoizonSearch({ storefront }: LivePoizonSearchProps) {
             const offers = product.offers
             const lowestOffer = offers.reduce<LivePoizonOffer | null>(
               (lowest, offer) =>
-                !lowest || (offer.total_rub ?? offer.quote_rub + offer.rf_delivery) <
-                  (lowest.total_rub ?? lowest.quote_rub + lowest.rf_delivery)
+                !lowest || offer.total_rub < lowest.total_rub
                   ? offer
                   : lowest,
               null,
             )
             if (!lowestOffer) return null
+            const botHref = buildLiveProductTelegramBotUrl(
+              storefront.botUsername,
+              product,
+              storefront.liveSearchNormalizedQuery,
+            )
             return (
               <article
                 key={product.product_ref}
@@ -145,8 +160,9 @@ export function LivePoizonSearch({ storefront }: LivePoizonSearchProps) {
                 <h4>{[product.brand, product.name].filter(Boolean).join(" ")}</h4>
                 {product.description ? <p>{product.description}</p> : null}
                 {product.article ? <p>Артикул: {product.article}</p> : null}
+                {product.color ? <p>Цвет: {product.color}</p> : null}
                 <strong className="live-poizon-search__total">
-                  от {formatRub(lowestOffer.total_rub ?? lowestOffer.quote_rub + lowestOffer.rf_delivery)}
+                  от {formatRub(lowestOffer.total_rub)}
                 </strong>
                 <p className="live-poizon-search__fixed-until">
                   Цена и курс зафиксированы {fixedUntil(product.expires_at)}.
@@ -154,13 +170,14 @@ export function LivePoizonSearch({ storefront }: LivePoizonSearchProps) {
                 <div className="live-poizon-search__sizes" aria-label={`Размеры ${product.name}`}>
                   {offers.map((offer) => (
                     <span key={`${product.product_ref}:${offer.size}`}>
-                      {offer.size} · {formatRub(offer.total_rub ?? offer.quote_rub + offer.rf_delivery)}
+                      {formatLiveSize(offer)} · {formatRub(offer.total_rub)}
+                      {offer.available === null ? " · наличие уточняется" : " · в наличии"}
                     </span>
                   ))}
                 </div>
                 <PriceBreakdown offer={lowestOffer} />
-                {storefront.liveSearchBotUrl ? (
-                  <a className="button button--quiet" href={storefront.liveSearchBotUrl}>
+                {botHref ? (
+                  <a className="button button--quiet" href={botHref} target="_blank" rel="noreferrer">
                     Выбрать и заказать в Telegram
                   </a>
                 ) : null}

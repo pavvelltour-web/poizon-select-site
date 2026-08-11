@@ -41,7 +41,6 @@ import {
 import {
   findTaskMatches,
   getProductPath,
-  getSizeOptions,
   isCategory,
   isSort,
   readUrlState,
@@ -118,9 +117,15 @@ function isLiveOffer(value: unknown): value is LivePoizonOffer {
   const offer = value as Record<string, unknown>
   return (
     typeof offer.size === "string" &&
+    (typeof offer.eu === "string" || offer.eu === null) &&
+    (typeof offer.ru === "string" || offer.ru === null) &&
+    (typeof offer.us === "string" || offer.us === null) &&
+    (typeof offer.cn === "string" || offer.cn === null) &&
+    (typeof offer.available === "boolean" || offer.available === null) &&
+    offer.available !== false &&
     typeof offer.quote_rub === "number" &&
     typeof offer.rf_delivery === "number" &&
-    (typeof offer.total_rub === "number" || offer.total_rub === null) &&
+    typeof offer.total_rub === "number" &&
     (offer.price_breakdown === null || isPriceBreakdown(offer.price_breakdown))
   )
 }
@@ -133,6 +138,7 @@ function isLiveProduct(value: unknown): value is LivePoizonProduct {
     (typeof product.brand === "string" || product.brand === null) &&
     typeof product.name === "string" &&
     (typeof product.article === "string" || product.article === null) &&
+    (typeof product.color === "string" || product.color === null) &&
     (product.kind === "footwear" || product.kind === "apparel" || product.kind === "accessory") &&
     (typeof product.description === "string" || product.description === null) &&
     Array.isArray(product.images) && product.images.every((image) => typeof image === "string") &&
@@ -200,9 +206,8 @@ export function useLandingStorefront(
   const [selectedSizeOfferState, setSelectedSizeOfferState] = useState<{
     status: "idle" | "loading" | "ready" | "failed"
     productSlug: string | null
-    result: import("./cart").CatalogSearchResult | null
     error: string | null
-  }>({ status: "idle", productSlug: null, result: null, error: null })
+  }>({ status: "idle", productSlug: null, error: null })
   const [cartLines, setCartLines] = useState<CartLine[]>([])
   const [isCartOpen, setCartOpen] = useState(initialState.cartOpen)
   const [checkoutCustomer, setCheckoutCustomer] = useState<CheckoutCustomer>({
@@ -263,20 +268,20 @@ export function useLandingStorefront(
     (selectedProduct
       ? { src: selectedProduct.fallbackImage, alt: selectedProduct.name }
       : null)
-  const selectedLiveResult = selectedProduct &&
-    selectedSizeOfferState.productSlug === selectedProduct.slug
-    ? selectedSizeOfferState.result
-    : null
   const selectedSizeOffers = useMemo(
-    () => selectedProduct
-      ? buildProductSizeOffers(
-        getSizeOptions(selectedProduct),
+    () => {
+      if (!selectedProduct) return []
+      const publishedOffer = catalogPriceState.items[selectedProduct.slug]
+      // A bundled catalogue size is merely editorial metadata.  The sheet
+      // may show sizes only when the server explicitly marks them as provider
+      // verified, otherwise the customer must use the live Telegram flow.
+      return buildProductSizeOffers(
+        [],
         selectedProduct.brand,
-        selectedLiveResult,
-        catalogPriceState.items[selectedProduct.slug],
+        publishedOffer?.liveProviderVerified ? publishedOffer : undefined,
       )
-      : [],
-    [catalogPriceState.items, selectedLiveResult, selectedProduct],
+    },
+    [catalogPriceState.items, selectedProduct],
   )
   const selectedSizeOptions = selectedSizeOffers
     .filter((offer) => offer.available)
@@ -388,7 +393,9 @@ export function useLandingStorefront(
         onlinePaymentEnabled: nextPriceState.onlinePaymentEnabled,
         error: null,
       })
-      setCartLines((lines) => reconcileCartLines(lines, nextPriceState.items))
+      setCartLines((lines) => nextPriceState.orderCreationEnabled
+        ? reconcileCartLines(lines, nextPriceState.items)
+        : [])
       return nextPriceState
     } catch (error) {
       if (signal?.aborted) return null
@@ -492,7 +499,6 @@ export function useLandingStorefront(
       setSelectedSizeOfferState({
         status: "idle",
         productSlug: null,
-        result: null,
         error: null,
       })
       return
@@ -503,7 +509,6 @@ export function useLandingStorefront(
       // trigger a supplier lookup just because a customer opens a card.
       status: "ready",
       productSlug: selectedProduct.slug,
-      result: null,
       error: null,
     })
   }, [selectedProduct])

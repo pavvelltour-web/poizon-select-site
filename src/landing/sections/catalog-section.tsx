@@ -2,8 +2,6 @@ import {
   AlertCircle,
   BadgeCheck,
   ChevronDown,
-  Copy,
-  ExternalLink,
   MoveRight,
   RotateCcw,
   Send,
@@ -16,8 +14,12 @@ import {
   sortOptions,
   Search,
 } from "../landing-data"
-import { buildLiveOrderRequest, copyOrderRequest } from "../order-request"
-import type { CatalogSearchFallback, CatalogSearchResult } from "../cart"
+import { buildLiveProductTelegramBotUrl } from "../order-request"
+import type {
+  CatalogSearchFallback,
+  CatalogSearchOffer,
+  CatalogSearchResult,
+} from "../cart"
 import type { CatalogSearchState } from "../landing-types"
 import type { LandingStorefront } from "../use-landing-storefront"
 import { ProductCard } from "./product-card"
@@ -103,7 +105,6 @@ export function CatalogSection({
                 product={product}
                 catalogPoizonPrice={storefront.catalogPoizonPrices[product.slug] ?? null}
                 catalogPoizonPricesReady={storefront.catalogPoizonPricesReady}
-                catalogStatus={storefront.catalogPriceState.status}
                 publishedOffer={storefront.catalogPriceState.items[product.slug] ?? null}
                 featured={index < 2}
                 index={index}
@@ -129,7 +130,6 @@ export function CatalogSection({
         {storefront.search.trim().length >= 2 ? (
           <SearchResults
             state={storefront.catalogSearch}
-            botUrl={storefront.botUrl}
             botUsername={storefront.botUsername}
             className="catalog-live-search"
           />
@@ -149,7 +149,6 @@ export function CatalogSection({
                   product={product}
                   catalogPoizonPrice={storefront.catalogPoizonPrices[product.slug] ?? null}
                   catalogPoizonPricesReady={storefront.catalogPoizonPricesReady}
-                  catalogStatus={storefront.catalogPriceState.status}
                   publishedOffer={storefront.catalogPriceState.items[product.slug] ?? null}
                   featured={index < 2}
                   index={index}
@@ -241,7 +240,6 @@ function TaskFinder({ storefront }: CatalogSectionProps) {
             {storefront.taskInput.trim().length >= 2 ? (
               <SearchResults
                 state={storefront.taskSearch}
-                botUrl={storefront.botUrl}
                 botUsername={storefront.botUsername}
                 className="task-finder__results"
               />
@@ -255,12 +253,11 @@ function TaskFinder({ storefront }: CatalogSectionProps) {
 
 interface SearchResultsProps {
   state: CatalogSearchState
-  botUrl: string | null
   botUsername: string | null
   className: string
 }
 
-function SearchResults({ state, botUrl, botUsername, className }: SearchResultsProps) {
+function SearchResults({ state, botUsername, className }: SearchResultsProps) {
   if (state.status === "idle") return null
 
   const response = state.response
@@ -278,7 +275,8 @@ function SearchResults({ state, botUrl, botUsername, className }: SearchResultsP
             : null
   const showEmpty =
     state.status === "ready" &&
-    response?.status === "catalog" &&
+    response?.status === "ready" &&
+    liveResults.length === 0 &&
     state.fallback.length === 0
 
   return (
@@ -298,10 +296,10 @@ function SearchResults({ state, botUrl, botUsername, className }: SearchResultsP
         <div className="live-search__results" aria-live="polite">
           {liveResults.map((result) => (
             <LiveSearchResultCard
-              key={result.providerProductId}
+              key={result.productRef}
               result={result}
-              botUrl={botUrl}
               botUsername={botUsername}
+              normalizedQuery={response?.normalizedQuery ?? null}
             />
           ))}
         </div>
@@ -324,36 +322,38 @@ function SearchResults({ state, botUrl, botUsername, className }: SearchResultsP
 
       {showEmpty ? (
         <p className="live-search__empty" role="status">
-          В опубликованном каталоге по этому запросу ничего не найдено.
+          По Poizon по этому запросу ничего не найдено. Уточните модель или артикул.
         </p>
       ) : null}
     </div>
   )
 }
 
+function formatSearchSize(offer: CatalogSearchOffer): string {
+  const labels = [
+    offer.ru ? `RU ${offer.ru}` : null,
+    offer.eu ? `EU ${offer.eu}` : null,
+    offer.us ? `US ${offer.us}` : null,
+    offer.cn ? `CN ${offer.cn}` : null,
+  ].filter((label): label is string => !!label)
+  return labels.length > 0 ? labels.join(" · ") : `Размер ${offer.size}`
+}
+
 function LiveSearchResultCard({
   result,
-  botUrl,
   botUsername,
+  normalizedQuery,
 }: {
   result: CatalogSearchResult
-  botUrl: string | null
   botUsername: string | null
+  normalizedQuery: string | null
 }) {
-  const [copyState, setCopyState] = useState<"idle" | "copied" | "failed">("idle")
-  const [selectedSkuId, setSelectedSkuId] = useState(result.offers[0]?.skuId ?? "")
   const title = [result.brand, result.name].filter(Boolean).join(" ")
-  const sizes = [...new Set(result.offers.map((offer) => offer.size))]
-  const selectedOffer = result.offers.filter(function pickOffer(offer) { return offer.skuId === selectedSkuId })[0]
+  const sizes = [...new Set(result.offers.map(formatSearchSize))]
   const lowestOffer = result.offers.reduce((lowest, offer) =>
-    offer.quoteRub < lowest.quoteRub ? offer : lowest,
+    offer.totalRub < lowest.totalRub ? offer : lowest,
   )
-
-  const copyRequest = async () => {
-    if (!selectedOffer) return
-    const copied = await copyOrderRequest(buildLiveOrderRequest(result, selectedOffer))
-    setCopyState(copied ? "copied" : "failed")
-  }
+  const botHref = buildLiveProductTelegramBotUrl(botUsername, result, normalizedQuery)
 
   return (
     <article className="live-search-card" data-testid="live-search-result">
@@ -369,58 +369,43 @@ function LiveSearchResultCard({
       <div className="live-search-card__content">
         <p className="live-search-card__source">
           <BadgeCheck aria-hidden="true" size={16} />
-          Подтверждённая карточка Poizon
+          Poizon · цена зафиксирована, наличие указано по данным источника
         </p>
         <h3>{title}</h3>
         {result.article ? <p className="live-search-card__article">Артикул: {result.article}</p> : null}
+        {result.color ? <p className="live-search-card__article">Цвет: {result.color}</p> : null}
+        {result.description ? <p className="live-search-card__description">{result.description}</p> : null}
         <p className="live-search-card__sizes">
-          Проверенные размеры: {sizes.join(", ")}
+          Доступные размеры: {sizes.join(", ")}
         </p>
         <p className="live-search-card__price">
-          <span>от</span>
-          <strong>{formatRub(lowestOffer.quoteRub)}</strong>
+          <span>Итог от</span>
+          <strong>{formatRub(lowestOffer.totalRub)}</strong>
         </p>
-        <p className="live-search-card__provider-price">
-          Официальная цена: ¥{new Intl.NumberFormat("zh-CN", { maximumFractionDigits: 2 }).format(lowestOffer.priceCny)}
+        <p className="live-search-card__delivery">
+          Включая фиксированную доставку по РФ {formatRub(lowestOffer.rfDelivery)}.
         </p>
-        <label className="live-search-card__offer">
-          <span>Размер и предложение</span>
-          <select value={selectedSkuId} onChange={(event) => setSelectedSkuId(event.target.value)}>
-            {result.offers.map((offer) => (
-              <option key={offer.skuId} value={offer.skuId}>{offer.size} — {formatRub(offer.quoteRub)}</option>
-            ))}
-          </select>
-        </label>
+        <div className="live-search-card__offers" aria-label={`Размеры и итоговые цены ${title}`}>
+          {result.offers.map((offer) => (
+            <span key={`${result.productRef}:${offer.size}`}>
+              {formatSearchSize(offer)} · {formatRub(offer.totalRub)}
+              {offer.available === null ? " · наличие уточняется" : " · в наличии"}
+            </span>
+          ))}
+        </div>
         <div className="live-search-card__actions">
-          <a
-            className="button button--quiet"
-            href={result.providerUrl}
-            target="_blank"
-            rel="noreferrer"
-          >
-            Карточка Poizon
-            <ExternalLink aria-hidden="true" size={16} />
-          </a>
-          <button type="button" className="button button--quiet" onClick={() => void copyRequest()}>
-            <Copy aria-hidden="true" size={16} />
-            {copyState === "copied" ? "Запрос скопирован" : "Скопировать запрос"}
-          </button>
-          {botUrl ? (
+          {botHref ? (
             <a
               className="button button--primary"
-              href={botUrl}
+              href={botHref}
               target="_blank"
               rel="noreferrer"
-              onClick={() => void copyRequest()}
             >
               <Send aria-hidden="true" size={16} />
-              Открыть @{botUsername ?? "Telegram"}
+              Выбрать в Telegram
             </a>
           ) : null}
         </div>
-        <p className="sr-only" aria-live="polite">
-          {copyState === "copied" ? "Запрос с артикулом и ссылкой Poizon скопирован" : ""}
-        </p>
       </div>
     </article>
   )

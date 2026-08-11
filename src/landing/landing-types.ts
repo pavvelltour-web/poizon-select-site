@@ -71,9 +71,14 @@ export interface LivePoizonPriceBreakdown {
 
 export interface LivePoizonOffer {
   size: string
+  eu: string | null
+  ru: string | null
+  us: string | null
+  cn: string | null
+  available: boolean | null
   quote_rub: number
   rf_delivery: number
-  total_rub: number | null
+  total_rub: number
   price_breakdown: LivePoizonPriceBreakdown | null
 }
 
@@ -82,6 +87,7 @@ export interface LivePoizonProduct {
   brand: string | null
   name: string
   article: string | null
+  color: string | null
   kind: "footwear" | "apparel" | "accessory"
   description: string | null
   images: string[]

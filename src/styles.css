@@ -5206,7 +5206,8 @@ body {
 .live-search-card__article,
 .live-search-card__sizes,
 .live-search-card__price,
-.live-search-card__provider-price {
+.live-search-card__description,
+.live-search-card__delivery {
   margin: 0;
 }
 
@@ -5231,7 +5232,9 @@ body {
 }
 
 .live-search-card__article,
-.live-search-card__sizes {
+.live-search-card__sizes,
+.live-search-card__description,
+.live-search-card__delivery {
   color: var(--kb-muted);
   font-size: 0.8rem;
   line-height: 1.4;
@@ -5252,10 +5255,19 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-.live-search-card__provider-price {
-  color: var(--kb-muted);
-  font-size: 0.76rem;
-  line-height: 1.35;
+.live-search-card__offers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.live-search-card__offers span {
+  border: 1px solid var(--kb-line-strong);
+  border-radius: 999px;
+  padding: 5px 8px;
+  color: var(--kb-text-soft);
+  font-size: 0.74rem;
+  font-variant-numeric: tabular-nums;
 }
 
 .live-search-card__actions {
@@ -5339,7 +5351,9 @@ body {
 
 .task-finder__results .live-search-card__source,
 .task-finder__results .live-search-card__article,
-.task-finder__results .live-search-card__sizes {
+.task-finder__results .live-search-card__sizes,
+.task-finder__results .live-search-card__description,
+.task-finder__results .live-search-card__delivery {
   font-size: 0.72rem;
 }
 

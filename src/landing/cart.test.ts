@@ -5,7 +5,6 @@ import {
   addOrIncrementCartLine,
   buildProductSizeOffers,
   buildCheckoutPayload,
-  isCatalogSearchResultForProduct,
   parseCatalogSearch,
   parseCheckoutCatalog,
   reconcileCartLines,
@@ -79,7 +78,7 @@ describe("checkout catalogue v10", () => {
     })
   })
 
-  it("parses a verified live Poizon result without creating a checkout offer", () => {
+  it("parses the public Poizon search DTO without supplier IDs, URLs or CNY", () => {
     const observedAt = new Date(Date.now() - 60_000).toISOString()
     const expiresAt = new Date(Date.now() + 14 * 60_000).toISOString()
     const parsed = parseCatalogSearch({
@@ -87,23 +86,42 @@ describe("checkout catalogue v10", () => {
       normalized_query: "Nike Air Force 1 DV0788-104 42",
       results: [
         {
-          source: "poizon",
-          provider_product_id: "poizon-dv0788-104",
-          provider_url: "https://www.poizon.com/product/dv0788-104",
+          product_ref: "air-force-1-07-white",
           brand: "Nike",
           name: "Air Force 1 '07 White",
           article: "DV0788-104",
+          color: "White / University Red",
           kind: "footwear",
+          description: "Белые кроссовки из натуральной кожи.",
           images: ["https://cdn.poizon.example/af1.webp"],
           observed_at: observedAt,
           expires_at: expiresAt,
           offers: [
             {
-              sku_id: "sku-42",
               size: "42",
-              currency: "CNY",
-              price_cny: 699,
+              eu: "42",
+              ru: "41",
+              us: "8.5",
+              cn: "265",
+              available: true,
               quote_rub: 16700,
+              rf_delivery: 1000,
+              total_rub: 17700,
+              price_breakdown: null,
+              sku_id: "private-sku-that-must-not-reach-ui",
+              price_cny: 699,
+            },
+            {
+              size: "43",
+              eu: "43",
+              ru: "42",
+              us: "9",
+              cn: "270",
+              available: false,
+              quote_rub: 17200,
+              rf_delivery: 1000,
+              total_rub: 18200,
+              price_breakdown: null,
             },
           ],
         },
@@ -111,53 +129,24 @@ describe("checkout catalogue v10", () => {
     })
 
     expect(parsed?.results[0]).toMatchObject({
-      providerProductId: "poizon-dv0788-104",
+      productRef: "air-force-1-07-white",
       article: "DV0788-104",
-      providerUrl: "https://www.poizon.com/product/dv0788-104",
-      offers: [{ skuId: "sku-42", size: "42", priceCny: 699, quoteRub: 16700 }],
+      color: "White / University Red",
+      description: "Белые кроссовки из натуральной кожи.",
+      offers: [{ size: "42", ru: "41", totalRub: 17700, available: true }],
     })
+    expect(parsed?.results[0]).not.toHaveProperty("providerProductId")
+    expect(parsed?.results[0]).not.toHaveProperty("providerUrl")
+    expect(parsed?.results[0]?.offers[0]).not.toHaveProperty("skuId")
+    expect(parsed?.results[0]?.offers[0]).not.toHaveProperty("priceCny")
     expect(parsed?.fallback).toEqual([])
     expect(
       parseCatalogSearch({
         status: "ready",
         normalized_query: "Nike",
-        results: [{ source: "poizon", offers: [{ currency: "RUB" }] }],
+        results: [{ product_ref: "broken", offers: [{ total_rub: 12000 }] }],
       })?.results,
     ).toEqual([])
-  })
-
-  it("accepts the equivalent verified Dewu provider contract", () => {
-    const observedAt = new Date(Date.now() - 60_000).toISOString()
-    const expiresAt = new Date(Date.now() + 14 * 60_000).toISOString()
-    const parsed = parseCatalogSearch({
-      status: "ready",
-      normalized_query: "Nike KD 18",
-      results: [{
-        source: "dewu",
-        provider_product_id: "dewu-kd-18",
-        provider_url: "https://www.dewu.com/product/kd-18",
-        brand: "Nike",
-        name: "KD 18",
-        kind: "footwear",
-        images: ["https://cdn.poizon.example/kd-18.webp"],
-        observed_at: observedAt,
-        expires_at: expiresAt,
-        offers: [{
-          sku_id: "dewu-kd-42",
-          size: "42",
-          ru: "41",
-          currency: "CNY",
-          price_cny: 899,
-          quote_rub: 24900,
-        }],
-      }],
-    })
-
-    expect(parsed?.results[0]).toMatchObject({
-      source: "dewu",
-      providerProductId: "dewu-kd-18",
-      offers: [{ size: "42", sizeRu: "41" }],
-    })
   })
 
   it("parses the complete published offer and rejects a prices-only payload", () => {
@@ -184,83 +173,27 @@ describe("checkout catalogue v10", () => {
     expect(parseCheckoutCatalog({ version: "v1", prices: { shoe: 1 } })).toBeNull()
   })
 
-  it("accepts a selected live result only when its full identity matches", () => {
-    const product = publicCatalogProducts.find(
-      (candidate) => candidate.slug === "nike-gt-cut-academy",
-    )!
-    const observedAt = new Date(Date.now() - 60_000).toISOString()
-    const expiresAt = new Date(Date.now() + 14 * 60_000).toISOString()
-    const result = parseCatalogSearch({
-      status: "ready",
-      normalized_query: product.query,
-      results: [{
-        source: "poizon",
-        provider_product_id: "poizon-gt-cut-academy",
-        provider_url: "https://www.poizon.com/product/gt-cut-academy",
-        brand: "Nike",
-        name: "G.T. Cut Academy",
-        model: "G.T. Cut Academy",
-        article: "GT-CUT-ACADEMY",
-        kind: "footwear",
-        images: ["https://cdn.poizon.example/gt-cut.webp"],
-        observed_at: observedAt,
-        expires_at: expiresAt,
-        offers: [{
-          sku_id: "gt-cut-44",
-          size: "44",
-          currency: "CNY",
-          price_cny: 899,
-          quote_rub: 24500,
-        }],
-      }],
-    })!.results[0]!
+  it("accepts the disabled live-Poizon-only checkout response as an empty snapshot", () => {
+    const parsed = parseCheckoutCatalog({
+      catalog_mode: "live_poizon_only",
+      version: "live-poizon-only-v1",
+      order_creation_enabled: false,
+      online_payment_enabled: false,
+      items: [],
+      prices: {},
+    })
 
-    expect(isCatalogSearchResultForProduct(product, result)).toBe(true)
-    expect(isCatalogSearchResultForProduct(product, { ...result, brand: "Jordan" })).toBe(false)
-    expect(isCatalogSearchResultForProduct(product, { ...result, kind: "apparel" })).toBe(false)
-    expect(isCatalogSearchResultForProduct(product, { ...result, name: "Air Force 1 '07" })).toBe(false)
-    expect(isCatalogSearchResultForProduct(product, { ...result, model: "Air Force 1 '07" })).toBe(false)
-    expect(isCatalogSearchResultForProduct(product, { ...result, article: "DV0788-104" })).toBe(false)
+    expect(parsed).toEqual({
+      items: {},
+      lookup: {},
+      version: "live-poizon-only-v1",
+      personalDataConsentVersion: null,
+      orderCreationEnabled: false,
+      onlinePaymentEnabled: false,
+    })
   })
 
-  it("maps live per-size quotes and confirms checkout only by exact SKU, EU and RUB", () => {
-    const observedAt = new Date(Date.now() - 60_000).toISOString()
-    const expiresAt = new Date(Date.now() + 14 * 60_000).toISOString()
-    const live = parseCatalogSearch({
-      status: "ready",
-      normalized_query: "Nike KD 18 basketball volleyball",
-      results: [{
-        source: "poizon",
-        provider_product_id: "poizon-kd-18",
-        provider_url: "https://www.poizon.com/product/kd-18",
-        brand: "Nike",
-        name: "KD 18",
-        article: "KD-18",
-        kind: "footwear",
-        images: ["https://cdn.poizon.example/kd-18.webp"],
-        observed_at: observedAt,
-        expires_at: expiresAt,
-        offers: [
-          {
-            sku_id: "sku-42",
-            size: "42",
-            ru: "41.5",
-            us: "8.5",
-            cn: "265",
-            currency: "CNY",
-            price_cny: 899,
-            quote_rub: 24900,
-          },
-          {
-            sku_id: "sku-43",
-            size: "43",
-            currency: "CNY",
-            price_cny: 959,
-            quote_rub: 26900,
-          },
-        ],
-      }],
-    })
+  it("keeps the size matrix separate from live search metadata", () => {
     const checkout = parseCheckoutCatalog({
       ...catalogPayload,
       items: [{
@@ -292,7 +225,6 @@ describe("checkout catalogue v10", () => {
     const matrix = buildProductSizeOffers(
       ["42", "43", "44"],
       "Nike",
-      live!.results[0]!,
       checkout!.items["nike-gt-cut-academy"],
     )
 
@@ -300,7 +232,7 @@ describe("checkout catalogue v10", () => {
       expect.objectContaining({
         skuId: "sku-42",
         sizeEu: "42",
-        sizeRu: "41,5",
+        sizeRu: "41",
         priceRub: 24900,
         available: true,
         checkoutConfirmed: true,
@@ -309,7 +241,6 @@ describe("checkout catalogue v10", () => {
         skuId: "sku-43",
         sizeEu: "43",
         sizeRu: "42",
-        priceCny: null,
         priceRub: 27000,
         available: true,
         checkoutConfirmed: true,
