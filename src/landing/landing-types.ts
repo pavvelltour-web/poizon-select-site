@@ -84,6 +84,8 @@ export interface LivePoizonOffer {
   cn: string | null
   /** `null` means Poizon did not report stock for this size. */
   available: boolean | null
+  /** Source CNY price for this exact size, not the product-level floor. */
+  price_cny: number
   quote_rub: number
   rf_delivery: number
   total_rub: number

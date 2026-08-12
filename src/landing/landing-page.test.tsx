@@ -49,6 +49,7 @@ function checkoutCatalogPayload(
           sku_id: `gt-cut-${size}`,
           size_eu: size,
           size_ru: String(Number(size) - 1),
+          price_cny: 1800,
           price_rub: 24500,
           price_version: "poizon-live-v1",
           available: true,
@@ -102,6 +103,7 @@ function readyGtCutSearchPayload() {
         us: "10",
         cn: "280",
         available: true,
+        price_cny: 1800,
         quote_rub: 24500,
         rf_delivery: 1000,
         total_rub: 25500,
@@ -141,6 +143,7 @@ function readySearchPayload(normalizedQuery = "Nike Air Force 1") {
             us: "8.5",
             cn: "265",
             available: true,
+            price_cny: 699,
             quote_rub: 16700,
             rf_delivery: 1000,
             total_rub: 17700,
@@ -153,6 +156,7 @@ function readySearchPayload(normalizedQuery = "Nike Air Force 1") {
             us: null,
             cn: null,
             available: null,
+            price_cny: 730,
             quote_rub: 17300,
             rf_delivery: 1000,
             total_rub: 18300,
@@ -673,7 +677,7 @@ describe("LandingPage", () => {
     })
   })
 
-  it("renders several public Poizon cards with Russian details, sizes and RUB totals only", async () => {
+  it("renders several public cards with size-bound CNY and final RUB prices", async () => {
     const user = userEvent.setup()
     const first = readySearchPayload("Nike Air Force 1")
     const second = {
@@ -691,6 +695,7 @@ describe("LandingPage", () => {
         us: "8.5",
         cn: "265",
         available: true,
+        price_cny: 699,
         quote_rub: 16_900,
         rf_delivery: 1000,
         total_rub: 17_900,
@@ -718,15 +723,75 @@ describe("LandingPage", () => {
     })
     expect(screen.getByText("Белые кроссовки из натуральной кожи.")).toBeInTheDocument()
     expect(screen.getByText("Чёрные кроссовки для повседневной носки.")).toBeInTheDocument()
-    expect(screen.getByText(/RU 41 · EU 42 · US 8\.5 · CN 265 · 17\s?700 ₽ · в наличии/u)).toBeInTheDocument()
+    expect(screen.getByText(/RU 41 · EU 42 · US 8\.5 · CN 265 · ¥699 · 17\s?700 ₽ · в наличии/u)).toBeInTheDocument()
     expect(screen.getAllByText("В наличии по данным поставщика.")).toHaveLength(2)
     expect(screen.getAllByText("Размеры указаны поставщиком.")).toHaveLength(2)
     expect(screen.getAllByText("Сверьте длину стопы с таблицей производителя.")).toHaveLength(2)
     expect(screen.getAllByRole("link", { name: "Выбрать в Telegram" })).toHaveLength(2)
-    expect(document.body.textContent).not.toContain("¥")
+    expect(document.body.textContent).toContain("¥699")
     expect(document.body.textContent).not.toContain("SKU")
     expect(document.body.textContent).not.toContain("Карточка Poizon")
     expect(document.body.textContent).not.toContain("poizon.com/product")
+  })
+
+  it("keeps the source CNY and final RUB amount bound to each individual size", async () => {
+    const user = userEvent.setup()
+    const payload = readySearchPayload("Nike G.T. Hustle 3")
+    const fetchMock = vi.fn(async (url: string, options?: RequestInit) => ({
+      ok: true,
+      status: 200,
+      json: async () => url.endsWith("/api/catalog/search") && options?.method === "POST"
+        ? {
+          ...payload,
+          results: [{
+            ...payload.results[0],
+            product_ref: "gt-hustle-3-gray",
+            name: "G.T. Hustle 3 Gray",
+            offers: [
+              {
+                size: "44.5",
+                eu: "44.5",
+                ru: null,
+                us: null,
+                cn: null,
+                available: true,
+                price_cny: 612,
+                quote_rub: 10_361.87,
+                rf_delivery: 1_000,
+                total_rub: 11_361.87,
+                price_breakdown: null,
+              },
+              {
+                size: "45",
+                eu: "45",
+                ru: null,
+                us: null,
+                cn: null,
+                available: true,
+                price_cny: 2400,
+                quote_rub: 38_464.2,
+                rf_delivery: 1_000,
+                total_rub: 39_464.2,
+                price_breakdown: null,
+              },
+            ],
+          }],
+        }
+        : livePoizonOnlyCheckoutPayload(),
+    }))
+    vi.stubGlobal("fetch", fetchMock)
+    window.history.replaceState(null, "", "/catalog")
+    render(<LandingPage configuredBotUsername="@SelectBuyerBot" />)
+
+    await user.type(screen.getByRole("searchbox", { name: "Поиск по товарам" }), "G.T. Hustle 3")
+
+    await waitFor(() => {
+      expect(screen.getByTestId("live-search-result")).toBeInTheDocument()
+    })
+    expect(screen.getByText(/EU 44\.5 · ¥612 · 11\s?362 ₽ · в наличии/u)).toBeInTheDocument()
+    expect(screen.getByText(/EU 45 · ¥2\s?400 · 39\s?464 ₽ · в наличии/u)).toBeInTheDocument()
+    expect(screen.getByText("Цена зависит от размера.")).toBeInTheDocument()
+    expect(screen.getByText(/11\s?362 ₽–39\s?464 ₽/u)).toBeInTheDocument()
   })
 
   it("shows live Poizon photos, translated description and an article-safe Telegram handoff", async () => {
@@ -754,8 +819,9 @@ describe("LandingPage", () => {
     expect(await screen.findByText("Белые кроссовки из натуральной кожи.")).toBeInTheDocument()
     expect(screen.getByRole("img", { name: "Air Force 1 '07 White" }))
       .toHaveAttribute("src", "https://cdn.poizon.example/air-force-1.webp")
-    expect(screen.getByText(/RU 41 · EU 42 · US 8\.5 · CN 265 · 17\s?700 ₽ · в наличии/u)).toBeInTheDocument()
-    expect(screen.getByText(/Размер: 43 · 18\s?300 ₽ · наличие уточняется/u)).toBeInTheDocument()
+    expect(screen.getByText(/RU 41 · EU 42 · US 8\.5 · CN 265 · ¥699 · 17\s?700 ₽ · в наличии/u)).toBeInTheDocument()
+    expect(screen.getByText(/Размер: 43 · ¥730 · 18\s?300 ₽ · наличие уточняется/u)).toBeInTheDocument()
+    expect(screen.getByText("Цена зависит от размера.")).toBeInTheDocument()
     expect(screen.getByText("В наличии по данным поставщика.")).toBeInTheDocument()
     expect(screen.getByText("Размеры указаны поставщиком.")).toBeInTheDocument()
     expect(screen.getByRole("img", { name: "Таблица размеров для Air Force 1 '07 White" }))
@@ -1009,9 +1075,9 @@ describe("LandingPage", () => {
     window.history.replaceState(null, "", "/product/nike-gt-cut-academy")
     render(<LandingPage configuredBotUsername="@SelectBuyerBot" />)
 
-    await user.click(await screen.findByRole("button", {
-      name: "43 RU, 44 EU, 24 500 ₽. Цена зафиксирована на 12 часов.",
-    }))
+    const selectedSize = await screen.findByRole("button", { name: /43 RU, 44 EU/u })
+    expect(selectedSize).toHaveAttribute("aria-label", expect.stringMatching(/¥1.800/u))
+    await user.click(selectedSize)
     await user.click(screen.getByRole("button", { name: "Добавить в корзину" }))
     expect(screen.getByRole("dialog", { name: "Корзина" })).toBeInTheDocument()
     expect(fetchMock.mock.calls.some(

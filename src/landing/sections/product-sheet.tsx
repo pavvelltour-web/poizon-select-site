@@ -29,6 +29,12 @@ interface ProductSheetProps {
   storefront: StorefrontState
 }
 
+const cny = new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 0 })
+
+function formatCny(value: number): string {
+  return `¥${cny.format(value)}`
+}
+
 export function ProductSheet({ storefront }: ProductSheetProps) {
   const touchStartX = useRef<number | null>(null)
   const dialogRef = useRef<HTMLElement>(null)
@@ -289,7 +295,7 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
                   className="size-price-cell"
                   type="button"
                   data-od-id={`sheet-size-${product.slug}-${offer.sizeEu.replaceAll(".", "-")}`}
-                  aria-label={`${offer.sizeRu ?? "Размер RU не указан"} RU, ${offer.sizeEu} EU, ${formatRub(offer.priceRub ?? 0)}. Цена зафиксирована на 12 часов.`}
+                  aria-label={`${offer.sizeRu ?? "Размер RU не указан"} RU, ${offer.sizeEu} EU, ${offer.priceCny === null ? "цена в юанях уточняется" : formatCny(offer.priceCny)}, ${formatRub(offer.priceRub ?? 0)}. Цена зафиксирована на 12 часов.`}
                   aria-pressed={storefront.selectedSize === offer.sizeEu}
                   disabled={!offer.available}
                   onClick={() => storefront.setSelectedSize(offer.sizeEu)}
@@ -299,7 +305,12 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
                     <small>({offer.sizeEu})</small>
                   </span>
                   <span className="size-price-cell__price">
-                    {offer.priceRub === null ? "Уточняется" : formatRub(offer.priceRub)}
+                    {offer.priceRub === null ? "Уточняется" : (
+                      <>
+                        {offer.priceCny === null ? null : <small>{formatCny(offer.priceCny)}</small>}
+                        <strong>{formatRub(offer.priceRub)}</strong>
+                      </>
+                    )}
                   </span>
                 </button>
               ))}

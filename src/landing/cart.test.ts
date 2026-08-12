@@ -44,6 +44,7 @@ const catalogPayload = {
           sku_id: "server-43",
           size_eu: "43",
           size_ru: "42",
+          price_cny: 1800,
           price_rub: 25100,
           price_version: "poizon-live-v1",
           available: true,
@@ -54,6 +55,7 @@ const catalogPayload = {
           sku_id: "server-44",
           size_eu: "44",
           size_ru: "43",
+          price_cny: 1800,
           price_rub: 25100,
           price_version: "poizon-live-v1",
           available: true,
@@ -112,7 +114,7 @@ describe("checkout catalogue v10", () => {
     })
   })
 
-  it("parses the public Poizon search DTO without supplier IDs, URLs or CNY", () => {
+  it("parses a CNY source price only beside its exact public size quote", () => {
     const observedAt = new Date(Date.now() - 60_000).toISOString()
     const expiresAt = new Date(Date.now() + 14 * 60_000).toISOString()
     const parsed = parseCatalogSearch({
@@ -156,6 +158,7 @@ describe("checkout catalogue v10", () => {
               us: "9",
               cn: "270",
               available: false,
+              price_cny: 729,
               quote_rub: 17200,
               rf_delivery: 1000,
               total_rub: 18200,
@@ -175,12 +178,12 @@ describe("checkout catalogue v10", () => {
       sizeContext: "Размеры указаны в системе Poizon.",
       sizeChart: "Сверьте длину стопы с таблицей производителя.",
       sizeImage: null,
-      offers: [{ size: "42", ru: "41", totalRub: 17700, available: true }],
+      offers: [{ size: "42", ru: "41", priceCny: 699, totalRub: 17700, available: true }],
     })
     expect(parsed?.results[0]).not.toHaveProperty("providerProductId")
     expect(parsed?.results[0]).not.toHaveProperty("providerUrl")
     expect(parsed?.results[0]?.offers[0]).not.toHaveProperty("skuId")
-    expect(parsed?.results[0]?.offers[0]).not.toHaveProperty("priceCny")
+    expect(parsed?.results[0]?.offers[0]).toHaveProperty("priceCny", 699)
     expect(parsed?.fallback).toEqual([])
     expect(
       parseCatalogSearch({
@@ -263,6 +266,7 @@ describe("checkout catalogue v10", () => {
             size_ru: "41",
             size_us: "8.5",
             size_cn: "265",
+            price_cny: 1790,
             price_rub: 24900,
             price_version: "poizon-live-v1",
             available: true,
@@ -273,6 +277,7 @@ describe("checkout catalogue v10", () => {
             sku_id: "sku-43",
             size_eu: "43",
             size_ru: "42",
+            price_cny: 1900,
             price_rub: 27000,
             price_version: "poizon-live-v1",
             available: true,
@@ -296,6 +301,7 @@ describe("checkout catalogue v10", () => {
         sizeRu: "41",
         sizeUs: "8.5",
         sizeCn: "265",
+        priceCny: 1790,
         priceRub: 24900,
         available: true,
         checkoutConfirmed: true,
@@ -304,6 +310,7 @@ describe("checkout catalogue v10", () => {
         skuId: "sku-43",
         sizeEu: "43",
         sizeRu: "42",
+        priceCny: 1900,
         priceRub: 27000,
         available: true,
         checkoutConfirmed: true,
@@ -329,6 +336,7 @@ describe("checkout catalogue v10", () => {
         size_offers: [{
           sku_id: "unconfirmed-44",
           size_eu: "44",
+          price_cny: 1800,
           price_rub: 26900,
           price_version: "poizon-live-v1",
           available: true,
@@ -354,6 +362,7 @@ describe("checkout catalogue v10", () => {
         size_offers: [{
           sku_id: "server-44-point-0",
           size_eu: "44.0",
+          price_cny: 1800,
           price_rub: 25100,
           price_version: "poizon-live-v1",
           available: true,
@@ -370,6 +379,7 @@ describe("checkout catalogue v10", () => {
         size_offers: ["server-44-a", "server-44-b"].map((sku_id) => ({
           sku_id,
           size_eu: "44",
+          price_cny: 1800,
           price_rub: 25100,
           price_version: "poizon-live-v1",
           available: true,

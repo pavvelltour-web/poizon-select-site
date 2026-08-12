@@ -34,6 +34,8 @@ interface CatalogSectionProps {
 
 export const CATALOG_PAGE_SIZE = 24
 
+const cny = new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 0 })
+
 const approvedPopularSlugs = [
   "nike-kd-18",
   "nike-sabrina-3",
@@ -369,6 +371,20 @@ function formatSearchSize(offer: CatalogSearchOffer): string {
   return labels.length > 0 ? labels.join(" · ") : `Размер: ${offer.size}`
 }
 
+function formatSearchCny(value: number): string {
+  return `¥${cny.format(value)}`
+}
+
+function formatSearchRubRange(offers: readonly CatalogSearchOffer[]): string {
+  let minimum = offers[0]?.totalRub ?? 0
+  let maximum = minimum
+  for (const offer of offers.slice(1)) {
+    minimum = Math.min(minimum, offer.totalRub)
+    maximum = Math.max(maximum, offer.totalRub)
+  }
+  return minimum === maximum ? formatRub(minimum) : `${formatRub(minimum)}–${formatRub(maximum)}`
+}
+
 function LiveSearchResultCard({
   result,
   botUsername,
@@ -380,9 +396,8 @@ function LiveSearchResultCard({
 }) {
   const title = [result.brand, result.name].filter(Boolean).join(" ")
   const sizes = [...new Set(result.offers.map(formatSearchSize))]
-  const lowestOffer = result.offers.reduce((lowest, offer) =>
-    offer.totalRub < lowest.totalRub ? offer : lowest,
-  )
+  const firstOffer = result.offers[0]
+  if (!firstOffer) return null
   const botHref = buildLiveProductTelegramBotUrl(botUsername, result, normalizedQuery)
 
   return (
@@ -424,16 +439,17 @@ function LiveSearchResultCard({
           Варианты размеров: {sizes.join(", ")}
         </p>
         <p className="live-search-card__price">
-          <span>Итог от</span>
-          <strong>{formatRub(lowestOffer.totalRub)}</strong>
+          <span>Итог по размеру</span>
+          <strong>{formatSearchRubRange(result.offers)}</strong>
         </p>
+        {result.offers.length > 1 ? <p className="live-search-card__delivery">Цена зависит от размера.</p> : null}
         <p className="live-search-card__delivery">
-          Включая фиксированную доставку по РФ {formatRub(lowestOffer.rfDelivery)}.
+          В итог включена фиксированная доставка по РФ {formatRub(firstOffer.rfDelivery)}.
         </p>
         <div className="live-search-card__offers" aria-label={`Размеры и итоговые цены ${title}`}>
           {result.offers.map((offer) => (
             <span key={`${result.productRef}:${offer.size}`}>
-              {formatSearchSize(offer)} · {formatRub(offer.totalRub)}
+              {formatSearchSize(offer)} · {formatSearchCny(offer.priceCny)} · {formatRub(offer.totalRub)}
               {offer.available === true
                 ? " · в наличии"
                 : offer.available === false

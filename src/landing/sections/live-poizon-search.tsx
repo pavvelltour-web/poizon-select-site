@@ -19,6 +19,22 @@ function formatRub(value: number) {
   return rub.format(value)
 }
 
+const cny = new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 0 })
+
+function formatCny(value: number) {
+  return `¥${cny.format(value)}`
+}
+
+function formatRubRange(offers: readonly LivePoizonOffer[]): string {
+  let minimum = offers[0]?.total_rub ?? 0
+  let maximum = minimum
+  for (const offer of offers.slice(1)) {
+    minimum = Math.min(minimum, offer.total_rub)
+    maximum = Math.max(maximum, offer.total_rub)
+  }
+  return minimum === maximum ? formatRub(minimum) : `${formatRub(minimum)}–${formatRub(maximum)}`
+}
+
 function formatLiveSize(offer: LivePoizonOffer): string {
   const labels = [
     offer.ru ? `RU ${offer.ru}` : null,
@@ -103,8 +119,8 @@ export function LivePoizonSearch({ storefront }: LivePoizonSearchProps) {
           <h3 id="live-poizon-search-title">Проверьте цену модели, которой нет в витрине.</h3>
         </div>
         <p>
-          Проверяем товары через наш сервер. Показываем только итог в ₽ по
-          единой формуле для сайта и Telegram.
+          Проверяем товары через наш сервер. Для каждого размера показываем
+          исходную цену в ¥ и итог в ₽ по единой формуле для сайта и Telegram.
         </p>
       </div>
 
@@ -178,14 +194,7 @@ export function LivePoizonSearch({ storefront }: LivePoizonSearchProps) {
             const sizeImages = [...new Set(
               [sizeImage, sizeChartImage].filter((image): image is string => Boolean(image)),
             )]
-            const lowestOffer = offers.reduce<LivePoizonOffer | null>(
-              (lowest, offer) =>
-                !lowest || offer.total_rub < lowest.total_rub
-                  ? offer
-                  : lowest,
-              null,
-            )
-            if (!lowestOffer) return null
+            if (offers.length === 0) return null
             const botHref = buildLiveProductTelegramBotUrl(
               storefront.botUsername,
               product,
@@ -228,8 +237,9 @@ export function LivePoizonSearch({ storefront }: LivePoizonSearchProps) {
                   </figure>
                 ))}
                 <strong className="live-poizon-search__total">
-                  от {formatRub(lowestOffer.total_rub)}
+                  Итог по размеру: {formatRubRange(offers)}
                 </strong>
+                {offers.length > 1 ? <p>Цена зависит от размера.</p> : null}
                 <p className="live-poizon-search__fixed-until">
                   Цена и курс получены по текущему запросу. Перед оформлением
                   выбранный размер перепроверяется.
@@ -237,12 +247,12 @@ export function LivePoizonSearch({ storefront }: LivePoizonSearchProps) {
                 <div className="live-poizon-search__sizes" aria-label={`Размеры ${product.name}`}>
                   {offers.map((offer) => (
                     <span key={`${product.product_ref}:${offer.size}`}>
-                      {formatLiveSize(offer)} · {formatRub(offer.total_rub)}
+                      {formatLiveSize(offer)} · {formatCny(offer.price_cny)} · {formatRub(offer.total_rub)}
                       {offerStockLabel(offer)}
                     </span>
                   ))}
                 </div>
-                <PriceBreakdown offer={lowestOffer} />
+                {offers.length === 1 ? <PriceBreakdown offer={offers[0]} /> : null}
                 {botHref ? (
                   <a className="button button--quiet" href={botHref} target="_blank" rel="noreferrer">
                     Выбрать и заказать в Telegram

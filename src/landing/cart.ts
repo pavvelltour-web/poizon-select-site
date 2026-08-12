@@ -53,6 +53,8 @@ export interface PublishedSizeOffer {
   sizeRu: string | null
   sizeUs: string | null
   sizeCn: string | null
+  /** Source CNY amount for this exact 12-hour snapshot SKU. */
+  priceCny: number
   priceRub: number
   priceVersion: string
   available: boolean
@@ -68,8 +70,8 @@ export type PublishedCatalogMap = Record<string, PublishedCatalogItem>
 export type CatalogSearchStatus = "catalog" | "ready" | "clarification" | "unavailable"
 
 /**
- * Public search DTO.  Supplier identifiers and CNY amounts deliberately do
- * not cross the CRM → browser boundary.
+ * Public search DTO. Supplier identifiers never cross the CRM → browser
+ * boundary; the CNY source price is shown only beside its exact size quote.
  */
 export interface CatalogSearchPriceBreakdown {
   purchaseRub: number
@@ -91,6 +93,8 @@ export interface CatalogSearchOffer {
   cn: string | null
   /** `null` means the supplier did not report stock for this size. */
   available: boolean | null
+  /** Source CNY price for this exact size; required with the final RUB quote. */
+  priceCny: number
   quoteRub: number
   rfDelivery: number
   totalRub: number
@@ -103,6 +107,7 @@ export interface ProductSizeOffer {
   sizeRu: string | null
   sizeUs: string | null
   sizeCn: string | null
+  priceCny: number | null
   priceRub: number | null
   available: boolean
   checkoutConfirmed: boolean
@@ -383,6 +388,7 @@ function parseCatalogSearchResult(value: unknown): CatalogSearchResult | null {
       const offer = rawOffer as Record<string, unknown>
       const size = optionalString(offer.size) ?? optionalString(offer.eu)
       const available = typeof offer.available === "boolean" ? offer.available : null
+      const priceCny = finitePositiveNumber(offer.price_cny)
       const quoteRub = finitePositiveNumber(offer.quote_rub)
       const rfDelivery = finitePositiveNumber(offer.rf_delivery)
       const totalRub = finitePositiveNumber(offer.total_rub)
@@ -391,6 +397,7 @@ function parseCatalogSearchResult(value: unknown): CatalogSearchResult | null {
         : parseCatalogSearchPriceBreakdown(offer.price_breakdown)
       if (
         !size ||
+        !priceCny ||
         !quoteRub ||
         !rfDelivery ||
         !totalRub ||
@@ -406,6 +413,7 @@ function parseCatalogSearchResult(value: unknown): CatalogSearchResult | null {
         us: optionalString(offer.us),
         cn: optionalString(offer.cn),
         available,
+        priceCny,
         quoteRub,
         rfDelivery,
         totalRub,
@@ -644,12 +652,14 @@ export function parseCheckoutCatalog(payload: unknown): CheckoutCatalogSnapshot 
         const offer = rawOffer as Record<string, unknown>
         const skuId = optionalString(offer.sku_id)
         const sizeEu = optionalString(offer.size_eu) ?? optionalString(offer.size)
+        const priceCny = finitePositiveNumber(offer.price_cny)
         const price = finitePositiveNumber(offer.price_rub)
         const offerAvailable = offer.available === true
         const offerPriceVersion = optionalString(offer.price_version)
         if (
           !skuId ||
           !sizeEu ||
+          !priceCny ||
           !price ||
           !offerAvailable ||
           offer.checkout_confirmed !== true ||
@@ -664,6 +674,7 @@ export function parseCheckoutCatalog(payload: unknown): CheckoutCatalogSnapshot 
           sizeRu: optionalString(offer.size_ru) ?? optionalString(offer.ru),
           sizeUs: optionalString(offer.size_us) ?? optionalString(offer.us),
           sizeCn: optionalString(offer.size_cn) ?? optionalString(offer.cn),
+          priceCny,
           priceRub: price,
           priceVersion: offerPriceVersion,
           available: true,
@@ -816,6 +827,7 @@ export function buildProductSizeOffers(
       sizeRu: checkoutOffer.sizeRu,
       sizeUs: checkoutOffer.sizeUs,
       sizeCn: checkoutOffer.sizeCn,
+      priceCny: checkoutOffer.priceCny,
       priceRub: checkoutOffer.priceRub,
       available: true,
       checkoutConfirmed: true,

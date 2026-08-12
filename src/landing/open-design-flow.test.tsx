@@ -39,6 +39,7 @@ function checkoutCatalogPayload() {
             sku_id: "kd-18-40",
             size_eu: "40",
             size_ru: "39",
+            price_cny: 1800,
             price_rub: 31400,
             price_version: "poizon-live-v1",
             available: true,
@@ -49,6 +50,7 @@ function checkoutCatalogPayload() {
             sku_id: "kd-18-42",
             size_eu: "42",
             size_ru: "41",
+            price_cny: 1900,
             price_rub: 32900,
             price_version: "poizon-live-v1",
             available: true,
@@ -86,6 +88,7 @@ function liveKd18Payload() {
           us: "7",
           cn: "250",
           available: true,
+          price_cny: 1800,
           quote_rub: 31400,
           rf_delivery: 1000,
           total_rub: 32400,
@@ -98,6 +101,7 @@ function liveKd18Payload() {
           us: "8.5",
           cn: "265",
           available: null,
+          price_cny: 1900,
           quote_rub: 32900,
           rf_delivery: 1000,
           total_rub: 33900,
@@ -173,8 +177,9 @@ describe("approved Open Design product flow", () => {
       dialog.querySelectorAll<HTMLImageElement>(".sheet-gallery-thumb img")[3]?.getAttribute("src"),
     ).toContain(`${approvedRoot}/nike-kd-18/04-rear.png`)
     const selectedSize = await within(dialog).findByRole("button", {
-      name: "39 RU, 40 EU, 31 400 ₽. Цена зафиксирована на 12 часов.",
+      name: /39 RU, 40 EU/u,
     })
+    expect(selectedSize).toHaveAttribute("aria-label", expect.stringMatching(/¥1.800/u))
     expect(selectedSize).toHaveAttribute("aria-pressed", "true")
     expect(within(dialog).getByText("Размер: RU (EU)")).toBeInTheDocument()
     expect(within(dialog).getByText("Гайд размера")).toBeInTheDocument()
@@ -185,15 +190,16 @@ describe("approved Open Design product flow", () => {
     // bundled catalogue's nearby EU values must not become fabricated,
     // disabled "availability" buttons in the live card.
     expect(within(dialog).queryByRole("button", {
-      name: "40 RU, 41 EU, 31 400 ₽. Цена зафиксирована на 12 часов.",
+      name: "40 RU, 41 EU, ¥1 800, 31 400 ₽. Цена зафиксирована на 12 часов.",
     })).toBeNull()
     expect(within(dialog).queryByRole("button", {
-      name: "34,5 RU, 35.5 EU, 31 400 ₽. Цена зафиксирована на 12 часов.",
+      name: "34,5 RU, 35.5 EU, ¥1 800, 31 400 ₽. Цена зафиксирована на 12 часов.",
     })).toBeNull()
 
     const nextSize = within(dialog).getByRole("button", {
-      name: "41 RU, 42 EU, 32 900 ₽. Цена зафиксирована на 12 часов.",
+      name: /41 RU, 42 EU/u,
     })
+    expect(nextSize).toHaveAttribute("aria-label", expect.stringMatching(/¥1.900/u))
     await user.click(nextSize)
     expect(nextSize).toHaveAttribute("aria-pressed", "true")
     expect(within(dialog).getAllByText("32 900 ₽").length).toBeGreaterThan(1)

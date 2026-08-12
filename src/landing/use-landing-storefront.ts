@@ -126,6 +126,9 @@ function isLiveOffer(value: unknown): value is LivePoizonOffer {
     (typeof offer.cn === "string" || offer.cn === null) &&
     (typeof offer.available === "boolean" || offer.available === null) &&
     offer.available !== false &&
+    typeof offer.price_cny === "number" &&
+    Number.isFinite(offer.price_cny) &&
+    offer.price_cny > 0 &&
     typeof offer.quote_rub === "number" &&
     typeof offer.rf_delivery === "number" &&
     typeof offer.total_rub === "number" &&
