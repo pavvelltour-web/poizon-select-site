@@ -616,11 +616,11 @@
         border-color: var(--fg);
         transform: translateY(-2px);
       }
-      .product-card:hover .product-media > img {
+      .product-card:hover .product-media.is-hover-ready > img {
         opacity: 0;
         transform: scale(0.96);
       }
-      .product-card:hover .product-pair {
+      .product-card:hover .product-media.is-hover-ready .product-pair {
         opacity: 1;
       }
       .product-card:hover .card-sizes {

@@ -1,7 +1,8 @@
 import { Heart } from "lucide-react"
-import { useState, type MouseEvent } from "react"
+import { useState, type MouseEvent, type PointerEvent } from "react"
 
 import type { CatalogProduct } from "../../catalog/catalog"
+import { getCardThumbnailUrl } from "../../catalog/card-thumbnail-versions"
 import type { CatalogPriceMap, PublishedCatalogItem } from "../cart"
 import {
   getDisplayPrice,
@@ -42,12 +43,22 @@ export function ProductCard({
 }: ProductCardProps) {
   const price = getDisplayPrice(product, catalogPriceLookup)
   const [mediaReady, setMediaReady] = useState(false)
+  const [hoverRequested, setHoverRequested] = useState(false)
+  const [hoverReady, setHoverReady] = useState(false)
   const displayPrice = price.value
   const primaryImage = resolveAssetUrl(product.image)
   // The third frame is the canonical front three-quarter pair view for footwear.
   // Keep the second gallery image untouched for its own product-gallery position.
   const hoverImageIndex = product.kind === "footwear" ? 2 : 1
   const hoverImage = resolveAssetUrl(product.gallery[hoverImageIndex]?.src ?? product.image)
+  const thumbnail = (position: number, width: number) =>
+    resolveAssetUrl(getCardThumbnailUrl(product.slug, position, width))
+  const primaryThumbnail640 = thumbnail(1, 640)
+  const primaryThumbnail960 = thumbnail(1, 960)
+  const primaryThumbnail1280 = thumbnail(1, 1280)
+  const hoverThumbnail640 = thumbnail(hoverImageIndex + 1, 640)
+  const hoverThumbnail960 = thumbnail(hoverImageIndex + 1, 960)
+  const hoverThumbnail1280 = thumbnail(hoverImageIndex + 1, 1280)
   const sizes = publishedOffer?.sizes.length ? publishedOffer.sizes : fallbackSizes(product.kind)
   const cardSizes = (sizes.length >= 7 ? [sizes[2], sizes[4], sizes[6]] : sizes.slice(0, 3))
     .filter((size): size is string => Boolean(size))
@@ -68,6 +79,14 @@ export function ProductCard({
     onOpen(product, event.currentTarget, preferredSize)
   }
 
+  const requestHover = () => {
+    if (hoverImage !== primaryImage) setHoverRequested(true)
+  }
+
+  const requestHoverOnPointer = (event: PointerEvent<HTMLAnchorElement>) => {
+    if (event.pointerType === "mouse" || event.pointerType === "pen") requestHover()
+  }
+
   return (
     <article
       className="product-card product-card--normalized"
@@ -81,15 +100,20 @@ export function ProductCard({
         data-od-id={`open-product-${product.slug}`}
         aria-label={`Открыть товар: ${product.brand} ${product.name}. Цена ${displayPrice}${available ? "" : ". Нет в продаже"}`}
         onClick={openProduct}
+        onFocus={requestHover}
+        onPointerEnter={requestHoverOnPointer}
       >
-        <span className={`product-media ${mediaReady ? "is-ready" : ""}`}>
+        <span className={`product-media ${mediaReady ? "is-ready" : ""} ${hoverReady ? "is-hover-ready" : ""}`}>
           {index < 2 ? <span className="badge-stack"><span className="product-badge badge-choice">Выбор клиентов</span></span> : null}
           <img
             className="product-card__image"
-            src={primaryImage}
+            src={primaryThumbnail640}
+            srcSet={`${primaryThumbnail640} 640w, ${primaryThumbnail960} 960w, ${primaryThumbnail1280} 1280w`}
+            sizes="(max-width: 620px) 50vw, (max-width: 980px) 33vw, (max-width: 1680px) 25vw, 20vw"
             width="1600"
             height="1200"
-            loading="lazy"
+            loading={index < 4 ? "eager" : "lazy"}
+            fetchPriority={index < 2 ? "high" : "auto"}
             decoding="async"
             alt=""
             onLoad={() => setMediaReady(true)}
@@ -99,14 +123,19 @@ export function ProductCard({
             }}
           />
           <span className="product-pair" aria-hidden="true" data-hover-frame={hoverImageIndex + 1}>
-            <img
-              src={hoverImage}
-              width="1600"
-              height="1200"
-              alt=""
-              loading="lazy"
-              onError={(event) => setImageFallback(event, product.fallbackImage)}
-            />
+            {hoverRequested ? (
+              <img
+                src={hoverThumbnail640}
+                srcSet={`${hoverThumbnail640} 640w, ${hoverThumbnail960} 960w, ${hoverThumbnail1280} 1280w`}
+                sizes="(max-width: 620px) 50vw, (max-width: 980px) 33vw, (max-width: 1680px) 25vw, 20vw"
+                width="1600"
+                height="1200"
+                alt=""
+                decoding="async"
+                onLoad={() => setHoverReady(true)}
+                onError={(event) => setImageFallback(event, product.fallbackImage)}
+              />
+            ) : null}
           </span>
         </span>
         <span className="product-info">

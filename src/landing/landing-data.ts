@@ -183,9 +183,12 @@ export function setImageFallback(
   event: SyntheticEvent<HTMLImageElement>,
   fallbackImage: string,
 ) {
+  const image = event.currentTarget
   const fallbackUrl = resolveAssetUrl(fallbackImage)
-  if (event.currentTarget.getAttribute("src") === fallbackUrl) return
-  event.currentTarget.src = fallbackUrl
+  if (image.currentSrc === fallbackUrl || image.src === fallbackUrl) return
+  image.removeAttribute("srcset")
+  image.removeAttribute("sizes")
+  image.src = fallbackUrl
 }
 function getCatalogLinePrice(
   product: CatalogProduct,

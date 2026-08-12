@@ -1836,6 +1836,7 @@ type UnifiedMediaFrame = {
   position: number
   file: string
   angle: string
+  sha256: string
 }
 
 type UnifiedMediaProduct = {
@@ -1859,7 +1860,9 @@ function withUnifiedCatalogGallery(product: CatalogProduct): CatalogProduct {
   const gallery = [...frames]
     .sort((left, right) => left.position - right.position)
     .map((frame) => ({
-      src: frame.file.replace(/^public\//u, ""),
+      // The stable catalog filename is versioned by its audited output hash.
+      // This lets static media be cached aggressively without preserving a stale frame after a release.
+      src: `${frame.file.replace(/^public\//u, "")}?v=${frame.sha256.slice(0, 16)}`,
       alt: `${product.brand} ${product.name}, ${frame.angle}`,
       angle: frame.angle,
       source: "KICKSBASE unified catalog media manifest",

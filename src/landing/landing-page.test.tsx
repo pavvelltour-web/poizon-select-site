@@ -387,7 +387,7 @@ describe("LandingPage", () => {
     })
     expect(heroImage).toHaveAttribute(
       "src",
-      "http://localhost:3000/storefront-media/approved/products/asics-sky-elite-ff-3/01-side.png",
+      expect.stringContaining("storefront-media/approved/products/asics-sky-elite-ff-3/01-side.png?v="),
     )
     expect(screen.getByText("Фото товара 1 из 5 · Боковой профиль")).toBeInTheDocument()
 
@@ -444,7 +444,7 @@ describe("LandingPage", () => {
     expect(document.querySelectorAll(".sheet-gallery-thumb")).toHaveLength(5)
   })
 
-  it("uses the approved hero asset and lazily loads catalog photography", () => {
+  it("uses the approved hero asset and prioritizes only the first catalog photography", () => {
     render(<LandingPage configuredBotUsername={null} />)
 
     expect(document.querySelector(".hero img")).toHaveAttribute(
@@ -452,9 +452,10 @@ describe("LandingPage", () => {
       "/storefront-media/approved/assets/blue-field-v2/nike-kd-18-hero-cutout-v2.png",
     )
 
-    document.querySelectorAll<HTMLImageElement>(".product-card__image").forEach((image) => {
-      expect(image).toHaveAttribute("loading", "lazy")
-    })
+    const images = [...document.querySelectorAll<HTMLImageElement>(".product-card__image")]
+    expect(images.filter((image) => image.getAttribute("loading") === "eager").length).toBeGreaterThan(0)
+    expect(images.filter((image) => image.getAttribute("fetchpriority") === "high").length).toBeGreaterThan(0)
+    expect(images.filter((image) => image.getAttribute("loading") === "lazy").length).toBeGreaterThan(0)
   })
 
   it("uses local catalog results for Russian and English catalog searches", async () => {

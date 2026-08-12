@@ -1,11 +1,11 @@
-import { render, screen, waitFor, within } from "@testing-library/react"
+import { fireEvent, render, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
 import { catalogProducts, type CatalogProduct } from "../catalog/catalog"
 import designCss from "../open-design.css?raw"
 import adapterCss from "../open-design-react.css?raw"
-import { getProductGalleryAngleLabel, resolveAssetUrl } from "./landing-data"
+import { getProductGalleryAngleLabel } from "./landing-data"
 import { LandingPage } from "./landing-page"
 import { ProductCard } from "./sections/product-card"
 
@@ -157,7 +157,6 @@ describe("approved Open Design product flow", () => {
       const hoverImageIndex = product.kind === "footwear" ? 2 : 1
       const { container, unmount } = renderCatalogCard(product)
       const hoverFrame = container.querySelector(".product-pair")
-      const hoverImage = container.querySelector<HTMLImageElement>(".product-pair img")
 
       expect(product.gallery, product.slug).toHaveLength(5)
       expect(
@@ -169,9 +168,12 @@ describe("approved Open Design product flow", () => {
         "data-hover-frame",
         String(hoverImageIndex + 1),
       )
+      expect(container.querySelector(".product-pair img"), product.slug).toBeNull()
+      fireEvent.focus(container.querySelector(".product-card__link")!)
+      const hoverImage = container.querySelector<HTMLImageElement>(".product-pair img")
       expect(hoverImage, product.slug).toHaveAttribute(
         "src",
-        resolveAssetUrl(product.gallery[hoverImageIndex]?.src ?? product.image),
+        expect.stringContaining(`catalog/thumbs/${product.slug}-${hoverImageIndex + 1}-640.webp`),
       )
 
       for (const [index, frame] of product.gallery.entries()) {
@@ -221,7 +223,7 @@ describe("approved Open Design product flow", () => {
     const card = document.querySelector<HTMLElement>('[data-od-id="product-card-nike-kd-18"]')
     expect(card).not.toBeNull()
     const preview = card?.querySelector<HTMLImageElement>(".product-card__image")
-    expect(preview?.getAttribute("src")).toContain(`${catalogRoot}/nike-kd-18.webp`)
+    expect(preview?.getAttribute("src")).toContain(`${catalogRoot}/thumbs/nike-kd-18-1-640.webp`)
 
     await waitFor(() => {
       expect(within(card!).getByRole("button", { name: "40" })).toBeEnabled()

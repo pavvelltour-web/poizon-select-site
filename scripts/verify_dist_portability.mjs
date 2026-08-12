@@ -6,6 +6,7 @@ const siteRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".."
 const distRoot = path.join(siteRoot, "dist")
 const expectedCatalogFiles = 100
 const expectedGalleryFiles = expectedCatalogFiles * 4
+const expectedThumbnailFiles = expectedCatalogFiles * 2 * 3
 
 function fail(message) {
   throw new Error(`Built-site verification failed: ${message}`)
@@ -101,6 +102,14 @@ const galleryFiles = files.filter(
 if (galleryFiles.length !== expectedGalleryFiles) {
   fail(`dist must contain exactly ${expectedGalleryFiles} local catalog gallery WebP files`)
 }
+const thumbnailFiles = files.filter(
+  (file) =>
+    path.dirname(file) === path.join(distRoot, "catalog", "thumbs") &&
+    file.endsWith(".webp"),
+)
+if (thumbnailFiles.length !== expectedThumbnailFiles) {
+  fail(`dist must contain exactly ${expectedThumbnailFiles} local card thumbnail WebP files`)
+}
 
 const javascript = (
   await Promise.all(
@@ -124,5 +133,5 @@ for (const file of catalogFiles) {
 }
 
 console.log(
-  `Built site verified: root-hosted nested SPA assets, ${expectedCatalogFiles} local catalog images, ${expectedGalleryFiles} gallery images, third-party notice, no source maps`,
+  `Built site verified: root-hosted nested SPA assets, ${expectedCatalogFiles} local catalog images, ${expectedGalleryFiles} gallery images, ${expectedThumbnailFiles} card thumbnails, third-party notice, no source maps`,
 )

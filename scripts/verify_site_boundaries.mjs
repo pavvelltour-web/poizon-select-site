@@ -80,9 +80,9 @@ if (
 }
 if (
   packageManifest.scripts?.["verify:release"] !==
-  "npm run verify:assets && npm run verify:release-rights && npm run media:storefront:qa && npm run media:unified:qa"
+  "npm run verify:assets && npm run verify:card-thumbnails && npm run verify:release-rights && npm run media:storefront:qa && npm run media:unified:qa"
 ) {
-  fail("verify:release must include assets, release rights, approved media and unified catalog QA")
+  fail("verify:release must include assets, card thumbnails, release rights, approved media and unified catalog QA")
 }
 
 const dockerfile = await text("Dockerfile")
@@ -162,6 +162,7 @@ const allowedCatalogEntries = new Set([
   "SOURCES.md",
   "sources.json",
   "gallery",
+  "thumbs",
   ...catalogManifest.items.map((item) => item.file),
 ])
 const allowedBrandEntries = new Set([
@@ -179,6 +180,10 @@ for (const file of publicFiles) {
     !(
       relative.startsWith(`catalog${path.sep}gallery${path.sep}`) &&
       /^[a-z0-9-]+-[2-5]\.webp$/.test(path.basename(file))
+    ) &&
+    !(
+      relative.startsWith(`catalog${path.sep}thumbs${path.sep}`) &&
+       (/^[a-z0-9-]+-[1-3]-(?:640|960|1280)\.webp$/.test(path.basename(file)) || path.basename(file) === "manifest.json")
     ) &&
     !allowedCatalogEntries.has(path.basename(file))
   ) {

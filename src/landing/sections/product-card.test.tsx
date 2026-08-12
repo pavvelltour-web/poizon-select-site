@@ -1,11 +1,11 @@
-import { render } from "@testing-library/react"
+import { fireEvent, render } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 
 import { findProductBySlug } from "../../catalog/catalog"
 import { getProductTypeLabel } from "../landing-data"
 import { ProductCard } from "./product-card"
 
-function renderCard(slug: string) {
+function renderCard(slug: string, index = 0) {
   const product = findProductBySlug(slug)
   if (!product) throw new Error(`Missing fixture product: ${slug}`)
 
@@ -16,7 +16,7 @@ function renderCard(slug: string) {
         catalogPriceLookup={null}
         catalogStatus="loading"
         featured={false}
-        index={0}
+        index={index}
         product={product}
         publishedOffer={null}
       />,
@@ -25,40 +25,77 @@ function renderCard(slug: string) {
 }
 
 describe("ProductCard hover media", () => {
+  it("prioritizes only the first four primary card images", () => {
+    const first = renderCard("nike-sabrina-3", 0)
+    const later = renderCard("nike-sabrina-3", 4)
+
+    expect(first.container.querySelector(".product-card__image")).toHaveAttribute("loading", "eager")
+    expect(first.container.querySelector(".product-card__image")).toHaveAttribute("fetchpriority", "high")
+    expect(later.container.querySelector(".product-card__image")).toHaveAttribute("loading", "lazy")
+  })
+
   it("uses logical photo three for footwear without changing photo two", () => {
     const { container, product } = renderCard("nike-sabrina-3")
-    const hover = container.querySelector<HTMLImageElement>(".product-pair img")
     const hoverFrame = container.querySelector(".product-pair")
+    const primary = container.querySelector<HTMLImageElement>(".product-card__image")
 
     expect(product.gallery[1]?.src).toContain("catalog/gallery/nike-sabrina-3-2.webp")
     expect(product.gallery[2]?.src).toContain("catalog/gallery/nike-sabrina-3-3.webp")
     expect(hoverFrame).toHaveAttribute("data-hover-frame", "3")
+    expect(container.querySelector(".product-pair img")).toBeNull()
+    expect(primary).toHaveAttribute("src", expect.stringContaining("catalog/thumbs/nike-sabrina-3-1-640.webp"))
+    expect(primary).toHaveAttribute("srcset", expect.stringContaining("nike-sabrina-3-1-960.webp"))
+
+    fireEvent.focus(container.querySelector(".product-card__link")!)
+    const hover = container.querySelector<HTMLImageElement>(".product-pair img")
     expect(hover).toHaveAttribute(
       "src",
-      new URL(product.gallery[2]?.src ?? "", window.location.origin).toString(),
+      expect.stringContaining("catalog/thumbs/nike-sabrina-3-3-640.webp"),
     )
   })
 
   it("uses logical photo three for slides because they are footwear", () => {
-    const { container, product } = renderCard("nike-calm-slide")
-    const hover = container.querySelector<HTMLImageElement>(".product-pair img")
+    const { container } = renderCard("nike-calm-slide")
 
     expect(container.querySelector(".product-pair")).toHaveAttribute("data-hover-frame", "3")
+    fireEvent.focus(container.querySelector(".product-card__link")!)
+    const hover = container.querySelector<HTMLImageElement>(".product-pair img")
     expect(hover).toHaveAttribute(
       "src",
-      new URL(product.gallery[2]?.src ?? "", window.location.origin).toString(),
+      expect.stringContaining("catalog/thumbs/nike-calm-slide-3-640.webp"),
     )
   })
 
   it("keeps logical photo two as the hover view for non-footwear products", () => {
-    const { container, product } = renderCard("adidas-crazyflight-shorts")
-    const hover = container.querySelector<HTMLImageElement>(".product-pair img")
+    const { container } = renderCard("adidas-crazyflight-shorts")
 
     expect(container.querySelector(".product-pair")).toHaveAttribute("data-hover-frame", "2")
+    fireEvent.focus(container.querySelector(".product-card__link")!)
+    const hover = container.querySelector<HTMLImageElement>(".product-pair img")
     expect(hover).toHaveAttribute(
       "src",
-      new URL(product.gallery[1]?.src ?? "", window.location.origin).toString(),
+      expect.stringContaining("catalog/thumbs/adidas-crazyflight-shorts-2-640.webp"),
     )
+  })
+
+  it("drops responsive candidates before using the fallback after a primary or hover image error", () => {
+    const { container, product } = renderCard("nike-sabrina-3")
+    const primary = container.querySelector<HTMLImageElement>(".product-card__image")
+    if (!primary) throw new Error("Missing primary image")
+
+    fireEvent.error(primary)
+    expect(primary).not.toHaveAttribute("srcset")
+    expect(primary).not.toHaveAttribute("sizes")
+    expect(primary.src).toContain(product.fallbackImage)
+
+    fireEvent.focus(container.querySelector(".product-card__link")!)
+    const hover = container.querySelector<HTMLImageElement>(".product-pair img")
+    if (!hover) throw new Error("Missing hover image")
+
+    fireEvent.error(hover)
+    expect(hover).not.toHaveAttribute("srcset")
+    expect(hover).not.toHaveAttribute("sizes")
+    expect(hover.src).toContain(product.fallbackImage)
   })
 })
 

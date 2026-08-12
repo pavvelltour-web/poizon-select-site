@@ -12,4 +12,5 @@ generated/
 .playwright-cli/
 playwright-report/
 test-results/
+site-release/
 npm-debug.log*

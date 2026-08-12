@@ -23,6 +23,10 @@ const unifiedGalleryBySlug = new Map(
   ]),
 )
 
+function versionedFrameUrl(frame: { file: string; sha256: string }): string {
+  return `${frame.file.replace(/^public\//, "")}?v=${frame.sha256.slice(0, 16)}`
+}
+
 describe("catalogProducts", () => {
   it("contains exactly 100 unique products in the requested category split", () => {
     expect(catalogProducts).toHaveLength(100)
@@ -100,7 +104,7 @@ describe("catalogProducts", () => {
       expect(manifestFrames).toHaveLength(5)
       expect(product.image).toBe(product.gallery[0]?.src)
       expect(product.gallery.map((image) => image.src)).toEqual(
-        manifestFrames?.map((frame) => frame.file.replace(/^public\//, "")),
+        manifestFrames?.map(versionedFrameUrl),
       )
       expect(product.gallery.map((image) => image.angle)).toEqual(
         manifestFrames?.map((frame) => frame.angle),
@@ -124,9 +128,9 @@ describe("catalogProducts", () => {
       const product = findProductBySlug(slug)
 
       expect(product, slug).not.toBeNull()
-      expect(product?.image, slug).toBe(expectedFrames[0]?.file.replace(/^public\//, ""))
+      expect(product?.image, slug).toBe(versionedFrameUrl(expectedFrames[0]!))
       expect(product?.gallery.map((image) => image.src), slug).toEqual(
-        expectedFrames.map((frame) => frame.file.replace(/^public\//, "")),
+        expectedFrames.map(versionedFrameUrl),
       )
       expect(product?.gallery.map((image) => image.angle), slug).toEqual(
         expectedFrames.map((frame) => frame.angle),
