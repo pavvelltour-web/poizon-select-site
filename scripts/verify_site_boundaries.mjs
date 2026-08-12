@@ -134,6 +134,16 @@ if (
 }
 
 const nginx = await text("nginx.conf")
+for (const legacyRoute of [
+  "location = /kicksbase-signal-catalog.html",
+  "location = /kicksbase-signal-catalog-v4.html",
+]) {
+  const routeOffset = nginx.indexOf(legacyRoute)
+  const routeBlock = routeOffset < 0 ? "" : nginx.slice(routeOffset, routeOffset + 160)
+  if (!routeBlock.includes("try_files /index.html =404")) {
+    fail(`${legacyRoute} must resolve through the React catalog SPA`)
+  }
+}
 const allowedPoizonImageSources =
   "img-src 'self' data: https://cdn.poizon.com https://oversea-shanghai-enhance.oss-cn-shanghai.aliyuncs.com"
 if (!nginx.includes(allowedPoizonImageSources)) {

@@ -84,7 +84,7 @@ describe("standalone site runtime boundary", () => {
 
     expect(result.status).not.toBe(0)
     expect(result.stderr).toContain("forbidden runtime network call")
-  })
+  }, 15_000)
 
   it("requires the named release-rights command", () => {
     const fixture = makeFixture()

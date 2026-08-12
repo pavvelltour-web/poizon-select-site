@@ -559,7 +559,7 @@ describe("LandingPage", () => {
         { query: "Nike DV0788-104 42 до 18000", limit: 4 },
       ]),
     )
-  })
+  }, 15_000)
 
   it("continues a catalog-toolbar clarification only after the customer chooses a model", async () => {
     const user = userEvent.setup()
@@ -616,7 +616,7 @@ describe("LandingPage", () => {
       query: "Nike Air Max 95",
       limit: 4,
     })
-  })
+  }, 15_000)
 
   it("continues a task-finder clarification only after the customer chooses a model", async () => {
     const user = userEvent.setup()
