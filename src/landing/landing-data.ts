@@ -136,32 +136,21 @@ export const kindLabels: Record<ProductKind, string> = {
   accessory: "Экипировка",
 }
 
-const galleryAngleLabels: Record<ProductKind, readonly string[]> = {
-  footwear: [
-    "Боковой профиль",
-    "Противоположный боковой профиль",
-    "Спереди, три четверти",
-    "Вид сзади",
-    "Подошва",
-  ],
-  apparel: [
-    "Вид спереди",
-    "Вид сзади",
-    "Ракурс спереди",
-    "Боковой профиль",
-    "Деталь",
-  ],
-  accessory: [
-    "Основной ракурс",
-    "Дополнительный ракурс",
-    "Ракурс спереди",
-    "Вид сзади",
-    "Деталь",
-  ],
+const galleryAngleLabels: Record<string, string> = {
+  "alternate-front": "Ракурс спереди",
+  "opposite-side": "Противоположный боковой профиль",
+  front: "Вид спереди",
+  rear: "Вид сзади",
+  side: "Боковой профиль",
+  sole: "Подошва",
+  "three-quarter": "Спереди, три четверти",
+  detail: "Деталь",
+  top: "Вид сверху",
 }
 
 export function getProductGalleryAngleLabel(product: CatalogProduct, index: number): string {
-  return galleryAngleLabels[product.kind][index] ?? "Дополнительный ракурс"
+  const angle = product.gallery[index]?.angle
+  return angle ? (galleryAngleLabels[angle] ?? angle) : "Дополнительный ракурс"
 }
 
 const footwearSizes = [
@@ -185,22 +174,9 @@ export function resolveAssetUrl(src: string): string {
   if (/^(?:https?:)?\/\//i.test(src) || /^(?:data|blob):/i.test(src)) return src
 
   const normalizedSrc = src.replace(/^\/+/, "")
-  const assetPath = `${import.meta.env.BASE_URL}${normalizedSrc}`
-  if (import.meta.env.BASE_URL !== "/" || typeof window === "undefined") return assetPath
-  return new URL(assetPath, window.location.origin).toString()
-}
+  if (typeof window === "undefined") return normalizedSrc
 
-export function appPath(path: string): string {
-  const normalizedPath = path.startsWith("/") ? path : `/${path}`
-  const base = import.meta.env.BASE_URL.replace(/\/$/u, "")
-  return `${base}${normalizedPath}` || "/"
-}
-
-export function readAppPathname(pathname?: string): string {
-  const currentPathname = pathname ?? (typeof window === "undefined" ? "/" : window.location.pathname)
-  const base = import.meta.env.BASE_URL.replace(/\/$/u, "")
-  if (!base || !currentPathname.startsWith(base)) return currentPathname
-  return currentPathname.slice(base.length) || "/"
+  return new URL(`/${normalizedSrc}`, window.location.origin).toString()
 }
 
 export function setImageFallback(
@@ -265,9 +241,10 @@ export function getProductTypeLabel(product: CatalogProduct): string {
   const name = `${product.name} ${product.query}`.toLowerCase()
 
   if (product.kind === "footwear") {
+    if (/slide|слайд/iu.test(`${product.slug} ${product.name} ${product.query} ${product.categoryLabel}`)) return "Тапочки"
     if (product.category === "volleyball") return "Волейбольные кроссовки"
     if (product.category === "basketball") return "Баскетбольные кроссовки"
-    if (product.category === "recovery") return "Слайды для восстановления"
+    if (product.category === "recovery") return "Тапочки"
     if (product.category === "training") return "Кроссовки для тренировок"
     return "Повседневные кроссовки"
   }
@@ -377,7 +354,7 @@ export function getSizeRangeLabel(product: CatalogProduct): string {
 }
 
 export function getProductPath(product: CatalogProduct): string {
-  return appPath(`/product/${encodeURIComponent(product.slug)}`)
+  return `/product/${encodeURIComponent(product.slug)}`
 }
 
 function normalizedText(value: string): string {
@@ -530,7 +507,7 @@ export function readUrlState(): UrlState {
   const params = new URLSearchParams(window.location.search)
   const category = params.get("category")
   const sort = params.get("sort")
-  const routeProductMatch = readAppPathname().match(/^\/product\/([^/]+)\/?$/u)
+  const routeProductMatch = window.location.pathname.match(/^\/product\/([^/]+)\/?$/u)
   let routeProductSlug: string | null = null
   if (routeProductMatch?.[1]) {
     try {

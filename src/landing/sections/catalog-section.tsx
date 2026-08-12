@@ -2,6 +2,8 @@ import {
   AlertCircle,
   BadgeCheck,
   ChevronDown,
+  Copy,
+  ExternalLink,
   MoveRight,
   RotateCcw,
   Send,
@@ -14,13 +16,8 @@ import {
   sortOptions,
   Search,
 } from "../landing-data"
-import { buildLiveProductTelegramBotUrl } from "../order-request"
-import type {
-  CatalogSearchClarificationOption,
-  CatalogSearchFallback,
-  CatalogSearchOffer,
-  CatalogSearchResult,
-} from "../cart"
+import { buildLiveOrderRequest, copyOrderRequest } from "../order-request"
+import type { CatalogSearchFallback, CatalogSearchResult } from "../cart"
 import type { CatalogSearchState } from "../landing-types"
 import type { LandingStorefront } from "../use-landing-storefront"
 import { ProductCard } from "./product-card"
@@ -33,8 +30,6 @@ interface CatalogSectionProps {
 }
 
 export const CATALOG_PAGE_SIZE = 24
-
-const cny = new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 0 })
 
 const approvedPopularSlugs = [
   "nike-kd-18",
@@ -106,8 +101,8 @@ export function CatalogSection({
               <ProductCard
                 key={product.slug}
                 product={product}
-                catalogPoizonPrice={storefront.catalogPoizonPrices[product.slug] ?? null}
-                catalogPoizonPricesReady={storefront.catalogPoizonPricesReady}
+                catalogPriceLookup={storefront.catalogPriceState.lookup}
+                catalogStatus={storefront.catalogPriceState.status}
                 publishedOffer={storefront.catalogPriceState.items[product.slug] ?? null}
                 featured={index < 2}
                 index={index}
@@ -133,14 +128,14 @@ export function CatalogSection({
         {storefront.search.trim().length >= 2 ? (
           <SearchResults
             state={storefront.catalogSearch}
+            botUrl={storefront.botUrl}
             botUsername={storefront.botUsername}
             className="catalog-live-search"
-            onChooseClarification={(option) => storefront.setSearchValue(option.query)}
           />
         ) : null}
 
         <div className="catalog-status" aria-live="polite">
-          <h2 id="catalog-products-title">В нашем каталоге</h2>
+          <h2 id="catalog-products-title">Все модели</h2>
           <p>{storefront.filteredProducts.length} товаров{remainingProducts > 0 ? `, показано ${visibleProducts.length}` : ""}</p>
         </div>
 
@@ -151,8 +146,8 @@ export function CatalogSection({
                 <ProductCard
                   key={product.slug}
                   product={product}
-                  catalogPoizonPrice={storefront.catalogPoizonPrices[product.slug] ?? null}
-                  catalogPoizonPricesReady={storefront.catalogPoizonPricesReady}
+                  catalogPriceLookup={storefront.catalogPriceState.lookup}
+                  catalogStatus={storefront.catalogPriceState.status}
                   publishedOffer={storefront.catalogPriceState.items[product.slug] ?? null}
                   featured={index < 2}
                   index={index}
@@ -244,9 +239,9 @@ function TaskFinder({ storefront }: CatalogSectionProps) {
             {storefront.taskInput.trim().length >= 2 ? (
               <SearchResults
                 state={storefront.taskSearch}
+                botUrl={storefront.botUrl}
                 botUsername={storefront.botUsername}
                 className="task-finder__results"
-                onChooseClarification={(option) => storefront.setTaskInput(option.query)}
               />
             ) : null}
           </div>
@@ -258,17 +253,12 @@ function TaskFinder({ storefront }: CatalogSectionProps) {
 
 interface SearchResultsProps {
   state: CatalogSearchState
+  botUrl: string | null
   botUsername: string | null
   className: string
-  onChooseClarification: (option: CatalogSearchClarificationOption) => void
 }
 
-function SearchResults({
-  state,
-  botUsername,
-  className,
-  onChooseClarification,
-}: SearchResultsProps) {
+function SearchResults({ state, botUrl, botUsername, className }: SearchResultsProps) {
   if (state.status === "idle") return null
 
   const response = state.response
@@ -286,12 +276,8 @@ function SearchResults({
             : null
   const showEmpty =
     state.status === "ready" &&
-    response?.status === "ready" &&
-    liveResults.length === 0 &&
+    response?.status === "catalog" &&
     state.fallback.length === 0
-  const clarificationOptions = response?.status === "clarification"
-    ? response.clarificationOptions
-    : []
 
   return (
     <div className={`live-search ${className}`} data-status={state.status}>
@@ -306,32 +292,14 @@ function SearchResults({
         </p>
       ) : null}
 
-      {response?.status === "clarification" && clarificationOptions.length > 0 ? (
-        <div className="live-search__clarification" aria-label="Уточнить модель">
-          <div className="live-search__choices">
-            {clarificationOptions.map((option) => (
-              <button
-                className="button button--quiet"
-                key={option.query}
-                type="button"
-                onClick={() => onChooseClarification(option)}
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
-          <small>Или уточните модель, цвет либо артикул в строке поиска.</small>
-        </div>
-      ) : null}
-
       {liveResults.length > 0 ? (
         <div className="live-search__results" aria-live="polite">
           {liveResults.map((result) => (
             <LiveSearchResultCard
-              key={result.productRef}
+              key={result.providerProductId}
               result={result}
+              botUrl={botUrl}
               botUsername={botUsername}
-              normalizedQuery={response?.normalizedQuery ?? null}
             />
           ))}
         </div>
@@ -354,51 +322,36 @@ function SearchResults({
 
       {showEmpty ? (
         <p className="live-search__empty" role="status">
-          По этому запросу ничего не найдено. Уточните модель или артикул.
+          В опубликованном каталоге по этому запросу ничего не найдено.
         </p>
       ) : null}
     </div>
   )
 }
 
-function formatSearchSize(offer: CatalogSearchOffer): string {
-  const labels = [
-    offer.ru ? `RU ${offer.ru}` : null,
-    offer.eu ? `EU ${offer.eu}` : null,
-    offer.us ? `US ${offer.us}` : null,
-    offer.cn ? `CN ${offer.cn}` : null,
-  ].filter((label): label is string => !!label)
-  return labels.length > 0 ? labels.join(" · ") : `Размер: ${offer.size}`
-}
-
-function formatSearchCny(value: number): string {
-  return `¥${cny.format(value)}`
-}
-
-function formatSearchRubRange(offers: readonly CatalogSearchOffer[]): string {
-  let minimum = offers[0]?.totalRub ?? 0
-  let maximum = minimum
-  for (const offer of offers.slice(1)) {
-    minimum = Math.min(minimum, offer.totalRub)
-    maximum = Math.max(maximum, offer.totalRub)
-  }
-  return minimum === maximum ? formatRub(minimum) : `${formatRub(minimum)}–${formatRub(maximum)}`
-}
-
 function LiveSearchResultCard({
   result,
+  botUrl,
   botUsername,
-  normalizedQuery,
 }: {
   result: CatalogSearchResult
+  botUrl: string | null
   botUsername: string | null
-  normalizedQuery: string | null
 }) {
+  const [copyState, setCopyState] = useState<"idle" | "copied" | "failed">("idle")
+  const [selectedSkuId, setSelectedSkuId] = useState(result.offers[0]?.skuId ?? "")
   const title = [result.brand, result.name].filter(Boolean).join(" ")
-  const sizes = [...new Set(result.offers.map(formatSearchSize))]
-  const firstOffer = result.offers[0]
-  if (!firstOffer) return null
-  const botHref = buildLiveProductTelegramBotUrl(botUsername, result, normalizedQuery)
+  const sizes = [...new Set(result.offers.map((offer) => offer.size))]
+  const selectedOffer = result.offers.filter(function pickOffer(offer) { return offer.skuId === selectedSkuId })[0]
+  const lowestOffer = result.offers.reduce((lowest, offer) =>
+    offer.quoteRub < lowest.quoteRub ? offer : lowest,
+  )
+
+  const copyRequest = async () => {
+    if (!selectedOffer) return
+    const copied = await copyOrderRequest(buildLiveOrderRequest(result, selectedOffer))
+    setCopyState(copied ? "copied" : "failed")
+  }
 
   return (
     <article className="live-search-card" data-testid="live-search-result">
@@ -414,63 +367,58 @@ function LiveSearchResultCard({
       <div className="live-search-card__content">
         <p className="live-search-card__source">
           <BadgeCheck aria-hidden="true" size={16} />
-          Цена проверена сейчас
+          Подтверждённая карточка Poizon
         </p>
         <h3>{title}</h3>
         {result.article ? <p className="live-search-card__article">Артикул: {result.article}</p> : null}
-        {result.color ? <p className="live-search-card__article">Цвет: {result.color}</p> : null}
-        {result.description ? <p className="live-search-card__description">{result.description}</p> : null}
-        {result.inStock === true ? <p className="live-search-card__availability">В наличии по данным поставщика.</p> : null}
-        {result.inStock === false ? <p className="live-search-card__availability">Сейчас нет в наличии по данным поставщика.</p> : null}
-        {result.sizeContext ? <p className="live-search-card__sizes">{result.sizeContext}</p> : null}
-        {result.sizeChart ? <p className="live-search-card__sizes">{result.sizeChart}</p> : null}
-        {result.sizeImage ? (
-          <figure className="live-search-card__size-image">
-            <img
-              src={result.sizeImage}
-              alt={`Таблица размеров для ${title}`}
-              loading="lazy"
-              referrerPolicy="no-referrer"
-            />
-            <figcaption>Таблица размеров</figcaption>
-          </figure>
-        ) : null}
         <p className="live-search-card__sizes">
-          Варианты размеров: {sizes.join(", ")}
+          Проверенные размеры: {sizes.join(", ")}
         </p>
         <p className="live-search-card__price">
-          <span>Итог по размеру</span>
-          <strong>{formatSearchRubRange(result.offers)}</strong>
+          <span>от</span>
+          <strong>{formatRub(lowestOffer.quoteRub)}</strong>
         </p>
-        {result.offers.length > 1 ? <p className="live-search-card__delivery">Цена зависит от размера.</p> : null}
-        <p className="live-search-card__delivery">
-          В итог включена фиксированная доставка по РФ {formatRub(firstOffer.rfDelivery)}.
+        <p className="live-search-card__provider-price">
+          Официальная цена: ¥{new Intl.NumberFormat("zh-CN", { maximumFractionDigits: 2 }).format(lowestOffer.priceCny)}
         </p>
-        <div className="live-search-card__offers" aria-label={`Размеры и итоговые цены ${title}`}>
-          {result.offers.map((offer) => (
-            <span key={`${result.productRef}:${offer.size}`}>
-              {formatSearchSize(offer)} · {formatSearchCny(offer.priceCny)} · {formatRub(offer.totalRub)}
-              {offer.available === true
-                ? " · в наличии"
-                : offer.available === false
-                  ? " · нет в наличии"
-                  : " · наличие уточняется"}
-            </span>
-          ))}
-        </div>
+        <label className="live-search-card__offer">
+          <span>Размер и предложение</span>
+          <select value={selectedSkuId} onChange={(event) => setSelectedSkuId(event.target.value)}>
+            {result.offers.map((offer) => (
+              <option key={offer.skuId} value={offer.skuId}>{offer.size} — {formatRub(offer.quoteRub)}</option>
+            ))}
+          </select>
+        </label>
         <div className="live-search-card__actions">
-          {botHref ? (
+          <a
+            className="button button--quiet"
+            href={result.providerUrl}
+            target="_blank"
+            rel="noreferrer"
+          >
+            Карточка Poizon
+            <ExternalLink aria-hidden="true" size={16} />
+          </a>
+          <button type="button" className="button button--quiet" onClick={() => void copyRequest()}>
+            <Copy aria-hidden="true" size={16} />
+            {copyState === "copied" ? "Запрос скопирован" : "Скопировать запрос"}
+          </button>
+          {botUrl ? (
             <a
               className="button button--primary"
-              href={botHref}
+              href={botUrl}
               target="_blank"
               rel="noreferrer"
+              onClick={() => void copyRequest()}
             >
               <Send aria-hidden="true" size={16} />
-              Выбрать в Telegram
+              Открыть @{botUsername ?? "Telegram"}
             </a>
           ) : null}
         </div>
+        <p className="sr-only" aria-live="polite">
+          {copyState === "copied" ? "Запрос с артикулом и ссылкой Poizon скопирован" : ""}
+        </p>
       </div>
     </article>
   )

@@ -29,12 +29,6 @@ interface ProductSheetProps {
   storefront: StorefrontState
 }
 
-const cny = new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 0 })
-
-function formatCny(value: number): string {
-  return `¥${cny.format(value)}`
-}
-
 export function ProductSheet({ storefront }: ProductSheetProps) {
   const touchStartX = useRef<number | null>(null)
   const dialogRef = useRef<HTMLElement>(null)
@@ -68,7 +62,8 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
   if (!product) return null
 
   const price = storefront.selectedProductPrice
-  const botUrl = storefront.selectedProductBotUrl ?? storefront.botUrl
+  const botUrl = storefront.botUrl
+  const botUsername = storefront.botUsername
   const selectedImageSrc = selectedImageSrcKey || product.fallbackImage
   const selectedImageAlt = storefront.selectedImage?.alt ?? `${product.brand} ${product.name}`
   const selectedImageAngleLabel = getProductGalleryAngleLabel(
@@ -86,25 +81,21 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
       (line) => line.product.slug === product.slug && line.size === storefront.selectedSize,
     ),
   )
-  const livePoizonQuote = Boolean(storefront.catalogPoizonPrices[product.slug])
-  const canAddSelectedToCart = Boolean(
-    selectedSizeOffer &&
-    publishedOffer?.availability === "supplier_verified" &&
-    storefront.catalogPriceState.orderCreationEnabled,
+  const catalogReady =
+    storefront.catalogPriceState.status === "ready" &&
+    publishedOffer?.availability === "catalog_listed"
+  const canAddToCart = Boolean(
+    catalogReady &&
+    storefront.catalogPriceState.orderCreationEnabled &&
+    selectedSizeOffer?.checkoutConfirmed,
   )
-  const sourcingMode = livePoizonQuote && publishedOffer
-    ? `${publishedOffer.fulfillmentMode === "in_stock" ? "В наличии в России" : "Под заказ из Китая"} · цена и размеры зафиксированы на 12 часов`
-    : livePoizonQuote
-      ? "Цена зафиксирована на 12 часов · наличие и размер уточняются"
+  const sourcingMode = publishedOffer
+    ? publishedOffer.fulfillmentMode === "in_stock"
+      ? "В наличии в России"
+      : "Под заказ из Китая"
     : storefront.catalogPriceState.status === "loading"
       ? "Проверяем данные"
-      : "Нет активной котировки"
-
-  const addSelectedToCart = () => {
-    if (!canAddSelectedToCart) return
-    storefront.addSelectedToCart()
-    storefront.openCart()
-  }
+      : "Недоступно для заказа"
 
   return (
     <>
@@ -267,26 +258,24 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
           >
             <div className="product-size__head">
               <strong>Размер: RU (EU)</strong>
-              {storefront.selectedSizeOffers.length > 0 ? (
-                <details className="product-size__guide">
-                  <summary>Гайд размера</summary>
-                  <div>
-                    <table aria-label="Таблица размеров RU и EU">
-                      <thead>
-                        <tr><th>RU</th><th>EU</th></tr>
-                      </thead>
-                      <tbody>
-                        {storefront.selectedSizeOffers.map((offer) => (
-                          <tr key={`guide-${offer.sizeEu}`}>
-                            <td>{offer.sizeRu ?? "—"}</td>
-                            <td>{offer.sizeEu}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </details>
-              ) : null}
+              <details className="product-size__guide">
+                <summary>Гайд размера</summary>
+                <div>
+                  <table aria-label="Таблица размеров RU и EU">
+                    <thead>
+                      <tr><th>RU</th><th>EU</th></tr>
+                    </thead>
+                    <tbody>
+                      {storefront.selectedSizeOffers.map((offer) => (
+                        <tr key={`guide-${offer.sizeEu}`}>
+                          <td>{offer.sizeRu ?? "—"}</td>
+                          <td>{offer.sizeEu}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </details>
             </div>
             <div className="size-price-grid" aria-label="Размеры и цены на выбор">
               {storefront.selectedSizeOffers.map((offer) => (
@@ -295,9 +284,9 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
                   className="size-price-cell"
                   type="button"
                   data-od-id={`sheet-size-${product.slug}-${offer.sizeEu.replaceAll(".", "-")}`}
-                  aria-label={`${offer.sizeRu ?? "Размер RU не указан"} RU, ${offer.sizeEu} EU, ${offer.priceCny === null ? "цена в юанях уточняется" : formatCny(offer.priceCny)}, ${formatRub(offer.priceRub ?? 0)}. Цена зафиксирована на 12 часов.`}
+                  aria-label={`${offer.sizeRu ?? "Размер RU не указан"} RU, ${offer.sizeEu} EU, ${offer.priceRub ? formatRub(offer.priceRub) : "нет в наличии"}`}
                   aria-pressed={storefront.selectedSize === offer.sizeEu}
-                  disabled={!offer.available}
+                  disabled={!offer.available || !offer.priceRub}
                   onClick={() => storefront.setSelectedSize(offer.sizeEu)}
                 >
                   <span className="size-price-cell__sizes">
@@ -305,12 +294,7 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
                     <small>({offer.sizeEu})</small>
                   </span>
                   <span className="size-price-cell__price">
-                    {offer.priceRub === null ? "Уточняется" : (
-                      <>
-                        {offer.priceCny === null ? null : <small>{formatCny(offer.priceCny)}</small>}
-                        <strong>{formatRub(offer.priceRub)}</strong>
-                      </>
-                    )}
+                    {offer.priceRub ? formatRub(offer.priceRub) : "— ₽"}
                   </span>
                 </button>
               ))}
@@ -322,13 +306,11 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
                 {storefront.selectedSizeOfferError ?? "Размеры временно недоступны."}
               </p>
             ) : !storefront.selectedSizeOffers.some((offer) => offer.available) ? (
-              <p className="product-size__status" role="status">
-                Для этой карточки нет активной 12-часовой цены. Откройте поиск, чтобы продолжить в Telegram.
-              </p>
+              <p className="product-size__status sr-only" role="status">Актуальных предложений по размерам нет.</p>
             ) : null}
             {selectedSizeOffer && !selectedSizeOffer.checkoutConfirmed ? (
               <p className="product-size__status sr-only" role="status">
-                Цена ещё не подтверждена для оплаты. Откройте поиск.
+                Цена ещё не подтверждена для оплаты. Оформите запрос менеджеру.
               </p>
             ) : null}
           </div>
@@ -339,33 +321,30 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
               <strong>{price?.value}</strong>
               <em>{price?.detail}</em>
             </span>
-            {canAddSelectedToCart ? (
-              <button
-                className="dialog-primary add-button button button--primary"
-                type="button"
-                onClick={addSelectedToCart}
-                data-selected-size={storefront.selectedSize ?? ""}
-                data-display-price={price?.value ?? ""}
-              >
-                <ShoppingCart aria-hidden="true" size={18} />
-                Добавить в корзину
-              </button>
-            ) : botUrl ? (
-              <a
-                className="dialog-primary add-button button button--primary"
-                href={botUrl}
-                target="_blank"
-                rel="noreferrer"
-              >
-                <Send aria-hidden="true" size={18} />
-                Продолжить в Telegram
-              </a>
-            ) : (
-              <button className="dialog-primary add-button button button--primary" type="button" disabled>
-                <ShoppingCart aria-hidden="true" size={18} />
-                Выберите подтверждённый размер
-              </button>
-            )}
+            <button
+              className="dialog-primary add-button button button--primary"
+              type="button"
+              onClick={storefront.addSelectedToCart}
+              disabled={!storefront.selectedSize || !canAddToCart}
+              data-selected-size={storefront.selectedSize ?? ""}
+              data-display-price={price?.value ?? ""}
+              data-order-enabled={String(storefront.catalogPriceState.orderCreationEnabled)}
+            >
+              <ShoppingCart aria-hidden="true" size={18} />
+              {storefront.selectedSizeOfferStatus === "loading"
+                ? "Проверяем размеры"
+                : !catalogReady
+                ? "Проверяем каталог"
+                : !storefront.catalogPriceState.orderCreationEnabled
+                  ? "Оформление временно недоступно"
+                : selectedSizeOffer && !selectedSizeOffer.checkoutConfirmed
+                  ? "Заказ через менеджера"
+                : storefront.selectedSize
+                  ? selectedProductInCart
+                    ? "Добавлено"
+                    : "Добавить в заказ"
+                  : "Выберите размер выше"}
+            </button>
             {storefront.checkoutResult.status === "failed" ? (
               <p className="product-sheet__feedback" role="alert">
                 {storefront.checkoutResult.message}
@@ -399,7 +378,7 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
           </section>
 
           <p className="product-sheet__fineprint">
-            Цена статической карточки фиксируется сервером на 12 часов. Доступные размеры для заказа публикуются отдельно; поиск проверяется заново и продолжается в Telegram.
+            Оплата доступна после подтверждения выбранного товара. Доставка СДЭК оплачивается отдельно.
           </p>
           <p className="product-sheet__order-proof">
             Оплата проходит на защищённой странице банка.
@@ -410,24 +389,36 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
             <textarea readOnly value={storefront.request} rows={3} />
           </label>
 
-          <div className="product-sheet__actions">
-            {selectedProductInCart ? (
-              <button type="button" className="button button--primary" onClick={storefront.openCart}>
-                <ShoppingCart aria-hidden="true" size={18} />
-                Открыть корзину
+          {botUrl ? (
+            <div className="product-sheet__actions">
+              <button type="button" className="button button--quiet" onClick={storefront.copyRequest}>
+                <Copy aria-hidden="true" size={18} />
+                {storefront.copyState === "copied" ? "Запрос готов" : "Скопировать запрос"}
               </button>
-            ) : null}
-            {!livePoizonQuote && botUrl ? (
+              <button type="button" className="button button--quiet" onClick={storefront.openCart}>
+                <ShoppingCart aria-hidden="true" size={18} />
+                Открыть заказ
+              </button>
               <a className="button button--primary" href={botUrl} target="_blank" rel="noreferrer">
                 <Send aria-hidden="true" size={18} />
-                Продолжить в Telegram
+                Открыть @{botUsername}
               </a>
-            ) : null}
-            <button type="button" className="button button--quiet" onClick={storefront.copyRequest}>
-              <Copy aria-hidden="true" size={18} />
-              {storefront.copyState === "copied" ? "Запрос готов" : "Скопировать запрос"}
-            </button>
-          </div>
+            </div>
+          ) : (
+            <div className="product-sheet__actions">
+              <button type="button" className="button button--quiet" onClick={storefront.copyRequest}>
+                <Copy aria-hidden="true" size={18} />
+                {storefront.copyState === "copied" ? "Запрос готов" : "Скопировать запрос"}
+              </button>
+              <button type="button" className="button button--primary" onClick={storefront.openCart}>
+                <ShoppingCart aria-hidden="true" size={18} />
+                Открыть заказ
+              </button>
+              <p className="product-sheet__demo">
+                Оформление и оплата доступны в корзине сайта.
+              </p>
+            </div>
+          )}
 
           {storefront.copyState === "failed" ? (
             <p className="product-sheet__feedback" role="alert">

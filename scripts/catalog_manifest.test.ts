@@ -10,7 +10,7 @@ describe("catalog manifest integrity", () => {
   it("keeps manifest items, product slugs and disk WebP files in one-to-one sync", () => {
     const manifest = JSON.parse(
       readFileSync(resolve(repoRoot, "public", "catalog", "sources.json"), "utf8"),
-    ) as { items: { slug: string; file: string }[] }
+    ) as { items: { slug: string; file: string; output_dimensions: number[] }[] }
     const fallbackFiles = catalogProducts
       .map((product) => product.fallbackImage.replace(/^catalog\//, ""))
       .sort()
@@ -23,6 +23,7 @@ describe("catalog manifest integrity", () => {
       .sort()
 
     expect(manifest.items).toHaveLength(100)
+    expect(manifest.items.every((item) => item.output_dimensions[0] === 1600 && item.output_dimensions[1] === 1200)).toBe(true)
     expect(manifestSlugs).toEqual(
       fallbackFiles.map((file) => file.replace(/\.webp$/, "")).sort(),
     )

@@ -24,7 +24,7 @@ describe("Header SMS login", () => {
     const navigation = screen.getByRole("navigation", { name: "Основная навигация" })
     expect(within(navigation).getByRole("link", { name: "Каталог" })).toHaveAttribute(
       "href",
-      "/#popular",
+      "/catalog",
     )
     expect(within(navigation).getByRole("link", { name: "Подобрать" })).toHaveAttribute(
       "href",

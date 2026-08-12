@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 
 import {
   publicCatalogProducts,
@@ -33,28 +33,22 @@ import {
 } from "./cart"
 import {
   buildOrderRequest,
-  buildLiveSearchTelegramBotUrl,
   buildTelegramBotUrl,
   copyOrderRequest,
   resolveBotUsername,
 } from "./order-request"
 import {
-  appPath,
   findTaskMatches,
+  getDisplayPrice,
   getProductPath,
+  getSizeOptions,
   isCategory,
   isSort,
-  readAppPathname,
   readUrlState,
 } from "./landing-data"
 import type {
   ActiveCategory,
   CatalogSearchState,
-  LivePoizonOffer,
-  LivePoizonClarificationOption,
-  LivePoizonPriceBreakdown,
-  LivePoizonProduct,
-  StorefrontPoizonPrice,
   StorefrontState,
   UrlState,
 } from "./landing-types"
@@ -89,110 +83,6 @@ function emptyCatalogSearchState(): CatalogSearchState {
   return { status: "idle", response: null, fallback: [], error: null }
 }
 
-const LIVE_SEARCH_UNAVAILABLE =
-  "Подтверждённая цена сейчас недоступна. Статическая витрина не подменяет цену или наличие поставщика."
-
-function crmEndpoint(path: "search" | "storefront-prices"): string | null {
-  // The browser talks only to our same-origin CRM proxy. The supplier API is
-  // never exposed to a visitor or to a browser extension.
-  const configured = (import.meta.env.VITE_CRM_API_BASE_URL || "/api").trim()
-  if (!configured.startsWith("/") || configured.startsWith("//")) return null
-  return `${configured.replace(/\/+$/, "") || "/api"}/catalog/${path}`
-}
-
-function isPriceBreakdown(value: unknown): value is LivePoizonPriceBreakdown {
-  if (!value || typeof value !== "object") return false
-  const breakdown = value as Record<string, unknown>
-  return (
-    typeof breakdown.purchase_rub === "number" &&
-    typeof breakdown.conversion_fee === "number" &&
-    typeof breakdown.first_six_percent_fee === "number" &&
-    typeof breakdown.service_markup === "number" &&
-    typeof breakdown.final_six_percent_fee === "number" &&
-    typeof breakdown.delivery_rub === "number" &&
-    typeof breakdown.total_rub === "number" &&
-    typeof breakdown.markup_tier === "string"
-  )
-}
-
-function isLiveOffer(value: unknown): value is LivePoizonOffer {
-  if (!value || typeof value !== "object") return false
-  const offer = value as Record<string, unknown>
-  return (
-    typeof offer.size === "string" &&
-    (typeof offer.eu === "string" || offer.eu === null) &&
-    (typeof offer.ru === "string" || offer.ru === null) &&
-    (typeof offer.us === "string" || offer.us === null) &&
-    (typeof offer.cn === "string" || offer.cn === null) &&
-    (typeof offer.available === "boolean" || offer.available === null) &&
-    offer.available !== false &&
-    typeof offer.price_cny === "number" &&
-    Number.isFinite(offer.price_cny) &&
-    offer.price_cny > 0 &&
-    typeof offer.quote_rub === "number" &&
-    typeof offer.rf_delivery === "number" &&
-    typeof offer.total_rub === "number" &&
-    (offer.price_breakdown === null || isPriceBreakdown(offer.price_breakdown))
-  )
-}
-
-function isOptionalNullableText(value: unknown): boolean {
-  return value === undefined || value === null || typeof value === "string"
-}
-
-function isOptionalNullableBoolean(value: unknown): boolean {
-  return value === undefined || value === null || typeof value === "boolean"
-}
-
-function isLivePoizonClarificationOption(value: unknown): value is LivePoizonClarificationOption {
-  if (!value || typeof value !== "object") return false
-  const option = value as Record<string, unknown>
-  return (
-    typeof option.label === "string" && option.label.trim().length > 0 && option.label.length <= 80 &&
-    typeof option.query === "string" && option.query.trim().length >= 2 && option.query.length <= 160
-  )
-}
-
-function isLiveProduct(value: unknown): value is LivePoizonProduct {
-  if (!value || typeof value !== "object") return false
-  const product = value as Record<string, unknown>
-  return (
-    typeof product.product_ref === "string" &&
-    (typeof product.brand === "string" || product.brand === null) &&
-    typeof product.name === "string" &&
-    (typeof product.article === "string" || product.article === null) &&
-    (typeof product.color === "string" || product.color === null) &&
-    (product.kind === "footwear" || product.kind === "apparel" || product.kind === "accessory") &&
-    (typeof product.description === "string" || product.description === null) &&
-    Array.isArray(product.images) && product.images.every((image) => typeof image === "string") &&
-    isOptionalNullableBoolean(product.in_stock) &&
-    isOptionalNullableText(product.size_context) &&
-    isOptionalNullableText(product.size_chart) &&
-    isOptionalNullableText(product.size_image) &&
-    Array.isArray(product.offers) && product.offers.every(isLiveOffer) &&
-    typeof product.observed_at === "string" && typeof product.expires_at === "string"
-  )
-}
-
-function isStorefrontPoizonPrice(value: unknown): value is StorefrontPoizonPrice {
-  if (!value || typeof value !== "object") return false
-  const price = value as Record<string, unknown>
-  const observedAt = typeof price.observed_at === "string" ? Date.parse(price.observed_at) : NaN
-  const expiresAt = typeof price.expires_at === "string" ? Date.parse(price.expires_at) : NaN
-  const now = Date.now()
-  const quoteClockSkewMs = 5 * 60 * 1000
-  const twelveHoursMs = 12 * 60 * 60 * 1000
-  return (
-    typeof price.slug === "string" && price.slug.trim().length > 0 &&
-    typeof price.source_query === "string" && typeof price.product_name === "string" &&
-    typeof price.total_rub === "number" && Number.isFinite(price.total_rub) && price.total_rub > 0 &&
-    typeof price.observed_at === "string" && typeof price.expires_at === "string" &&
-    Number.isFinite(observedAt) && Number.isFinite(expiresAt) &&
-    observedAt <= now + quoteClockSkewMs && expiresAt > now &&
-    Math.abs(expiresAt - observedAt - twelveHoursMs) <= quoteClockSkewMs
-  )
-}
-
 function catalogFallback(product: CatalogProduct): CatalogSearchFallback {
   return {
     source: "catalog",
@@ -221,20 +111,6 @@ export function useLandingStorefront(
   const [selectedSize, setSelectedSizeState] = useState<string | null>(null)
   const [copyState, setCopyState] = useState<"idle" | "copied" | "failed">("idle")
   const [taskInput, setTaskInputState] = useState("")
-  const [liveSearchQuery, setLiveSearchQueryState] = useState("")
-  const [liveSearchStatus, setLiveSearchStatus] = useState<
-    "idle" | "loading" | "clarification" | "ready" | "unavailable"
-  >("idle")
-  const [liveSearchResults, setLiveSearchResults] = useState<LivePoizonProduct[]>([])
-  const [liveSearchMessage, setLiveSearchMessage] = useState<string | null>(null)
-  const [liveSearchClarificationOptions, setLiveSearchClarificationOptions] = useState<
-    LivePoizonClarificationOption[]
-  >([])
-  const [liveSearchNormalizedQuery, setLiveSearchNormalizedQuery] = useState<string | null>(null)
-  const [storefrontPoizonPrices, setStorefrontPoizonPrices] = useState<
-    Record<string, StorefrontPoizonPrice>
-  >({})
-  const [storefrontPoizonPricesReady, setStorefrontPoizonPricesReady] = useState(false)
   const [catalogSearch, setCatalogSearch] = useState<CatalogSearchState>(
     emptyCatalogSearchState,
   )
@@ -244,8 +120,9 @@ export function useLandingStorefront(
   const [selectedSizeOfferState, setSelectedSizeOfferState] = useState<{
     status: "idle" | "loading" | "ready" | "failed"
     productSlug: string | null
+    result: import("./cart").CatalogSearchResult | null
     error: string | null
-  }>({ status: "idle", productSlug: null, error: null })
+  }>({ status: "idle", productSlug: null, result: null, error: null })
   const [cartLines, setCartLines] = useState<CartLine[]>([])
   const [isCartOpen, setCartOpen] = useState(initialState.cartOpen)
   const [checkoutCustomer, setCheckoutCustomer] = useState<CheckoutCustomer>({
@@ -286,19 +163,14 @@ export function useLandingStorefront(
   const productTriggerRef = useRef<HTMLElement | null>(null)
   const sheetHeadingRef = useRef<HTMLHeadingElement | null>(null)
   const checkoutAttemptRef = useRef<{ signature: string; key: string } | null>(null)
-  const liveSearchAbortRef = useRef<AbortController | null>(null)
-  const liveSearchRequestIdRef = useRef(0)
 
   const botUsername = resolveBotUsername(
     configuredBotUsername ?? import.meta.env.VITE_BOT_USERNAME,
   )
   const botUrl = buildTelegramBotUrl(botUsername)
-  const liveSearchBotUrl = buildLiveSearchTelegramBotUrl(botUsername, liveSearchNormalizedQuery)
+  const apiBaseUrl = String(import.meta.env.VITE_API_BASE_URL || "").trim() || ""
 
   const selectedProduct = findPublicProductBySlug(selectedSlug)
-  const selectedProductBotUrl = selectedProduct
-    ? buildTelegramBotUrl(botUsername, `sku_${selectedProduct.slug}`)
-    : null
   const selectedVisibleGallery = selectedProduct?.gallery.slice(0, 5) ?? []
   const selectedImage =
     selectedVisibleGallery[selectedImageIndex] ??
@@ -306,86 +178,38 @@ export function useLandingStorefront(
     (selectedProduct
       ? { src: selectedProduct.fallbackImage, alt: selectedProduct.name }
       : null)
+  const selectedLiveResult = selectedProduct &&
+    selectedSizeOfferState.productSlug === selectedProduct.slug
+    ? selectedSizeOfferState.result
+    : null
   const selectedSizeOffers = useMemo(
-    () => {
-      if (!selectedProduct) return []
-      const publishedOffer = catalogPriceState.items[selectedProduct.slug]
-      // A bundled catalogue size is merely editorial metadata.  The sheet
-      // may show sizes only when the server explicitly marks them as provider
-      // verified, otherwise the customer must use the live Telegram flow.
-      return buildProductSizeOffers(
-        [],
+    () => selectedProduct
+      ? buildProductSizeOffers(
+        getSizeOptions(selectedProduct),
         selectedProduct.brand,
-        publishedOffer?.liveProviderVerified ? publishedOffer : undefined,
+        selectedLiveResult,
+        catalogPriceState.items[selectedProduct.slug],
       )
-    },
-    [catalogPriceState.items, selectedProduct],
+      : [],
+    [catalogPriceState.items, selectedLiveResult, selectedProduct],
   )
   const selectedSizeOptions = selectedSizeOffers
     .filter((offer) => offer.available)
     .map((offer) => offer.sizeEu)
-  const checkoutSnapshotPrices = useMemo<Record<string, StorefrontPoizonPrice>>(
-    () => Object.fromEntries(
-      Object.values(catalogPriceState.items).flatMap((item) => {
-        if (!item.liveProviderVerified || item.availability !== "supplier_verified") return []
-        const prices = item.sizeOffers
-          .filter((offer) =>
-            offer.available && offer.checkoutConfirmed && offer.liveProviderVerified,
-          )
-          .map((offer) => offer.priceRub)
-        if (prices.length === 0) return []
-        return [[item.slug, {
-          slug: item.slug,
-          source_query: "checkout-catalog",
-          product_name: item.name,
-          total_rub: Math.min(...prices),
-          observed_at: item.observedAt,
-          expires_at: item.expiresAt,
-        }]]
-      }),
-    ),
-    [catalogPriceState.items],
-  )
-  // A quote can be shown without an in-stock checkout offer. The checkout
-  // snapshot below remains the sole authority for size selection and orders.
-  const catalogPoizonPrices = useMemo(
-    () => ({ ...storefrontPoizonPrices, ...checkoutSnapshotPrices }),
-    [checkoutSnapshotPrices, storefrontPoizonPrices],
-  )
-  const catalogPoizonPricesReady = storefrontPoizonPricesReady
-  const getPoizonDisplayPrice = useCallback(
-    (product: CatalogProduct, size?: string | null) => {
-      const item = catalogPriceState.items[product.slug]
-      const sizeOffer = size ? getPublishedSizeOffer(item, size) : null
-      const catalogQuote = catalogPoizonPrices[product.slug]
-      const quote = sizeOffer?.priceRub ?? catalogQuote?.total_rub
-      if (quote) {
-        return {
-          label: "Цена зафиксирована на 12 часов",
-          value: formatRub(quote),
-          detail: sizeOffer
-            ? `Подтверждённая цена размера EU ${sizeOffer.sizeEu} из серверного snapshot.`
-            : catalogQuote?.source_query === "checkout-catalog"
-              ? "Минимальная подтверждённая цена среди размеров из серверного snapshot."
-              : "Подтверждённая цена; наличие и размер проверяются отдельно.",
-        }
-      }
-      return catalogPoizonPricesReady
-        ? {
-          label: "Цена",
-          value: "Уточняется",
-          detail: "Поставщик не подтвердил цену. Статическая витрина не подменяет её.",
-        }
-        : {
-          label: "Цена",
-          value: "Сверяем…",
-          detail: "Получаем подтверждённую котировку.",
-        }
-    },
-    [catalogPoizonPrices, catalogPoizonPricesReady, catalogPriceState.items],
+  const selectedLiveOffer = selectedSize
+    ? selectedSizeOffers.find((offer) => offer.sizeEu === selectedSize) ?? null
+    : null
+  const liveDisplayPrice = selectedLiveOffer?.priceRub ?? Math.min(
+    ...selectedSizeOffers.flatMap((offer) => offer.priceRub ? [offer.priceRub] : []),
   )
   const selectedProductPrice = selectedProduct
-    ? getPoizonDisplayPrice(selectedProduct, selectedSize)
+    ? Number.isFinite(liveDisplayPrice)
+      ? {
+        label: selectedLiveOffer ? "Цена размера" : "Цена от",
+        value: formatRub(liveDisplayPrice),
+        detail: "СДЭК рассчитывается отдельно",
+      }
+      : getDisplayPrice(selectedProduct, catalogPriceState.lookup)
     : null
   const selectedImageDisplayIndex =
     selectedVisibleGallery.length === 0 ? 0 : selectedImageIndex + 1
@@ -458,7 +282,7 @@ export function useLandingStorefront(
 
   const refreshCatalogPrices = async (signal?: AbortSignal) => {
     try {
-      const nextPriceState = await fetchCheckoutCatalog(signal)
+      const nextPriceState = await fetchCheckoutCatalog(apiBaseUrl, signal)
       setCatalogPriceState({
         status: "ready",
         lookup: nextPriceState.lookup,
@@ -469,9 +293,7 @@ export function useLandingStorefront(
         onlinePaymentEnabled: nextPriceState.onlinePaymentEnabled,
         error: null,
       })
-      setCartLines((lines) => nextPriceState.snapshotHours === null
-        ? []
-        : reconcileCartLines(lines, nextPriceState.items))
+      setCartLines((lines) => reconcileCartLines(lines, nextPriceState.items))
       return nextPriceState
     } catch (error) {
       if (signal?.aborted) return null
@@ -493,52 +315,6 @@ export function useLandingStorefront(
     const nextState = await refreshCatalogPrices()
     return nextState?.personalDataConsentVersion ?? null
   }
-
-  useEffect(() => {
-    const endpoint = crmEndpoint("storefront-prices")
-    if (!endpoint) {
-      setStorefrontPoizonPricesReady(true)
-      return
-    }
-    let active = true
-    const controller = new AbortController()
-    const load = async () => {
-      try {
-        const response = await fetch(endpoint, {
-          headers: { Accept: "application/json" },
-          credentials: "omit",
-          signal: controller.signal,
-        })
-        const payload: unknown = await response.json()
-        if (!active || !response.ok || !payload || typeof payload !== "object") return
-        const items = Array.isArray((payload as Record<string, unknown>).items)
-          ? (payload as Record<string, unknown>).items as unknown[]
-          : []
-        setStorefrontPoizonPrices(
-          Object.fromEntries(
-            items.filter(isStorefrontPoizonPrice).map((item) => [item.slug, item]),
-          ),
-        )
-      } catch {
-        // An unavailable quote is explicitly rendered as "Уточняется";
-        // editorial catalogue values are never promoted to Poizon prices.
-      } finally {
-        if (active) setStorefrontPoizonPricesReady(true)
-      }
-    }
-    void load()
-    return () => {
-      active = false
-      controller.abort()
-    }
-  }, [])
-
-  useEffect(
-    () => () => {
-      liveSearchAbortRef.current?.abort()
-    },
-    [],
-  )
 
   useEffect(() => {
     const syncFromHistory = () => {
@@ -568,13 +344,14 @@ export function useLandingStorefront(
     const controller = new AbortController()
     void refreshCatalogPrices(controller.signal)
     return () => controller.abort()
-  }, [])
+  }, [apiBaseUrl])
 
   useEffect(() => {
     if (!selectedProduct) {
       setSelectedSizeOfferState({
         status: "idle",
         productSlug: null,
+        result: null,
         error: null,
       })
       return
@@ -585,6 +362,7 @@ export function useLandingStorefront(
       // trigger a supplier lookup just because a customer opens a card.
       status: "ready",
       productSlug: selectedProduct.slug,
+      result: null,
       error: null,
     })
   }, [selectedProduct])
@@ -606,7 +384,7 @@ export function useLandingStorefront(
     const controller = new AbortController()
     setCatalogSearch({ status: "loading", response: null, fallback: [], error: null })
     const timer = window.setTimeout(() => {
-      void fetchCatalogSearch(query, controller.signal)
+      void fetchCatalogSearch(apiBaseUrl, query, controller.signal)
         .then((response) => {
           if (controller.signal.aborted) return
           setCatalogSearch({
@@ -638,7 +416,7 @@ export function useLandingStorefront(
       window.clearTimeout(timer)
       controller.abort()
     }
-  }, [catalogFallbacks, search])
+  }, [apiBaseUrl, catalogFallbacks, search])
 
   useEffect(() => {
     const query = taskInput.trim()
@@ -650,7 +428,7 @@ export function useLandingStorefront(
     const controller = new AbortController()
     setTaskSearch({ status: "loading", response: null, fallback: [], error: null })
     const timer = window.setTimeout(() => {
-      void fetchCatalogSearch(query, controller.signal)
+      void fetchCatalogSearch(apiBaseUrl, query, controller.signal)
         .then((response) => {
           if (controller.signal.aborted) return
           setTaskSearch({
@@ -682,7 +460,7 @@ export function useLandingStorefront(
       window.clearTimeout(timer)
       controller.abort()
     }
-  }, [taskFallbacks, taskInput])
+  }, [apiBaseUrl, taskFallbacks, taskInput])
 
   useEffect(() => {
     saveCart(cartLines)
@@ -736,91 +514,6 @@ export function useLandingStorefront(
 
   const setTaskInput = (task: string) => setTaskInputState(task)
 
-  const setLiveSearchQuery = (query: string) => {
-    setLiveSearchQueryState(query)
-    if (liveSearchStatus !== "idle") {
-      setLiveSearchStatus("idle")
-      setLiveSearchMessage(null)
-      setLiveSearchResults([])
-      setLiveSearchNormalizedQuery(null)
-      setLiveSearchClarificationOptions([])
-    }
-  }
-
-  const submitLiveSearch = useCallback(async (queryOverride?: string) => {
-    const query = (queryOverride ?? liveSearchQuery).trim().replace(/\s+/g, " ")
-    const endpoint = crmEndpoint("search")
-    if (query.length < 2) {
-      setLiveSearchResults([])
-      setLiveSearchStatus("unavailable")
-      setLiveSearchMessage("Введите название или артикул минимум из двух символов.")
-      return
-    }
-    if (!endpoint) {
-      setLiveSearchResults([])
-      setLiveSearchStatus("unavailable")
-      setLiveSearchMessage(LIVE_SEARCH_UNAVAILABLE)
-      return
-    }
-
-    liveSearchAbortRef.current?.abort()
-    const controller = new AbortController()
-    liveSearchAbortRef.current = controller
-    const requestId = liveSearchRequestIdRef.current + 1
-    liveSearchRequestIdRef.current = requestId
-    setLiveSearchResults([])
-    setLiveSearchNormalizedQuery(null)
-    setLiveSearchClarificationOptions([])
-    setLiveSearchStatus("loading")
-    setLiveSearchMessage(null)
-    try {
-      const response = await fetch(endpoint, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
-        credentials: "omit",
-        signal: controller.signal,
-        body: JSON.stringify({ query, limit: 4 }),
-      })
-      const payload: unknown = await response.json()
-      if (requestId !== liveSearchRequestIdRef.current) return
-      const data = payload && typeof payload === "object" ? payload as Record<string, unknown> : null
-      const results = Array.isArray(data?.results) ? data.results.filter(isLiveProduct) : []
-      if (response.ok && data?.status === "ready" && results.length > 0) {
-        setLiveSearchResults(results)
-        setLiveSearchNormalizedQuery(
-          typeof data.normalized_query === "string" && data.normalized_query.trim().length >= 2
-            ? data.normalized_query.trim()
-            : query,
-        )
-        setLiveSearchStatus("ready")
-        return
-      }
-      const options = Array.isArray(data?.clarification_options)
-        ? data.clarification_options.filter(isLivePoizonClarificationOption).slice(0, 4)
-        : []
-      if (response.ok && data?.status === "clarification") {
-        setLiveSearchStatus("clarification")
-        setLiveSearchMessage(
-          typeof data?.clarification === "string" && data.clarification.trim()
-            ? data.clarification
-            : "Уточните модель или артикул.",
-        )
-        setLiveSearchClarificationOptions(options)
-        return
-      }
-      setLiveSearchStatus("unavailable")
-      setLiveSearchMessage(
-        typeof data?.clarification === "string" && data.clarification.trim()
-          ? data.clarification
-          : LIVE_SEARCH_UNAVAILABLE,
-      )
-    } catch {
-      if (controller.signal.aborted || requestId !== liveSearchRequestIdRef.current) return
-      setLiveSearchStatus("unavailable")
-      setLiveSearchMessage(LIVE_SEARCH_UNAVAILABLE)
-    }
-  }, [liveSearchQuery])
-
   const openProduct = (product: CatalogProduct, trigger: HTMLElement, preferredSize?: string) => {
     productTriggerRef.current = trigger
     setCartOpen(false)
@@ -832,8 +525,8 @@ export function useLandingStorefront(
   function closeProduct() {
     setSelectedSlug(null)
     setSelectedSizeState(null)
-    if (/^\/product\/[^/]+\/?$/u.test(readAppPathname())) {
-      window.history.pushState(null, "", appPath("/"))
+    if (/^\/product\/[^/]+\/?$/u.test(window.location.pathname)) {
+      window.history.pushState(null, "", "/")
       window.dispatchEvent(new PopStateEvent("popstate"))
     }
     queueMicrotask(() => productTriggerRef.current?.focus())
@@ -875,7 +568,7 @@ export function useLandingStorefront(
 
   function closeCart() {
     const routeState = readUrlState()
-    const productRoute = /^\/product\/[^/]+\/?$/u.test(readAppPathname())
+    const productRoute = /^\/product\/[^/]+\/?$/u.test(window.location.pathname)
     setCartOpen(false)
     setSelectedSizeState(null)
     setSelectedSlug(productRoute ? routeState.productSlug : null)
@@ -905,7 +598,7 @@ export function useLandingStorefront(
     if (
       catalogPriceState.status !== "ready" ||
       !offer ||
-      offer.availability !== "supplier_verified" ||
+      offer.availability !== "catalog_listed" ||
       !confirmedSizeOffer
     ) {
       setCheckoutResult(
@@ -1024,6 +717,7 @@ export function useLandingStorefront(
 
     try {
       const result = await submitCheckout(
+        apiBaseUrl,
         cartLines,
         checkoutCustomer,
         checkoutConsents,
@@ -1070,20 +764,10 @@ export function useLandingStorefront(
   return {
     botUsername,
     botUrl,
-    selectedProductBotUrl,
     category,
     search,
     sort,
     taskInput,
-    liveSearchQuery,
-    liveSearchNormalizedQuery,
-    liveSearchBotUrl,
-    liveSearchStatus,
-    liveSearchResults,
-    liveSearchMessage,
-    liveSearchClarificationOptions,
-    catalogPoizonPrices,
-    catalogPoizonPricesReady,
     catalogPriceState,
     filteredProducts,
     selectedProduct,
@@ -1097,7 +781,6 @@ export function useLandingStorefront(
     selectedSizeOfferStatus: selectedSizeOfferState.status,
     selectedSizeOfferError: selectedSizeOfferState.error,
     selectedProductPrice,
-    getPoizonDisplayPrice,
     cartLines,
     cartCount,
     cartTotalRub: currentCartTotalRub,
@@ -1117,8 +800,6 @@ export function useLandingStorefront(
     applyQuickFilter,
     resetCatalog,
     setTaskInput,
-    setLiveSearchQuery,
-    submitLiveSearch,
     openProduct,
     closeProduct,
     selectProductImage,

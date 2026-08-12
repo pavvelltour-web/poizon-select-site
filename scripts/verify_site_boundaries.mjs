@@ -3,13 +3,7 @@ import { fileURLToPath } from "node:url"
 import path from "node:path"
 
 const siteRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
-const allowedBrowserEnv = new Set([
-  // Vite's compile-time static hosting base path. It never carries endpoint or secret data.
-  "BASE_URL",
-  "VITE_BOT_USERNAME",
-  // Public same-origin path only. It must never contain a provider endpoint.
-  "VITE_CRM_API_BASE_URL",
-])
+const allowedBrowserEnv = new Set(["VITE_API_BASE_URL", "VITE_BOT_USERNAME"])
 const auditedTextExtensions = new Set([
   ".css",
   ".html",
@@ -54,10 +48,9 @@ const envKeys = envExample
 if (
   envKeys.length !== 2 ||
   envKeys[0] !== "VITE_BOT_USERNAME" ||
-  envKeys[1] !== "VITE_CRM_API_BASE_URL" ||
-  !/^VITE_CRM_API_BASE_URL=\/api$/m.test(envExample)
+  envKeys[1] !== "VITE_API_BASE_URL"
 ) {
-  fail(".env.example may contain only VITE_BOT_USERNAME and VITE_CRM_API_BASE_URL=/api")
+  fail(".env.example may contain only VITE_BOT_USERNAME and VITE_API_BASE_URL")
 }
 
 const dockerIgnore = await text(".dockerignore")
@@ -87,16 +80,16 @@ if (
 }
 if (
   packageManifest.scripts?.["verify:release"] !==
-  "npm run verify:assets && npm run verify:release-rights"
+  "npm run verify:assets && npm run verify:release-rights && npm run media:storefront:qa && npm run media:unified:qa"
 ) {
-  fail("verify:release must include assets and the release-rights gate")
+  fail("verify:release must include assets, release rights, approved media and unified catalog QA")
 }
 
 const dockerfile = await text("Dockerfile")
 for (const required of [
   "npm ci --ignore-scripts",
   'ARG VITE_BOT_USERNAME=""',
-  'ARG VITE_CRM_API_BASE_URL="/api"',
+  'ARG VITE_API_BASE_URL=""',
   "npm run build:production",
   "USER nginx",
   "EXPOSE 8080",
@@ -112,46 +105,11 @@ for (const image of ["node:24-alpine", "nginx:1.29-alpine"]) {
     fail(`${image} must be pinned to an immutable digest`)
   }
 }
-// The repository is edited from both Windows and Linux. Normalise line endings
-// before inspecting build-stage ordering so the security gate is platform-neutral.
-const productionStage = dockerfile
-  .replace(/\r\n/g, "\n")
-  .split("FROM runtime-base AS production\n")[1]
-const legacyReleaseCopy = productionStage?.indexOf(
-  "COPY site-release/ /usr/share/nginx/html/",
-)
-const reactDistCopy = productionStage?.indexOf(
-  "COPY --from=production-build /app/dist /usr/share/nginx/html",
-)
-if (
-  !productionStage ||
-  legacyReleaseCopy === undefined ||
-  reactDistCopy === undefined ||
-  legacyReleaseCopy < 0 ||
-  reactDistCopy <= legacyReleaseCopy
-) {
-  fail("production Dockerfile must preserve the React index after legacy release files")
-}
 
 const nginx = await text("nginx.conf")
-for (const legacyRoute of [
-  "location = /kicksbase-signal-catalog.html",
-  "location = /kicksbase-signal-catalog-v4.html",
-]) {
-  const routeOffset = nginx.indexOf(legacyRoute)
-  const routeBlock = routeOffset < 0 ? "" : nginx.slice(routeOffset, routeOffset + 160)
-  if (!routeBlock.includes("try_files /index.html =404")) {
-    fail(`${legacyRoute} must resolve through the React catalog SPA`)
-  }
-}
-const allowedPoizonImageSources =
-  "img-src 'self' data: https://cdn.poizon.com https://oversea-shanghai-enhance.oss-cn-shanghai.aliyuncs.com"
-if (!nginx.includes(allowedPoizonImageSources)) {
-  fail("deployment policy must pin the verified Poizon image CDNs")
-}
 for (const required of [
   "default-src 'self'",
-  "connect-src 'self'",
+  "connect-src 'self' https://api.kicksbase.ru",
   "form-action 'none'",
   "frame-ancestors 'none'",
   "object-src 'none'",
@@ -165,12 +123,11 @@ for (const required of [
   const target = required === "USER nginx" ? dockerfile : nginx
   if (!target.includes(required)) fail(`deployment policy is missing ${required}`)
 }
-for (const required of [
-  "location ^~ /api/",
-  "proxy_pass http://api:8000",
-  "proxy_set_header Host api",
-]) {
-  if (!nginx.includes(required)) fail(`Nginx is missing the same-origin CRM proxy: ${required}`)
+for (const route of ["location = /catalog {", "location = /catalog/ {"]) {
+  if (!nginx.includes(route)) fail(`nginx must serve the SPA route with ${route}`)
+}
+if (nginx.includes("try_files $uri $uri/")) {
+  fail("nginx directory fallback can redirect SPA routes to the internal port")
 }
 
 const browserFiles = await sourceFiles(path.join(siteRoot, "src"))
@@ -187,8 +144,8 @@ const allowedPublicEntries = new Set([
   ...allowedRootBinaryEntries,
   "brand",
   "catalog",
-  "404.html",
   "favicon.svg",
+  "storefront-media",
 ])
 for (const entry of publicEntries) {
   if (!allowedPublicEntries.has(entry.name)) {
@@ -240,7 +197,11 @@ for (const file of publicFiles) {
       [".ico", ".png", ".webp"].includes(extension)
     ) &&
     !(relative.startsWith(`catalog${path.sep}`) && extension === ".webp") &&
-    !(relative.startsWith(`brand${path.sep}`) && extension === ".webp")
+    !(relative.startsWith(`brand${path.sep}`) && extension === ".webp") &&
+    !(
+      relative.startsWith(`storefront-media${path.sep}approved${path.sep}`) &&
+      [".png", ".webp"].includes(extension)
+    )
   ) {
     fail(`public contains an unaudited file type: ${relative}`)
   }
@@ -256,9 +217,6 @@ const auditedConfigFiles = [
 
 for (const file of browserFiles) {
   const source = await readFile(file, "utf8")
-  if (source.includes("storefront-media/approved/assets/")) {
-    fail(`${path.relative(siteRoot, file)} references a retired unpublished storefront asset`)
-  }
   if (/from\s+["'][^"']*crm/i.test(source)) {
     fail(`${path.relative(siteRoot, file)} imports CRM code`)
   }
@@ -269,38 +227,24 @@ for (const file of browserFiles) {
   ) {
     fail(`${path.relative(siteRoot, file)} contains a dangerous browser sink`)
   }
-  const relativeFile = path.relative(siteRoot, file).split(path.sep).join("/")
-  const hasRuntimeNetworkCall =
-    /\bfetch\s*\(|\bXMLHttpRequest\b|\bWebSocket\s*\(|\bEventSource\s*\(|\bnavigator\s*\.\s*sendBeacon\s*\(/.test(
+  if (
+    /\bXMLHttpRequest\b|\bWebSocket\s*\(|\bEventSource\s*\(|\bnavigator\s*\.\s*sendBeacon\s*\(/.test(
       source,
     )
-  const isAllowedSameOriginCatalogRequest =
-    relativeFile === "src/landing/use-landing-storefront.ts" &&
-    source.includes("function crmEndpoint(") &&
-    source.includes('configured.startsWith("/")') &&
-    source.includes('configured.startsWith("//")') &&
-    source.includes('crmEndpoint("search")') &&
-    source.includes('crmEndpoint("storefront-prices")') &&
-    source.includes('credentials: "omit"')
-  const isAllowedSameOriginCheckoutRequest =
-    relativeFile === "src/landing/cart.ts" &&
-    source.includes("function sameOriginApiEndpoint(path: string)") &&
-    source.includes('return `/api/${path.replace(/^\\/+/, "")}`') &&
-    source.includes('credentials: "same-origin"')
-  const isAllowedSameOriginAuthRequest =
-    relativeFile === "src/landing/sections/header.tsx" &&
-    source.includes('fetch("/api/auth/sms/request"') &&
-    source.includes('fetch("/api/auth/sms/verify"') &&
-    source.includes('credentials: "same-origin"')
-  if (
-    hasRuntimeNetworkCall &&
-    !isAllowedSameOriginCatalogRequest &&
-    !isAllowedSameOriginCheckoutRequest &&
-    !isAllowedSameOriginAuthRequest
   ) {
     fail(
-      `${relativeFile} contains a forbidden runtime network call`,
+      `${path.relative(siteRoot, file)} contains a forbidden runtime network call`,
     )
+  }
+  if (
+    /\bfetch\s*\(/.test(source) &&
+    !source.includes("/api/checkout/orders") &&
+    !(
+      source.includes("/api/auth/sms/request") &&
+      source.includes("/api/auth/sms/verify")
+    )
+  ) {
+    fail(`${path.relative(siteRoot, file)} contains a non-checkout fetch call`)
   }
 
   const envAccesses = [

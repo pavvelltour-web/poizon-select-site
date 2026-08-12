@@ -2,8 +2,7 @@ import { describe, expect, it } from "vitest"
 
 import { catalogProducts } from "../catalog/catalog"
 import {
-  buildLiveProductTelegramBotUrl,
-  buildLiveSearchTelegramBotUrl,
+  buildLiveOrderRequest,
   buildOrderRequest,
   buildTelegramBotUrl,
   resolveBotUsername,
@@ -28,18 +27,10 @@ describe("Telegram order handoff", () => {
     expect(buildTelegramBotUrl("https://evil.test/namebot")).toBeNull()
   })
 
-  it("hands a bounded live Poizon query to the bot through Telegram start", () => {
-    expect(buildLiveSearchTelegramBotUrl("MyBuyerBot", "Nike Air Force 1")).toBe(
-      "https://t.me/MyBuyerBot?start=live_TmlrZSBBaXIgRm9yY2UgMQ",
-    )
-    expect(buildLiveSearchTelegramBotUrl("MyBuyerBot", "x".repeat(120))).toBeNull()
-    expect(buildLiveSearchTelegramBotUrl(null, "Nike Air Force 1")).toBeNull()
-  })
-
   it("creates the exact one-line bot search query without an envelope", () => {
     const request = buildOrderRequest(catalogProducts[0])
 
-    expect(request).toBe("ASICS SKY ELITE FF 3 1051A080-100 volleyball")
+    expect(request).toBe("ASICS SKY ELITE FF 3 volleyball")
     expect(request).not.toContain("\n")
     expect(request).not.toContain("Поисковый запрос:")
     expect(request).not.toMatch(/[<>]/)
@@ -48,23 +39,27 @@ describe("Telegram order handoff", () => {
   it("adds a selected size as a clean second line", () => {
     const request = buildOrderRequest(catalogProducts[0], "EU 43")
 
-    expect(request).toBe(
-      "ASICS SKY ELITE FF 3 1051A080-100 volleyball\nРазмер: EU 43",
-    )
+    expect(request).toBe("ASICS SKY ELITE FF 3 volleyball\nРазмер: EU 43")
     expect(request).not.toMatch(/[<>]/)
   })
 
-  it("uses the article for the live Telegram handoff without source details", () => {
-    const href = buildLiveProductTelegramBotUrl("MyBuyerBot", {
+  it("keeps the live article and official provider URL in the Telegram handoff", () => {
+    const request = buildLiveOrderRequest({
       brand: "Nike",
       name: "Air Force 1 '07 White",
       article: "DV0788-104",
-    }, "Nike Air Force 1")
+      providerUrl: "https://www.poizon.com/product/dv0788-104",
+      expiresAt: "2026-08-01T10:15:00Z",
+    }, {
+      skuId: "sku-42",
+      size: "42",
+      priceCny: 699,
+      quoteRub: 16_700,
+    })
 
-    expect(href).toBe("https://t.me/MyBuyerBot?start=live_RFYwNzg4LTEwNA")
-    expect(href).not.toContain("poizon.com")
-    expect(href).not.toContain("sku")
-    expect(href).not.toContain("%C2%A5")
+    expect(request).toBe(
+      "Nike Air Force 1 '07 White\nАртикул: DV0788-104\nPoizon: https://www.poizon.com/product/dv0788-104\nРазмер: 42\nSKU Poizon: sku-42\nЦена Poizon: ¥699\nКотировка: 16700 ₽\nДействует до: 2026-08-01T10:15:00Z",
+    )
   })
 
   it("keeps all 100 catalog handoffs unique, one-line and bot-ready", () => {

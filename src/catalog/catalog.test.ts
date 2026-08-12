@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest"
 
+import unifiedCatalogMediaManifest from "../../catalog-media/unified-catalog-media.json"
+
 import {
   canonicalCatalogMediaUrl,
   catalogProducts,
@@ -14,18 +16,12 @@ import {
   sortCatalog,
 } from "./catalog"
 
-const approvedStorefrontSlugs = [
-  "nike-kd-18",
-  "nike-sabrina-3",
-  "nike-aone",
-  "asics-sky-elite-ff-3",
-  "li-ning-wade-808-4-ultra",
-  "new-balance-two-wxy-v5",
-  "anta-kai-1",
-  "nike-free-metcon-6",
-] as const
-
-const approvedStorefrontMediaRoot = "/storefront-media/approved/products"
+const unifiedGalleryBySlug = new Map(
+  unifiedCatalogMediaManifest.products.map((product) => [
+    product.slug,
+    [...product.frames].sort((left, right) => left.position - right.position),
+  ]),
+)
 
 describe("catalogProducts", () => {
   it("contains exactly 100 unique products in the requested category split", () => {
@@ -90,16 +86,7 @@ describe("catalogProducts", () => {
     const imagePaths = new Set<string>()
 
     for (const product of catalogProducts) {
-      const assetSlug = product.fallbackImage
-        .replace(/^catalog\//, "")
-        .replace(/\.webp$/, "")
-      const fallbackGallery = [
-        product.fallbackImage,
-        `catalog/gallery/${assetSlug}-2.webp`,
-        `catalog/gallery/${assetSlug}-3.webp`,
-        `catalog/gallery/${assetSlug}-4.webp`,
-        `catalog/gallery/${assetSlug}-5.webp`,
-      ]
+      const manifestFrames = unifiedGalleryBySlug.get(product.slug)
 
       expect(product.slug).toMatch(/^[a-z0-9]+(?:-[a-z0-9]+)*$/)
       expect(product.brand.trim()).toBe(product.brand)
@@ -110,24 +97,20 @@ describe("catalogProducts", () => {
       expect(product.query.length).toBeGreaterThan(8)
       expect(product.fallbackImage).toMatch(/^catalog\/[a-z0-9-]+\.webp$/)
       expect(product.gallery).toHaveLength(5)
+      expect(manifestFrames).toHaveLength(5)
       expect(product.image).toBe(product.gallery[0]?.src)
-      if (!approvedStorefrontSlugs.includes(product.slug as typeof approvedStorefrontSlugs[number])) {
-        expect(product.gallery.map((image) => image.src)).toContain(product.fallbackImage)
-        expect(product.image).toBe(product.fallbackImage)
-        expect(
-          product.gallery.every((image) => fallbackGallery.includes(image.src)),
-        ).toBe(true)
-      }
+      expect(product.gallery.map((image) => image.src)).toEqual(
+        manifestFrames?.map((frame) => frame.file.replace(/^public\//, "")),
+      )
+      expect(product.gallery.map((image) => image.angle)).toEqual(
+        manifestFrames?.map((frame) => frame.angle),
+      )
       expect(new Set(product.gallery.map((image) => image.contentSignal)).size).toBe(
         product.gallery.length,
       )
-      if (!approvedStorefrontSlugs.includes(product.slug as typeof approvedStorefrontSlugs[number])) {
-        expect(
-          product.gallery.every(
-            (image) => image.source === "Project-generated studio reference",
-          ),
-        ).toBe(true)
-      }
+      expect(product.gallery.every(
+        (image) => image.source === "KICKSBASE unified catalog media manifest",
+      )).toBe(true)
       imagePaths.add(product.fallbackImage)
       expect(Boolean(product.marketPrice || product.orderQuote)).toBe(true)
     }
@@ -136,21 +119,18 @@ describe("catalogProducts", () => {
     expect(catalogProducts.every((product) => product.gallery.length === 5)).toBe(true)
   })
 
-  it("keeps the approved preview, product sheet and PDP on the same five images", () => {
-    for (const slug of approvedStorefrontSlugs) {
+  it("keeps preview, product sheet and PDP on the manifest's five ordered images", () => {
+    for (const [slug, expectedFrames] of unifiedGalleryBySlug) {
       const product = findProductBySlug(slug)
-      const expectedGallery = [
-        `${approvedStorefrontMediaRoot}/${slug}/01-side.png`,
-        `${approvedStorefrontMediaRoot}/${slug}/03-side.png`,
-        `${approvedStorefrontMediaRoot}/${slug}/02-three-quarter.png`,
-        `${approvedStorefrontMediaRoot}/${slug}/04-rear.png`,
-        `${approvedStorefrontMediaRoot}/${slug}/05-sole.png`,
-      ]
 
       expect(product, slug).not.toBeNull()
-      expect(product?.image, slug).toBe(expectedGallery[0])
-      expect(product?.gallery.map((image) => image.src), slug).toEqual(expectedGallery)
-      expect(product?.gallery[3]?.alt, slug).toContain("вид сзади")
+      expect(product?.image, slug).toBe(expectedFrames[0]?.file.replace(/^public\//, ""))
+      expect(product?.gallery.map((image) => image.src), slug).toEqual(
+        expectedFrames.map((frame) => frame.file.replace(/^public\//, "")),
+      )
+      expect(product?.gallery.map((image) => image.angle), slug).toEqual(
+        expectedFrames.map((frame) => frame.angle),
+      )
     }
   })
 

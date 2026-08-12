@@ -20,9 +20,7 @@ function checkoutCatalogPayload(
   },
 ) {
   return {
-    version: "poizon-live-v1",
-    catalog_mode: "curated_live_poizon",
-    snapshot_hours: 12,
+    version: "2026-08-02-v3",
     personal_data_consent_version: "pd-2026-08",
     order_creation_enabled: capabilities.orderCreationEnabled,
     online_payment_enabled: capabilities.onlinePaymentEnabled,
@@ -34,24 +32,17 @@ function checkoutCatalogPayload(
         product_kind: "footwear",
         sizes,
         price_rub: 24500,
-        price_version: "poizon-live-v1",
         image_url: "https://kicksbase.ru/catalog/nike-gt-cut-academy.webp",
-        images: ["https://kicksbase.ru/catalog/nike-gt-cut-academy.webp"],
         fulfillment_mode: "made_to_order",
-        availability: "supplier_verified",
+        availability: "catalog_listed",
         eta_min_days: 10,
         eta_max_days: 18,
-        observed_at: new Date(Date.now() - 60_000).toISOString(),
-        expires_at: new Date(Date.now() + 12 * 60 * 60 * 1000 - 60_000).toISOString(),
-        catalog_source: "poizon_curated_snapshot",
-        live_provider_verified: true,
+        live_provider_verified: false,
         size_offers: sizes.map((size) => ({
           sku_id: `gt-cut-${size}`,
           size_eu: size,
           size_ru: String(Number(size) - 1),
-          price_cny: 1800,
           price_rub: 24500,
-          price_version: "poizon-live-v1",
           available: true,
           checkout_confirmed: true,
           live_provider_verified: true,
@@ -61,53 +52,26 @@ function checkoutCatalogPayload(
   }
 }
 
-function livePoizonOnlyCheckoutPayload() {
-  return {
-    catalog_mode: "live_poizon_only",
-    version: "live-poizon-only-v1",
-    order_creation_enabled: false,
-    online_payment_enabled: false,
-    items: [],
-    prices: {},
-  }
-}
-
-function storefrontPricePayload() {
-  return {
-    items: [{
-      slug: "nike-gt-cut-academy",
-      source_query: "Nike G.T. Cut Academy",
-      product_name: "G.T. Cut Academy",
-      total_rub: 24500,
-      observed_at: new Date(Date.now() - 60_000).toISOString(),
-      expires_at: new Date(Date.now() + 12 * 60 * 60 * 1000 - 60_000).toISOString(),
-    }],
-  }
-}
-
 function readyGtCutSearchPayload() {
   const payload = readySearchPayload("Nike G.T. Cut Academy basketball volleyball")
   return {
     ...payload,
     results: [{
       ...payload.results[0],
-      product_ref: "gt-cut-academy",
+      provider_product_id: "poizon-gt-cut-academy",
+      provider_url: "https://www.poizon.com/product/gt-cut-academy",
       name: "G.T. Cut Academy",
       model: "G.T. Cut Academy",
       article: "GT-CUT-ACADEMY",
-      color: "Black / White",
       offers: [{
+        sku_id: "gt-cut-44",
         size: "44",
-        eu: "44",
         ru: "43",
         us: "10",
         cn: "280",
-        available: true,
-        price_cny: 1800,
+        currency: "CNY",
+        price_cny: 899,
         quote_rub: 24500,
-        rf_delivery: 1000,
-        total_rub: 25500,
-        price_breakdown: null,
       }],
     }],
   }
@@ -121,46 +85,30 @@ function readySearchPayload(normalizedQuery = "Nike Air Force 1") {
     normalized_query: normalizedQuery,
     results: [
       {
-        product_ref: "air-force-1-07-white",
+        source: "poizon",
+        provider_product_id: "poizon-air-force-1-07-white",
+        provider_url: "https://www.poizon.com/product/dv0788-104",
         brand: "Nike",
         name: "Air Force 1 '07 White",
         article: "DV0788-104",
-        color: "White / University Red",
         kind: "footwear",
-        description: null,
         images: ["https://cdn.poizon.example/air-force-1.webp"],
-        in_stock: true,
-        size_context: "Размеры указаны поставщиком.",
-        size_chart: "Сверьте длину стопы с таблицей производителя.",
-        size_image: "https://cdn.poizon.example/air-force-1-size-chart.webp",
         observed_at: observedAt,
         expires_at: expiresAt,
         offers: [
           {
+            sku_id: "sku-42",
             size: "42",
-            eu: "42",
-            ru: "41",
-            us: "8.5",
-            cn: "265",
-            available: true,
+            currency: "CNY",
             price_cny: 699,
             quote_rub: 16700,
-            rf_delivery: 1000,
-            total_rub: 17700,
-            price_breakdown: null,
           },
           {
+            sku_id: "sku-43",
             size: "43",
-            eu: null,
-            ru: null,
-            us: null,
-            cn: null,
-            available: null,
-            price_cny: 730,
+            currency: "CNY",
+            price_cny: 729,
             quote_rub: 17300,
-            rf_delivery: 1000,
-            total_rub: 18300,
-            price_breakdown: null,
           },
         ],
       },
@@ -193,8 +141,7 @@ afterEach(() => {
 })
 
 describe("LandingPage", () => {
-  it("renders the approved eight-product home and progressively reveals the full catalog", async () => {
-    const user = userEvent.setup()
+  it("renders the approved eight-product home and progressively reveals the full catalog", () => {
     const view = render(<LandingPage configuredBotUsername={null} />)
 
     expect(
@@ -205,7 +152,7 @@ describe("LandingPage", () => {
       "href",
       "/catalog",
     )
-    expect(screen.getByText("Другие товары по запросу")).toBeInTheDocument()
+    expect(screen.queryByText("по запросу")).toBeNull()
     const firstCard = productLinks()[0]
     expect(firstCard).toHaveAccessibleName(/Nike KD 18/)
     expect(within(firstCard).getByText("Кроссовки Nike KD 18")).toBeInTheDocument()
@@ -225,7 +172,6 @@ describe("LandingPage", () => {
     window.history.replaceState(null, "", "/catalog")
     render(<LandingPage configuredBotUsername={null} />)
     expect(productLinks()).toHaveLength(CATALOG_PAGE_SIZE)
-    expect(screen.getByRole("heading", { name: "В нашем каталоге" })).toBeInTheDocument()
     expect(
       screen.getByText(`${publicCatalogProducts.length} товаров, показано 24`),
     ).toBeInTheDocument()
@@ -233,9 +179,13 @@ describe("LandingPage", () => {
       screen.getByRole("button", { name: `Показать ещё ${CATALOG_PAGE_SIZE}` }),
     ).toBeInTheDocument()
 
-    await user.click(screen.getByRole("button", { name: `Показать ещё ${CATALOG_PAGE_SIZE}` }))
-    expect(productLinks()).toHaveLength(CATALOG_PAGE_SIZE * 2)
-    expect(screen.getByRole("button", { name: /Показать ещё/ })).toBeInTheDocument()
+    while (productLinks().length < publicCatalogProducts.length) {
+      fireEvent.click(screen.getByRole("button", { name: /Показать ещё/ }))
+    }
+
+    expect(productLinks()).toHaveLength(publicCatalogProducts.length)
+    expect(screen.queryByRole("button", { name: /Показать ещё/ })).toBeNull()
+    expect(screen.getByText("Показан весь каталог")).toBeInTheDocument()
   })
 
   it("canonicalizes the trailing-slash catalog route and renders the full catalog view", () => {
@@ -370,8 +320,7 @@ describe("LandingPage", () => {
 
     const dialog = screen.getByRole("dialog", { name: /Ronaldinho #10 Jersey/ })
     expect(dialog).toHaveAttribute("id", "product-dialog")
-    expect(within(dialog).getAllByText(/Сверяем…|Уточняется/).length).toBeGreaterThan(0)
-    expect(within(dialog).queryByText(/^\d{1,3}(?: \d{3})+ ₽$/)).toBeNull()
+    expect(within(dialog).getAllByText(/^\d{1,3}(?: \d{3})+ ₽$/).length).toBeGreaterThan(0)
     expect(screen.getByRole("button", { name: "Открыть фото в полном размере" })).toBeInTheDocument()
     expect(screen.queryByText(/VITE_BOT_USERNAME|менеджер/i)).toBeNull()
   })
@@ -495,15 +444,12 @@ describe("LandingPage", () => {
     expect(document.querySelectorAll(".sheet-gallery-thumb")).toHaveLength(5)
   })
 
-  it("uses the published hero asset and lazily loads catalog photography", () => {
+  it("uses the approved hero asset and lazily loads catalog photography", () => {
     render(<LandingPage configuredBotUsername={null} />)
 
     expect(document.querySelector(".hero img")).toHaveAttribute(
       "src",
-      new URL(
-        "/brand/kicksbase-hero.webp",
-        window.location.origin,
-      ).toString(),
+      "/storefront-media/approved/assets/blue-field-v2/nike-kd-18-hero-cutout-v2.png",
     )
 
     document.querySelectorAll<HTMLImageElement>(".product-card__image").forEach((image) => {
@@ -539,7 +485,7 @@ describe("LandingPage", () => {
       "href",
       "/product/nike-air-force-1-07-white",
     )
-    expect(screen.queryByText("Проверка поставщика временно недоступна.")).toBeNull()
+    expect(screen.queryByText("Проверка Poizon временно недоступна.")).toBeNull()
 
     view.unmount()
     window.history.replaceState(null, "", "/")
@@ -563,370 +509,6 @@ describe("LandingPage", () => {
         { query: "Nike DV0788-104 42 до 18000", limit: 4 },
       ]),
     )
-  }, 15_000)
-
-  it("continues a catalog-toolbar clarification only after the customer chooses a model", async () => {
-    const user = userEvent.setup()
-    const ready = readySearchPayload("Nike Air Max 95")
-    const fetchMock = vi.fn(async (url: string, options?: RequestInit) => {
-      if (url.endsWith("/api/catalog/search") && options?.method === "POST") {
-        const body = JSON.parse(String(options.body)) as { query: string }
-        if (body.query === "найк аир макс") {
-          return {
-            ok: true,
-            status: 200,
-            json: async () => ({
-              status: "clarification",
-              normalized_query: "Nike Air Max",
-              clarification: "Какая версия Air Max нужна?",
-              clarification_options: [
-                { label: "Air Max 95", query: "Nike Air Max 95" },
-                { label: "Air Max Plus", query: "Nike Air Max Plus" },
-              ],
-              results: [],
-              fallback: [],
-            }),
-          }
-        }
-        return { ok: true, status: 200, json: async () => ready }
-      }
-      return { ok: true, status: 200, json: async () => livePoizonOnlyCheckoutPayload() }
-    })
-    vi.stubGlobal("fetch", fetchMock)
-    window.history.replaceState(null, "", "/catalog")
-    render(<LandingPage configuredBotUsername="@SelectBuyerBot" />)
-
-    await user.type(screen.getByRole("searchbox", { name: "Поиск по товарам" }), "найк аир макс")
-
-    expect(await screen.findByText("Какая версия Air Max нужна?")).toBeInTheDocument()
-    expect(screen.getByRole("button", { name: "Air Max 95" })).toBeInTheDocument()
-    const callsBeforeChoice = fetchMock.mock.calls.filter(
-      ([url, options]) => String(url).endsWith("/api/catalog/search") && options?.method === "POST",
-    )
-    expect(callsBeforeChoice).toHaveLength(1)
-    expect(JSON.parse(String(callsBeforeChoice[0][1]?.body))).toEqual({
-      query: "найк аир макс",
-      limit: 4,
-    })
-
-    await user.click(screen.getByRole("button", { name: "Air Max 95" }))
-
-    expect(await screen.findByRole("heading", { name: "Nike Air Force 1 '07 White" })).toBeInTheDocument()
-    const calls = fetchMock.mock.calls.filter(
-      ([url, options]) => String(url).endsWith("/api/catalog/search") && options?.method === "POST",
-    )
-    expect(calls).toHaveLength(2)
-    expect(JSON.parse(String(calls[1][1]?.body))).toEqual({
-      query: "Nike Air Max 95",
-      limit: 4,
-    })
-  }, 15_000)
-
-  it("continues a task-finder clarification only after the customer chooses a model", async () => {
-    const user = userEvent.setup()
-    const ready = readySearchPayload("Nike Air Max Plus")
-    const fetchMock = vi.fn(async (url: string, options?: RequestInit) => {
-      if (url.endsWith("/api/catalog/search") && options?.method === "POST") {
-        const body = JSON.parse(String(options.body)) as { query: string }
-        if (body.query === "найк аир макс") {
-          return {
-            ok: true,
-            status: 200,
-            json: async () => ({
-              status: "clarification",
-              normalized_query: "Nike Air Max",
-              clarification: "Какая версия Air Max нужна?",
-              clarification_options: [
-                { label: "Air Max Plus", query: "Nike Air Max Plus" },
-              ],
-              results: [],
-              fallback: [],
-            }),
-          }
-        }
-        return { ok: true, status: 200, json: async () => ready }
-      }
-      return { ok: true, status: 200, json: async () => livePoizonOnlyCheckoutPayload() }
-    })
-    vi.stubGlobal("fetch", fetchMock)
-    render(<LandingPage configuredBotUsername="@SelectBuyerBot" />)
-
-    const finder = screen.getByLabelText("Помощь с выбором")
-    await user.type(
-      within(finder).getByRole("searchbox", { name: "Опишите задачу для подбора" }),
-      "найк аир макс",
-    )
-
-    expect(await within(finder).findByText("Какая версия Air Max нужна?")).toBeInTheDocument()
-    await user.click(within(finder).getByRole("button", { name: "Air Max Plus" }))
-
-    await waitFor(() => {
-      expect(within(finder).getByTestId("live-search-result")).toBeInTheDocument()
-    })
-    const calls = fetchMock.mock.calls.filter(
-      ([url, options]) => String(url).endsWith("/api/catalog/search") && options?.method === "POST",
-    )
-    expect(calls).toHaveLength(2)
-    expect(JSON.parse(String(calls[0][1]?.body))).toEqual({
-      query: "найк аир макс",
-      limit: 4,
-    })
-    expect(JSON.parse(String(calls[1][1]?.body))).toEqual({
-      query: "Nike Air Max Plus",
-      limit: 4,
-    })
-  })
-
-  it("renders several public cards with size-bound CNY and final RUB prices", async () => {
-    const user = userEvent.setup()
-    const first = readySearchPayload("Nike Air Force 1")
-    const second = {
-      ...first.results[0],
-      product_ref: "air-force-1-07-black",
-      name: "Air Force 1 '07 Black",
-      article: "CW2288-001",
-      color: "Black / White",
-      description: "Чёрные кроссовки для повседневной носки.",
-      images: ["https://cdn.poizon.example/air-force-1-black.webp"],
-      offers: [{
-        size: "42",
-        eu: "42",
-        ru: "41",
-        us: "8.5",
-        cn: "265",
-        available: true,
-        price_cny: 699,
-        quote_rub: 16_900,
-        rf_delivery: 1000,
-        total_rub: 17_900,
-        price_breakdown: null,
-      }],
-    }
-    const fetchMock = vi.fn(async (url: string, options?: RequestInit) => ({
-      ok: true,
-      status: 200,
-      json: async () => url.endsWith("/api/catalog/search") && options?.method === "POST"
-        ? { ...first, results: [{
-          ...first.results[0],
-          description: "Белые кроссовки из натуральной кожи.",
-        }, second] }
-        : livePoizonOnlyCheckoutPayload(),
-    }))
-    vi.stubGlobal("fetch", fetchMock)
-    window.history.replaceState(null, "", "/catalog")
-    render(<LandingPage configuredBotUsername="@SelectBuyerBot" />)
-
-    await user.type(screen.getByRole("searchbox", { name: "Поиск по товарам" }), "найк аир форс")
-
-    await waitFor(() => {
-      expect(screen.getAllByTestId("live-search-result")).toHaveLength(2)
-    })
-    expect(screen.getByText("Белые кроссовки из натуральной кожи.")).toBeInTheDocument()
-    expect(screen.getByText("Чёрные кроссовки для повседневной носки.")).toBeInTheDocument()
-    expect(screen.getByText(/RU 41 · EU 42 · US 8\.5 · CN 265 · ¥699 · 17\s?700 ₽ · в наличии/u)).toBeInTheDocument()
-    expect(screen.getAllByText("В наличии по данным поставщика.")).toHaveLength(2)
-    expect(screen.getAllByText("Размеры указаны поставщиком.")).toHaveLength(2)
-    expect(screen.getAllByText("Сверьте длину стопы с таблицей производителя.")).toHaveLength(2)
-    expect(screen.getAllByRole("link", { name: "Выбрать в Telegram" })).toHaveLength(2)
-    expect(document.body.textContent).toContain("¥699")
-    expect(document.body.textContent).not.toContain("SKU")
-    expect(document.body.textContent).not.toContain("Карточка Poizon")
-    expect(document.body.textContent).not.toContain("poizon.com/product")
-  })
-
-  it("keeps the source CNY and final RUB amount bound to each individual size", async () => {
-    const user = userEvent.setup()
-    const payload = readySearchPayload("Nike G.T. Hustle 3")
-    const fetchMock = vi.fn(async (url: string, options?: RequestInit) => ({
-      ok: true,
-      status: 200,
-      json: async () => url.endsWith("/api/catalog/search") && options?.method === "POST"
-        ? {
-          ...payload,
-          results: [{
-            ...payload.results[0],
-            product_ref: "gt-hustle-3-gray",
-            name: "G.T. Hustle 3 Gray",
-            offers: [
-              {
-                size: "44.5",
-                eu: "44.5",
-                ru: null,
-                us: null,
-                cn: null,
-                available: true,
-                price_cny: 612,
-                quote_rub: 10_361.87,
-                rf_delivery: 1_000,
-                total_rub: 11_361.87,
-                price_breakdown: null,
-              },
-              {
-                size: "45",
-                eu: "45",
-                ru: null,
-                us: null,
-                cn: null,
-                available: true,
-                price_cny: 2400,
-                quote_rub: 38_464.2,
-                rf_delivery: 1_000,
-                total_rub: 39_464.2,
-                price_breakdown: null,
-              },
-            ],
-          }],
-        }
-        : livePoizonOnlyCheckoutPayload(),
-    }))
-    vi.stubGlobal("fetch", fetchMock)
-    window.history.replaceState(null, "", "/catalog")
-    render(<LandingPage configuredBotUsername="@SelectBuyerBot" />)
-
-    await user.type(screen.getByRole("searchbox", { name: "Поиск по товарам" }), "G.T. Hustle 3")
-
-    await waitFor(() => {
-      expect(screen.getByTestId("live-search-result")).toBeInTheDocument()
-    })
-    expect(screen.getByText(/EU 44\.5 · ¥612 · 11\s?362 ₽ · в наличии/u)).toBeInTheDocument()
-    expect(screen.getByText(/EU 45 · ¥2\s?400 · 39\s?464 ₽ · в наличии/u)).toBeInTheDocument()
-    expect(screen.getByText("Цена зависит от размера.")).toBeInTheDocument()
-    expect(screen.getByText(/11\s?362 ₽–39\s?464 ₽/u)).toBeInTheDocument()
-  })
-
-  it("shows live Poizon photos, translated description and an article-safe Telegram handoff", async () => {
-    const user = userEvent.setup()
-    const payload = readySearchPayload("Nike Air Force 1")
-    const fetchMock = vi.fn(async (url: string, options?: RequestInit) => ({
-      ok: true,
-      status: 200,
-      json: async () => url.endsWith("/api/catalog/search") && options?.method === "POST"
-        ? {
-          ...payload,
-          results: [{
-            ...payload.results[0],
-            description: "Белые кроссовки из натуральной кожи.",
-          }],
-        }
-        : livePoizonOnlyCheckoutPayload(),
-    }))
-    vi.stubGlobal("fetch", fetchMock)
-    render(<LandingPage configuredBotUsername="@SelectBuyerBot" />)
-
-    await user.type(screen.getByRole("searchbox", { name: "Поиск товаров по запросу" }), "Nike Air Force 1")
-    await user.click(screen.getByRole("button", { name: "Найти товары" }))
-
-    expect(await screen.findByText("Белые кроссовки из натуральной кожи.")).toBeInTheDocument()
-    expect(screen.getByRole("img", { name: "Air Force 1 '07 White" }))
-      .toHaveAttribute("src", "https://cdn.poizon.example/air-force-1.webp")
-    expect(screen.getByText(/RU 41 · EU 42 · US 8\.5 · CN 265 · ¥699 · 17\s?700 ₽ · в наличии/u)).toBeInTheDocument()
-    expect(screen.getByText(/Размер: 43 · ¥730 · 18\s?300 ₽ · наличие уточняется/u)).toBeInTheDocument()
-    expect(screen.getByText("Цена зависит от размера.")).toBeInTheDocument()
-    expect(screen.getByText("В наличии по данным поставщика.")).toBeInTheDocument()
-    expect(screen.getByText("Размеры указаны поставщиком.")).toBeInTheDocument()
-    expect(screen.getByRole("img", { name: "Таблица размеров для Air Force 1 '07 White" }))
-      .toHaveAttribute("src", "https://cdn.poizon.example/air-force-1-size-chart.webp")
-    expect(screen.getByRole("link", { name: "Выбрать и заказать в Telegram" }))
-      .toHaveAttribute("href", "https://t.me/SelectBuyerBot?start=live_RFYwNzg4LTEwNA")
-    expect(fetchMock.mock.calls).toContainEqual(expect.arrayContaining([
-      "/api/catalog/search",
-      expect.objectContaining({ method: "POST" }),
-    ]))
-  })
-
-  it("asks for an Air Max version before it requests fresh Poizon cards", async () => {
-    const user = userEvent.setup()
-    const ready = {
-      ...readySearchPayload("Nike Air Max 95"),
-      results: [{
-        ...readySearchPayload("Nike Air Max 95").results[0],
-        product_ref: "air-max-95",
-        name: "Air Max 95",
-      }],
-    }
-    const fetchMock = vi.fn(async (url: string, options?: RequestInit) => {
-      if (url.endsWith("/api/catalog/search") && options?.method === "POST") {
-        const body = JSON.parse(String(options.body)) as { query: string }
-        if (body.query === "найк аир макс") {
-          return {
-            ok: true,
-            status: 200,
-            json: async () => ({
-              status: "clarification",
-              normalized_query: "найк аир макс",
-              clarification: "Какая версия Air Max нужна?",
-              clarification_options: [
-                { label: "Air Max 95", query: "Nike Air Max 95" },
-                { label: "Air Max Plus", query: "Nike Air Max Plus" },
-              ],
-              results: [],
-              fallback: [],
-            }),
-          }
-        }
-        return { ok: true, status: 200, json: async () => ready }
-      }
-      return { ok: true, status: 200, json: async () => livePoizonOnlyCheckoutPayload() }
-    })
-    vi.stubGlobal("fetch", fetchMock)
-    render(<LandingPage configuredBotUsername="@SelectBuyerBot" />)
-
-    await user.type(screen.getByRole("searchbox", { name: "Поиск товаров по запросу" }), "найк аир макс")
-    await user.click(screen.getByRole("button", { name: "Найти товары" }))
-
-    expect(await screen.findByText("Какая версия Air Max нужна?")).toBeInTheDocument()
-    expect(screen.getByRole("button", { name: "Air Max 95" })).toBeInTheDocument()
-    const sourceCallsBeforeChoice = fetchMock.mock.calls.filter(
-      ([url, options]) => String(url).endsWith("/api/catalog/search") && options?.method === "POST",
-    )
-    expect(sourceCallsBeforeChoice).toHaveLength(1)
-    expect(JSON.parse(String(sourceCallsBeforeChoice[0][1]?.body))).toEqual({
-      query: "найк аир макс",
-      limit: 4,
-    })
-
-    await user.click(screen.getByRole("button", { name: "Air Max 95" }))
-
-    expect(await screen.findByRole("heading", { name: "Nike Air Max 95" })).toBeInTheDocument()
-    const sourceCalls = fetchMock.mock.calls.filter(
-      ([url, options]) => String(url).endsWith("/api/catalog/search") && options?.method === "POST",
-    )
-    expect(sourceCalls).toHaveLength(2)
-    expect(JSON.parse(String(sourceCalls[1][1]?.body))).toEqual({
-      query: "Nike Air Max 95",
-      limit: 4,
-    })
-  })
-
-  it("renders a Poizon size-chart URL as an image and does not duplicate a brand in the title", async () => {
-    const user = userEvent.setup()
-    const payload = readySearchPayload("Nike Air Force 1")
-    const sizeChartUrl = "https://cdn.poizon.example/air-force-1-size-chart-from-chart.webp"
-    const fetchMock = vi.fn(async (url: string, options?: RequestInit) => ({
-      ok: true,
-      status: 200,
-      json: async () => url.endsWith("/api/catalog/search") && options?.method === "POST"
-        ? {
-          ...payload,
-          results: [{
-            ...payload.results[0],
-            name: "Nike Air Force 1 '07 White",
-            size_chart: sizeChartUrl,
-            size_image: null,
-          }],
-        }
-        : livePoizonOnlyCheckoutPayload(),
-    }))
-    vi.stubGlobal("fetch", fetchMock)
-    render(<LandingPage configuredBotUsername="@SelectBuyerBot" />)
-
-    await user.type(screen.getByRole("searchbox", { name: "Поиск товаров по запросу" }), "Nike Air Force 1")
-    await user.click(screen.getByRole("button", { name: "Найти товары" }))
-
-    expect(await screen.findByRole("heading", { name: "Nike Air Force 1 '07 White" })).toBeInTheDocument()
-    expect(screen.getByRole("img", { name: "Таблица размеров для Nike Air Force 1 '07 White" }))
-      .toHaveAttribute("src", sizeChartUrl)
-    expect(screen.queryByText(sizeChartUrl)).not.toBeInTheDocument()
   })
 
   it("does not look up a provider when a customer opens a published product card", async () => {
@@ -967,16 +549,22 @@ describe("LandingPage", () => {
     expect(within(finder).queryByText("16 000 ₽")).toBeNull()
   })
 
-  it("never replaces a missing Poizon snapshot with a bundled catalog price", async () => {
+  it("keeps published catalog prices readable when the API is temporarily offline", async () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("offline")))
     window.history.replaceState(null, "", "/catalog")
     render(<LandingPage configuredBotUsername={null} />)
 
-    const firstCard = productLinks()[0]
     await waitFor(() => {
-      expect(within(firstCard).getByText("Уточняется")).toBeInTheDocument()
+      expect(
+        screen.getByText(
+          "Цены из витрины видны. Оформление вернётся после восстановления связи с сервером.",
+        ),
+      ).toBeInTheDocument()
     })
-    expect(within(firstCard).queryByText("34 500 ₽")).toBeNull()
+
+    const firstCard = productLinks()[0]
+    expect(within(firstCard).getByText("34 500 ₽")).toBeInTheDocument()
+    expect(within(firstCard).queryByText("—")).toBeNull()
   })
 
   it("maps a legacy product query to the canonical product page", async () => {
@@ -1025,7 +613,7 @@ describe("LandingPage", () => {
     })
   })
 
-  it("uses the CRM snapshot for a published product without a direct provider lookup", async () => {
+  it("uses server-owned checkout offers instead of a provider result", async () => {
     const fetchMock = vi.fn(async (url: string) => ({
       ok: true,
       status: 200,
@@ -1035,78 +623,157 @@ describe("LandingPage", () => {
     }))
     vi.stubGlobal("fetch", fetchMock)
     window.history.replaceState(null, "", "/product/nike-gt-cut-academy")
-    render(<LandingPage configuredBotUsername="@SelectBuyerBot" />)
+    render(<LandingPage configuredBotUsername={null} />)
 
-    expect((await screen.findAllByText("Цена зафиксирована на 12 часов")).length).toBeGreaterThan(0)
+    expect(await screen.findByRole("button", {
+      name: "43 RU, 44 EU, 24 500 ₽",
+    })).toBeEnabled()
     expect(fetchMock.mock.calls.filter(([url]) =>
       String(url).endsWith("/api/catalog/search"),
     )).toHaveLength(0)
   })
 
-  it("shows a valid 12-hour storefront price without unlocking checkout sizes", async () => {
-    const fetchMock = vi.fn(async (url: string) => ({
-      ok: true,
-      status: 200,
-      json: async () => url.includes("/api/catalog/storefront-prices")
-        ? storefrontPricePayload()
-        : livePoizonOnlyCheckoutPayload(),
-    }))
-    vi.stubGlobal("fetch", fetchMock)
-    window.history.replaceState(null, "", "/product/nike-gt-cut-academy")
-
-    render(<LandingPage configuredBotUsername="@SelectBuyerBot" />)
-
-    expect((await screen.findAllByText("Цена зафиксирована на 12 часов")).length)
-      .toBeGreaterThan(0)
-    expect(screen.getAllByText("24 500 ₽").length).toBeGreaterThan(0)
-    expect(screen.queryByRole("button", { name: "Добавить в корзину" })).toBeNull()
-    expect((await screen.findAllByRole("link", { name: "Продолжить в Telegram" }))[0])
-      .toHaveAttribute("href", "https://t.me/SelectBuyerBot?start=sku_nike-gt-cut-academy")
-  })
-
-  it("puts a selected snapshot size in the site cart without submitting a stale total", async () => {
+  it("adds a selected product to the site cart and submits checkout", async () => {
     const user = userEvent.setup()
-    const fetchMock = vi.fn(async (_url: string, _options?: RequestInit) => ({
+    const fetchMock = vi.fn(async (_url: string, options?: RequestInit) => ({
       ok: true,
-      status: 200,
-      json: async () => checkoutCatalogPayload(),
+      status: options?.method === "POST" && _url.endsWith("/api/checkout/orders") ? 201 : 200,
+      json: async () => _url.endsWith("/api/catalog/search")
+        ? readyGtCutSearchPayload()
+        : options?.method === "POST" && _url.endsWith("/api/checkout/orders")
+        ? {
+            checkout_id: "web-test",
+            order_number: "KB-20260801-TEST",
+            order_ids: [101],
+            amounts: {
+              merchandise_rub: 24500,
+              payable_now_rub: 24500,
+              delivery_due_later_rub: 880,
+              currency: "RUB",
+            },
+            delivery: {
+              method: "cdek_courier",
+              provider: "cdek",
+              city: "Москва",
+              postal_code: "119607",
+              address: "ул. Лобачевского, 100",
+              pvz_code: null,
+              amount_rub: 880,
+              quote_status: "estimated",
+              min_days: null,
+              max_days: null,
+              payment_timing: "separate_after_arrival",
+            },
+            status: "payment_ready",
+            payment_url: "https://securepay.tbank.ru/test",
+            message: "Заказ создан.",
+          }
+        : checkoutCatalogPayload(),
     }))
     vi.stubGlobal("fetch", fetchMock)
     window.history.replaceState(null, "", "/product/nike-gt-cut-academy")
-    render(<LandingPage configuredBotUsername="@SelectBuyerBot" />)
+    render(<LandingPage configuredBotUsername={null} />)
 
-    const selectedSize = await screen.findByRole("button", { name: /43 RU, 44 EU/u })
-    expect(selectedSize).toHaveAttribute("aria-label", expect.stringMatching(/¥1.800/u))
-    await user.click(selectedSize)
-    await user.click(screen.getByRole("button", { name: "Добавить в корзину" }))
-    expect(screen.getByRole("dialog", { name: "Корзина" })).toBeInTheDocument()
-    expect(fetchMock.mock.calls.some(
-      (call) => call[1]?.method === "POST" && String(call[0]).endsWith("/api/checkout/orders"),
-    )).toBe(false)
+    await user.click(await screen.findByRole("button", {
+      name: "43 RU, 44 EU, 24 500 ₽",
+    }))
+    const purchaseButton = screen.getByRole("button", { name: /Добавить в заказ/ })
+    expect(purchaseButton).toHaveAttribute("data-selected-size", "44")
+    expect(purchaseButton).toHaveAttribute("data-display-price", "24 500 ₽")
+    await user.click(purchaseButton)
+    expect(screen.getByRole("button", { name: "Добавлено" })).toBeInTheDocument()
+    await user.click(screen.getByRole("button", { name: "Открыть заказ" }))
+
+    const cart = screen.getByRole("dialog", { name: "Корзина" })
+    expect(within(cart).getByText(/Nike G.T. Cut Academy/)).toBeInTheDocument()
+    expect(within(cart).getByText("Товары сейчас")).toBeInTheDocument()
+
+    await user.type(within(cart).getByLabelText("ФИО получателя"), "Павел Шустров")
+    await user.type(
+      within(cart).getByLabelText("Телефон для связи и СДЭК"),
+      "+79990000000",
+    )
+    await user.type(within(cart).getByLabelText("Email для чека"), "buyer@example.com")
+    await user.type(within(cart).getByLabelText("Город"), "Москва")
+    await user.type(within(cart).getByLabelText("Почтовый индекс"), "119607")
+    await user.type(within(cart).getByLabelText("Адрес доставки"), "ул. Лобачевского, 100")
+    await user.click(within(cart).getByRole("checkbox", { name: /публичной оферты/i }))
+    await user.click(
+      within(cart).getByRole("checkbox", { name: /обработку персональных данных/i }),
+    )
+    await user.click(within(cart).getByRole("button", { name: "Оплатить товары 24 500 ₽" }))
+
+    const lastOrderCall = await waitFor(() => {
+      const postCall = fetchMock.mock.calls.find(
+        (call) => call[1]?.method === "POST" && String(call[0]).endsWith("/api/checkout/orders"),
+      )
+      expect(postCall).toBeDefined()
+      return postCall as [
+        unknown,
+        { body?: string; headers?: Record<string, string> },
+      ]
+    })
+    const body = JSON.parse(lastOrderCall[1].body as string)
+    expect(lastOrderCall[1].headers?.["Idempotency-Key"]).toMatch(
+      /^[\x21-\x7e]{8,80}$/,
+    )
+    expect(body.customer.full_name).toBe("Павел Шустров")
+    expect(body.items[0]).toMatchObject({
+      product_slug: "nike-gt-cut-academy",
+      size_eu: "44",
+      quantity: 1,
+      price_rub: 24500,
+      price_version: "2026-08-02-v3",
+    })
+    expect(body.delivery).toEqual({
+      method: "cdek_courier",
+      city: "Москва",
+      postal_code: "119607",
+      address: "ул. Лобачевского, 100",
+      pvz_code: null,
+    })
+    const payment = await screen.findByRole("dialog", { name: "Оплата" })
+    expect(within(payment).getByText(/KB-20260801-TEST/)).toBeInTheDocument()
+    expect(within(payment).getByText(/Доставка 880 ₽ оплачивается отдельно/)).toBeInTheDocument()
+    expect(within(payment).getByRole("link", { name: "Перейти к оплате" })).toHaveAttribute(
+      "href",
+      "https://securepay.tbank.ru/test",
+    )
   })
 
-  it("keeps the Telegram order path available even when legacy web checkout is disabled", async () => {
+  it("keeps the PDP visible but blocks add-to-cart when order creation is disabled", async () => {
+    const user = userEvent.setup()
     const fetchMock = vi.fn(async (_url: string, _options?: RequestInit) => ({
       ok: true,
       status: 200,
       json: async () => _url.endsWith("/api/catalog/search")
         ? readyGtCutSearchPayload()
-        : livePoizonOnlyCheckoutPayload(),
+        : checkoutCatalogPayload(undefined, {
+          orderCreationEnabled: false,
+          onlinePaymentEnabled: false,
+        }),
     }))
     vi.stubGlobal("fetch", fetchMock)
     window.history.replaceState(null, "", "/product/nike-gt-cut-academy")
 
-    render(<LandingPage configuredBotUsername="@SelectBuyerBot" />)
+    render(<LandingPage configuredBotUsername={null} />)
 
-    expect((await screen.findAllByRole("link", { name: "Продолжить в Telegram" }))[0])
-      .toHaveAttribute("href", "https://t.me/SelectBuyerBot?start=sku_nike-gt-cut-academy")
+    await user.click(await screen.findByRole("button", {
+      name: "43 RU, 44 EU, 24 500 ₽",
+    }))
+    const purchaseButton = await screen.findByRole("button", {
+      name: "Оформление временно недоступно",
+    })
+    expect(purchaseButton).toBeDisabled()
+    expect(purchaseButton).toHaveAttribute("data-order-enabled", "false")
+    expect(purchaseButton).toHaveAttribute("data-selected-size", "44")
     expect(screen.queryByRole("dialog", { name: "Корзина" })).toBeNull()
     expect(fetchMock.mock.calls.some(
       (call) => call[1]?.method === "POST" && String(call[0]).endsWith("/api/checkout/orders"),
     )).toBe(false)
   })
 
-  it("clears a persisted legacy cart without reviving a bundled price", async () => {
+  it("keeps a valid persisted cart readable but blocks checkout when order creation is disabled", async () => {
     localStorage.setItem(
       "kicksbase-cart-v1",
       JSON.stringify([{ slug: "nike-gt-cut-academy", size: "44", quantity: 1 }]),
@@ -1114,19 +781,24 @@ describe("LandingPage", () => {
     const fetchMock = vi.fn(async (_url: string, _options?: RequestInit) => ({
       ok: true,
       status: 200,
-      json: async () => livePoizonOnlyCheckoutPayload(),
+      json: async () => checkoutCatalogPayload(undefined, {
+        orderCreationEnabled: false,
+        onlinePaymentEnabled: false,
+      }),
     }))
     vi.stubGlobal("fetch", fetchMock)
     window.history.replaceState(null, "", "/?cart=1")
 
-    render(<LandingPage configuredBotUsername="@SelectBuyerBot" />)
+    render(<LandingPage configuredBotUsername={null} />)
 
     const cart = await screen.findByRole("dialog", { name: "Корзина" })
-    expect(await within(cart).findByText("В заказе пока нет товаров.")).toBeInTheDocument()
-    expect(within(cart).queryByText("24 500 ₽")).toBeNull()
-    await waitFor(() => {
-      expect(JSON.parse(localStorage.getItem("kicksbase-cart-v1") || "null")).toEqual([])
-    })
+    expect(
+      await within(cart).findByText("Цена и размеры видны. Оформление заказа сейчас отключено."),
+    ).toBeInTheDocument()
+    expect(
+      within(cart).getByRole("button", { name: "Оформление временно недоступно" }),
+    ).toBeDisabled()
+    expect(within(cart).getAllByText("24 500 ₽")).toHaveLength(2)
     expect(fetchMock.mock.calls.some(
       (call) => call[1]?.method === "POST" && String(call[0]).endsWith("/api/checkout/orders"),
     )).toBe(false)

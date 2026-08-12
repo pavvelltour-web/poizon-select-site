@@ -8,6 +8,7 @@ import ts from "typescript"
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..")
 const catalogSourcePath = resolve(repoRoot, "src", "catalog", "catalog.ts")
 const manifestPath = resolve(repoRoot, "public", "catalog", "sources.json")
+const unifiedManifestPath = resolve(repoRoot, "catalog-media", "unified-catalog-media.json")
 const queuePath = resolve(repoRoot, "catalog-media", "regeneration-queue.json")
 const outputPath = resolve(
   repoRoot,
@@ -19,7 +20,7 @@ function fail(message) {
   throw new Error(`GPT image prompt export failed: ${message}`)
 }
 
-function loadCatalogProducts(source) {
+function loadCatalogProducts(source, unifiedCatalogMediaManifest) {
   const transpiled = ts.transpileModule(source, {
     compilerOptions: {
       module: ts.ModuleKind.CommonJS,
@@ -33,6 +34,9 @@ function loadCatalogProducts(source) {
     exports: {},
     module: { exports: {} },
     require(specifier) {
+      if (specifier === "../../catalog-media/unified-catalog-media.json") {
+        return { __esModule: true, default: unifiedCatalogMediaManifest }
+      }
       fail(`unexpected runtime import while loading catalog.ts: ${specifier}`)
     },
   }
@@ -104,8 +108,11 @@ const viewLibrary = {
   "brim-detail": "close detail of brim, stitching and crown junction",
 }
 
-const catalogSource = await readFile(catalogSourcePath, "utf8")
-const products = loadCatalogProducts(catalogSource)
+const [catalogSource, unifiedCatalogMediaManifest] = await Promise.all([
+  readFile(catalogSourcePath, "utf8"),
+  readFile(unifiedManifestPath, "utf8").then(JSON.parse),
+])
+const products = loadCatalogProducts(catalogSource, unifiedCatalogMediaManifest)
 if (!Array.isArray(products) || products.length !== 100) {
   fail("catalogProducts must evaluate to exactly 100 products")
 }

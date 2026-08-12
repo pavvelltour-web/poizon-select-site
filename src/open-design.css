@@ -1,4 +1,4 @@
-﻿    :root {
+    :root {
       --bg: oklch(0.982 0.003 255);
       --surface: oklch(0.996 0.0015 255);
       --surface-strong: oklch(0.963 0.002 220);
@@ -333,18 +333,6 @@
       transform: translateX(-50%) rotate(-4deg) scale(1.01);
       filter: drop-shadow(0 32px 24px oklch(0.17 0.05 255 / 0.30));
     }
-    .hero-media--scene {
-      background: var(--surface);
-    }
-    .hero-media--scene img {
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      object-position: 66% center;
-      transform: none;
-      filter: none;
-    }
     .popular {
       padding: clamp(70px, 9vw, 112px) 0 92px;
       container-type: inline-size;
@@ -440,6 +428,8 @@
       transform: translateY(1px);
     }
     .product-media > img {
+      position: absolute;
+      inset: 0;
       width: 100%;
       height: 100%;
       padding: 0;
@@ -539,8 +529,15 @@
     }
     .product-info {
       display: grid;
-      gap: 5px;
-      padding: 16px 12px 14px;
+      gap: 6px;
+      padding: 18px 14px 16px;
+    }
+    .product-price-row {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      min-width: 0;
+      margin-top: 3px;
     }
     .product-price {
       margin: 0;
@@ -576,7 +573,7 @@
     .product-price-row .product-supply {
       display: inline-flex;
       align-items: center;
-      gap: 5px;
+      gap: 7px;
       margin: 0;
       padding: 0;
       font-size: 12px;
@@ -592,7 +589,7 @@
     }
     .card-sizes {
       max-height: 0;
-      margin: 0 8px;
+      margin: 0 14px;
       overflow: hidden;
       opacity: 0;
       transform: translateY(-6px);
@@ -603,8 +600,8 @@
         transform 200ms var(--ease);
     }
     body.is-keyboard-nav .product-card:focus-within .card-sizes {
-      max-height: 104px;
-      padding: 10px 0 10px;
+      max-height: 140px;
+      padding: 14px 0;
       opacity: 1;
       transform: translateY(0);
     }
@@ -627,15 +624,15 @@
         opacity: 1;
       }
       .product-card:hover .card-sizes {
-        max-height: 104px;
-        padding: 10px 0 10px;
+        max-height: 140px;
+        padding: 14px 0;
         opacity: 1;
         transform: translateY(0);
       }
     }
     .card-sizes > span {
       display: block;
-      margin-bottom: 6px;
+      margin-bottom: 8px;
       color: var(--muted);
       font-size: 11px;
       letter-spacing: 0.02em;
@@ -643,17 +640,11 @@
     .card-size-options {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 5px;
-    }
-    .card-size-unverified {
-      margin: 0;
-      color: var(--muted);
-      font-size: 11px;
-      line-height: 1.35;
+      gap: 7px;
     }
     .card-size-button {
       min-width: 0;
-      min-height: 32px;
+      min-height: 35px;
       padding: 0 2px;
       border: 1px solid var(--border);
       border-radius: 7px;
@@ -1309,7 +1300,7 @@
       align-items: baseline;
       flex-wrap: wrap;
       gap: 7px;
-      margin-top: 7px;
+      margin-top: 9px;
       min-width: 0;
     }
     .popular .product-badge {
@@ -1409,16 +1400,13 @@
       letter-spacing: 0.07em;
     }
     .payment-mark--sbp {
-      color: var(--accent-dark);
+      padding: 4px;
     }
-    .payment-mark--sbp svg {
-      width: 18px;
-      height: 18px;
-      fill: none;
-      stroke: currentColor;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-      stroke-width: 1.7;
+    .payment-mark--sbp img {
+      display: block;
+      width: 22px;
+      height: 22px;
+      object-fit: contain;
     }
     .payment-mark--card {
       color: var(--fg);
@@ -1644,14 +1632,6 @@
         object-position: center 56%;
         transform: translateX(-50%) rotate(-4deg) scale(1.01);
       }
-      .hero-media--scene img {
-        inset: 0;
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        object-position: 66% center;
-        transform: none;
-      }
       .popular {
         padding: 72px 0;
       }
@@ -1744,8 +1724,8 @@
       .product-price-row {
         align-items: flex-start;
         flex-direction: column;
-        gap: 1px;
-        margin-top: 5px;
+        gap: 4px;
+        margin-top: 6px;
       }
       .product-price-row .product-supply {
         font-size: 11px;

@@ -1,7 +1,7 @@
 import { Heart, Menu, Search, ShoppingBag, UserRound, X } from "lucide-react"
 import { useEffect, useMemo, useRef, useState, type RefObject } from "react"
 
-import { publicCatalogProducts, type CatalogProduct } from "../../catalog/catalog"
+import { formatRub, publicCatalogProducts, type CatalogProduct } from "../../catalog/catalog"
 import { getProductPath, getProductTypeLabel, resolveAssetUrl } from "../landing-data"
 import { useModalDialog } from "../use-modal-dialog"
 
@@ -17,7 +17,7 @@ interface HeaderProps {
   onOpenProduct?: (product: CatalogProduct, trigger: HTMLElement) => void
 }
 
-const logoSrc = "brand/kicksbase-logo.webp"
+const logoSrc = "/storefront-media/approved/assets/kicksbase-signal/kicksbase-logo.webp"
 
 export function Header({
   cartCount,
@@ -256,7 +256,7 @@ export function Header({
   }
 
   const navLinks = [
-    ["/#popular", "Каталог", "nav-catalog"],
+    ["/catalog", "Каталог", "nav-catalog"],
     ["/#finder", "Подобрать", "nav-finder"],
     ["/#delivery", "Доставка и возврат", "nav-delivery-and-returns"],
     ["/#about", "О нас", "nav-about"],
@@ -281,7 +281,7 @@ export function Header({
           </button>
 
           <a className="brand" href="/" data-od-id="brand-link" aria-label="KICKSBASE - главная">
-            <img className="brand-mark" src={resolveAssetUrl(logoSrc)} alt="" width="720" height="720" />
+            <img className="brand-mark" src={logoSrc} alt="" width="720" height="720" />
             <span className="brand-copy">
               <span className="brand-name">KICKSBASE</span>
               <span className="brand-note">обувь и экипировка</span>
@@ -438,7 +438,7 @@ export function Header({
                   }}
                 >
                   <strong>{getProductTypeLabel(product)} {product.brand} {product.name}</strong>
-                  <span>Открыть</span>
+                  <span>{product.orderQuote ? formatRub(product.orderQuote.totalRub) : "Открыть"}</span>
                 </button>
               ))}
               {searchQuery.trim().length >= 2 && searchResults.length === 0 ? <p className="empty-state">Ничего не нашли.</p> : null}

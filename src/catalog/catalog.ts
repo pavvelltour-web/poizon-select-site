@@ -1,3 +1,5 @@
+import unifiedCatalogMediaManifest from "../../catalog-media/unified-catalog-media.json"
+
 export const catalogCategories = [
   { id: "all", label: "Всё" },
   { id: "court-shoes", label: "Для зала" },
@@ -42,6 +44,7 @@ export const PUBLIC_CATALOG_POLICY =
 export interface CatalogImage {
   src: string
   alt: string
+  angle?: string
   source?: string
   contentSignal?: string
 }
@@ -315,7 +318,7 @@ const sportProducts: readonly ProductSource[] = [
     categoryLabel: "Волейбол · прыжок",
     kind: "footwear",
     sportPriority: true,
-    query: "ASICS SKY ELITE FF 3 1051A080-100 volleyball",
+    query: "ASICS SKY ELITE FF 3 volleyball",
     note: "Флагманский low · для атакующих игроков",
     marketPrice: "17,5–20,5 тыс. ₽",
     priceBasis: MARKET_PRICE_BASIS,
@@ -330,7 +333,7 @@ const sportProducts: readonly ProductSource[] = [
     categoryLabel: "Волейбол · mid",
     kind: "footwear",
     sportPriority: true,
-    query: "ASICS SKY ELITE FF MT 3 1051A081-100 volleyball",
+    query: "ASICS SKY ELITE FF MT 3 volleyball",
     note: "Средняя высота · прыжок и фиксация",
     marketPrice: "20–22,5 тыс. ₽",
     priceBasis: MARKET_PRICE_BASIS,
@@ -345,7 +348,7 @@ const sportProducts: readonly ProductSource[] = [
     categoryLabel: "Волейбол · премиум",
     kind: "footwear",
     sportPriority: true,
-    query: "ASICS METARISE 2 1051A089-100 volleyball",
+    query: "ASICS METARISE 2 1051A089 volleyball",
     note: "Премиальная модель · приоритет для доигровщика",
     marketPrice: "24–34 тыс. ₽",
     priceBasis: MARKET_PRICE_BASIS,
@@ -373,7 +376,7 @@ const sportProducts: readonly ProductSource[] = [
     categoryLabel: "Волейбол · универсальная",
     kind: "footwear",
     sportPriority: true,
-    query: "ASICS GEL-TACTIC 13 1071A102-100 volleyball",
+    query: "ASICS GEL-TACTIC 13 volleyball",
     note: "Универсальный зал · средний ценовой сегмент",
     marketPrice: "14–16 тыс. ₽",
     priceBasis: MARKET_PRICE_BASIS,
@@ -1219,13 +1222,13 @@ const expandedProducts: readonly ProductSource[] = [
   {
     slug: "oofos-ooahh-slide",
     brand: "OOFOS",
-    name: "OOahh Slide",
+    name: "OOahh",
     category: "recovery",
-    categoryLabel: "Восстановление · слайды",
+    categoryLabel: "Восстановление · тапочки",
     kind: "footwear",
     sportPriority: true,
     query: "OOFOS OOahh Slide recovery sandal",
-    note: "Классический recovery-слайд после зала · премиум-дополнение к Nike Calm",
+    note: "Тапочки для восстановления после зала · премиум-дополнение к Nike Calm",
     marketPrice: "6–10 тыс. ₽",
     priceBasis: MARKET_PRICE_BASIS,
     chinaPriceYuan: 360,
@@ -1829,34 +1832,46 @@ function withFallbackGallery(product: ProductSource): CatalogProduct {
   }
 }
 
-const approvedStorefrontMediaRoot = "/storefront-media/approved/products"
-const approvedStorefrontSlugs = new Set([
-  "anta-kai-1",
-  "asics-sky-elite-ff-3",
-  "li-ning-wade-808-4-ultra",
-  "new-balance-two-wxy-v5",
-  "nike-aone",
-  "nike-free-metcon-6",
-  "nike-kd-18",
-  "nike-sabrina-3",
-])
+type UnifiedMediaFrame = {
+  position: number
+  file: string
+  angle: string
+}
 
-function withApprovedStorefrontGallery(product: CatalogProduct): CatalogProduct {
-  if (!approvedStorefrontSlugs.has(product.slug)) return product
-  const gallery = [
-    { src: `${approvedStorefrontMediaRoot}/${product.slug}/01-side.png`, alt: `${product.brand} ${product.name}, боковой профиль`, source: "KICKSBASE approved normalized release", contentSignal: `${product.slug}-approved-1` },
-    { src: `${approvedStorefrontMediaRoot}/${product.slug}/03-side.png`, alt: `${product.brand} ${product.name}, противоположный боковой профиль`, source: "KICKSBASE approved normalized release", contentSignal: `${product.slug}-approved-2` },
-    { src: `${approvedStorefrontMediaRoot}/${product.slug}/02-three-quarter.png`, alt: `${product.brand} ${product.name}, фронтальный ракурс`, source: "KICKSBASE approved normalized release", contentSignal: `${product.slug}-approved-3` },
-    { src: `${approvedStorefrontMediaRoot}/${product.slug}/04-rear.png`, alt: `${product.brand} ${product.name}, вид сзади`, source: "KICKSBASE approved normalized release", contentSignal: `${product.slug}-approved-4` },
-    { src: `${approvedStorefrontMediaRoot}/${product.slug}/05-sole.png`, alt: `${product.brand} ${product.name}, подошва`, source: "KICKSBASE approved normalized release", contentSignal: `${product.slug}-approved-5` },
-  ] as const
+type UnifiedMediaProduct = {
+  slug: string
+  frames: readonly UnifiedMediaFrame[]
+}
 
-  return { ...product, gallery, image: gallery[0].src }
+const unifiedMediaBySlug = new Map(
+  (unifiedCatalogMediaManifest.products as readonly UnifiedMediaProduct[]).map((product) => [
+    product.slug,
+    product.frames,
+  ]),
+)
+
+function withUnifiedCatalogGallery(product: CatalogProduct): CatalogProduct {
+  const frames = unifiedMediaBySlug.get(product.slug)
+  if (!frames || frames.length !== 5) {
+    throw new Error(`Unified catalog media is incomplete for ${product.slug}`)
+  }
+
+  const gallery = [...frames]
+    .sort((left, right) => left.position - right.position)
+    .map((frame) => ({
+      src: frame.file.replace(/^public\//u, ""),
+      alt: `${product.brand} ${product.name}, ${frame.angle}`,
+      angle: frame.angle,
+      source: "KICKSBASE unified catalog media manifest",
+      contentSignal: `${product.slug}-unified-${frame.position}`,
+    }))
+
+  return { ...product, gallery, image: gallery[0]!.src }
 }
 
 export const catalogProducts: readonly CatalogProduct[] = catalogProductSource.map(
   (product) =>
-    withApprovedStorefrontGallery(withFallbackGallery({
+    withUnifiedCatalogGallery(withFallbackGallery({
       ...product,
       ...performanceBasketballOverrides[product.slug],
       ...(requestPriceGuides[product.slug]

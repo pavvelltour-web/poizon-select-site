@@ -6,18 +6,6 @@ const siteRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".."
 const distRoot = path.join(siteRoot, "dist")
 const expectedCatalogFiles = 100
 const expectedGalleryFiles = expectedCatalogFiles * 4
-const deploymentBase = `/${(process.env.VITE_DEPLOY_BASE || "/")
-  .replace(/^\/+|\/+$/g, "")}`.replace(/^\/$/, "") || "/"
-
-function relativeFromDeploymentBase(reference) {
-  const pathname = decodeURIComponent(new URL(reference, "https://example.test/").pathname)
-  const expectedPrefix = deploymentBase === "/" ? "/" : `${deploymentBase}/`
-  if (!pathname.startsWith(expectedPrefix)) {
-    fail(`asset is outside the configured deployment base: ${reference}`)
-  }
-
-  return pathname.slice(expectedPrefix.length)
-}
 
 function fail(message) {
   throw new Error(`Built-site verification failed: ${message}`)
@@ -59,21 +47,12 @@ for (const reference of htmlReferences) {
   ) {
     fail(`index.html contains an external asset reference: ${reference}`)
   }
-  const relative = relativeFromDeploymentBase(reference)
-  if (!relative || relative.includes("..")) {
-    fail(`asset has an invalid root path: ${reference}`)
+  if (!reference.startsWith("/")) {
+    fail(`index.html asset must be root-absolute for nested SPA routes: ${reference}`)
   }
+  const mounted = new URL(reference, "https://example.test")
+  const relative = decodeURIComponent(mounted.pathname.slice(1))
   await access(path.join(distRoot, relative))
-}
-
-const executableReferences = htmlReferences.filter((reference) =>
-  /\.(?:css|js)(?:\?|$)/i.test(reference),
-)
-if (
-  executableReferences.length < 2 ||
-  executableReferences.some((reference) => relativeFromDeploymentBase(reference).startsWith("assets/") === false)
-) {
-  fail("entry CSS/JS must stay inside the configured static deployment base")
 }
 
 const files = await filesBelow(distRoot)
@@ -145,5 +124,5 @@ for (const file of catalogFiles) {
 }
 
 console.log(
-  `Built site verified: ${deploymentBase}-safe deep-link assets, ${expectedCatalogFiles} local catalog images, ${expectedGalleryFiles} gallery images, third-party notice, no source maps`,
+  `Built site verified: root-hosted nested SPA assets, ${expectedCatalogFiles} local catalog images, ${expectedGalleryFiles} gallery images, third-party notice, no source maps`,
 )

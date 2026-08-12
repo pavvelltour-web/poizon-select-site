@@ -2772,74 +2772,6 @@ button:disabled,
   }
 }
 
-/* Live provider cards intentionally stay separate from the owner catalogue:
-   they are transient quotes, not products saved to the public storefront. */
-.live-poizon-search {
-  display: grid;
-  gap: 18px;
-  width: min(var(--kb-page), 1240px);
-  margin: 42px auto;
-  border: 1px solid color-mix(in srgb, var(--kb-accent) 42%, transparent);
-  border-radius: 22px;
-  padding: clamp(18px, 3vw, 32px);
-  background: linear-gradient(130deg, rgb(118 165 255 / 14%), transparent 52%), var(--kb-panel);
-}
-
-.live-poizon-search__heading,
-.live-poizon-search__form,
-.live-poizon-search__results {
-  display: grid;
-  gap: 14px;
-}
-
-.live-poizon-search__heading { grid-template-columns: minmax(0, 1fr) minmax(240px, 390px); }
-.live-poizon-search__heading h3,
-.live-poizon-search__result h4 { margin: 0; }
-.live-poizon-search__heading > p,
-.live-poizon-search__result > p { margin: 0; color: var(--kb-muted); line-height: 1.5; }
-.live-poizon-search__form { grid-template-columns: minmax(0, 1fr) auto; }
-.live-poizon-search__input { display: flex; align-items: center; gap: 10px; min-height: 50px; border: 1px solid var(--kb-line-strong); border-radius: 14px; padding: 0 14px; color: var(--kb-muted); background: var(--kb-bg-2); }
-.live-poizon-search__input input { width: 100%; min-width: 0; border: 0; outline: 0; color: var(--kb-text); background: transparent; }
-.live-poizon-search__input input::placeholder { color: var(--kb-dim); }
-.live-poizon-search__status p { margin: 0; color: var(--kb-muted); }
-.live-poizon-search__clarification { display: grid; gap: 10px; border: 1px solid var(--kb-line); border-radius: 14px; padding: 12px; background: var(--kb-bg-2); }
-.live-poizon-search__choices { display: flex; flex-wrap: wrap; gap: 8px; }
-.live-poizon-search__choices .button { min-height: 38px; padding: 8px 12px; }
-.live-poizon-search__results { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-.live-poizon-search__result { display: grid; gap: 12px; min-width: 0; border: 1px solid var(--kb-line); border-radius: 16px; padding: 14px; background: var(--kb-bg-2); }
-.live-poizon-search__image { aspect-ratio: 4 / 3; width: 100%; border-radius: 12px; object-fit: cover; background: var(--kb-panel); }
-.live-poizon-search__result-heading { display: flex; justify-content: space-between; gap: 10px; color: var(--kb-muted); }
-.live-poizon-search__result-heading span,
-.live-poizon-search__total { color: var(--kb-accent); font-weight: 850; }
-.live-poizon-search__total { font-size: 1.55rem; }
-.live-poizon-search__fixed-until { font-size: .82rem; }
-.live-poizon-search__availability,
-.live-poizon-search__size-context,
-.live-poizon-search__size-chart { margin: 0; color: var(--kb-muted); font-size: .88rem; line-height: 1.45; }
-.live-poizon-search__availability { color: var(--kb-text-soft); font-weight: 750; }
-.live-poizon-search__size-image,
-.live-search-card__size-image { display: grid; gap: 6px; margin: 0; }
-.live-poizon-search__size-image img,
-.live-search-card__size-image img { width: min(100%, 520px); border: 1px solid var(--kb-line); border-radius: 10px; background: var(--kb-panel); }
-.live-poizon-search__size-image figcaption,
-.live-search-card__size-image figcaption { color: var(--kb-muted); font-size: .78rem; }
-.live-poizon-search__sizes { display: flex; flex-wrap: wrap; gap: 7px; }
-.live-poizon-search__sizes span { border: 1px solid var(--kb-line-strong); border-radius: 999px; padding: 6px 9px; color: var(--kb-text-soft); font-size: .82rem; font-weight: 700; }
-.live-poizon-search__breakdown { display: grid; gap: 6px; margin: 0; border-top: 1px solid var(--kb-line); padding-top: 12px; }
-.live-poizon-search__breakdown div { display: flex; justify-content: space-between; gap: 10px; color: var(--kb-muted); font-size: .82rem; }
-.live-poizon-search__breakdown dt,
-.live-poizon-search__breakdown dd { margin: 0; }
-.live-poizon-search__breakdown dd { color: var(--kb-text-soft); font-weight: 750; text-align: right; }
-.live-poizon-search__spinner { animation: live-poizon-search-spin .9s linear infinite; }
-
-@keyframes live-poizon-search-spin { to { transform: rotate(1turn); } }
-
-@media (max-width: 680px) {
-  .live-poizon-search__heading,
-  .live-poizon-search__form,
-  .live-poizon-search__results { grid-template-columns: 1fr; }
-}
-
 @media (max-width: 389px) {
   .hero-commerce__grid,
   .product-grid {
@@ -5180,33 +5112,6 @@ body {
   margin-top: 1px;
 }
 
-.live-search__clarification {
-  display: grid;
-  gap: 8px;
-  border: 1px solid var(--kb-line);
-  border-radius: var(--kb-radius);
-  padding: 10px 12px;
-  background: var(--kb-panel);
-}
-
-.live-search__choices {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.live-search__choices .button {
-  min-height: 36px;
-  padding: 7px 10px;
-  font-size: 0.78rem;
-}
-
-.live-search__clarification small {
-  color: var(--kb-muted);
-  font-size: 0.76rem;
-  line-height: 1.4;
-}
-
 .live-search__results,
 .live-search__fallback > div {
   display: grid;
@@ -5246,8 +5151,7 @@ body {
 .live-search-card__article,
 .live-search-card__sizes,
 .live-search-card__price,
-.live-search-card__description,
-.live-search-card__delivery {
+.live-search-card__provider-price {
   margin: 0;
 }
 
@@ -5272,19 +5176,11 @@ body {
 }
 
 .live-search-card__article,
-.live-search-card__sizes,
-.live-search-card__availability,
-.live-search-card__description,
-.live-search-card__delivery {
+.live-search-card__sizes {
   color: var(--kb-muted);
   font-size: 0.8rem;
   line-height: 1.4;
   overflow-wrap: anywhere;
-}
-
-.live-search-card__availability {
-  color: var(--kb-text-soft);
-  font-weight: 700;
 }
 
 .live-search-card__price {
@@ -5301,19 +5197,10 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
-.live-search-card__offers {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.live-search-card__offers span {
-  border: 1px solid var(--kb-line-strong);
-  border-radius: 999px;
-  padding: 5px 8px;
-  color: var(--kb-text-soft);
-  font-size: 0.74rem;
-  font-variant-numeric: tabular-nums;
+.live-search-card__provider-price {
+  color: var(--kb-muted);
+  font-size: 0.76rem;
+  line-height: 1.35;
 }
 
 .live-search-card__actions {
@@ -5397,9 +5284,7 @@ body {
 
 .task-finder__results .live-search-card__source,
 .task-finder__results .live-search-card__article,
-.task-finder__results .live-search-card__sizes,
-.task-finder__results .live-search-card__description,
-.task-finder__results .live-search-card__delivery {
+.task-finder__results .live-search-card__sizes {
   font-size: 0.72rem;
 }
 

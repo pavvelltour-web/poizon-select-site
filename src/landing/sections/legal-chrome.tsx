@@ -1,12 +1,11 @@
 import { useEffect, useRef, useState } from "react"
-import { resolveAssetUrl } from "../landing-data"
 
 interface LegalHeaderProps {
   cartCount: number
   openCart: () => void
 }
 
-const logoSrc = "brand/kicksbase-logo.webp"
+const logoSrc = "/storefront-media/approved/assets/kicksbase-signal/kicksbase-logo.webp"
 
 export function LegalHeader({ cartCount, openCart }: LegalHeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false)
@@ -27,7 +26,7 @@ export function LegalHeader({ cartCount, openCart }: LegalHeaderProps) {
     <header className="site-header" data-od-id="legal-header">
       <div className="header-inner shell">
         <a className="brand" href="/" data-od-id="legal-logo" aria-label="KICKSBASE, на главную">
-          <img className="brand-logo" src={resolveAssetUrl(logoSrc)} alt="" width="720" height="720" />
+          <img className="brand-logo" src={logoSrc} alt="" width="720" height="720" />
           KICKSBASE
         </a>
         <nav className="header-nav" aria-label="Основная навигация">
@@ -83,7 +82,7 @@ export function LegalFooter() {
       <div className="shell footer-grid">
         <div>
           <a className="brand" href="/">
-            <img className="brand-logo" src={resolveAssetUrl(logoSrc)} alt="" width="720" height="720" />
+            <img className="brand-logo" src={logoSrc} alt="" width="720" height="720" />
             KICKSBASE
           </a>
         </div>

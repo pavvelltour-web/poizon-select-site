@@ -14,6 +14,7 @@ import { useEffect, useRef, useState } from "react"
 
 import type { CatalogProduct } from "../../catalog/catalog"
 import {
+  getDisplayPrice,
   getProductGalleryAngleLabel,
   getProductTypeLabel,
   getProductUse,
@@ -22,7 +23,6 @@ import {
   setImageFallback,
 } from "../landing-data"
 import type { StorefrontState } from "../landing-types"
-import { buildTelegramBotUrl } from "../order-request"
 import { useProductLightbox } from "../use-product-lightbox"
 
 interface ProductDetailPageProps {
@@ -71,13 +71,11 @@ export function ProductDetailPage({ product, storefront }: ProductDetailPageProp
     )
   }
 
-  const price = storefront.getPoizonDisplayPrice(product, selectedSize)
-  const botOrderUrl = buildTelegramBotUrl(storefront.botUsername, `sku_${product.slug}`)
+  const price = getDisplayPrice(product, storefront.catalogPriceState.lookup)
   const publishedOffer = storefront.catalogPriceState.items[product.slug]
   const catalogReady =
     storefront.catalogPriceState.status === "ready" &&
-    publishedOffer?.availability === "supplier_verified" &&
-    publishedOffer.liveProviderVerified
+    publishedOffer?.availability === "catalog_listed"
   const sizeOptions = catalogReady ? publishedOffer.sizes : []
   const orderCreationEnabled =
     catalogReady && storefront.catalogPriceState.orderCreationEnabled
@@ -230,24 +228,30 @@ export function ProductDetailPage({ product, storefront }: ProductDetailPageProp
             </div>
           </div>
 
-          {botOrderUrl ? (
-          <a
+          <button
             className="button button--primary pdp-buybox__cta"
-            href={botOrderUrl}
-            target="_blank"
-            rel="noopener noreferrer"
+            type="button"
             data-selected-size={selectedSize ?? ""}
             data-display-price={price.value}
             data-catalog-ready={catalogReady ? "true" : "false"}
             data-order-enabled={orderCreationEnabled ? "true" : "false"}
             aria-describedby="pdp-price pdp-selection-status"
+            disabled={!selectedSize || !orderCreationEnabled}
+            onClick={() => {
+              if (selectedSize) storefront.addProductToCart(product, selectedSize)
+            }}
           >
             <ShoppingBag aria-hidden="true" size={19} />
-            Оформить в Telegram
-          </a>
-          ) : (
-            <p className="pdp-selection-status">Telegram-бот временно недоступен.</p>
-          )}
+            {storefront.catalogPriceState.status === "loading"
+              ? "Проверяем каталог"
+              : !catalogReady
+                ? "Недоступно для заказа"
+                : !orderCreationEnabled
+                  ? "Оформление временно недоступно"
+              : selectedSize
+                ? `Добавить в заказ за ${price.value}`
+                : "Выберите размер"}
+          </button>
           <span className="sr-only" id="pdp-selection-status" aria-live="polite">
             {selectedSize
               ? `Выбран размер ${selectedSize}. Цена товара ${price.value}.`

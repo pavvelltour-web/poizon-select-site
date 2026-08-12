@@ -1,7 +1,8 @@
-import { render, screen } from "@testing-library/react"
+import { render } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 
 import { findProductBySlug } from "../../catalog/catalog"
+import { getProductTypeLabel } from "../landing-data"
 import { ProductCard } from "./product-card"
 
 function renderCard(slug: string) {
@@ -12,8 +13,8 @@ function renderCard(slug: string) {
     product,
     ...render(
       <ProductCard
-        catalogPoizonPrice={null}
-        catalogPoizonPricesReady={false}
+        catalogPriceLookup={null}
+        catalogStatus="loading"
         featured={false}
         index={0}
         product={product}
@@ -24,23 +25,13 @@ function renderCard(slug: string) {
 }
 
 describe("ProductCard hover media", () => {
-  it("does not invent catalogue sizes or supplier stock from a price chip", () => {
-    const { product } = renderCard("nike-air-force-1-07-white")
-    const card = screen.getByText(`Кроссовки ${product.brand} ${product.name}`).closest("article")
-    if (!card) throw new Error("Product card was not rendered")
-
-    expect(card).toHaveTextContent("Уточнить в Telegram по актуальному запросу")
-    expect(card).not.toHaveTextContent("Размеры EU")
-    expect(card.querySelectorAll(".card-size-button")).toHaveLength(0)
-  })
-
   it("uses logical photo three for footwear without changing photo two", () => {
     const { container, product } = renderCard("nike-sabrina-3")
     const hover = container.querySelector<HTMLImageElement>(".product-pair img")
     const hoverFrame = container.querySelector(".product-pair")
 
-    expect(product.gallery[1]?.src).toContain("03-side.png")
-    expect(product.gallery[2]?.src).toContain("02-three-quarter.png")
+    expect(product.gallery[1]?.src).toContain("catalog/gallery/nike-sabrina-3-2.webp")
+    expect(product.gallery[2]?.src).toContain("catalog/gallery/nike-sabrina-3-3.webp")
     expect(hoverFrame).toHaveAttribute("data-hover-frame", "3")
     expect(hover).toHaveAttribute(
       "src",
@@ -68,5 +59,29 @@ describe("ProductCard hover media", () => {
       "src",
       new URL(product.gallery[1]?.src ?? "", window.location.origin).toString(),
     )
+  })
+})
+
+describe("Recovery footwear naming", () => {
+  it("builds the natural OOFOS modal title without duplicate footwear wording", () => {
+    const product = findProductBySlug("oofos-ooahh-slide")
+    if (!product) throw new Error("Missing OOFOS fixture product")
+
+    expect(product.name).toBe("OOahh")
+    expect(`${getProductTypeLabel(product)} ${product.brand} ${product.name}`).toBe(
+      "Тапочки OOFOS OOahh",
+    )
+  })
+
+  it.each([
+    "nike-calm-slide",
+    "crocs-mellow-recovery-slide",
+    "hoka-ora-recovery-slide-3",
+    "nike-mind-001-slide-black",
+  ])("keeps a sensible slipper type for %s", (slug) => {
+    const product = findProductBySlug(slug)
+    if (!product) throw new Error(`Missing recovery fixture product: ${slug}`)
+
+    expect(getProductTypeLabel(product)).toBe("Тапочки")
   })
 })

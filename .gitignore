@@ -9,8 +9,15 @@ __pycache__/
 .codex/
 coverage/
 generated/
+catalog-media/staging/
 graphify-out/
 .playwright-cli/
 playwright-report/
 test-results/
 npm-debug.log*
+tmp/
+output/
+site-release/
+.tmp_patch*
+temp_edit_check.txt
+inventory.json

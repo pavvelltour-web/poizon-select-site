@@ -1,4 +1,4 @@
-import { AlertCircle, CreditCard, Landmark, Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react"
+import { AlertCircle, CreditCard, Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react"
 import { motion } from "motion/react"
 import { useRef } from "react"
 
@@ -37,19 +37,10 @@ export function CartDrawer({ storefront }: CartDrawerProps) {
   const catalogIsReady = storefront.catalogPriceState.status === "ready"
   const orderCreationEnabled = storefront.catalogPriceState.orderCreationEnabled
   const onlinePaymentEnabled = storefront.catalogPriceState.onlinePaymentEnabled
-  const cartHasConfirmedPrices = storefront.cartLines.length > 0 && storefront.cartLines.every(
-    (line) => getEffectiveLinePrice(
-      line.product,
-      storefront.catalogPriceState.lookup,
-      storefront.catalogPriceState.items,
-      line.size,
-    ) !== null,
-  )
   const hasInvalidLines = storefront.cartLines.some((line) => line.validation !== "valid")
   const canSubmit =
     catalogIsReady &&
     orderCreationEnabled &&
-    cartHasConfirmedPrices &&
     !hasInvalidLines &&
     storefront.cartLines.length > 0 &&
     storefront.checkoutCustomer.fullName.trim().length >= 2 &&
@@ -112,79 +103,78 @@ export function CartDrawer({ storefront }: CartDrawerProps) {
               >
                 <AlertCircle aria-hidden="true" size={17} />
                 {storefront.catalogPriceState.status === "ready" && !orderCreationEnabled
-                  ? "Подтверждённая 12-часовая цена получена, но оформление заказа сейчас отключено."
+                  ? "Цена и размеры видны. Оформление заказа сейчас отключено."
                   : storefront.catalogPriceState.status === "ready" && !onlinePaymentEnabled
                     ? "Заказ можно оформить. Онлайн-оплата пока недоступна."
                     : storefront.catalogPriceState.status === "ready"
-                      ? "Цена и размеры зафиксированы на 12 часов. Заказ будет передан в CRM."
+                      ? "Цена и размеры сверены. После оформления откроется защищённая страница оплаты."
                   : storefront.catalogPriceState.status === "loading"
                     ? "Проверяем цену и размеры на сервере. До проверки оформить заказ нельзя."
                     : "Серверный каталог недоступен. Оформление заказа временно заблокировано."}
               </p>
 
-              {storefront.cartLines.map((line, index) => {
-                const linePrice = getEffectiveLinePrice(
-                  line.product,
-                  storefront.catalogPriceState.lookup,
-                  storefront.catalogPriceState.items,
-                  line.size,
-                )
-                return (
-                  <article
-                    className={`cart-item cart-line cart-line--${line.validation}`}
-                    key={line.id}
-                    data-od-id={`cart-item-${index}`}
-                  >
-                    <div className="cart-item-media"><img
-                      src={resolveAssetUrl(line.product.image)}
-                      width="96"
-                      height="72"
-                      alt=""
-                      loading="lazy"
-                      onError={(event) => setImageFallback(event, line.product.fallbackImage)}
-                    /></div>
-                    <div className="cart-item-copy">
-                      <strong>{line.product.brand} {line.product.name}</strong>
-                      <span>EU {line.size}</span>
-                      <em>
-                        {linePrice === null ? "Уточняется" : formatRub(linePrice)}
-                        {linePrice === null && !catalogIsReady ? " · цена не подтверждена" : ""}
-                      </em>
-                      {line.validation === "invalid" ? (
-                        <small className="cart-line__error">
-                          Товар или размер отсутствует в опубликованном каталоге. Удалите позицию.
-                        </small>
-                      ) : null}
-                    </div>
-                    <div className="cart-line__controls" aria-label="Количество">
-                      <button
-                        type="button"
-                        onClick={() => storefront.setCartLineQuantity(line.id, line.quantity - 1)}
-                        aria-label="Уменьшить количество"
-                      >
-                        <Minus aria-hidden="true" size={14} />
-                      </button>
-                      <span>{line.quantity}</span>
-                      <button
-                        type="button"
-                        onClick={() => storefront.setCartLineQuantity(line.id, line.quantity + 1)}
-                        aria-label="Увеличить количество"
-                      >
-                        <Plus aria-hidden="true" size={14} />
-                      </button>
-                    </div>
+              {storefront.cartLines.map((line, index) => (
+                <article
+                  className={`cart-item cart-line cart-line--${line.validation}`}
+                  key={line.id}
+                  data-od-id={`cart-item-${index}`}
+                >
+                  <div className="cart-item-media"><img
+                    src={resolveAssetUrl(line.product.image)}
+                    width="96"
+                    height="72"
+                    alt=""
+                    loading="lazy"
+                    onError={(event) => setImageFallback(event, line.product.fallbackImage)}
+                  /></div>
+                  <div className="cart-item-copy">
+                    <strong>{line.product.brand} {line.product.name}</strong>
+                    <span>EU {line.size}</span>
+                    <em>
+                      {formatRub(
+                        getEffectiveLinePrice(
+                          line.product,
+                          storefront.catalogPriceState.lookup,
+                          storefront.catalogPriceState.items,
+                          line.size,
+                        ),
+                      )}
+                      {catalogIsReady ? "" : " · предварительно"}
+                    </em>
+                    {line.validation === "invalid" ? (
+                      <small className="cart-line__error">
+                        Товар или размер отсутствует в опубликованном каталоге. Удалите позицию.
+                      </small>
+                    ) : null}
+                  </div>
+                  <div className="cart-line__controls" aria-label="Количество">
                     <button
-                      className="cart-line__remove"
                       type="button"
-                      data-od-id={`remove-cart-item-${index}`}
-                      onClick={() => storefront.removeCartLine(line.id)}
-                      aria-label="Удалить товар из заказа"
+                      onClick={() => storefront.setCartLineQuantity(line.id, line.quantity - 1)}
+                      aria-label="Уменьшить количество"
                     >
-                      <Trash2 aria-hidden="true" size={16} />
+                      <Minus aria-hidden="true" size={14} />
                     </button>
-                  </article>
-                )
-              })}
+                    <span>{line.quantity}</span>
+                    <button
+                      type="button"
+                      onClick={() => storefront.setCartLineQuantity(line.id, line.quantity + 1)}
+                      aria-label="Увеличить количество"
+                    >
+                      <Plus aria-hidden="true" size={14} />
+                    </button>
+                  </div>
+                  <button
+                    className="cart-line__remove"
+                    type="button"
+                    data-od-id={`remove-cart-item-${index}`}
+                    onClick={() => storefront.removeCartLine(line.id)}
+                    aria-label="Удалить товар из заказа"
+                  >
+                    <Trash2 aria-hidden="true" size={16} />
+                  </button>
+                </article>
+              ))}
             </div>
 
             <form
@@ -196,15 +186,15 @@ export function CartDrawer({ storefront }: CartDrawerProps) {
             >
               <div className="cart-total checkout-form__total">
                 <span>Товары сейчас</span>
-                <strong>{cartHasConfirmedPrices ? formatRub(storefront.cartTotalRub) : "Уточняется"}</strong>
-                <small>Цена и размеры подтверждены на 12 часов. Доставка не добавляется к этому итогу повторно.</small>
+                <strong>{formatRub(storefront.cartTotalRub)}</strong>
+                <small>Доставка СДЭК рассчитывается и оплачивается отдельно после прибытия.</small>
               </div>
 
               <section className="payment-methods" data-od-id="payment-methods" aria-labelledby="payment-methods-title">
                 <p id="payment-methods-title">Оплата на следующем шаге</p>
                 <div className="payment-method-list">
                   <span className="payment-method" aria-label="Система быстрых платежей">
-                    <span className="payment-mark payment-mark--sbp" aria-hidden="true"><Landmark size={18} /></span>
+                    <span className="payment-mark payment-mark--sbp" aria-hidden="true"><img src="/storefront-media/approved/assets/brand/sbp-sign-official.png" alt="" /></span>
                     <span>СБП</span>
                   </span>
                   <span className="payment-method" aria-label="Банковская карта">

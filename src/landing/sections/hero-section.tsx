@@ -1,5 +1,3 @@
-import { resolveAssetUrl } from "../landing-data"
-
 export function HeroSection() {
   return (
     <div className="hero-wrap container">
@@ -10,10 +8,10 @@ export function HeroSection() {
           <p className="hero-lead">Подберите модель по задаче, размеру и бюджету до перехода к оплате.</p>
           <a className="hero-action" href="#finder" data-od-id="hero-primary-cta">Подобрать модель</a>
         </div>
-        <div className="hero-media hero-media--scene" data-od-id="hero-product-stage">
+        <div className="hero-media" data-od-id="hero-product-stage">
           <img
-            src={resolveAssetUrl("brand/kicksbase-hero.webp")}
-            alt="Волейбольная экипировка KICKSBASE"
+            src="/storefront-media/approved/assets/blue-field-v2/nike-kd-18-hero-cutout-v2.png"
+            alt="Кроссовки Nike KD 18, боковой профиль целиком"
             width="1600"
             height="1200"
             fetchPriority="high"

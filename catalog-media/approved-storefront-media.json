@@ -1,0 +1,729 @@
+{
+  "schema_version": 2,
+  "scope": "Open Design featured footwear release",
+  "expected_sku_count": 8,
+  "canvas": [
+    1600,
+    1200
+  ],
+  "background_rgb": [
+    242,
+    243,
+    243
+  ],
+  "skus": [
+    {
+      "sku": "catalog:anta-kai-1",
+      "slug": "anta-kai-1",
+      "product_type": "footwear",
+      "rights": {
+        "status": "licensed",
+        "evidence_reference": "Owner authorization dated 2026-08-03: Poizon product photography may be used for the KICKSBASE storefront."
+      },
+      "frames": [
+        {
+          "file": "storefront-media/approved/products/anta-kai-1/01-side.png",
+          "role": "primary",
+          "angle": "side",
+          "orientation": "toe-left",
+          "composition": "single",
+          "source_kind": "generated-reference",
+          "sha256": "986b8eb95c25a10de6d72a54451923ac9519c29ac93498b5910743c6b9eae818",
+          "generation": {
+            "model": "open-design-export",
+            "source_file": "public/storefront-media/approved/assets/blue-field-v2/anta-kai-1-stage.png",
+            "source_sha256": "b3bfdb3666298809159df657d641815a3570be2135632c61b6769c1e35acb9f6",
+            "prompt_reference": "catalog-media/generated-reference/approved-missing-angles/PROMPTS.md"
+          }
+        },
+        {
+          "file": "storefront-media/approved/products/anta-kai-1/02-three-quarter.png",
+          "role": "gallery",
+          "angle": "three-quarter",
+          "orientation": "toe-left",
+          "composition": "pair",
+          "source_kind": "generated-reference",
+          "sha256": "2d752c26f9eecbf604adeb9a9c2250ef40aa99bfb71620b01856f277d851b2fa",
+          "generation": {
+            "model": "open-design-export",
+            "source_file": "public/storefront-media/approved/assets/blue-field-v2/hover/anta-kai-1-front-pair-bg.png",
+            "source_sha256": "08b5188966e6f714b35695df177d29b77d333b4bf3b3136bb1443b9a40cdc7d1",
+            "prompt_reference": "catalog-media/generated-reference/approved-missing-angles/PROMPTS.md"
+          }
+        },
+        {
+          "file": "storefront-media/approved/products/anta-kai-1/03-side.png",
+          "role": "gallery",
+          "angle": "side",
+          "orientation": "toe-right",
+          "composition": "single",
+          "source_kind": "generated-reference",
+          "sha256": "4494618a6db64dc8187a0e1a745964b097137ed1aaa3145d2d36d7c566f860aa",
+          "generation": {
+            "model": "open-design-export",
+            "source_file": "public/storefront-media/approved/assets/blue-field-v2/gallery/normalized/anta-kai-1-3.png",
+            "source_sha256": "001290c58c67a81188a574832ae258e6ea40cc8bab76e7fa5aa95cb152ad73fd",
+            "prompt_reference": "catalog-media/generated-reference/approved-missing-angles/PROMPTS.md"
+          }
+        },
+        {
+          "file": "storefront-media/approved/products/anta-kai-1/04-rear.png",
+          "role": "gallery",
+          "angle": "rear",
+          "orientation": "rear-facing",
+          "composition": "pair",
+          "source_kind": "generated-reference",
+          "sha256": "4562b5fc8d5c36d06c59539f3ba8c4a524d1622eb3ce23825443cd0d093bb828",
+          "generation": {
+            "model": "gpt-image-2",
+            "source_file": "catalog-media/generated-reference/approved-missing-angles/anta-kai-1-rear-chroma.png",
+            "source_sha256": "d6755ba6839c94a692a6d43ca9d69dd25f61102b1564b3984a67e28711390422",
+            "prompt_reference": "catalog-media/generated-reference/approved-missing-angles/PROMPTS.md"
+          }
+        },
+        {
+          "file": "storefront-media/approved/products/anta-kai-1/05-sole.png",
+          "role": "gallery",
+          "angle": "sole",
+          "orientation": "not-applicable",
+          "composition": "pair",
+          "source_kind": "generated-reference",
+          "sha256": "2e0591c3b85772f3972378763c4e4f2daa58e6bcb21d6751ff7453264508b269",
+          "generation": {
+            "model": "gpt-image-2",
+            "source_file": "catalog-media/generated-reference/approved-missing-angles/anta-kai-1-sole-chroma.png",
+            "source_sha256": "8d6ec01434f023e606eafb3337546a0e39219fa18fd54ea5557b74ddd0064128",
+            "prompt_reference": "catalog-media/generated-reference/approved-missing-angles/PROMPTS.md"
+          }
+        }
+      ]
+    },
+    {
+      "sku": "catalog:asics-sky-elite-ff-3",
+      "slug": "asics-sky-elite-ff-3",
+      "product_type": "footwear",
+      "rights": {
+        "status": "owner-attested",
+        "evidence_reference": "Owner instruction dated 2026-08-01; every frame remains explicitly labelled generated-reference until official provider evidence is imported"
+      },
+      "frames": [
+        {
+          "file": "storefront-media/approved/products/asics-sky-elite-ff-3/01-side.png",
+          "role": "primary",
+          "angle": "side",
+          "orientation": "toe-left",
+          "composition": "single",
+          "source_kind": "poizon-original",
+          "sha256": "637736fd7fc7bb9e0164055d208c4b0f31abd4eeaaa0372eb5dbb3a65fea6a4e",
+          "source": {
+            "provider": "poizon-public-product-page",
+            "product_url": "https://kr.poizon.com/product/asics-sky-elite-ff-3-white-blue-coast-women-s-637846218",
+            "asset_url": "https://cdn.poizon.com/pro-img/cut-img/20241212/43a5bae17a364e1784a4f189fb1e7b5b.jpg",
+            "observed_at": "2026-08-09T23:18:27.711Z",
+            "identifiers": {
+              "spu": "637846218"
+            },
+            "intake_file": "catalog-media/intake/poizon-pages/asics-sky-elite-ff-3/01.jpg",
+            "intake_sha256": "8f14ca5586663cb43475ee980799e25d71b9e4a6e03b456fca9456ec9669a7b3"
+          }
+        },
+        {
+          "file": "storefront-media/approved/products/asics-sky-elite-ff-3/02-three-quarter.png",
+          "role": "gallery",
+          "angle": "three-quarter",
+          "orientation": "toe-left",
+          "composition": "pair",
+          "source_kind": "poizon-original",
+          "sha256": "163ac025e192d613334112cb6db6471218c44cf3f59eef2c82184ae378e191db",
+          "source": {
+            "provider": "poizon-public-product-page",
+            "product_url": "https://kr.poizon.com/product/asics-sky-elite-ff-3-white-blue-coast-women-s-637846218",
+            "asset_url": "https://cdn.poizon.com/pro-img/cut-img/20241212/5c72c0194f8d4f71a04e772288b0eedc.jpg",
+            "observed_at": "2026-08-09T23:18:27.711Z",
+            "identifiers": {
+              "spu": "637846218"
+            },
+            "intake_file": "catalog-media/intake/poizon-pages/asics-sky-elite-ff-3/03.jpg",
+            "intake_sha256": "40aa5b7c196c54f5556869d59f02370eaf01e184d5ab49814fb7c3592592221a"
+          }
+        },
+        {
+          "file": "storefront-media/approved/products/asics-sky-elite-ff-3/03-side.png",
+          "role": "gallery",
+          "angle": "side",
+          "orientation": "toe-right",
+          "composition": "single",
+          "source_kind": "poizon-original",
+          "sha256": "6808b96d60c4505d159b7c5762f9c5b2eb0a37b61ff4c92018643f152c6e3640",
+          "source": {
+            "provider": "poizon-public-product-page",
+            "product_url": "https://kr.poizon.com/product/asics-sky-elite-ff-3-white-blue-coast-women-s-637846218",
+            "asset_url": "https://cdn.poizon.com/pro-img/cut-img/20241212/23eb13a77d81457cbcc8ff16c7dfb203.jpg",
+            "observed_at": "2026-08-09T23:18:27.711Z",
+            "identifiers": {
+              "spu": "637846218"
+            },
+            "intake_file": "catalog-media/intake/poizon-pages/asics-sky-elite-ff-3/02.jpg",
+            "intake_sha256": "312e97441651f06e7790acfbabdaea72180062fca9d4b6e8e88fd60365d978ad"
+          }
+        },
+        {
+          "file": "storefront-media/approved/products/asics-sky-elite-ff-3/04-rear.png",
+          "role": "gallery",
+          "angle": "rear",
+          "orientation": "rear-facing",
+          "composition": "pair",
+          "source_kind": "poizon-original",
+          "sha256": "546a35a34945573cf12eedb66a1f0d81f33efaaa8d29a8ea5d40bf9d3eab8129",
+          "source": {
+            "provider": "poizon-public-product-page",
+            "product_url": "https://kr.poizon.com/product/asics-sky-elite-ff-3-white-blue-coast-women-s-637846218",
+            "asset_url": "https://cdn.poizon.com/pro-img/cut-img/20241212/2362b5e893904e8eb8f53ebce477e6f0.jpg",
+            "observed_at": "2026-08-09T23:18:27.711Z",
+            "identifiers": {
+              "spu": "637846218"
+            },
+            "intake_file": "catalog-media/intake/poizon-pages/asics-sky-elite-ff-3/05.jpg",
+            "intake_sha256": "a329ab7226157167a1e6dd9d6d9ce40072ee8436384b3d00ffafb870e65e3864"
+          }
+        },
+        {
+          "file": "storefront-media/approved/products/asics-sky-elite-ff-3/05-sole.png",
+          "role": "gallery",
+          "angle": "sole",
+          "orientation": "not-applicable",
+          "composition": "pair",
+          "source_kind": "poizon-original",
+          "sha256": "7a232da3d90d86ddf161b040c9b9b2977c9684a2b64b1a6d8d7cfc1ce2291421",
+          "source": {
+            "provider": "poizon-public-product-page",
+            "product_url": "https://kr.poizon.com/product/asics-sky-elite-ff-3-white-blue-coast-women-s-637846218",
+            "asset_url": "https://cdn.poizon.com/pro-img/cut-img/20241212/72be659fb546493cb9e7c2ac508a31ec.jpg",
+            "observed_at": "2026-08-09T23:18:27.711Z",
+            "identifiers": {
+              "spu": "637846218"
+            },
+            "intake_file": "catalog-media/intake/poizon-pages/asics-sky-elite-ff-3/06.jpg",
+            "intake_sha256": "26ec256d309bf7890648b843c640fb7916b623166ec8b168d2700bcd106d583c"
+          }
+        }
+      ]
+    },
+    {
+      "sku": "catalog:li-ning-wade-808-4-ultra",
+      "slug": "li-ning-wade-808-4-ultra",
+      "product_type": "footwear",
+      "rights": {
+        "status": "owner-attested",
+        "evidence_reference": "Owner instruction dated 2026-08-01; every frame remains explicitly labelled generated-reference until official provider evidence is imported"
+      },
+      "frames": [
+        {
+          "file": "storefront-media/approved/products/li-ning-wade-808-4-ultra/01-side.png",
+          "role": "primary",
+          "angle": "side",
+          "orientation": "toe-left",
+          "composition": "single",
+          "source_kind": "generated-reference",
+          "sha256": "7230d844df6c7d3c67077d19a00d3cd841dcde87cad78f1c627d06c61dedc92e",
+          "generation": {
+            "model": "open-design-export",
+            "source_file": "public/storefront-media/approved/assets/blue-field-v2/li-ning-wade-808-4-ultra-stage.png",
+            "source_sha256": "997b82546343b5b8bd12176eadf5cc9ba83823a31576923d22b01996e23335d6",
+            "prompt_reference": "catalog-media/generated-reference/approved-missing-angles/PROMPTS.md"
+          }
+        },
+        {
+          "file": "storefront-media/approved/products/li-ning-wade-808-4-ultra/02-three-quarter.png",
+          "role": "gallery",
+          "angle": "three-quarter",
+          "orientation": "toe-left",
+          "composition": "pair",
+          "source_kind": "generated-reference",
+          "sha256": "d76b60254bfbb312c8dc4387c18156454bb8fc4e95e7fb80f93f2d11e88e64c9",
+          "generation": {
+            "model": "open-design-export",
+            "source_file": "public/storefront-media/approved/assets/blue-field-v2/hover/li-ning-wade-808-4-ultra-front-pair-bg.png",
+            "source_sha256": "4962ed57f905576a00c71a3e50c1357ed6a93bac4a8164f475898185bb828f9f",
+            "prompt_reference": "catalog-media/generated-reference/approved-missing-angles/PROMPTS.md"
+          }
+        },
+        {
+          "file": "storefront-media/approved/products/li-ning-wade-808-4-ultra/03-side.png",
+          "role": "gallery",
+          "angle": "side",
+          "orientation": "toe-right",
+          "composition": "single",
+          "source_kind": "generated-reference",
+          "sha256": "6c956fbf9a3dcff62fed5ed29f07f815f2b41b6657cdda700edd88b1d9e0eed5",
+          "generation": {
+            "model": "open-design-export",
+            "source_file": "public/storefront-media/approved/assets/blue-field-v2/gallery/normalized/li-ning-wade-808-4-ultra-3.png",
+            "source_sha256": "372309a4cf5589b0d85813b22fe410dc63cde8e174493fe77d5bf51375acbb0c",
+            "prompt_reference": "catalog-media/generated-reference/approved-missing-angles/PROMPTS.md"
+          }
+        },
+        {
+          "file": "storefront-media/approved/products/li-ning-wade-808-4-ultra/04-rear.png",
+          "role": "gallery",
+          "angle": "rear",
+          "orientation": "rear-facing",
+          "composition": "pair",
+          "source_kind": "generated-reference",
+          "sha256": "d801dc5152c92c1071bd94681f188950fe3a960bdae348c70195babba5fb2a1f",
+          "generation": {
+            "model": "gpt-image-2",
+            "source_file": "catalog-media/generated-reference/approved-missing-angles/li-ning-wade-808-4-ultra-rear-chroma.png",
+            "source_sha256": "8473d2cd2769ad51b014196d1ee74e881363d56b474b874a8a4851ef3dfbab4f",
+            "prompt_reference": "catalog-media/generated-reference/approved-missing-angles/PROMPTS.md"
+          }
+        },
+        {
+          "file": "storefront-media/approved/products/li-ning-wade-808-4-ultra/05-sole.png",
+          "role": "gallery",
+          "angle": "sole",
+          "orientation": "not-applicable",
+          "composition": "pair",
+          "source_kind": "generated-reference",
+          "sha256": "8dd39000177a7a8eaa891c05ecb3d3c8ca4e71ee35a075096693337158040134",
+          "generation": {
+            "model": "gpt-image-2",
+            "source_file": "catalog-media/generated-reference/approved-missing-angles/li-ning-wade-808-4-ultra-sole-chroma.png",
+            "source_sha256": "1619cece75a1841bf040e906e373105ce8d6fa9a788a39bc424d60412296d9d9",
+            "prompt_reference": "catalog-media/generated-reference/approved-missing-angles/PROMPTS.md"
+          }
+        }
+      ]
+    },
+    {
+      "sku": "catalog:new-balance-two-wxy-v5",
+      "slug": "new-balance-two-wxy-v5",
+      "product_type": "footwear",
+      "rights": {
+        "status": "owner-attested",
+        "evidence_reference": "Owner instruction dated 2026-08-01; every frame remains explicitly labelled generated-reference until official provider evidence is imported"
+      },
+      "frames": [
+        {
+          "file": "storefront-media/approved/products/new-balance-two-wxy-v5/01-side.png",
+          "role": "primary",
+          "angle": "side",
+          "orientation": "toe-left",
+          "composition": "single",
+          "source_kind": "generated-reference",
+          "sha256": "cbde02ba55563d34e565bb41eb0a3245943eb9951c33632e41a45d0b95c60e71",
+          "generation": {
+            "model": "open-design-export",
+            "source_file": "public/storefront-media/approved/assets/blue-field-v2/new-balance-two-wxy-v5-stage.png",
+            "source_sha256": "3b936e61aab9f90d82226b107f0002815cdee36581b1e034c7e449cdec552ab3",
+            "prompt_reference": "catalog-media/generated-reference/approved-missing-angles/PROMPTS.md"
+          }
+        },
+        {
+          "file": "storefront-media/approved/products/new-balance-two-wxy-v5/02-three-quarter.png",
+          "role": "gallery",
+          "angle": "three-quarter",
+          "orientation": "toe-left",
+          "composition": "pair",
+          "source_kind": "generated-reference",
+          "sha256": "a226f935be85c67192ea1ed9646a74199ba8ac5e6f03bc432df14e857810fa1e",
+          "generation": {
+            "model": "open-design-export",
+            "source_file": "public/storefront-media/approved/assets/blue-field-v2/hover/new-balance-two-wxy-v5-front-pair-bg.png",
+            "source_sha256": "22618defd7c050efa4d887ef9d10da3ac6f0bda73983f1f549e1f4db59f492c7",
+            "prompt_reference": "catalog-media/generated-reference/approved-missing-angles/PROMPTS.md"
+          }
+        },
+        {
+          "file": "storefront-media/approved/products/new-balance-two-wxy-v5/03-side.png",
+          "role": "gallery",
+          "angle": "side",
+          "orientation": "toe-right",
+          "composition": "single",
+          "source_kind": "generated-reference",
+          "sha256": "20d30c0a2d60627b7b14f0d6941b78397e195ddadaefefdc5f1bad04a542a911",
+          "generation": {
+            "model": "open-design-export",
+            "source_file": "public/storefront-media/approved/assets/blue-field-v2/gallery/normalized/new-balance-two-wxy-v5-3.png",
+            "source_sha256": "c636faaf3893ca1bab57d7d8acc9f9e58e054e10bd460aec3c59f43fc4216e94",
+            "prompt_reference": "catalog-media/generated-reference/approved-missing-angles/PROMPTS.md"
+          }
+        },
+        {
+          "file": "storefront-media/approved/products/new-balance-two-wxy-v5/04-rear.png",
+          "role": "gallery",
+          "angle": "rear",
+          "orientation": "rear-facing",
+          "composition": "pair",
+          "source_kind": "generated-reference",
+          "sha256": "0f41d8c55a845d96e48fea40eeea48b424f21ed3f215e44f0e20dd111d3025d4",
+          "generation": {
+            "model": "gpt-image-2",
+            "source_file": "catalog-media/generated-reference/unified-missing-angles/new-balance-two-wxy-v5-rear.png",
+            "source_sha256": "02d4e2c25747d5148f751b37bd6f5362971fda0f4aed0c791854d2cffe6a11d4",
+            "prompt_reference": "catalog-media/generated-reference/unified-missing-angles/GENERATION_NOTES.md"
+          }
+        },
+        {
+          "file": "storefront-media/approved/products/new-balance-two-wxy-v5/05-sole.png",
+          "role": "gallery",
+          "angle": "sole",
+          "orientation": "not-applicable",
+          "composition": "pair",
+          "source_kind": "generated-reference",
+          "sha256": "8735b48b7fac27a41f5156654bc5eb294ee64d1dae6f4f89e362035128f44055",
+          "generation": {
+            "model": "gpt-image-2",
+            "source_file": "catalog-media/generated-reference/approved-missing-angles/new-balance-two-wxy-v5-sole-chroma.png",
+            "source_sha256": "2c579321f6ab364d8adbd2f5f20892e97f9909fa3b01589d7684195cddec1153",
+            "prompt_reference": "catalog-media/generated-reference/approved-missing-angles/PROMPTS.md"
+          }
+        }
+      ]
+    },
+    {
+      "sku": "catalog:nike-aone",
+      "slug": "nike-aone",
+      "product_type": "footwear",
+      "rights": {
+        "status": "owner-attested",
+        "evidence_reference": "Owner instruction dated 2026-08-01; every frame remains explicitly labelled generated-reference until official provider evidence is imported"
+      },
+      "frames": [
+        {
+          "file": "storefront-media/approved/products/nike-aone/01-side.png",
+          "role": "primary",
+          "angle": "side",
+          "orientation": "toe-left",
+          "composition": "single",
+          "source_kind": "generated-reference",
+          "sha256": "169761c45fd39ec3985683a1dc454bd0a45af5201ac8e4722b1e3618f54c304f",
+          "generation": {
+            "model": "open-design-export",
+            "source_file": "public/storefront-media/approved/assets/blue-field-v2/nike-aone-stage.png",
+            "source_sha256": "ac85ff68e90e7667b3b8fb1cf72e1d9513d882dc2225079e8e566609b028e773",
+            "prompt_reference": "catalog-media/generated-reference/approved-missing-angles/PROMPTS.md"
+          }
+        },
+        {
+          "file": "storefront-media/approved/products/nike-aone/02-three-quarter.png",
+          "role": "gallery",
+          "angle": "three-quarter",
+          "orientation": "toe-left",
+          "composition": "pair",
+          "source_kind": "generated-reference",
+          "sha256": "c479d926b21563a845417b93f25c48a662478dbbf7993ad34f7815a97b878b11",
+          "generation": {
+            "model": "gpt-image-2",
+            "source_file": "catalog-media/generated-reference/approved-missing-angles/nike-aone-three-quarter-chroma.png",
+            "source_sha256": "1626bf1e8eece6fc4093dfe27077667c8cc67288d0fae8db13a0d369a67b4d63",
+            "prompt_reference": "catalog-media/generated-reference/approved-missing-angles/PROMPTS.md"
+          }
+        },
+        {
+          "file": "storefront-media/approved/products/nike-aone/03-side.png",
+          "role": "gallery",
+          "angle": "side",
+          "orientation": "toe-right",
+          "composition": "single",
+          "source_kind": "generated-reference",
+          "sha256": "623a57448b4e7aad5ada854a08dd6cd6ab61c0071a89eb2d84b2f0907a8f975e",
+          "generation": {
+            "model": "open-design-export",
+            "source_file": "public/storefront-media/approved/assets/blue-field-v2/gallery/normalized/nike-aone-3.png",
+            "source_sha256": "23315b1390446a25bfeb22a99375a0d3bccf66daa6fcb48ebe7b8b4485f67a37",
+            "prompt_reference": "catalog-media/generated-reference/approved-missing-angles/PROMPTS.md"
+          }
+        },
+        {
+          "file": "storefront-media/approved/products/nike-aone/04-rear.png",
+          "role": "gallery",
+          "angle": "rear",
+          "orientation": "rear-facing",
+          "composition": "pair",
+          "source_kind": "generated-reference",
+          "sha256": "9a8a3f85d5912ebb081f5f0627acbef83206c92358233ce1eb64ce2da366a3ef",
+          "generation": {
+            "model": "gpt-image-2",
+            "source_file": "catalog-media/generated-reference/approved-missing-angles/nike-aone-rear-chroma.png",
+            "source_sha256": "3a7952d09915636b573a4b02ff6a5a47d65818d0db686a80827b84fd7f2416d9",
+            "prompt_reference": "catalog-media/generated-reference/approved-missing-angles/PROMPTS.md"
+          }
+        },
+        {
+          "file": "storefront-media/approved/products/nike-aone/05-sole.png",
+          "role": "gallery",
+          "angle": "sole",
+          "orientation": "not-applicable",
+          "composition": "pair",
+          "source_kind": "generated-reference",
+          "sha256": "62e555da8220cee0201fb232b5b7afe51481b5fc5efbd635380dd27274ac6069",
+          "generation": {
+            "model": "gpt-image-2",
+            "source_file": "catalog-media/generated-reference/approved-missing-angles/nike-aone-sole-chroma.png",
+            "source_sha256": "9dd96935e412d88a726f0c880aa2b4303d86086fdb32edebf21eb5223c28b781",
+            "prompt_reference": "catalog-media/generated-reference/approved-missing-angles/PROMPTS.md"
+          }
+        }
+      ]
+    },
+    {
+      "sku": "catalog:nike-free-metcon-6",
+      "slug": "nike-free-metcon-6",
+      "product_type": "footwear",
+      "rights": {
+        "status": "owner-attested",
+        "evidence_reference": "Owner instruction dated 2026-08-01; every frame remains explicitly labelled generated-reference until official provider evidence is imported"
+      },
+      "frames": [
+        {
+          "file": "storefront-media/approved/products/nike-free-metcon-6/01-side.png",
+          "role": "primary",
+          "angle": "side",
+          "orientation": "toe-left",
+          "composition": "single",
+          "source_kind": "generated-reference",
+          "sha256": "84c82342be5a4a1d8b291ab79641aa50a1f043ba67c99bd3f3923e9a3aedd450",
+          "generation": {
+            "model": "open-design-export",
+            "source_file": "public/storefront-media/approved/assets/blue-field-v2/nike-free-metcon-6-stage.png",
+            "source_sha256": "058b6e49a826bf44bedbadc8daa14138ca3c666579ddfaf9ae4c1bdd5832318b",
+            "prompt_reference": "catalog-media/generated-reference/approved-missing-angles/PROMPTS.md"
+          }
+        },
+        {
+          "file": "storefront-media/approved/products/nike-free-metcon-6/02-three-quarter.png",
+          "role": "gallery",
+          "angle": "three-quarter",
+          "orientation": "toe-left",
+          "composition": "pair",
+          "source_kind": "generated-reference",
+          "sha256": "7a2e10ab0bd27bc200fe6f551087b154687dc8a8d76d58a5003dc225a4e570a4",
+          "generation": {
+            "model": "open-design-export",
+            "source_file": "public/storefront-media/approved/assets/blue-field-v2/hover/nike-free-metcon-6-front-pair-bg.png",
+            "source_sha256": "39613ecc3002932d1ae81fe4d8c12f275a00367ad020f41523bf9924b1047244",
+            "prompt_reference": "catalog-media/generated-reference/approved-missing-angles/PROMPTS.md"
+          }
+        },
+        {
+          "file": "storefront-media/approved/products/nike-free-metcon-6/03-side.png",
+          "role": "gallery",
+          "angle": "side",
+          "orientation": "toe-right",
+          "composition": "single",
+          "source_kind": "generated-reference",
+          "sha256": "dbd21e19db1ec0609a4f6da913805166d370ed4ba295605ec96fe8e9a1b51340",
+          "generation": {
+            "model": "open-design-export",
+            "source_file": "public/storefront-media/approved/assets/blue-field-v2/gallery/normalized/nike-free-metcon-6-3.png",
+            "source_sha256": "74a6168dd2226d43b8aa65cd8ecef209274e01ad1fec52806743fd8396959a31",
+            "prompt_reference": "catalog-media/generated-reference/approved-missing-angles/PROMPTS.md"
+          }
+        },
+        {
+          "file": "storefront-media/approved/products/nike-free-metcon-6/04-rear.png",
+          "role": "gallery",
+          "angle": "rear",
+          "orientation": "rear-facing",
+          "composition": "pair",
+          "source_kind": "generated-reference",
+          "sha256": "e52d85af3620015c4e5226752ac38747bdf72c4a121f48b4a06f51fb55bd37d4",
+          "generation": {
+            "model": "gpt-image-2",
+            "source_file": "catalog-media/generated-reference/approved-missing-angles/nike-free-metcon-6-rear-chroma.png",
+            "source_sha256": "0cbcb86f59257295e9bc6fb433be8512cf06d153359d85aa9fffe98845f7abbf",
+            "prompt_reference": "catalog-media/generated-reference/approved-missing-angles/PROMPTS.md"
+          }
+        },
+        {
+          "file": "storefront-media/approved/products/nike-free-metcon-6/05-sole.png",
+          "role": "gallery",
+          "angle": "sole",
+          "orientation": "not-applicable",
+          "composition": "pair",
+          "source_kind": "generated-reference",
+          "sha256": "b768d265e58984a6159462c1ee4e36c54ecb4ee733ec1991915f4ede26df5c99",
+          "generation": {
+            "model": "gpt-image-2",
+            "source_file": "catalog-media/generated-reference/approved-missing-angles/nike-free-metcon-6-sole-chroma.png",
+            "source_sha256": "9f2194d8117201293ff6bfd6e7ba0ed011944a27eed542a47734fccb050b4b17",
+            "prompt_reference": "catalog-media/generated-reference/approved-missing-angles/PROMPTS.md"
+          }
+        }
+      ]
+    },
+    {
+      "sku": "catalog:nike-kd-18",
+      "slug": "nike-kd-18",
+      "product_type": "footwear",
+      "rights": {
+        "status": "owner-attested",
+        "evidence_reference": "Owner instruction dated 2026-08-01; every frame remains explicitly labelled generated-reference until official provider evidence is imported"
+      },
+      "frames": [
+        {
+          "file": "storefront-media/approved/products/nike-kd-18/01-side.png",
+          "role": "primary",
+          "angle": "side",
+          "orientation": "toe-left",
+          "composition": "single",
+          "source_kind": "generated-reference",
+          "sha256": "e76bd1e274fc843fcb9cab2fdebaaa014e8094144926b6f32ce905b821a7b94d",
+          "generation": {
+            "model": "open-design-export",
+            "source_file": "public/storefront-media/approved/assets/blue-field-v2/nike-kd-18-stage.png",
+            "source_sha256": "ecff1ecddbebcb75dcd1bcea586fcca65707aeeaacc4d957ecfcafbd6c981631",
+            "prompt_reference": "catalog-media/generated-reference/approved-missing-angles/PROMPTS.md"
+          }
+        },
+        {
+          "file": "storefront-media/approved/products/nike-kd-18/02-three-quarter.png",
+          "role": "gallery",
+          "angle": "three-quarter",
+          "orientation": "toe-left",
+          "composition": "pair",
+          "source_kind": "generated-reference",
+          "sha256": "6c5d48f6fe7c7284bb2fd505cb55b488ebe2ba7b088fff88a23016de1f499fb7",
+          "generation": {
+            "model": "open-design-export",
+            "source_file": "public/storefront-media/approved/assets/blue-field-v2/hover/nike-kd-18-front-pair-bg.png",
+            "source_sha256": "44eb1576452d1a641e24d9f76df314400c10f22990f3367e63264aa817a0a44b",
+            "prompt_reference": "catalog-media/generated-reference/approved-missing-angles/PROMPTS.md"
+          }
+        },
+        {
+          "file": "storefront-media/approved/products/nike-kd-18/03-side.png",
+          "role": "gallery",
+          "angle": "side",
+          "orientation": "toe-right",
+          "composition": "single",
+          "source_kind": "generated-reference",
+          "sha256": "ad5e7d344e50f8bcae738bf97201090bdbc5c5f782ee409f23def7b411b8532e",
+          "generation": {
+            "model": "gpt-image-2",
+            "source_file": "catalog-media/generated-reference/approved-missing-angles/nike-kd-18-opposite-side-chroma.png",
+            "source_sha256": "0ff7e48fd9b01b791b522703411eddc9f55f1213ae9d4ae41a9e2996309182ff",
+            "prompt_reference": "catalog-media/generated-reference/approved-missing-angles/PROMPTS.md"
+          }
+        },
+        {
+          "file": "storefront-media/approved/products/nike-kd-18/04-rear.png",
+          "role": "gallery",
+          "angle": "rear",
+          "orientation": "rear-facing",
+          "composition": "pair",
+          "source_kind": "generated-reference",
+          "sha256": "73e9c75c7e5de5746091b0405e39220eae2d72e632ed3bcf0d6424d7ba343cc5",
+          "generation": {
+            "model": "open-design-export",
+            "source_file": "public/storefront-media/approved/assets/blue-field-v2/gallery/normalized/nike-kd-18-4.png",
+            "source_sha256": "6a216de3144a7cf82ad9f1101bff01e07de8560d1a63f6573d4c62581a6fd6d8",
+            "prompt_reference": "catalog-media/generated-reference/approved-missing-angles/PROMPTS.md"
+          }
+        },
+        {
+          "file": "storefront-media/approved/products/nike-kd-18/05-sole.png",
+          "role": "gallery",
+          "angle": "sole",
+          "orientation": "not-applicable",
+          "composition": "pair",
+          "source_kind": "generated-reference",
+          "sha256": "9df03bf0a2844e212a22a8a8c502743e7bd49e6fd15b2f97caadc6d1d63c481e",
+          "generation": {
+            "model": "gpt-image-2",
+            "source_file": "catalog-media/generated-reference/approved-missing-angles/nike-kd-18-sole-chroma.png",
+            "source_sha256": "94075ce49791c4a474808c801bfe021cd3e26ac1fe560644679ccf514c879971",
+            "prompt_reference": "catalog-media/generated-reference/approved-missing-angles/PROMPTS.md"
+          }
+        }
+      ]
+    },
+    {
+      "sku": "catalog:nike-sabrina-3",
+      "slug": "nike-sabrina-3",
+      "product_type": "footwear",
+      "rights": {
+        "status": "owner-attested",
+        "evidence_reference": "Owner instruction dated 2026-08-01; every frame remains explicitly labelled generated-reference until official provider evidence is imported"
+      },
+      "frames": [
+        {
+          "file": "storefront-media/approved/products/nike-sabrina-3/01-side.png",
+          "role": "primary",
+          "angle": "side",
+          "orientation": "toe-left",
+          "composition": "single",
+          "source_kind": "generated-reference",
+          "sha256": "f05e15598c4febcfbd731b90a3b0890e98779ca206f260d45d424750336588e8",
+          "generation": {
+            "model": "open-design-export",
+            "source_file": "public/storefront-media/approved/assets/blue-field-v2/nike-sabrina-3-stage.png",
+            "source_sha256": "93e1fd3d1336b27b45856c5e5fa99bd8023df4a68efa0463f616fb68344afa1d",
+            "prompt_reference": "catalog-media/generated-reference/approved-missing-angles/PROMPTS.md"
+          }
+        },
+        {
+          "file": "storefront-media/approved/products/nike-sabrina-3/02-three-quarter.png",
+          "role": "gallery",
+          "angle": "three-quarter",
+          "orientation": "toe-left",
+          "composition": "pair",
+          "source_kind": "generated-reference",
+          "sha256": "1b34735b8bb293b9a7b85b65a80683a929d41886028c88c97530e716ade9e871",
+          "generation": {
+            "model": "open-design-export",
+            "source_file": "public/storefront-media/approved/assets/blue-field-v2/hover/nike-sabrina-3-front-pair-bg.png",
+            "source_sha256": "f78ab74b29e06ef1da8ba141e8f5c97e6e71f872f16063d04acaba14ba43ddfd",
+            "prompt_reference": "catalog-media/generated-reference/approved-missing-angles/PROMPTS.md"
+          }
+        },
+        {
+          "file": "storefront-media/approved/products/nike-sabrina-3/03-side.png",
+          "role": "gallery",
+          "angle": "side",
+          "orientation": "toe-right",
+          "composition": "single",
+          "source_kind": "generated-reference",
+          "sha256": "776fb3fb3d8caa18b8136c6d53ef37da5a04f0fa7f0a90ea7a46379fc13c221f",
+          "generation": {
+            "model": "gpt-image-2",
+            "source_file": "catalog-media/generated-reference/approved-missing-angles/nike-sabrina-3-opposite-side-chroma.png",
+            "source_sha256": "d68fb329d360d5dbd97286a3909c25117a61fd7729587db981fd51a3a94164a1",
+            "prompt_reference": "catalog-media/generated-reference/approved-missing-angles/PROMPTS.md"
+          }
+        },
+        {
+          "file": "storefront-media/approved/products/nike-sabrina-3/04-rear.png",
+          "role": "gallery",
+          "angle": "rear",
+          "orientation": "rear-facing",
+          "composition": "pair",
+          "source_kind": "generated-reference",
+          "sha256": "1a583612550cd3dc844e6e0aee9bf11e2e3e8c01fefb1f2943fae2040ed433d4",
+          "generation": {
+            "model": "gpt-image-2",
+            "source_file": "catalog-media/generated-reference/approved-missing-angles/nike-sabrina-3-rear-chroma.png",
+            "source_sha256": "3e68aa96de9e76f4f14ac97fdd5cc24a9f5a8c852b964de95a2ba86f099e82d5",
+            "prompt_reference": "catalog-media/generated-reference/approved-missing-angles/PROMPTS.md"
+          }
+        },
+        {
+          "file": "storefront-media/approved/products/nike-sabrina-3/05-sole.png",
+          "role": "gallery",
+          "angle": "sole",
+          "orientation": "not-applicable",
+          "composition": "pair",
+          "source_kind": "generated-reference",
+          "sha256": "8781d5aacee26d1a4b6d49d92a2c6894aff822cc8ba7c8d4f52e1df4b106055a",
+          "generation": {
+            "model": "gpt-image-2",
+            "source_file": "catalog-media/generated-reference/approved-missing-angles/nike-sabrina-3-sole-chroma.png",
+            "source_sha256": "9681eebd2ae3cd4b6e3dc10ed322ad10606cda000b4693facb7537ed2445cf1d",
+            "prompt_reference": "catalog-media/generated-reference/approved-missing-angles/PROMPTS.md"
+          }
+        }
+      ]
+    }
+  ]
+}

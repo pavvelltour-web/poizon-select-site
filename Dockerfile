@@ -6,9 +6,9 @@ RUN npm ci --ignore-scripts
 COPY . .
 
 ARG VITE_BOT_USERNAME=""
+ARG VITE_API_BASE_URL=""
 ENV VITE_BOT_USERNAME=$VITE_BOT_USERNAME
-ARG VITE_CRM_API_BASE_URL="/api"
-ENV VITE_CRM_API_BASE_URL=$VITE_CRM_API_BASE_URL
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 
 FROM build-base AS demo-build
 RUN npm run build
@@ -23,9 +23,10 @@ COPY --from=demo-build /app/dist /usr/share/nginx/html
 USER nginx
 
 FROM build-base AS production-build
+RUN apk add --no-cache python3 py3-pillow \
+    && ln -s /usr/bin/python3 /usr/local/bin/python
 RUN npm run build:production
 
 FROM runtime-base AS production
-COPY site-release/ /usr/share/nginx/html/
 COPY --from=production-build /app/dist /usr/share/nginx/html
 USER nginx

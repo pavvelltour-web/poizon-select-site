@@ -72,20 +72,6 @@ afterEach(() => {
 })
 
 describe("standalone site runtime boundary", () => {
-  it("rejects references to retired unpublished storefront assets", () => {
-    const fixture = makeFixture()
-    writeFileSync(
-      path.join(fixture, "src", "retired-storefront-asset.ts"),
-      'const image = "storefront-media/approved/assets/legacy.webp"\n',
-      "utf8",
-    )
-
-    const result = runVerifier(fixture)
-
-    expect(result.status).not.toBe(0)
-    expect(result.stderr).toContain("retired unpublished storefront asset")
-  }, 15_000)
-
   it("rejects a browser runtime network call", () => {
     const fixture = makeFixture()
     writeFileSync(
@@ -97,8 +83,8 @@ describe("standalone site runtime boundary", () => {
     const result = runVerifier(fixture)
 
     expect(result.status).not.toBe(0)
-    expect(result.stderr).toContain("forbidden runtime network call")
-  }, 15_000)
+    expect(result.stderr).toContain("non-checkout fetch call")
+  })
 
   it("requires the named release-rights command", () => {
     const fixture = makeFixture()

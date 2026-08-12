@@ -55,91 +55,13 @@ export interface CatalogSearchState {
 
 export type CopyState = "idle" | "copied" | "failed"
 
-export type LivePoizonSearchStatus = "idle" | "loading" | "clarification" | "ready" | "unavailable"
-
-/** A bounded server-selected model option shown before a live Poizon lookup. */
-export interface LivePoizonClarificationOption {
-  label: string
-  query: string
-}
-
-/** Customer-safe data from the verified Batch Sync quote. */
-export interface LivePoizonPriceBreakdown {
-  purchase_rub: number
-  conversion_fee: number
-  first_six_percent_fee: number
-  service_markup: number
-  final_six_percent_fee: number
-  delivery_rub: number
-  total_rub: number
-  markup_tier: string
-}
-
-export interface LivePoizonOffer {
-  size: string
-  /** Source-provided size labels. They are never converted or inferred in the UI. */
-  eu: string | null
-  ru: string | null
-  us: string | null
-  cn: string | null
-  /** `null` means Poizon did not report stock for this size. */
-  available: boolean | null
-  /** Source CNY price for this exact size, not the product-level floor. */
-  price_cny: number
-  quote_rub: number
-  rf_delivery: number
-  total_rub: number
-  price_breakdown: LivePoizonPriceBreakdown | null
-}
-
-export interface LivePoizonProduct {
-  product_ref: string
-  brand: string | null
-  name: string
-  article: string | null
-  color: string | null
-  kind: "footwear" | "apparel" | "accessory"
-  description: string | null
-  images: string[]
-  /** Availability reported for the product by Poizon; never inferred from a size. */
-  in_stock?: boolean | null
-  /** Supplier-provided explanation for how to read the listed sizes. */
-  size_context?: string | null
-  /** Supplier-provided size-chart text. */
-  size_chart?: string | null
-  /** HTTPS size-chart image accepted by the client before rendering. */
-  size_image?: string | null
-  offers: LivePoizonOffer[]
-  observed_at: string
-  expires_at: string
-}
-
-export interface StorefrontPoizonPrice {
-  slug: string
-  source_query: string
-  product_name: string
-  total_rub: number
-  observed_at: string
-  expires_at: string
-}
-
 export interface StorefrontState {
   botUsername: string | null
   botUrl: string | null
-  selectedProductBotUrl: string | null
   category: ActiveCategory
   search: string
   sort: CatalogSort
   taskInput: string
-  liveSearchQuery: string
-  liveSearchNormalizedQuery: string | null
-  liveSearchBotUrl: string | null
-  liveSearchStatus: LivePoizonSearchStatus
-  liveSearchResults: LivePoizonProduct[]
-  liveSearchMessage: string | null
-  liveSearchClarificationOptions: LivePoizonClarificationOption[]
-  catalogPoizonPrices: Record<string, StorefrontPoizonPrice>
-  catalogPoizonPricesReady: boolean
   filteredProducts: CatalogProduct[]
   selectedProduct: CatalogProduct | null
   selectedImage: { src: string; alt: string } | null
@@ -152,7 +74,6 @@ export interface StorefrontState {
   selectedSizeOfferStatus: "idle" | "loading" | "ready" | "failed"
   selectedSizeOfferError: string | null
   selectedProductPrice: DisplayPrice | null
-  getPoizonDisplayPrice: (product: CatalogProduct, size?: string | null) => DisplayPrice
   catalogPriceState: CatalogPriceState
   cartLines: CartLine[]
   cartCount: number
@@ -177,8 +98,6 @@ export interface StorefrontState {
   }) => void
   resetCatalog: () => void
   setTaskInput: (task: string) => void
-  setLiveSearchQuery: (query: string) => void
-  submitLiveSearch: (queryOverride?: string) => Promise<void>
   openProduct: (product: CatalogProduct, trigger: HTMLElement, preferredSize?: string) => void
   closeProduct: () => void
   selectProductImage: (index: number) => void

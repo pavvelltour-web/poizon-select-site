@@ -7,6 +7,7 @@ import ts from "typescript"
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..")
 const catalogSourcePath = resolve(repoRoot, "src", "catalog", "catalog.ts")
 const manifestPath = resolve(repoRoot, "public", "catalog", "sources.json")
+const unifiedManifestPath = resolve(repoRoot, "catalog-media", "unified-catalog-media.json")
 const queuePath = resolve(repoRoot, "catalog-media", "regeneration-queue.json")
 const importerPath = resolve(repoRoot, "scripts", "import_ai_contact_sheet.py")
 const promptsPath = resolve(
@@ -19,7 +20,7 @@ function fail(message) {
   throw new Error(`Product media pipeline verification failed: ${message}`)
 }
 
-function loadCatalogProducts(source) {
+function loadCatalogProducts(source, unifiedCatalogMediaManifest) {
   const transpiled = ts.transpileModule(source, {
     compilerOptions: {
       module: ts.ModuleKind.CommonJS,
@@ -32,6 +33,9 @@ function loadCatalogProducts(source) {
     exports: {},
     module: { exports: {} },
     require(specifier) {
+      if (specifier === "../../catalog-media/unified-catalog-media.json") {
+        return { __esModule: true, default: unifiedCatalogMediaManifest }
+      }
       fail(`unexpected runtime import while loading catalog.ts: ${specifier}`)
     },
   }
@@ -49,9 +53,10 @@ function assertText(value, field, minLength = 12) {
   }
 }
 
-const [catalogSource, manifest, queue, promptExport, importerSource] = await Promise.all([
+const [catalogSource, manifest, unifiedCatalogMediaManifest, queue, promptExport, importerSource] = await Promise.all([
   readFile(catalogSourcePath, "utf8"),
   readFile(manifestPath, "utf8").then(JSON.parse),
+  readFile(unifiedManifestPath, "utf8").then(JSON.parse),
   readFile(queuePath, "utf8").then(JSON.parse),
   readFile(promptsPath, "utf8").then(JSON.parse),
   readFile(importerPath, "utf8"),
@@ -64,7 +69,7 @@ if (
   fail("import_ai_contact_sheet.py must support schema-v2 prompt exports")
 }
 
-const products = loadCatalogProducts(catalogSource)
+const products = loadCatalogProducts(catalogSource, unifiedCatalogMediaManifest)
 if (!Array.isArray(products) || products.length !== 100) {
   fail("catalogProducts must contain exactly 100 products")
 }
