@@ -1,5 +1,5 @@
-import { Heart } from "lucide-react"
-import { useEffect, useRef, useState, type MouseEvent, type PointerEvent, type SyntheticEvent } from "react"
+import { Heart, ImageOff, LoaderCircle } from "lucide-react"
+import { useEffect, useRef, useState, type MouseEvent, type PointerEvent } from "react"
 
 import type { CatalogProduct } from "../../catalog/catalog"
 import { getCardThumbnailUrl } from "../../catalog/card-thumbnail-versions"
@@ -10,7 +10,6 @@ import {
   getProductTypeLabel,
   getProductUse,
   resolveAssetUrl,
-  setImageFallback,
 } from "../landing-data"
 
 interface ProductCardProps {
@@ -31,18 +30,70 @@ function fallbackSizes(kind: CatalogProduct["kind"]): readonly string[] {
   return ["36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46"]
 }
 
-function retryThumbnailOnce(
-  event: SyntheticEvent<HTMLImageElement>,
-  thumbnailUrl: string,
-): boolean {
-  const image = event.currentTarget
-  if (image.dataset.thumbnailRetry === "1") return false
+const CARD_IMAGE_RETRY_DELAYS = [180, 560, 0] as const
+const CARD_IMAGE_LAST_CANDIDATE = CARD_IMAGE_RETRY_DELAYS.length
 
-  image.dataset.thumbnailRetry = "1"
-  image.removeAttribute("srcset")
-  image.removeAttribute("sizes")
-  image.src = `${thumbnailUrl}${thumbnailUrl.includes("?") ? "&" : "?"}retry=1`
-  return true
+interface CardImageSource {
+  src: string
+  srcSet?: string
+  sizes?: string
+}
+
+function withRetryMarker(url: string, attempt: number): string {
+  return `${url}${url.includes("?") ? "&" : "?"}retry=${attempt}`
+}
+
+function getCardImageSource(
+  candidate: number,
+  thumbnail640: string,
+  thumbnail960: string,
+  thumbnail1280: string,
+  fallback: string,
+): CardImageSource {
+  if (candidate === 0) {
+    return {
+      src: thumbnail640,
+      srcSet: `${thumbnail640} 640w, ${thumbnail960} 960w, ${thumbnail1280} 1280w`,
+      sizes: "(max-width: 620px) 50vw, (max-width: 980px) 33vw, (max-width: 1680px) 25vw, 20vw",
+    }
+  }
+  if (candidate === 1) return { src: withRetryMarker(thumbnail640, candidate) }
+  if (candidate === 2) return { src: withRetryMarker(thumbnail960, candidate) }
+  return { src: fallback }
+}
+
+function useCardImageLoadPlan(key: string) {
+  const [candidate, setCandidate] = useState(0)
+  const [retryPending, setRetryPending] = useState(false)
+  const [failed, setFailed] = useState(false)
+
+  useEffect(() => {
+    setCandidate(0)
+    setRetryPending(false)
+    setFailed(false)
+  }, [key])
+
+  useEffect(() => {
+    if (!retryPending) return
+
+    const delay = CARD_IMAGE_RETRY_DELAYS[candidate] ?? 0
+    const timer = window.setTimeout(() => {
+      setCandidate((current) => current + 1)
+      setRetryPending(false)
+    }, delay)
+    return () => window.clearTimeout(timer)
+  }, [candidate, retryPending])
+
+  const retryOrFail = () => {
+    if (retryPending || failed) return
+    if (candidate >= CARD_IMAGE_LAST_CANDIDATE) {
+      setFailed(true)
+      return
+    }
+    setRetryPending(true)
+  }
+
+  return { candidate, retryPending, failed, retryOrFail }
 }
 
 export function ProductCard({
@@ -56,7 +107,6 @@ export function ProductCard({
   onOpen,
 }: ProductCardProps) {
   const price = getDisplayPrice(product, catalogPriceLookup)
-  const [mediaReady, setMediaReady] = useState(false)
   const [hoverRequested, setHoverRequested] = useState(false)
   const [hoverReady, setHoverReady] = useState(false)
   const hoverImageRef = useRef<HTMLImageElement | null>(null)
@@ -74,6 +124,23 @@ export function ProductCard({
   const hoverThumbnail640 = thumbnail(hoverImageIndex + 1, 640)
   const hoverThumbnail960 = thumbnail(hoverImageIndex + 1, 960)
   const hoverThumbnail1280 = thumbnail(hoverImageIndex + 1, 1280)
+  const primaryLoad = useCardImageLoadPlan(product.slug)
+  const hoverLoad = useCardImageLoadPlan(`${product.slug}:${hoverImage}`)
+  const isPriorityCard = index < 2
+  const primarySource = getCardImageSource(
+    primaryLoad.candidate,
+    primaryThumbnail640,
+    primaryThumbnail960,
+    primaryThumbnail1280,
+    resolveAssetUrl(product.fallbackImage),
+  )
+  const hoverSource = getCardImageSource(
+    hoverLoad.candidate,
+    hoverThumbnail640,
+    hoverThumbnail960,
+    hoverThumbnail1280,
+    hoverImage,
+  )
   const sizes = publishedOffer?.sizes.length ? publishedOffer.sizes : fallbackSizes(product.kind)
   const cardSizes = (sizes.length >= 7 ? [sizes[2], sizes[4], sizes[6]] : sizes.slice(0, 3))
     .filter((size): size is string => Boolean(size))
@@ -107,7 +174,7 @@ export function ProductCard({
     if (hoverRequested && hoverElement?.complete && hoverElement.naturalWidth > 0) {
       setHoverReady(true)
     }
-  }, [hoverRequested])
+  }, [hoverRequested, hoverSource.src])
 
   return (
     <article
@@ -125,42 +192,44 @@ export function ProductCard({
         onFocus={requestHover}
         onPointerEnter={requestHoverOnPointer}
       >
-        <span className={`product-media ${mediaReady ? "is-ready" : ""} ${hoverReady ? "is-hover-ready" : ""}`}>
-          {index < 2 ? <span className="badge-stack"><span className="product-badge badge-choice">Выбор клиентов</span></span> : null}
+        <span className={`product-media ${primaryLoad.retryPending ? "is-media-retrying" : ""} ${primaryLoad.failed ? "is-media-failed" : ""} ${hoverReady ? "is-hover-ready" : ""}`}>
+          {isPriorityCard ? <span className="badge-stack"><span className="product-badge badge-choice">Выбор клиентов</span></span> : null}
           <img
             className="product-card__image"
-            src={primaryThumbnail640}
-            srcSet={`${primaryThumbnail640} 640w, ${primaryThumbnail960} 960w, ${primaryThumbnail1280} 1280w`}
-            sizes="(max-width: 620px) 50vw, (max-width: 980px) 33vw, (max-width: 1680px) 25vw, 20vw"
+            src={primarySource.src}
+            srcSet={primarySource.srcSet}
+            sizes={primarySource.sizes}
             width="1600"
             height="1200"
-            loading={index < 4 ? "eager" : "lazy"}
-            fetchPriority={index < 2 ? "high" : "auto"}
+            loading={isPriorityCard ? "eager" : "lazy"}
+            fetchPriority={isPriorityCard ? "high" : "auto"}
             decoding="async"
             alt=""
-            onLoad={() => setMediaReady(true)}
-            onError={(event) => {
-              if (retryThumbnailOnce(event, primaryThumbnail640)) return
-              setImageFallback(event, product.fallbackImage)
-              setMediaReady(true)
-            }}
+            onError={primaryLoad.retryOrFail}
           />
+          {primaryLoad.retryPending ? (
+            <span className="product-media__loading" aria-hidden="true">
+              <LoaderCircle strokeWidth={1.6} />
+            </span>
+          ) : null}
+          {primaryLoad.failed ? (
+            <span className="product-media__error" aria-hidden="true">
+              <ImageOff strokeWidth={1.6} />
+            </span>
+          ) : null}
           <span className="product-pair" aria-hidden="true" data-hover-frame={hoverImageIndex + 1}>
             {hoverRequested ? (
               <img
                 ref={hoverImageRef}
-                src={hoverThumbnail640}
-                srcSet={`${hoverThumbnail640} 640w, ${hoverThumbnail960} 960w, ${hoverThumbnail1280} 1280w`}
-                sizes="(max-width: 620px) 50vw, (max-width: 980px) 33vw, (max-width: 1680px) 25vw, 20vw"
+                src={hoverSource.src}
+                srcSet={hoverSource.srcSet}
+                sizes={hoverSource.sizes}
                 width="1600"
                 height="1200"
                 alt=""
                 decoding="async"
                 onLoad={() => setHoverReady(true)}
-                onError={(event) => {
-                  if (retryThumbnailOnce(event, hoverThumbnail640)) return
-                  setImageFallback(event, product.fallbackImage)
-                }}
+                onError={hoverLoad.retryOrFail}
               />
             ) : null}
           </span>

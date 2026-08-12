@@ -74,6 +74,57 @@ button.catalog-link {
   pointer-events: none;
 }
 
+.product-media__error {
+  position: absolute;
+  z-index: 4;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  background: var(--product-stage);
+  pointer-events: none;
+}
+
+.product-media__loading {
+  position: absolute;
+  z-index: 4;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  background: var(--product-stage);
+  pointer-events: none;
+}
+
+.product-media__loading svg {
+  width: 28px;
+  height: 28px;
+  animation: product-media-retry 900ms linear infinite;
+}
+
+.product-media__error svg {
+  width: 32px;
+  height: 32px;
+}
+
+@keyframes product-media-retry {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .product-media__loading svg {
+    animation: none;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .product-card:hover .product-media.is-hover-ready .product-media__error {
+    opacity: 0;
+  }
+}
+
 .favorite-button.is-active {
   color: var(--surface);
   background: var(--fg);
