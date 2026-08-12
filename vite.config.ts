@@ -5,7 +5,7 @@ export default defineConfig({
   // The SPA is served from the domain root while product pages use history
   // routes such as /product/:slug. Root-relative assets keep direct/deep-link
   // loads from incorrectly requesting /product/assets/*.
-  base: "/",
+  base: process.env.VITE_DEPLOY_BASE || "/",
   plugins: [react()],
   server: {
     proxy: {

@@ -4,6 +4,8 @@ import path from "node:path"
 
 const siteRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
 const allowedBrowserEnv = new Set([
+  // Vite's compile-time static hosting base path. It never carries endpoint or secret data.
+  "BASE_URL",
   "VITE_BOT_USERNAME",
   // Public same-origin path only. It must never contain a provider endpoint.
   "VITE_CRM_API_BASE_URL",
@@ -175,6 +177,7 @@ const allowedPublicEntries = new Set([
   ...allowedRootBinaryEntries,
   "brand",
   "catalog",
+  "404.html",
   "favicon.svg",
 ])
 for (const entry of publicEntries) {

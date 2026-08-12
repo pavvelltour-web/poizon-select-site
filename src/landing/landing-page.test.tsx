@@ -496,7 +496,10 @@ describe("LandingPage", () => {
 
     expect(document.querySelector(".hero img")).toHaveAttribute(
       "src",
-      "/storefront-media/approved/assets/blue-field-v2/nike-kd-18-hero-cutout-v2.png",
+      new URL(
+        "/storefront-media/approved/assets/blue-field-v2/nike-kd-18-hero-cutout-v2.png",
+        window.location.origin,
+      ).toString(),
     )
 
     document.querySelectorAll<HTMLImageElement>(".product-card__image").forEach((image) => {

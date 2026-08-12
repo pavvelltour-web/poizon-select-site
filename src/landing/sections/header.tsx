@@ -17,7 +17,7 @@ interface HeaderProps {
   onOpenProduct?: (product: CatalogProduct, trigger: HTMLElement) => void
 }
 
-const logoSrc = "/storefront-media/approved/assets/kicksbase-signal/kicksbase-logo.webp"
+const logoSrc = "storefront-media/approved/assets/kicksbase-signal/kicksbase-logo.webp"
 
 export function Header({
   cartCount,
@@ -281,7 +281,7 @@ export function Header({
           </button>
 
           <a className="brand" href="/" data-od-id="brand-link" aria-label="KICKSBASE - главная">
-            <img className="brand-mark" src={logoSrc} alt="" width="720" height="720" />
+            <img className="brand-mark" src={resolveAssetUrl(logoSrc)} alt="" width="720" height="720" />
             <span className="brand-copy">
               <span className="brand-name">KICKSBASE</span>
               <span className="brand-note">обувь и экипировка</span>

@@ -1,4 +1,6 @@
-const logoSrc = "/storefront-media/approved/assets/kicksbase-signal/kicksbase-logo.webp"
+import { resolveAssetUrl } from "../landing-data"
+
+const logoSrc = "storefront-media/approved/assets/kicksbase-signal/kicksbase-logo.webp"
 
 export function Footer() {
   return (
@@ -6,7 +8,7 @@ export function Footer() {
       <div className="footer-grid container">
         <div>
           <a className="brand" href="/" aria-label="KICKSBASE - главная">
-            <img className="brand-mark" src={logoSrc} alt="" width="720" height="720" />
+            <img className="brand-mark" src={resolveAssetUrl(logoSrc)} alt="" width="720" height="720" />
             <span className="brand-copy"><span className="brand-name">KICKSBASE</span></span>
           </a>
           <p className="footer-copy">Оригинальная экипировка для зала, тренировок и восстановления. На каждой странице показываем цену, размеры и срок поставки.</p>

@@ -39,10 +39,12 @@ import {
   resolveBotUsername,
 } from "./order-request"
 import {
+  appPath,
   findTaskMatches,
   getProductPath,
   isCategory,
   isSort,
+  readAppPathname,
   readUrlState,
 } from "./landing-data"
 import type {
@@ -827,8 +829,8 @@ export function useLandingStorefront(
   function closeProduct() {
     setSelectedSlug(null)
     setSelectedSizeState(null)
-    if (/^\/product\/[^/]+\/?$/u.test(window.location.pathname)) {
-      window.history.pushState(null, "", "/")
+    if (/^\/product\/[^/]+\/?$/u.test(readAppPathname())) {
+      window.history.pushState(null, "", appPath("/"))
       window.dispatchEvent(new PopStateEvent("popstate"))
     }
     queueMicrotask(() => productTriggerRef.current?.focus())
@@ -870,7 +872,7 @@ export function useLandingStorefront(
 
   function closeCart() {
     const routeState = readUrlState()
-    const productRoute = /^\/product\/[^/]+\/?$/u.test(window.location.pathname)
+    const productRoute = /^\/product\/[^/]+\/?$/u.test(readAppPathname())
     setCartOpen(false)
     setSelectedSizeState(null)
     setSelectedSlug(productRoute ? routeState.productSlug : null)

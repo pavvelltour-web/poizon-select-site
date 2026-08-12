@@ -204,7 +204,7 @@ export function CartDrawer({ storefront }: CartDrawerProps) {
                 <p id="payment-methods-title">Оплата на следующем шаге</p>
                 <div className="payment-method-list">
                   <span className="payment-method" aria-label="Система быстрых платежей">
-                    <span className="payment-mark payment-mark--sbp" aria-hidden="true"><img src="/storefront-media/approved/assets/brand/sbp-sign-official.png" alt="" /></span>
+                    <span className="payment-mark payment-mark--sbp" aria-hidden="true"><img src={resolveAssetUrl("storefront-media/approved/assets/brand/sbp-sign-official.png")} alt="" /></span>
                     <span>СБП</span>
                   </span>
                   <span className="payment-method" aria-label="Банковская карта">

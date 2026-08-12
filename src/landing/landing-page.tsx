@@ -15,6 +15,7 @@ import { ProductDetailPage } from "./sections/product-detail-page"
 import { PaymentDialog } from "./sections/payment-dialog"
 import { ProductSheet } from "./sections/product-sheet"
 import { useLandingStorefront } from "./use-landing-storefront"
+import { appPath, readAppPathname } from "./landing-data"
 
 interface LandingPageProps {
   configuredBotUsername?: string | null
@@ -31,7 +32,7 @@ type StaticRoute =
 export function LandingPage({ configuredBotUsername }: LandingPageProps) {
   const storefront = useLandingStorefront(configuredBotUsername)
   const [favoriteSlugs, setFavoriteSlugs] = useState<string[]>(loadFavoriteSlugs)
-  const rawPathname = typeof window === "undefined" ? "/" : window.location.pathname
+  const rawPathname = typeof window === "undefined" ? "/" : readAppPathname()
   const pathname = canonicalLegacyPath(rawPathname)
   const searchParams = readSearchParams()
   const routeName = pathname.replace(/^\/|\/$/g, "")
@@ -62,7 +63,7 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
   useEffect(() => {
     if (rawPathname === pathname) return
     const hash = pathname === "/catalog" ? "" : window.location.hash
-    window.history.replaceState(window.history.state, "", `${pathname}${window.location.search}${hash}`)
+    window.history.replaceState(window.history.state, "", appPath(`${pathname}${window.location.search}${hash}`))
   }, [pathname, rawPathname])
 
   useEffect(() => {
@@ -80,7 +81,7 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
   useEffect(() => {
     if (!legacyProductSlug || productRouteMatch) return
     const canonicalPath = `/product/${encodeURIComponent(legacyProductSlug)}`
-    window.history.replaceState(window.history.state, "", canonicalPath)
+    window.history.replaceState(window.history.state, "", appPath(canonicalPath))
   }, [legacyProductSlug, productRouteMatch !== null])
   const checkoutOutcome =
     pathname === "/checkout/success"

@@ -185,9 +185,22 @@ export function resolveAssetUrl(src: string): string {
   if (/^(?:https?:)?\/\//i.test(src) || /^(?:data|blob):/i.test(src)) return src
 
   const normalizedSrc = src.replace(/^\/+/, "")
-  if (typeof window === "undefined") return normalizedSrc
+  const assetPath = `${import.meta.env.BASE_URL}${normalizedSrc}`
+  if (import.meta.env.BASE_URL !== "/" || typeof window === "undefined") return assetPath
+  return new URL(assetPath, window.location.origin).toString()
+}
 
-  return new URL(`/${normalizedSrc}`, window.location.origin).toString()
+export function appPath(path: string): string {
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`
+  const base = import.meta.env.BASE_URL.replace(/\/$/u, "")
+  return `${base}${normalizedPath}` || "/"
+}
+
+export function readAppPathname(pathname?: string): string {
+  const currentPathname = pathname ?? (typeof window === "undefined" ? "/" : window.location.pathname)
+  const base = import.meta.env.BASE_URL.replace(/\/$/u, "")
+  if (!base || !currentPathname.startsWith(base)) return currentPathname
+  return currentPathname.slice(base.length) || "/"
 }
 
 export function setImageFallback(
@@ -364,7 +377,7 @@ export function getSizeRangeLabel(product: CatalogProduct): string {
 }
 
 export function getProductPath(product: CatalogProduct): string {
-  return `/product/${encodeURIComponent(product.slug)}`
+  return appPath(`/product/${encodeURIComponent(product.slug)}`)
 }
 
 function normalizedText(value: string): string {
@@ -517,7 +530,7 @@ export function readUrlState(): UrlState {
   const params = new URLSearchParams(window.location.search)
   const category = params.get("category")
   const sort = params.get("sort")
-  const routeProductMatch = window.location.pathname.match(/^\/product\/([^/]+)\/?$/u)
+  const routeProductMatch = readAppPathname().match(/^\/product\/([^/]+)\/?$/u)
   let routeProductSlug: string | null = null
   if (routeProductMatch?.[1]) {
     try {
