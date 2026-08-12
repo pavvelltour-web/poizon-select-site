@@ -6,7 +6,7 @@ const siteRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".."
 const distRoot = path.join(siteRoot, "dist")
 const expectedCatalogFiles = 100
 const expectedGalleryFiles = expectedCatalogFiles * 4
-const expectedThumbnailFiles = expectedCatalogFiles * 2 * 3
+const expectedThumbnailFiles = expectedCatalogFiles * 3 * 3
 
 function fail(message) {
   throw new Error(`Built-site verification failed: ${message}`)

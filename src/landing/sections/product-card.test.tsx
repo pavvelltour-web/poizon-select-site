@@ -78,6 +78,17 @@ describe("ProductCard hover media", () => {
     )
   })
 
+  it.each(["rocktape-kinesiology-tape-black", "theraband-resistance-band-set"])(
+    "ships a versioned logical photo two thumbnail for recovery accessory %s",
+    (slug) => {
+      const { container } = renderCard(slug)
+
+      fireEvent.focus(container.querySelector(".product-card__link")!)
+      const hover = container.querySelector<HTMLImageElement>(".product-pair img")
+      expect(hover?.src).toContain(`catalog/thumbs/${slug}-2-640.webp?v=`)
+    },
+  )
+
   it("drops responsive candidates before using the fallback after a primary or hover image error", () => {
     const { container, product } = renderCard("nike-sabrina-3")
     const primary = container.querySelector<HTMLImageElement>(".product-card__image")

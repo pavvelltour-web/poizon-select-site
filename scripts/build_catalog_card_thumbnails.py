@@ -15,14 +15,11 @@ OUTPUT_DIR = ROOT / "public" / "catalog" / "thumbs"
 RUNTIME_MANIFEST = ROOT / "src" / "catalog" / "card-thumbnail-versions.ts"
 WIDTHS = (640, 960, 1280)
 ASPECT_RATIO = 4 / 3
+CARD_POSITIONS = (1, 2, 3)
 
 
 def sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
-
-
-def hover_position(media_profile: str) -> int:
-    return 3 if any(token in media_profile for token in ("footwear", "slide", "recovery")) else 2
 
 
 def write_runtime_manifest(entries: list[dict[str, object]]) -> None:
@@ -63,9 +60,11 @@ def main() -> None:
 
     for product in manifest["products"]:
         slug = product["slug"]
-        positions = (1, hover_position(product["media_profile"]))
         frames = {frame["position"]: frame for frame in product["frames"]}
-        for position in positions:
+        # ProductCard uses frame 3 for footwear and frame 2 for other product
+        # kinds. The unified manifest deliberately contains only media metadata,
+        # so emit both hover candidates rather than infer a product kind here.
+        for position in CARD_POSITIONS:
             frame = frames[position]
             source = ROOT / frame["file"]
             with Image.open(source) as image:

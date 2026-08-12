@@ -18,10 +18,6 @@ function hash(buffer) {
   return createHash("sha256").update(buffer).digest("hex")
 }
 
-function hoverPosition(mediaProfile) {
-  return /footwear|slide|recovery/u.test(mediaProfile) ? 3 : 2
-}
-
 function readUint24LE(buffer, offset) {
   return buffer[offset] | (buffer[offset + 1] << 8) | (buffer[offset + 2] << 16)
 }
@@ -76,7 +72,10 @@ if (
 
 const expected = []
 for (const product of unified.products) {
-  for (const position of [1, hoverPosition(product.media_profile)]) {
+  // The card renders frame 3 for footwear and frame 2 for every other kind.
+  // Unified media intentionally has no product-kind field, so the responsive
+  // pack must include both hover candidates for every product.
+  for (const position of [1, 2, 3]) {
     const frame = product.frames.find((candidate) => candidate.position === position)
     if (!frame) fail(`${product.slug} is missing unified frame ${position}`)
     for (const width of widths) {
