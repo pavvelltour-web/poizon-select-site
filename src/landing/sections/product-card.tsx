@@ -1,5 +1,5 @@
 import { Heart } from "lucide-react"
-import { useState, type MouseEvent, type PointerEvent } from "react"
+import { useEffect, useRef, useState, type MouseEvent, type PointerEvent, type SyntheticEvent } from "react"
 
 import type { CatalogProduct } from "../../catalog/catalog"
 import { getCardThumbnailUrl } from "../../catalog/card-thumbnail-versions"
@@ -31,6 +31,20 @@ function fallbackSizes(kind: CatalogProduct["kind"]): readonly string[] {
   return ["36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46"]
 }
 
+function retryThumbnailOnce(
+  event: SyntheticEvent<HTMLImageElement>,
+  thumbnailUrl: string,
+): boolean {
+  const image = event.currentTarget
+  if (image.dataset.thumbnailRetry === "1") return false
+
+  image.dataset.thumbnailRetry = "1"
+  image.removeAttribute("srcset")
+  image.removeAttribute("sizes")
+  image.src = `${thumbnailUrl}${thumbnailUrl.includes("?") ? "&" : "?"}retry=1`
+  return true
+}
+
 export function ProductCard({
   index,
   product,
@@ -45,6 +59,7 @@ export function ProductCard({
   const [mediaReady, setMediaReady] = useState(false)
   const [hoverRequested, setHoverRequested] = useState(false)
   const [hoverReady, setHoverReady] = useState(false)
+  const hoverImageRef = useRef<HTMLImageElement | null>(null)
   const displayPrice = price.value
   const primaryImage = resolveAssetUrl(product.image)
   // The third frame is the canonical front three-quarter pair view for footwear.
@@ -87,6 +102,13 @@ export function ProductCard({
     if (event.pointerType === "mouse" || event.pointerType === "pen") requestHover()
   }
 
+  useEffect(() => {
+    const hoverElement = hoverImageRef.current
+    if (hoverRequested && hoverElement?.complete && hoverElement.naturalWidth > 0) {
+      setHoverReady(true)
+    }
+  }, [hoverRequested])
+
   return (
     <article
       className="product-card product-card--normalized"
@@ -118,6 +140,7 @@ export function ProductCard({
             alt=""
             onLoad={() => setMediaReady(true)}
             onError={(event) => {
+              if (retryThumbnailOnce(event, primaryThumbnail640)) return
               setImageFallback(event, product.fallbackImage)
               setMediaReady(true)
             }}
@@ -125,6 +148,7 @@ export function ProductCard({
           <span className="product-pair" aria-hidden="true" data-hover-frame={hoverImageIndex + 1}>
             {hoverRequested ? (
               <img
+                ref={hoverImageRef}
                 src={hoverThumbnail640}
                 srcSet={`${hoverThumbnail640} 640w, ${hoverThumbnail960} 960w, ${hoverThumbnail1280} 1280w`}
                 sizes="(max-width: 620px) 50vw, (max-width: 980px) 33vw, (max-width: 1680px) 25vw, 20vw"
@@ -133,7 +157,10 @@ export function ProductCard({
                 alt=""
                 decoding="async"
                 onLoad={() => setHoverReady(true)}
-                onError={(event) => setImageFallback(event, product.fallbackImage)}
+                onError={(event) => {
+                  if (retryThumbnailOnce(event, hoverThumbnail640)) return
+                  setImageFallback(event, product.fallbackImage)
+                }}
               />
             ) : null}
           </span>

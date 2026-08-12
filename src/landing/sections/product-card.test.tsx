@@ -89,7 +89,21 @@ describe("ProductCard hover media", () => {
     },
   )
 
-  it("drops responsive candidates before using the fallback after a primary or hover image error", () => {
+  it("waits for a loaded hover thumbnail before allowing the visual swap", () => {
+    const { container } = renderCard("nike-sabrina-3")
+    const media = container.querySelector(".product-media")
+    const link = container.querySelector(".product-card__link")!
+
+    fireEvent.focus(link)
+    const hover = container.querySelector<HTMLImageElement>(".product-pair img")
+    if (!hover) throw new Error("Missing hover image")
+
+    expect(media).not.toHaveClass("is-hover-ready")
+    fireEvent.load(hover)
+    expect(media).toHaveClass("is-hover-ready")
+  })
+
+  it("retries a failed thumbnail once before using the fallback for primary and hover media", () => {
     const { container, product } = renderCard("nike-sabrina-3")
     const primary = container.querySelector<HTMLImageElement>(".product-card__image")
     if (!primary) throw new Error("Missing primary image")
@@ -97,6 +111,10 @@ describe("ProductCard hover media", () => {
     fireEvent.error(primary)
     expect(primary).not.toHaveAttribute("srcset")
     expect(primary).not.toHaveAttribute("sizes")
+    expect(primary.src).toContain("catalog/thumbs/nike-sabrina-3-1-640.webp?v=")
+    expect(primary.src).toContain("retry=1")
+
+    fireEvent.error(primary)
     expect(primary.src).toContain(product.fallbackImage)
 
     fireEvent.focus(container.querySelector(".product-card__link")!)
@@ -106,6 +124,10 @@ describe("ProductCard hover media", () => {
     fireEvent.error(hover)
     expect(hover).not.toHaveAttribute("srcset")
     expect(hover).not.toHaveAttribute("sizes")
+    expect(hover.src).toContain("catalog/thumbs/nike-sabrina-3-3-640.webp?v=")
+    expect(hover.src).toContain("retry=1")
+
+    fireEvent.error(hover)
     expect(hover.src).toContain(product.fallbackImage)
   })
 })
