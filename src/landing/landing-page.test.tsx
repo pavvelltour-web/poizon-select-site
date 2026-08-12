@@ -570,6 +570,7 @@ describe("LandingPage", () => {
                 color: "Grey",
                 in_stock: false,
                 description: "Серая версия модели.",
+                size_chart: "https://oversea-shanghai-enhance.oss-cn-shanghai.aliyuncs.com/poizon/air-max-95-size-chart.png",
                 kind: "footwear",
                 images: ["https://cdn.example.test/air-max-95-grey.webp"],
                 observed_at: observedAt,
@@ -607,10 +608,15 @@ describe("LandingPage", () => {
     expect(screen.getByText("Размерная сетка: EU 40–46")).toBeInTheDocument()
     expect(screen.getByText("Нет в наличии")).toBeInTheDocument()
     expect(screen.getByRole("option", { name: /42 \(RU 41\).*20 900 ₽/ })).toBeInTheDocument()
-    expect(screen.getByRole("link", { name: "Размерная сетка" })).toHaveAttribute(
-      "href",
-      "https://cdn.example.test/air-max-95-size-chart.webp",
-    )
+    const sizeChartLinks = screen.getAllByRole("link", { name: "Размерная сетка" })
+    expect(sizeChartLinks.some(
+      (link) => link.getAttribute("href") === "https://cdn.example.test/air-max-95-size-chart.webp",
+    )).toBe(true)
+    expect(sizeChartLinks.some(
+      (link) => link.getAttribute("href") === "https://oversea-shanghai-enhance.oss-cn-shanghai.aliyuncs.com/poizon/air-max-95-size-chart.png",
+    )).toBe(true)
+    expect(screen.queryByText("https://oversea-shanghai-enhance.oss-cn-shanghai.aliyuncs.com/poizon/air-max-95-size-chart.png"))
+      .toBeNull()
     await user.type(search, " ")
     await waitFor(() => {
       const refreshedCard = screen.getAllByTestId("live-search-result")[0]!

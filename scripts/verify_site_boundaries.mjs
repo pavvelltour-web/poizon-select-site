@@ -123,6 +123,28 @@ for (const required of [
   const target = required === "USER nginx" ? dockerfile : nginx
   if (!target.includes(required)) fail(`deployment policy is missing ${required}`)
 }
+const csp = nginx.match(/add_header Content-Security-Policy "([^"]+)" always;/)?.[1]
+const imageDirective = csp?.match(/(?:^|;\s*)img-src\s+([^;]+)/)?.[1]
+if (!imageDirective) fail("nginx must define an img-src directive")
+const imageSources = new Set(imageDirective.trim().split(/\s+/))
+const expectedImageSources = new Set([
+  "'self'",
+  "data:",
+  "https://cdn.poizon.com",
+  "https://cdn-img.thepoizon.ru",
+  "https://oversea-shanghai-enhance.oss-cn-shanghai.aliyuncs.com",
+])
+for (const trustedSource of expectedImageSources) {
+  if (!imageSources.has(trustedSource)) {
+    fail(`img-src must permit trusted live image host ${trustedSource}`)
+  }
+}
+if (
+  imageSources.size !== expectedImageSources.size ||
+  [...imageSources].some((source) => !expectedImageSources.has(source))
+) {
+  fail("img-src must contain only the explicit trusted image hosts")
+}
 for (const route of ["location = /catalog {", "location = /catalog/ {"]) {
   if (!nginx.includes(route)) fail(`nginx must serve the SPA route with ${route}`)
 }

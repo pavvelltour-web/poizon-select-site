@@ -98,4 +98,36 @@ describe("standalone site runtime boundary", () => {
     expect(result.status).not.toBe(0)
     expect(result.stderr).toContain("verify:release-rights")
   })
+
+  it("requires explicit trusted live-image CSP hosts", () => {
+    const fixture = makeFixture()
+    const nginxPath = path.join(fixture, "nginx.conf")
+    const nginx = readFileSync(nginxPath, "utf8")
+    writeFileSync(
+      nginxPath,
+      nginx.replace(" https://cdn.poizon.com", ""),
+      "utf8",
+    )
+
+    const result = runVerifier(fixture)
+
+    expect(result.status).not.toBe(0)
+    expect(result.stderr).toContain("trusted live image host https://cdn.poizon.com")
+  })
+
+  it("rejects every additional live-image CSP origin", () => {
+    const fixture = makeFixture()
+    const nginxPath = path.join(fixture, "nginx.conf")
+    const nginx = readFileSync(nginxPath, "utf8")
+    writeFileSync(
+      nginxPath,
+      nginx.replace("data: https://cdn.poizon.com", "data: https://evil.example https://cdn.poizon.com"),
+      "utf8",
+    )
+
+    const result = runVerifier(fixture)
+
+    expect(result.status).not.toBe(0)
+    expect(result.stderr).toContain("only the explicit trusted image hosts")
+  })
 })

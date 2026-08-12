@@ -95,6 +95,7 @@ describe("checkout catalogue v10", () => {
           in_stock: true,
           description: "Белые кроссовки на каждый день.",
           size_context: "EU",
+          size_chart: "https://oversea-shanghai-enhance.oss-cn-shanghai.aliyuncs.com/poizon/af1-size-chart.png",
           kind: "footwear",
           images: ["https://cdn.poizon.example/af1.webp"],
           observed_at: observedAt,
@@ -119,6 +120,8 @@ describe("checkout catalogue v10", () => {
       productRef: "af1-white-quote",
       article: "DV0788-104",
       description: "Белые кроссовки на каждый день.",
+      sizeChart: null,
+      sizeImage: "https://oversea-shanghai-enhance.oss-cn-shanghai.aliyuncs.com/poizon/af1-size-chart.png",
       offers: [{ offerRef: "af1-white-42", size: "42", sizeRu: "41", priceCny: 699, totalRub: 17700 }],
     })
     expect(parsed?.fallback).toEqual([])

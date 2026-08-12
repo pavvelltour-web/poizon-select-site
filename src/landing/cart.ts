@@ -298,6 +298,11 @@ function parseCatalogSearchResult(value: unknown): CatalogSearchResult | null {
   const productRef = optionalString(source.product_ref)
   const name = optionalString(source.name)
   const kind = optionalString(source.kind)
+  // Batch Sync may place a chart image in `size_chart` instead of
+  // `size_image`. Treat it as a media URL only after the same HTTPS safety
+  // check used for the product image; otherwise retain it as readable chart
+  // text. This prevents a long raw URL from being rendered in the card.
+  const sizeChartImage = safeHttpsUrl(source.size_chart)
   const observedAt = optionalString(source.observed_at)
   const expiresAt = optionalString(source.expires_at)
   const observedAtMs = parseQuoteTimestamp(source.observed_at)
@@ -365,8 +370,8 @@ function parseCatalogSearchResult(value: unknown): CatalogSearchResult | null {
     color: optionalString(source.color),
     inStock: typeof source.in_stock === "boolean" ? source.in_stock : null,
     sizeContext: optionalString(source.size_context),
-    sizeChart: optionalString(source.size_chart),
-    sizeImage: safeHttpsUrl(source.size_image),
+    sizeChart: sizeChartImage ? null : optionalString(source.size_chart),
+    sizeImage: safeHttpsUrl(source.size_image) ?? sizeChartImage,
     kind: kind as CatalogProduct["kind"],
     description: optionalString(source.description),
     images,
