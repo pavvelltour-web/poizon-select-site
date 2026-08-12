@@ -256,6 +256,9 @@ const auditedConfigFiles = [
 
 for (const file of browserFiles) {
   const source = await readFile(file, "utf8")
+  if (source.includes("storefront-media/approved/assets/")) {
+    fail(`${path.relative(siteRoot, file)} references a retired unpublished storefront asset`)
+  }
   if (/from\s+["'][^"']*crm/i.test(source)) {
     fail(`${path.relative(siteRoot, file)} imports CRM code`)
   }

@@ -1,6 +1,6 @@
 import { resolveAssetUrl } from "../landing-data"
 
-const logoSrc = "storefront-media/approved/assets/kicksbase-signal/kicksbase-logo.webp"
+const logoSrc = "brand/kicksbase-logo.webp"
 
 export function Footer() {
   return (

@@ -17,7 +17,7 @@ interface HeaderProps {
   onOpenProduct?: (product: CatalogProduct, trigger: HTMLElement) => void
 }
 
-const logoSrc = "storefront-media/approved/assets/kicksbase-signal/kicksbase-logo.webp"
+const logoSrc = "brand/kicksbase-logo.webp"
 
 export function Header({
   cartCount,

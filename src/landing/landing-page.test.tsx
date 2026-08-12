@@ -491,13 +491,13 @@ describe("LandingPage", () => {
     expect(document.querySelectorAll(".sheet-gallery-thumb")).toHaveLength(5)
   })
 
-  it("uses the approved hero asset and lazily loads catalog photography", () => {
+  it("uses the published hero asset and lazily loads catalog photography", () => {
     render(<LandingPage configuredBotUsername={null} />)
 
     expect(document.querySelector(".hero img")).toHaveAttribute(
       "src",
       new URL(
-        "/storefront-media/approved/assets/blue-field-v2/nike-kd-18-hero-cutout-v2.png",
+        "/brand/kicksbase-hero.webp",
         window.location.origin,
       ).toString(),
     )

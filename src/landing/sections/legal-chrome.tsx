@@ -6,7 +6,7 @@ interface LegalHeaderProps {
   openCart: () => void
 }
 
-const logoSrc = "storefront-media/approved/assets/kicksbase-signal/kicksbase-logo.webp"
+const logoSrc = "brand/kicksbase-logo.webp"
 
 export function LegalHeader({ cartCount, openCart }: LegalHeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false)
