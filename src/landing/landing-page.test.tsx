@@ -58,20 +58,18 @@ function readyGtCutSearchPayload() {
     ...payload,
     results: [{
       ...payload.results[0],
-      provider_product_id: "poizon-gt-cut-academy",
-      provider_url: "https://www.poizon.com/product/gt-cut-academy",
+      product_ref: "gt-cut-academy",
       name: "G.T. Cut Academy",
       model: "G.T. Cut Academy",
       article: "GT-CUT-ACADEMY",
       offers: [{
-        sku_id: "gt-cut-44",
+        offer_ref: "gt-cut-academy-44",
         size: "44",
         ru: "43",
         us: "10",
         cn: "280",
-        currency: "CNY",
         price_cny: 899,
-        quote_rub: 24500,
+        total_rub: 24500,
       }],
     }],
   }
@@ -85,9 +83,7 @@ function readySearchPayload(normalizedQuery = "Nike Air Force 1") {
     normalized_query: normalizedQuery,
     results: [
       {
-        source: "poizon",
-        provider_product_id: "poizon-air-force-1-07-white",
-        provider_url: "https://www.poizon.com/product/dv0788-104",
+        product_ref: "air-force-1-07-white",
         brand: "Nike",
         name: "Air Force 1 '07 White",
         article: "DV0788-104",
@@ -97,18 +93,20 @@ function readySearchPayload(normalizedQuery = "Nike Air Force 1") {
         expires_at: expiresAt,
         offers: [
           {
-            sku_id: "sku-42",
+            offer_ref: "air-force-42",
             size: "42",
-            currency: "CNY",
+            eu: "42",
+            available: true,
             price_cny: 699,
-            quote_rub: 16700,
+            total_rub: 16700,
           },
           {
-            sku_id: "sku-43",
+            offer_ref: "air-force-43",
             size: "43",
-            currency: "CNY",
+            eu: "43",
+            available: true,
             price_cny: 729,
-            quote_rub: 17300,
+            total_rub: 17300,
           },
         ],
       },
@@ -510,6 +508,123 @@ describe("LandingPage", () => {
         { query: "Nike DV0788-104 42 до 18000", limit: 4 },
       ]),
     )
+  })
+
+  it("uses public AI clarification choices and renders several live cards without supplier internals", async () => {
+    const user = userEvent.setup()
+    const observedAt = new Date(Date.now() - 60_000).toISOString()
+    const expiresAt = new Date(Date.now() + 14 * 60_000).toISOString()
+    let airMax95Searches = 0
+    const fetchMock = vi.fn(async (url: string, options?: RequestInit) => {
+      if (url.endsWith("/api/catalog/search") && options?.method === "POST") {
+        const query = JSON.parse(String(options.body)).query as string
+        if (query === "air max") {
+          return {
+            ok: true,
+            json: async () => ({
+              status: "clarification",
+              normalized_query: "Nike Air Max",
+              clarification: "Какая модель Air Max нужна?",
+              clarification_options: [{ label: "Air Max 95", query: "Nike Air Max 95" }],
+              results: [],
+            }),
+          }
+        }
+        const isRefresh = query === "Nike Air Max 95" && airMax95Searches++ > 0
+        return {
+          ok: true,
+          json: async () => ({
+            status: "ready",
+            normalized_query: query,
+            results: [
+              {
+                product_ref: "air-max-95-black",
+                brand: "Nike",
+                name: "Air Max 95",
+                article: "HM8755-001",
+                color: "Black",
+                in_stock: true,
+                description: "Чёрная версия с видимым амортизирующим блоком.",
+                size_context: "EU",
+                size_chart: "EU 40–46",
+                size_image: "https://cdn.example.test/air-max-95-size-chart.webp",
+                kind: "footwear",
+                images: ["https://cdn.example.test/air-max-95-black.webp"],
+                observed_at: observedAt,
+                expires_at: expiresAt,
+                offers: [{
+                  offer_ref: isRefresh ? "air-max-95-black-42-refreshed" : "air-max-95-black-42",
+                  size: "42",
+                  eu: "42",
+                  ru: "41",
+                  available: true,
+                  price_cny: isRefresh ? 999 : 899,
+                  quote_rub: 19_900,
+                  total_rub: isRefresh ? 22_900 : 20_900,
+                }],
+              },
+              {
+                product_ref: "air-max-95-grey",
+                brand: "Nike",
+                name: "Air Max 95",
+                color: "Grey",
+                in_stock: false,
+                description: "Серая версия модели.",
+                kind: "footwear",
+                images: ["https://cdn.example.test/air-max-95-grey.webp"],
+                observed_at: observedAt,
+                expires_at: expiresAt,
+                offers: [{
+                  offer_ref: "air-max-95-grey-43",
+                  size: "43",
+                  eu: "43",
+                  price_cny: 929,
+                  quote_rub: 20_500,
+                  total_rub: 21_500,
+                }],
+              },
+            ],
+          }),
+        }
+      }
+      return { ok: true, json: async () => checkoutCatalogPayload() }
+    })
+    vi.stubGlobal("fetch", fetchMock)
+    window.history.replaceState(null, "", "/catalog")
+    render(<LandingPage configuredBotUsername="@SelectBuyerBot" />)
+
+    const search = screen.getByRole("searchbox", { name: "Поиск по товарам" })
+    await user.type(search, "air max")
+    const clarification = await screen.findByRole("button", { name: "Air Max 95" })
+    await user.click(clarification)
+
+    await waitFor(() => {
+      expect(screen.getAllByTestId("live-search-result")).toHaveLength(2)
+    })
+    expect(screen.getByText("Чёрная версия с видимым амортизирующим блоком.")).toBeInTheDocument()
+    expect(screen.getByText("В наличии")).toBeInTheDocument()
+    expect(screen.getByText("Размеры: EU")).toBeInTheDocument()
+    expect(screen.getByText("Размерная сетка: EU 40–46")).toBeInTheDocument()
+    expect(screen.getByText("Нет в наличии")).toBeInTheDocument()
+    expect(screen.getByRole("option", { name: /42 \(RU 41\).*20 900 ₽/ })).toBeInTheDocument()
+    expect(screen.getByRole("link", { name: "Размерная сетка" })).toHaveAttribute(
+      "href",
+      "https://cdn.example.test/air-max-95-size-chart.webp",
+    )
+    await user.type(search, " ")
+    await waitFor(() => {
+      const refreshedCard = screen.getAllByTestId("live-search-result")[0]!
+      expect(within(refreshedCard).getByRole("combobox", { name: "Размер и предложение" }))
+        .toHaveValue("air-max-95-black-42-refreshed")
+      expect(within(refreshedCard).getByRole("option", { name: /42 \(RU 41\).*22 900 ₽/ }))
+        .toBeInTheDocument()
+    })
+    expect(screen.queryByRole("link", { name: /Карточка Poizon/i })).toBeNull()
+    expect(fetchMock.mock.calls.map(([, options]) => JSON.parse(String(options?.body || "{}"))))
+      .toEqual(expect.arrayContaining([
+        { query: "air max", limit: 4 },
+        { query: "Nike Air Max 95", limit: 4 },
+      ]))
   })
 
   it("does not look up a provider when a customer opens a published product card", async () => {

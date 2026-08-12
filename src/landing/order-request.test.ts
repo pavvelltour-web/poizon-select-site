@@ -43,23 +43,25 @@ describe("Telegram order handoff", () => {
     expect(request).not.toMatch(/[<>]/)
   })
 
-  it("keeps the live article and official provider URL in the Telegram handoff", () => {
+  it("keeps the live article, colour and selected quote without supplier internals", () => {
     const request = buildLiveOrderRequest({
       brand: "Nike",
       name: "Air Force 1 '07 White",
       article: "DV0788-104",
-      providerUrl: "https://www.poizon.com/product/dv0788-104",
+      color: "White",
       expiresAt: "2026-08-01T10:15:00Z",
     }, {
-      skuId: "sku-42",
       size: "42",
+      sizeEu: "42",
+      sizeRu: "41",
       priceCny: 699,
-      quoteRub: 16_700,
+      totalRub: 17_700,
     })
 
     expect(request).toBe(
-      "Nike Air Force 1 '07 White\nАртикул: DV0788-104\nPoizon: https://www.poizon.com/product/dv0788-104\nРазмер: 42\nSKU Poizon: sku-42\nЦена Poizon: ¥699\nКотировка: 16700 ₽\nДействует до: 2026-08-01T10:15:00Z",
+      "Nike Air Force 1 '07 White\nАртикул: DV0788-104\nЦвет: White\nРазмер: 42 (RU 41)\nЦена: ¥699\nИтоговая цена: 17700 ₽\nДействует до: 2026-08-01T10:15:00Z",
     )
+    expect(request).not.toMatch(/Poizon|SKU|https:/)
   })
 
   it("keeps all 100 catalog handoffs unique, one-line and bot-ready", () => {

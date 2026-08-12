@@ -3,7 +3,6 @@ import {
   BadgeCheck,
   ChevronDown,
   Copy,
-  ExternalLink,
   MoveRight,
   RotateCcw,
   Send,
@@ -130,6 +129,7 @@ export function CatalogSection({
             state={storefront.catalogSearch}
             botUrl={storefront.botUrl}
             botUsername={storefront.botUsername}
+            onChooseClarification={storefront.setSearchValue}
             className="catalog-live-search"
           />
         ) : null}
@@ -241,6 +241,7 @@ function TaskFinder({ storefront }: CatalogSectionProps) {
                 state={storefront.taskSearch}
                 botUrl={storefront.botUrl}
                 botUsername={storefront.botUsername}
+                onChooseClarification={storefront.setTaskInput}
                 className="task-finder__results"
               />
             ) : null}
@@ -255,10 +256,17 @@ interface SearchResultsProps {
   state: CatalogSearchState
   botUrl: string | null
   botUsername: string | null
+  onChooseClarification: (query: string) => void
   className: string
 }
 
-function SearchResults({ state, botUrl, botUsername, className }: SearchResultsProps) {
+function SearchResults({
+  state,
+  botUrl,
+  botUsername,
+  onChooseClarification,
+  className,
+}: SearchResultsProps) {
   if (state.status === "idle") return null
 
   const response = state.response
@@ -296,12 +304,29 @@ function SearchResults({ state, botUrl, botUsername, className }: SearchResultsP
         <div className="live-search__results" aria-live="polite">
           {liveResults.map((result) => (
             <LiveSearchResultCard
-              key={result.providerProductId}
+              key={result.productRef}
               result={result}
               botUrl={botUrl}
               botUsername={botUsername}
             />
           ))}
+        </div>
+      ) : null}
+
+      {response?.status === "clarification" && response.clarificationOptions.length > 0 ? (
+        <div className="live-search__fallback" aria-label="Уточнить запрос">
+          <div>
+            {response.clarificationOptions.map((option) => (
+              <button
+                className="button button--quiet"
+                key={option.query}
+                type="button"
+                onClick={() => onChooseClarification(option.query)}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
         </div>
       ) : null}
 
@@ -339,13 +364,23 @@ function LiveSearchResultCard({
   botUsername: string | null
 }) {
   const [copyState, setCopyState] = useState<"idle" | "copied" | "failed">("idle")
-  const [selectedSkuId, setSelectedSkuId] = useState(result.offers[0]?.skuId ?? "")
+  const [selectedOfferRef, setSelectedOfferRef] = useState(result.offers[0]?.offerRef ?? "")
   const title = [result.brand, result.name].filter(Boolean).join(" ")
-  const sizes = [...new Set(result.offers.map((offer) => offer.size))]
-  const selectedOffer = result.offers.filter(function pickOffer(offer) { return offer.skuId === selectedSkuId })[0]
+  const sizes = [...new Set(result.offers.map((offer) => offer.sizeEu ?? offer.size))]
+  // A fresh result can retain the card's product_ref while its source offers
+  // are replaced. Fall back during render instead of resetting state in an
+  // effect, so the select and handoff never point at a disappeared offer.
+  const selectedOffer = result.offers.find(
+    (offer) => offer.offerRef === selectedOfferRef,
+  ) ?? result.offers[0]
   const lowestOffer = result.offers.reduce((lowest, offer) =>
-    offer.quoteRub < lowest.quoteRub ? offer : lowest,
+    offer.totalRub < lowest.totalRub ? offer : lowest,
   )
+  const availability = result.inStock === true
+    ? "В наличии"
+    : result.inStock === false
+      ? "Нет в наличии"
+      : "Наличие уточняется"
 
   const copyRequest = async () => {
     if (!selectedOffer) return
@@ -367,38 +402,55 @@ function LiveSearchResultCard({
       <div className="live-search-card__content">
         <p className="live-search-card__source">
           <BadgeCheck aria-hidden="true" size={16} />
-          Подтверждённая карточка Poizon
+          Актуальная карточка по запросу
         </p>
         <h3>{title}</h3>
         {result.article ? <p className="live-search-card__article">Артикул: {result.article}</p> : null}
+        {result.color ? <p className="live-search-card__article">Цвет: {result.color}</p> : null}
+        {result.description ? <p className="live-search-card__article">{result.description}</p> : null}
         <p className="live-search-card__sizes">
           Проверенные размеры: {sizes.join(", ")}
         </p>
+        <p className="live-search-card__sizes">{availability}</p>
+        {result.sizeContext ? (
+          <p className="live-search-card__sizes">
+            Размеры: {result.sizeContext}
+          </p>
+        ) : null}
+        {result.sizeChart ? (
+          <p className="live-search-card__sizes">Размерная сетка: {result.sizeChart}</p>
+        ) : null}
         <p className="live-search-card__price">
           <span>от</span>
-          <strong>{formatRub(lowestOffer.quoteRub)}</strong>
+          <strong>{formatRub(lowestOffer.totalRub)}</strong>
         </p>
         <p className="live-search-card__provider-price">
           Официальная цена: ¥{new Intl.NumberFormat("zh-CN", { maximumFractionDigits: 2 }).format(lowestOffer.priceCny)}
         </p>
         <label className="live-search-card__offer">
           <span>Размер и предложение</span>
-          <select value={selectedSkuId} onChange={(event) => setSelectedSkuId(event.target.value)}>
+          <select
+            value={selectedOffer?.offerRef ?? ""}
+            onChange={(event) => setSelectedOfferRef(event.target.value)}
+          >
             {result.offers.map((offer) => (
-              <option key={offer.skuId} value={offer.skuId}>{offer.size} — {formatRub(offer.quoteRub)}</option>
+              <option key={offer.offerRef} value={offer.offerRef}>
+                {offer.sizeEu ?? offer.size}{offer.sizeRu ? ` (RU ${offer.sizeRu})` : ""} — {formatRub(offer.totalRub)}
+              </option>
             ))}
           </select>
         </label>
         <div className="live-search-card__actions">
-          <a
-            className="button button--quiet"
-            href={result.providerUrl}
-            target="_blank"
-            rel="noreferrer"
-          >
-            Карточка Poizon
-            <ExternalLink aria-hidden="true" size={16} />
-          </a>
+          {result.sizeImage ? (
+            <a
+              className="button button--quiet"
+              href={result.sizeImage}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Размерная сетка
+            </a>
+          ) : null}
           <button type="button" className="button button--quiet" onClick={() => void copyRequest()}>
             <Copy aria-hidden="true" size={16} />
             {copyState === "copied" ? "Запрос скопирован" : "Скопировать запрос"}
@@ -417,7 +469,7 @@ function LiveSearchResultCard({
           ) : null}
         </div>
         <p className="sr-only" aria-live="polite">
-          {copyState === "copied" ? "Запрос с артикулом и ссылкой Poizon скопирован" : ""}
+          {copyState === "copied" ? "Запрос с выбранным размером скопирован" : ""}
         </p>
       </div>
     </article>

@@ -65,13 +65,19 @@ export type PublishedCatalogMap = Record<string, PublishedCatalogItem>
 export type CatalogSearchStatus = "catalog" | "ready" | "clarification" | "unavailable"
 
 export interface CatalogSearchOffer {
-  skuId: string
+  // Browser-only key. Supplier SKU IDs stay on the server because a live
+  // search quote does not grant checkout authority.
+  offerRef: string
   size: string
+  sizeEu: string | null
   sizeRu: string | null
   sizeUs: string | null
   sizeCn: string | null
+  available: boolean | null
   priceCny: number
-  quoteRub: number
+  // Final amount for this exact size. It includes the fixed RF delivery and
+  // is the only live RUB amount the storefront may display to a customer.
+  totalRub: number
 }
 
 export interface ProductSizeOffer {
@@ -87,14 +93,20 @@ export interface ProductSizeOffer {
 }
 
 export interface CatalogSearchResult {
-  source: "poizon" | "dewu"
-  providerProductId: string
-  providerUrl: string
+  // Opaque public API reference. It lets React key a result without exposing
+  // a supplier product ID or URL.
+  productRef: string
   brand: string | null
   name: string
   model: string
   article: string | null
+  color: string | null
+  inStock: boolean | null
+  sizeContext: string | null
+  sizeChart: string | null
+  sizeImage: string | null
   kind: CatalogProduct["kind"]
+  description: string | null
   images: readonly string[]
   observedAt: string
   expiresAt: string
@@ -111,10 +123,16 @@ export interface CatalogSearchFallback {
   availability: "unverified"
 }
 
+export interface CatalogSearchClarificationOption {
+  label: string
+  query: string
+}
+
 export interface CatalogSearchResponse {
   status: CatalogSearchStatus
   normalizedQuery: string
   clarification: string | null
+  clarificationOptions: readonly CatalogSearchClarificationOption[]
   results: readonly CatalogSearchResult[]
   fallback: readonly CatalogSearchFallback[]
 }
@@ -241,16 +259,7 @@ function safeHttpsUrl(value: unknown): string | null {
   }
 }
 
-const officialProviderHosts = new Set(["poizon.com", "www.poizon.com", "dewu.com", "www.dewu.com"])
 const quoteClockSkewMs = 5 * 60 * 1000
-
-function safeProviderUrl(value: unknown): string | null {
-  const url = safeHttpsUrl(value)
-  if (!url) return null
-
-  const parsed = new URL(url)
-  return officialProviderHosts.has(parsed.hostname.toLowerCase()) ? parsed.toString() : null
-}
 
 function parseQuoteTimestamp(value: unknown): number | null {
   const timestamp = optionalString(value)
@@ -286,8 +295,7 @@ function safeCatalogNavigationUrl(value: unknown): string | null {
 function parseCatalogSearchResult(value: unknown): CatalogSearchResult | null {
   if (!value || typeof value !== "object") return null
   const source = value as Record<string, unknown>
-  const providerProductId = optionalString(source.provider_product_id)
-  const providerUrl = safeProviderUrl(source.provider_url)
+  const productRef = optionalString(source.product_ref)
   const name = optionalString(source.name)
   const kind = optionalString(source.kind)
   const observedAt = optionalString(source.observed_at)
@@ -305,35 +313,34 @@ function parseCatalogSearchResult(value: unknown): CatalogSearchResult | null {
     ? source.offers.flatMap((rawOffer): CatalogSearchOffer[] => {
       if (!rawOffer || typeof rawOffer !== "object") return []
       const offer = rawOffer as Record<string, unknown>
-      const skuId = optionalString(offer.sku_id)
       const size = optionalString(offer.size) ?? optionalString(offer.eu)
-      const quoteRub = finitePositiveNumber(offer.quote_rub)
+      const offerRef = optionalString(offer.offer_ref)
+      const totalRub = finitePositiveNumber(offer.total_rub)
       const sourcePrice = finitePositiveNumber(offer.price_cny)
       if (
-        !skuId ||
+        !offerRef ||
         !size ||
-        !quoteRub ||
-        !sourcePrice ||
-        offer.currency !== "CNY"
+        !totalRub ||
+        !sourcePrice
       ) {
         return []
       }
       return [{
-        skuId,
+        offerRef,
         size,
+        sizeEu: optionalString(offer.eu),
         sizeRu: optionalString(offer.ru),
         sizeUs: optionalString(offer.us),
         sizeCn: optionalString(offer.cn),
+        available: typeof offer.available === "boolean" ? offer.available : null,
         priceCny: sourcePrice,
-        quoteRub,
+        totalRub,
       }]
     })
     : []
 
   if (
-    !["poizon", "dewu"].includes(String(source.source)) ||
-    !providerProductId ||
-    !providerUrl ||
+    !productRef ||
     !name ||
     !observedAt ||
     !expiresAt ||
@@ -350,14 +357,18 @@ function parseCatalogSearchResult(value: unknown): CatalogSearchResult | null {
   }
 
   return {
-    source: source.source as CatalogSearchResult["source"],
-    providerProductId,
-    providerUrl,
+    productRef,
     brand: optionalString(source.brand),
     name,
     model: optionalString(source.model) ?? name,
     article: optionalString(source.article),
+    color: optionalString(source.color),
+    inStock: typeof source.in_stock === "boolean" ? source.in_stock : null,
+    sizeContext: optionalString(source.size_context),
+    sizeChart: optionalString(source.size_chart),
+    sizeImage: safeHttpsUrl(source.size_image),
     kind: kind as CatalogProduct["kind"],
+    description: optionalString(source.description),
     images,
     observedAt,
     expiresAt,
@@ -394,6 +405,15 @@ function parseCatalogSearchFallback(value: unknown): CatalogSearchFallback | nul
   }
 }
 
+function parseClarificationOption(value: unknown): CatalogSearchClarificationOption | null {
+  if (!value || typeof value !== "object") return null
+  const source = value as Record<string, unknown>
+  const label = optionalString(source.label)
+  const query = optionalString(source.query)
+  if (!label || !query || label.length > 80 || query.length > 160) return null
+  return { label, query }
+}
+
 export function parseCatalogSearch(payload: unknown): CatalogSearchResponse | null {
   if (!payload || typeof payload !== "object") return null
   const source = payload as Record<string, unknown>
@@ -411,6 +431,12 @@ export function parseCatalogSearch(payload: unknown): CatalogSearchResponse | nu
     status: status as CatalogSearchStatus,
     normalizedQuery,
     clarification: optionalString(source.clarification),
+    clarificationOptions: Array.isArray(source.clarification_options)
+      ? source.clarification_options
+        .map(parseClarificationOption)
+        .filter((option): option is CatalogSearchClarificationOption => !!option)
+        .slice(0, 4)
+      : [],
     results: source.results
       .map(parseCatalogSearchResult)
       .filter((result): result is CatalogSearchResult => !!result),
@@ -694,21 +720,22 @@ export function buildProductSizeOffers(
       ? (liveByExactSize.get(checkoutOffer.sizeEu) ?? []).find(
         (liveOffer) =>
           liveOffer.size === checkoutOffer.sizeEu &&
-          liveOffer.skuId === checkoutOffer.skuId &&
-          liveOffer.quoteRub === checkoutOffer.priceRub,
+          liveOffer.totalRub === checkoutOffer.priceRub,
       ) ?? null
       : null
 
     if (checkoutOffer && matchingLiveOffer) {
       return {
-        skuId: matchingLiveOffer.skuId,
-        sizeEu: matchingLiveOffer.size,
+        // Checkout continues to use the server-owned catalog SKU.  A live
+        // search response intentionally has no supplier SKU in the browser.
+        skuId: checkoutOffer.skuId,
+        sizeEu: checkoutOffer.sizeEu,
         sizeRu: displayRuSize(matchingLiveOffer.sizeRu) ??
           nikeRuFallback(brand, matchingLiveOffer.size),
         sizeUs: matchingLiveOffer.sizeUs,
         sizeCn: matchingLiveOffer.sizeCn,
         priceCny: matchingLiveOffer.priceCny,
-        priceRub: matchingLiveOffer.quoteRub,
+        priceRub: matchingLiveOffer.totalRub,
         available: true,
         checkoutConfirmed: true,
       }

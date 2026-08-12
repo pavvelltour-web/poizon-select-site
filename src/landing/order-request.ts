@@ -41,34 +41,20 @@ export function buildOrderRequest(
   return size ? `${query}\nРазмер: ${size}` : query
 }
 
-function cleanProviderUrl(value: string): string | null {
-  const url = cleanLine(value)
-  try {
-    const parsed = new URL(url)
-    const allowedHosts = new Set(["poizon.com", "www.poizon.com", "dewu.com", "www.dewu.com"])
-    return parsed.protocol === "https:" && !parsed.username && !parsed.password && !parsed.port && allowedHosts.has(parsed.hostname.toLowerCase())
-      ? parsed.toString()
-      : null
-  } catch {
-    return null
-  }
-}
-
 export function buildLiveOrderRequest(
-  product: Pick<CatalogSearchResult, "article" | "brand" | "name" | "providerUrl" | "expiresAt">,
-  offer: Pick<CatalogSearchOffer, "skuId" | "size" | "priceCny" | "quoteRub">,
+  product: Pick<CatalogSearchResult, "article" | "brand" | "name" | "color" | "expiresAt">,
+  offer: Pick<CatalogSearchOffer, "size" | "sizeEu" | "sizeRu" | "priceCny" | "totalRub">,
 ): string {
   const name = cleanLine([product.brand, product.name].filter(Boolean).join(" "))
   const article = product.article ? cleanLine(product.article) : ""
-  const providerUrl = cleanProviderUrl(product.providerUrl)
+  const color = product.color ? cleanLine(product.color) : ""
   const lines = [name]
 
   if (article) lines.push(`Артикул: ${article}`)
-  if (providerUrl) lines.push(`Poizon: ${providerUrl}`)
-  lines.push(`Размер: ${cleanLine(offer.size)}`)
-  lines.push(`SKU Poizon: ${cleanLine(offer.skuId)}`)
-  lines.push(`Цена Poizon: ¥${offer.priceCny}`)
-  lines.push(`Котировка: ${offer.quoteRub} ₽`)
+  if (color) lines.push(`Цвет: ${color}`)
+  lines.push(`Размер: ${cleanLine(offer.sizeEu ?? offer.size)}${offer.sizeRu ? ` (RU ${cleanLine(offer.sizeRu)})` : ""}`)
+  lines.push(`Цена: ¥${offer.priceCny}`)
+  lines.push(`Итоговая цена: ${offer.totalRub} ₽`)
   lines.push(`Действует до: ${cleanLine(product.expiresAt)}`)
 
   return lines.join("\n")
