@@ -2,7 +2,6 @@ import { ChevronLeft, ChevronRight, Copy, Send, X } from "lucide-react"
 import { motion } from "motion/react"
 import { useRef } from "react"
 
-import { formatRub } from "../../catalog/catalog"
 import { kindLabels, resolveAssetUrl, setImageFallback } from "../landing-data"
 import type { StorefrontState } from "../landing-types"
 
@@ -212,42 +211,20 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
             </div>
           </dl>
 
-          {product.orderQuote ? (
-            <dl className="price-breakdown" aria-label="Расчет заказа">
-              <div>
-                <dt>Цена источника</dt>
-                <dd>¥{product.orderQuote.priceYuan}</dd>
-              </div>
-              <div>
-                <dt>Курс</dt>
-                <dd>{product.orderQuote.yuanRate} ₽/¥</dd>
-              </div>
-              <div>
-                <dt>Выкуп</dt>
-                <dd>{formatRub(product.orderQuote.purchaseRub)}</dd>
-              </div>
-              <div>
-                <dt>Оплата {product.orderQuote.paymentFeePercent}%</dt>
-                <dd>{formatRub(product.orderQuote.paymentFee)}</dd>
-              </div>
-              <div>
-                <dt>Логистика</dt>
-                <dd>{formatRub(product.orderQuote.internationalLogistics)}</dd>
-              </div>
-              <div>
-                <dt>Сервис {product.orderQuote.serviceFeePercent}%</dt>
-                <dd>{formatRub(product.orderQuote.serviceFee)}</dd>
-              </div>
-              <div>
-                <dt>РФ доставка</dt>
-                <dd>{formatRub(product.orderQuote.rfDelivery)}</dd>
-              </div>
-              <div>
-                <dt>Итого</dt>
-                <dd>{formatRub(product.orderQuote.totalRub)}</dd>
-              </div>
-            </dl>
-          ) : null}
+          <dl className="price-breakdown" aria-label="Статус цены">
+            <div>
+              <dt>Статус</dt>
+              <dd>{price?.label}</dd>
+            </div>
+            <div>
+              <dt>Итого</dt>
+              <dd>{price?.value}</dd>
+            </div>
+            <div>
+              <dt>Актуальность</dt>
+              <dd>{price?.detail}</dd>
+            </div>
+          </dl>
 
           <p className="product-sheet__fineprint">
             Цена, размер, цвет, наличие, бирки и упаковка подтверждаются по

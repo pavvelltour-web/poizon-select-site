@@ -86,6 +86,21 @@ describe("standalone site runtime boundary", () => {
     expect(result.stderr).toContain("forbidden runtime network call")
   })
 
+  it("rejects a price reader that loses the 12-hour verified-response gate", () => {
+    const fixture = makeFixture()
+    const priceReader = path.join(fixture, "src", "landing", "catalog-price-api.ts")
+    writeFileSync(
+      priceReader,
+      readFileSync(priceReader, "utf8").replace('response.snapshot_hours !== 12', "false"),
+      "utf8",
+    )
+
+    const result = runVerifier(fixture)
+
+    expect(result.status).not.toBe(0)
+    expect(result.stderr).toContain("forbidden runtime network call")
+  })
+
   it("requires the named release-rights command", () => {
     const fixture = makeFixture()
     const packagePath = path.join(fixture, "package.json")

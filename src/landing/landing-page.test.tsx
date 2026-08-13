@@ -1,7 +1,8 @@
-import { render, screen, waitFor, within } from "@testing-library/react"
+import { act, render, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
+import { catalogProducts } from "../catalog/catalog"
 import * as orderRequest from "./order-request"
 import { LandingPage } from "./landing-page"
 
@@ -10,22 +11,23 @@ function productButtons() {
 }
 
 afterEach(() => {
+  vi.useRealTimers()
   vi.restoreAllMocks()
   vi.unstubAllGlobals()
   window.history.replaceState(null, "", "/")
 })
 
 describe("LandingPage", () => {
-  it("renders all items with a visible price floor", () => {
+  it("renders all catalogue items without substituting editorial prices", () => {
     render(<LandingPage configuredBotUsername={null} />)
 
     expect(screen.getByRole("heading", { name: "KICKSBASE" })).toBeInTheDocument()
     expect(productButtons()).toHaveLength(100)
-    expect(screen.queryByText("по запросу")).toBeNull()
-    expect(screen.getAllByText("Цена от")).toHaveLength(100)
-    expect(screen.getAllByText("от 22 100 ₽").length).toBeGreaterThan(0)
-    expect(screen.getAllByText("от 45 тыс. ₽").length).toBeGreaterThan(0)
-    expect(screen.getAllByText("от 4 тыс. ₽").length).toBeGreaterThan(0)
+    expect(screen.getAllByText("По запросу").length).toBeGreaterThanOrEqual(200)
+    expect(screen.getAllByText("Цена")).toHaveLength(100)
+    expect(screen.queryByText("от 22 100 ₽")).toBeNull()
+    expect(screen.queryByText("от 45 тыс. ₽")).toBeNull()
+    expect(screen.queryByText("от 4 тыс. ₽")).toBeNull()
     expect(
       screen.getByText(/Перед оплатой всё должно быть понятно/),
     ).toBeInTheDocument()
@@ -52,9 +54,7 @@ describe("LandingPage", () => {
     expect(productButtons()).toHaveLength(3)
     expect(window.location.search).toBe("?category=volleyball&q=nike")
 
-    await user.selectOptions(screen.getByRole("combobox", { name: "Сортировка" }), [
-      "price-desc",
-    ])
+    await user.selectOptions(screen.getByRole("combobox", { name: "Сортировка" }), ["price-desc"])
     expect(productButtons()[0]).toHaveAccessibleName(/Nike ZOOM HYPERSET 2/)
     expect(window.location.search).toBe(
       "?category=volleyball&q=nike&sort=price-desc",
@@ -277,7 +277,8 @@ describe("LandingPage", () => {
       "price-asc",
     )
     expect(screen.getByTestId("order-dock")).toBeInTheDocument()
-    expect(screen.getByLabelText("Расчет заказа")).toBeInTheDocument()
+    expect(screen.queryByLabelText("Расчет заказа")).toBeNull()
+    expect(within(screen.getByTestId("order-dock")).getAllByText("По запросу").length).toBeGreaterThan(0)
     expect(screen.getByRole("link", { name: "Открыть @SelectBuyerBot" })).toHaveAttribute(
       "href",
       "https://t.me/SelectBuyerBot",
@@ -336,5 +337,99 @@ describe("LandingPage", () => {
     expect(screen.getByRole("alert")).toHaveTextContent(
       "Выделите текст выше и скопируйте его вручную.",
     )
+  })
+
+  it("shows a verified price only until its CRM snapshot expires, then refreshes fail-closed", async () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date("2026-08-14T09:00:00.000Z"))
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          catalog_mode: "curated_live_poizon",
+          snapshot_hours: 12,
+          items: [
+            {
+              slug: "asics-sky-elite-ff-3",
+              price_rub: 15_900,
+              live_provider_verified: true,
+              observed_at: "2026-08-14T08:00:00.000Z",
+              expires_at: "2026-08-14T09:00:01.000Z",
+            },
+          ],
+        }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          catalog_mode: "curated_live_poizon",
+          snapshot_hours: 12,
+          items: [],
+        }),
+      })
+    vi.stubGlobal("fetch", fetchMock)
+
+    render(<LandingPage configuredBotUsername={null} />)
+
+    await act(async () => {
+      await Promise.resolve()
+      await Promise.resolve()
+    })
+    expect(screen.getAllByText("от 15 900 ₽").length).toBeGreaterThan(0)
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(1_001)
+    })
+    expect(screen.queryByText("от 15 900 ₽")).toBeNull()
+    expect(screen.getAllByText("По запросу")).not.toHaveLength(0)
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+    vi.useRealTimers()
+  })
+
+  it("overlays exactly the 19 verified CRM catalogue prices and leaves the rest by request", async () => {
+    const observedAt = new Date(Date.now() - 60 * 60 * 1000).toISOString()
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString()
+    const verifiedProducts = catalogProducts.slice(0, 19)
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          catalog_mode: "curated_live_poizon",
+          snapshot_hours: 12,
+          items: [
+            ...verifiedProducts.map((product) => ({
+              slug: product.slug,
+              price_rub: 12_345,
+              live_provider_verified: true,
+              observed_at: observedAt,
+              expires_at: expiresAt,
+            })),
+            {
+              slug: "not-in-the-storefront",
+              price_rub: 12_345,
+              live_provider_verified: true,
+              observed_at: observedAt,
+              expires_at: expiresAt,
+            },
+          ],
+        }),
+      }),
+    )
+    render(<LandingPage configuredBotUsername={null} />)
+
+    await waitFor(() => {
+      expect(screen.getAllByText("от 12 345 ₽").length).toBeGreaterThanOrEqual(19)
+    })
+    const cards = productButtons()
+    expect(cards).toHaveLength(100)
+    for (const card of cards.slice(0, 19)) {
+      expect(within(card).getAllByText("от 12 345 ₽").length).toBeGreaterThan(0)
+    }
+    expect(
+      cards.slice(19).filter((card) => within(card).queryAllByText("По запросу").length > 0)
+        .length,
+    ).toBe(81)
   })
 })

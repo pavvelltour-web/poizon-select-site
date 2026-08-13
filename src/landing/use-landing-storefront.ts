@@ -9,6 +9,10 @@ import {
   type CatalogProduct,
 } from "../catalog/catalog"
 import {
+  fetchVerifiedCatalogPrices,
+  type VerifiedCatalogPrice,
+} from "./catalog-price-api"
+import {
   buildOrderRequest,
   buildTelegramBotUrl,
   copyOrderRequest,
@@ -91,6 +95,26 @@ function isLiveProduct(value: unknown): value is LivePoizonProduct {
   )
 }
 
+function sortStorefrontProducts(
+  products: readonly CatalogProduct[],
+  sort: CatalogSort,
+  verifiedPrices: Readonly<Record<string, VerifiedCatalogPrice>>,
+): CatalogProduct[] {
+  if (sort !== "price-asc" && sort !== "price-desc") return sortCatalog(products, sort)
+
+  return products
+    .map((product, index) => ({ product, index, price: verifiedPrices[product.slug]?.totalRub }))
+    .sort((left, right) => {
+      const leftIsPriced = Number.isFinite(left.price)
+      const rightIsPriced = Number.isFinite(right.price)
+      if (leftIsPriced !== rightIsPriced) return leftIsPriced ? -1 : 1
+      if (!leftIsPriced || !rightIsPriced) return left.index - right.index
+      const delta = sort === "price-asc" ? left.price! - right.price! : right.price! - left.price!
+      return delta || left.index - right.index
+    })
+    .map(({ product }) => product)
+}
+
 export function useLandingStorefront(
   configuredBotUsername?: string | null,
 ): StorefrontState {
@@ -111,10 +135,39 @@ export function useLandingStorefront(
   >("idle")
   const [liveSearchResults, setLiveSearchResults] = useState<LivePoizonProduct[]>([])
   const [liveSearchMessage, setLiveSearchMessage] = useState<string | null>(null)
+  const [verifiedCatalogPrices, setVerifiedCatalogPrices] = useState<
+    Readonly<Record<string, VerifiedCatalogPrice>>
+  >({})
+  const [catalogPriceRefresh, setCatalogPriceRefresh] = useState(0)
   const productTriggerRef = useRef<HTMLButtonElement | null>(null)
   const sheetHeadingRef = useRef<HTMLHeadingElement | null>(null)
   const liveSearchAbortRef = useRef<AbortController | null>(null)
   const liveSearchRequestIdRef = useRef(0)
+
+  useEffect(() => {
+    const controller = new AbortController()
+    let refreshTimer: number | undefined
+    void fetchVerifiedCatalogPrices(controller.signal).then((prices) => {
+      if (controller.signal.aborted) return
+      setVerifiedCatalogPrices(prices)
+
+      const nextExpiryMs = Math.min(
+        ...Object.values(prices)
+          .map((price) => Date.parse(price.expiresAt))
+          .filter(Number.isFinite),
+      )
+      if (!Number.isFinite(nextExpiryMs)) return
+      refreshTimer = window.setTimeout(() => {
+        // Never keep a visible amount after its server-verified window ends.
+        setVerifiedCatalogPrices({})
+        setCatalogPriceRefresh((current) => current + 1)
+      }, Math.max(0, nextExpiryMs - Date.now()))
+    })
+    return () => {
+      controller.abort()
+      if (refreshTimer !== undefined) window.clearTimeout(refreshTimer)
+    }
+  }, [catalogPriceRefresh])
 
   const botUsername = resolveBotUsername(
     configuredBotUsername ?? import.meta.env.VITE_BOT_USERNAME,
@@ -129,15 +182,22 @@ export function useLandingStorefront(
     (selectedProduct
       ? { src: selectedProduct.fallbackImage, alt: selectedProduct.name }
       : null)
-  const selectedProductPrice = selectedProduct
-    ? getDisplayPrice(selectedProduct)
-    : null
+  const getProductPrice = useCallback(
+    (product: CatalogProduct) => getDisplayPrice(product, verifiedCatalogPrices[product.slug]),
+    [verifiedCatalogPrices],
+  )
+  const selectedProductPrice = selectedProduct ? getProductPrice(selectedProduct) : null
   const selectedSizeOptions = selectedProduct ? getSizeOptions(selectedProduct) : []
   const selectedImageDisplayIndex =
     selectedVisibleGallery.length === 0 ? 0 : selectedImageIndex + 1
   const filteredProducts = useMemo(
-    () => sortCatalog(filterCatalog(catalogProducts, category, search), sort),
-    [category, search, sort],
+    () =>
+      sortStorefrontProducts(
+        filterCatalog(catalogProducts, category, search),
+        sort,
+        verifiedCatalogPrices,
+      ),
+    [category, search, sort, verifiedCatalogPrices],
   )
   const heroProducts = useMemo(
     () =>
@@ -150,8 +210,8 @@ export function useLandingStorefront(
     ? buildOrderRequest(selectedProduct, selectedSize ?? undefined)
     : ""
   const taskMatches = useMemo(
-    () => findTaskMatches(catalogProducts, taskInput).slice(0, 3),
-    [taskInput],
+    () => findTaskMatches(catalogProducts, taskInput, verifiedCatalogPrices).slice(0, 3),
+    [taskInput, verifiedCatalogPrices],
   )
 
   const writeUrl = (
@@ -409,6 +469,7 @@ export function useLandingStorefront(
     selectedSize,
     selectedSizeOptions,
     selectedProductPrice,
+    getProductPrice,
     request,
     copyState,
     taskMatches,

@@ -81,6 +81,7 @@ export interface StorefrontState {
   selectedSize: string | null
   selectedSizeOptions: readonly string[]
   selectedProductPrice: DisplayPrice | null
+  getProductPrice: (product: CatalogProduct) => DisplayPrice
   request: string
   copyState: CopyState
   taskMatches: TaskMatch[]

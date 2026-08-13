@@ -23,6 +23,7 @@ import {
   type CatalogSort,
   type ProductKind,
 } from "../catalog/catalog"
+import type { VerifiedCatalogPrice } from "./catalog-price-api"
 import type { ActiveCategory, DisplayPrice, TaskMatch, UrlState } from "./landing-types"
 import type { LucideIcon } from "lucide-react"
 import type { SyntheticEvent } from "react"
@@ -205,12 +206,6 @@ export const kindLabels: Record<ProductKind, string> = {
   accessory: "Экипировка",
 }
 
-const fallbackFromPrices: Record<ProductKind, string> = {
-  footwear: "от 22 тыс. ₽",
-  apparel: "от 4 тыс. ₽",
-  accessory: "от 3 тыс. ₽",
-}
-
 const footwearSizes = [
   "36",
   "37",
@@ -250,33 +245,26 @@ export function setImageFallback(
   event.currentTarget.src = fallbackUrl
 }
 
-function marketPriceToFrom(price: string): string {
-  const firstNumber = price.match(/^\d+(?:[.,]\d+)?/)?.[0]
-  if (!firstNumber) return price
-  return `от ${firstNumber.replace(".", ",")} тыс. ₽`
-}
-
-export function getDisplayPrice(product: CatalogProduct): DisplayPrice {
-  if (product.orderQuote) {
+export function getDisplayPrice(
+  _product: CatalogProduct,
+  verifiedPrice?: VerifiedCatalogPrice,
+): DisplayPrice {
+  if (verifiedPrice) {
+    const expiresAt = new Intl.DateTimeFormat("ru-RU", {
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(new Date(verifiedPrice.expiresAt))
     return {
       label: "Цена от",
-      value: `от ${formatRub(product.orderQuote.totalRub)}`,
-      detail: "расчет до оплаты",
-    }
-  }
-
-  if (product.marketPrice) {
-    return {
-      label: "Цена от",
-      value: marketPriceToFrom(product.marketPrice),
-      detail: product.priceBasis ?? "ориентир",
+      value: `от ${formatRub(verifiedPrice.totalRub)}`,
+      detail: `зафиксирована до ${expiresAt}`,
     }
   }
 
   return {
-    label: "Цена от",
-    value: fallbackFromPrices[product.kind],
-    detail: "уточним по размеру",
+    label: "Цена",
+    value: "По запросу",
+    detail: "уточним цену и наличие",
   }
 }
 
@@ -349,7 +337,11 @@ function productSearchText(product: CatalogProduct): string {
   )
 }
 
-function scoreTaskProduct(product: CatalogProduct, task: string): TaskMatch | null {
+function scoreTaskProduct(
+  product: CatalogProduct,
+  task: string,
+  verifiedPrices: Readonly<Record<string, VerifiedCatalogPrice>>,
+): TaskMatch | null {
   const normalizedTask = normalizedText(task)
   if (!normalizedTask.trim()) return null
 
@@ -395,7 +387,7 @@ function scoreTaskProduct(product: CatalogProduct, task: string): TaskMatch | nu
     if (product.category === "bags") add(9, "сумка и мелочи")
   }
   if (/бюджет|дешев|до\s?\d|недорог/.test(normalizedTask)) {
-    const price = product.orderQuote?.totalRub ?? Number.MAX_SAFE_INTEGER
+    const price = verifiedPrices[product.slug]?.totalRub ?? Number.MAX_SAFE_INTEGER
     if (price < 12_000) add(8, "ближе к низкому бюджету")
   }
 
@@ -406,14 +398,15 @@ function scoreTaskProduct(product: CatalogProduct, task: string): TaskMatch | nu
 export function findTaskMatches(
   products: readonly CatalogProduct[],
   task: string,
+  verifiedPrices: Readonly<Record<string, VerifiedCatalogPrice>> = {},
 ): TaskMatch[] {
   return products
-    .map((product) => scoreTaskProduct(product, task))
+    .map((product) => scoreTaskProduct(product, task, verifiedPrices))
     .filter((match): match is TaskMatch => match !== null)
     .sort((left, right) => {
       if (right.score !== left.score) return right.score - left.score
-      const leftPrice = left.product.orderQuote?.totalRub ?? Number.MAX_SAFE_INTEGER
-      const rightPrice = right.product.orderQuote?.totalRub ?? Number.MAX_SAFE_INTEGER
+      const leftPrice = verifiedPrices[left.product.slug]?.totalRub ?? Number.MAX_SAFE_INTEGER
+      const rightPrice = verifiedPrices[right.product.slug]?.totalRub ?? Number.MAX_SAFE_INTEGER
       return leftPrice - rightPrice
     })
 }

@@ -233,14 +233,27 @@ for (const file of browserFiles) {
     /\bfetch\s*\(|\bXMLHttpRequest\b|\bWebSocket\s*\(|\bEventSource\s*\(|\bnavigator\s*\.\s*sendBeacon\s*\(/.test(
       source,
     )
-  const isAllowedSameOriginSearch =
+  const isAllowedSameOriginCatalogApi =
     relativeFile === "src/landing/use-landing-storefront.ts" &&
     source.includes("function crmSearchEndpoint()") &&
     source.includes('configured.startsWith("/")') &&
     source.includes('configured.startsWith("//")') &&
     source.includes("/catalog/search") &&
     source.includes('credentials: "omit"')
-  if (hasRuntimeNetworkCall && !isAllowedSameOriginSearch) {
+  const isAllowedSameOriginVerifiedPriceRead =
+    relativeFile === "src/landing/catalog-price-api.ts" &&
+    source.includes("function crmApiBase()") &&
+    source.includes('configured.startsWith("/")') &&
+    source.includes('configured.startsWith("//")') &&
+    source.includes("/checkout/orders?mode=catalog") &&
+    source.includes('credentials: "omit"') &&
+    source.includes('response.catalog_mode !== "curated_live_poizon"') &&
+    source.includes("response.snapshot_hours !== 12")
+  if (
+    hasRuntimeNetworkCall &&
+    !isAllowedSameOriginCatalogApi &&
+    !isAllowedSameOriginVerifiedPriceRead
+  ) {
     fail(
       `${relativeFile} contains a forbidden runtime network call`,
     )

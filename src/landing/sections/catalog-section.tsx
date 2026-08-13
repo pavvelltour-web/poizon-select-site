@@ -9,7 +9,6 @@ import {
   categoryDetails,
   categoryIcons,
   categoryTone,
-  getDisplayPrice,
   quickFilters,
   resolveAssetUrl,
   scenarioTiles,
@@ -60,6 +59,7 @@ export function CatalogSection({ storefront }: CatalogSectionProps) {
               product={product}
               featured={index === 0}
               index={index}
+              price={storefront.getProductPrice(product)}
               openProduct={storefront.openProduct}
             />
           ))}
@@ -113,7 +113,7 @@ function TaskFinder({ storefront }: CatalogSectionProps) {
         <div className="task-finder__results" aria-live="polite">
           {storefront.taskMatches.length > 0 ? (
             storefront.taskMatches.slice(0, 4).map((match) => {
-              const price = getDisplayPrice(match.product)
+              const price = storefront.getProductPrice(match.product)
 
               return (
                 <button
