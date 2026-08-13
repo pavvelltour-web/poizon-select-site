@@ -130,6 +130,12 @@ describe("verified catalogue price reader", () => {
               size_eu: "45",
               price_rub: 11_000,
             }),
+            verifiedSizeOffer({
+              sku_id: "size-46-not-verified",
+              size_eu: "46",
+              price_rub: 11_000,
+              live_provider_verified: false,
+            }),
           ],
         }),
         verifiedItem({
@@ -150,6 +156,15 @@ describe("verified catalogue price reader", () => {
           slug: "no-eligible-size",
           size_offers: [verifiedSizeOffer({ available: false })],
         }),
+        verifiedItem({
+          slug: "duplicate-sku",
+          price_rub: 13_000,
+          size_offers: [
+            verifiedSizeOffer({ sku_id: "same-sku", size_eu: "42", price_rub: 13_000 }),
+            verifiedSizeOffer({ sku_id: "same-sku", size_eu: "43", price_rub: 13_000 }),
+            verifiedSizeOffer({ sku_id: "independent-sku", size_eu: "44", price_rub: 13_000 }),
+          ],
+        }),
       ]),
       now,
     )
@@ -160,12 +175,18 @@ describe("verified catalogue price reader", () => {
     })
     expect(prices["valid-size-offers"]?.sizeOffers["43"]).toBeUndefined()
     expect(prices["valid-size-offers"]?.sizeOffers["45"]).toBeUndefined()
+    expect(prices["valid-size-offers"]?.sizeOffers["46"]).toBeUndefined()
     expect(prices["duplicate-size"]?.sizeOffers).toMatchObject({
       "43": { skuId: "three", totalRub: 13_000 },
     })
     expect(prices["duplicate-size"]?.sizeOffers["42"]).toBeUndefined()
     expect(prices["mismatched-floor"]).toBeUndefined()
     expect(prices["no-eligible-size"]).toBeUndefined()
+    expect(prices["duplicate-sku"]?.sizeOffers).toMatchObject({
+      "44": { skuId: "independent-sku", totalRub: 13_000 },
+    })
+    expect(prices["duplicate-sku"]?.sizeOffers["42"]).toBeUndefined()
+    expect(prices["duplicate-sku"]?.sizeOffers["43"]).toBeUndefined()
   })
 
   it("uses the same-origin checkout catalogue and returns no price on failure", async () => {

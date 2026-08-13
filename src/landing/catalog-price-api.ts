@@ -132,15 +132,29 @@ function parseVerifiedPrice(value: unknown, nowMs: number): VerifiedCatalogPrice
 
   const sizeOffers: Record<string, VerifiedCatalogSizeOffer> = {}
   const ambiguousSizes = new Set<string>()
+  const publishedSkuSizes = new Map<string, string>()
+  const ambiguousSkuIds = new Set<string>()
   for (const rawOffer of rawSizeOffers) {
     const offer = parseVerifiedSizeOffer(rawOffer, observedAt, expiresAt)
-    if (!offer || ambiguousSizes.has(offer.size)) continue
+    if (!offer || ambiguousSizes.has(offer.size) || ambiguousSkuIds.has(offer.skuId)) {
+      continue
+    }
+    const publishedSizeForSku = publishedSkuSizes.get(offer.skuId)
+    if (publishedSizeForSku) {
+      // A supplier SKU has one exact size. If it is published under two size
+      // labels, neither alias is safe to show or price in the storefront.
+      delete sizeOffers[publishedSizeForSku]
+      ambiguousSkuIds.add(offer.skuId)
+      if (publishedSizeForSku === offer.size) ambiguousSizes.add(offer.size)
+      continue
+    }
     if (sizeOffers[offer.size]) {
       delete sizeOffers[offer.size]
       ambiguousSizes.add(offer.size)
       continue
     }
     sizeOffers[offer.size] = offer
+    publishedSkuSizes.set(offer.skuId, offer.size)
   }
   const validSizeOffers = Object.values(sizeOffers)
   if (validSizeOffers.length === 0) return null
