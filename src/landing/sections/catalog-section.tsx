@@ -20,6 +20,7 @@ import {
 } from "../landing-data"
 import type { ActiveCategory } from "../landing-types"
 import type { LandingStorefront } from "../use-landing-storefront"
+import { LivePoizonSearch } from "./live-poizon-search"
 import { ProductCard } from "./product-card"
 
 interface CatalogSectionProps {
@@ -41,6 +42,7 @@ export function CatalogSection({ storefront }: CatalogSectionProps) {
       </div>
 
       <TaskFinder storefront={storefront} />
+      <LivePoizonSearch storefront={storefront} />
       <ScenarioGrid storefront={storefront} />
       <CatalogToolbar storefront={storefront} />
       <CategoryRow storefront={storefront} />

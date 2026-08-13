@@ -1662,12 +1662,12 @@
         "official_product_photo": false,
         "generated_at": "2026-08-03T14:47:27+00:00"
       },
-      "output_bytes": 121994,
+      "output_bytes": 100738,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "9104a3a818f0f6e5dc7a4e37471fac1d6bd972d002034b8f39621c82f8021170",
+      "output_sha256": "bb95061d118b269f3bae3885d7731f2c5a675385abb2f703a9183856e7a5d241",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
@@ -1772,12 +1772,12 @@
         "official_product_photo": false,
         "generated_at": "2026-08-03T14:47:27+00:00"
       },
-      "output_bytes": 112568,
+      "output_bytes": 128340,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "5c40404bef42af6e78404ed8b1b8d638d76ca0410e5926c6b4e4bcb4474dfdcf",
+      "output_sha256": "de9e609409e3ddacee2f214cf2be3518b56ad0d5d69010a78d323d4c72decc15",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",
@@ -1926,12 +1926,12 @@
         "official_product_photo": false,
         "generated_at": "2026-08-03T14:47:27+00:00"
       },
-      "output_bytes": 37590,
+      "output_bytes": 27806,
       "output_dimensions": [
         1200,
         900
       ],
-      "output_sha256": "7c67f22f88726fcdf99a4d99a6f505b533fd5391ac1fca33cbacbbe0110668d8",
+      "output_sha256": "28f5378025e2f7831d9b4ed44e9fb57d72e568bf6a093e28a6e1333f537448fc",
       "usage": "original visual reference; exact product, colour, size, availability and price must be confirmed before order",
       "rights": {
         "status": "owned",

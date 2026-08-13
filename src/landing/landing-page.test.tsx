@@ -11,6 +11,7 @@ function productButtons() {
 
 afterEach(() => {
   vi.restoreAllMocks()
+  vi.unstubAllGlobals()
   window.history.replaceState(null, "", "/")
 })
 
@@ -170,6 +171,93 @@ describe("LandingPage", () => {
     expect(
       within(finder).getByRole("button", { name: /ASICS SKY ELITE FF 3/ }),
     ).toBeInTheDocument()
+  })
+
+  it("renders a fresh CRM Poizon quote without substituting the static catalog", async () => {
+    const user = userEvent.setup()
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        status: "ready",
+        results: [
+          {
+            provider_source: "poizon_batch_sync_api",
+            provider_product_id: "af1-white",
+            brand: "Nike",
+            name: "Air Force 1 '07 White",
+            article: "DD8959-100",
+            kind: "footwear",
+            yuan_rate: 11.3,
+            offers: [
+              {
+                sku_id: "af1-42",
+                size: "42",
+                currency: "CNY",
+                price_cny: 760,
+                quote_rub: 11473.46,
+                rf_delivery: 1000,
+                total_rub: 12473.46,
+                price_breakdown: {
+                  purchase_rub: 8588,
+                  conversion_fee: 343.52,
+                  first_six_percent_fee: 535.89,
+                  service_markup: 1300,
+                  final_six_percent_fee: 706.04,
+                  delivery_rub: 1000,
+                  total_rub: 12473.46,
+                  markup_tier: "popular_pair",
+                },
+              },
+            ],
+          },
+        ],
+      }),
+    })
+    vi.stubGlobal("fetch", fetchMock)
+    render(<LandingPage configuredBotUsername={null} />)
+
+    await user.type(screen.getByRole("searchbox", { name: "Поиск в Poizon" }), "Nike Air Force 1")
+    await user.click(screen.getByRole("button", { name: "Найти в Poizon" }))
+
+    await waitFor(() => {
+      expect(screen.getByLabelText("Результаты живого поиска Poizon")).toBeInTheDocument()
+    })
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/catalog/search",
+      expect.objectContaining({
+        method: "POST",
+        credentials: "omit",
+        body: JSON.stringify({ query: "Nike Air Force 1", limit: 4 }),
+      }),
+    )
+    expect(screen.getByText("Цена Poizon сейчас")).toBeInTheDocument()
+    expect(screen.getByText(/12\s?473\s?₽/)).toBeInTheDocument()
+    expect(screen.getByText("Конвертация 4%")).toBeInTheDocument()
+    expect(screen.getByText("Финальная комиссия 6%")).toBeInTheDocument()
+  })
+
+  it("makes unavailability explicit instead of using a static price", async () => {
+    const user = userEvent.setup()
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          status: "unavailable",
+          results: [],
+          clarification: "Живой каталог Poizon временно недоступен.",
+        }),
+      }),
+    )
+    render(<LandingPage configuredBotUsername={null} />)
+
+    await user.type(screen.getByRole("searchbox", { name: "Поиск в Poizon" }), "Nike Air Force 1")
+    await user.click(screen.getByRole("button", { name: "Найти в Poizon" }))
+
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "Живой каталог Poizon временно недоступен.",
+    )
+    expect(screen.queryByLabelText("Результаты живого поиска Poizon")).toBeNull()
   })
 
   it("hydrates a product dialog from a URL and browser back restores catalog context", async () => {

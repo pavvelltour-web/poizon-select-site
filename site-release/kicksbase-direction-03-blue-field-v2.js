@@ -1,6 +1,7 @@
 ﻿    (function () {
       var formatPrice = new Intl.NumberFormat("ru-RU");
       var galleryAngles = ["Боковой профиль", "Вид спереди", "Ракурс 3/4", "Вид сзади", "Подошва"];
+      var strictFootwearV1Labels = ["Боковой профиль", "Спереди, 3/4", "Пара спереди, 3/4", "Пара сзади", "Подошва"];
 
       function hoverFrameSource(slug) {
         var file = slug === "nike-aone"
@@ -9,8 +10,18 @@
         return "assets/blue-field-v2/hover/" + file;
       }
 
-      function gallerySources(slug) {
-        var resolvedLabels = galleryAngles;
+      function gallerySources(slug, galleryLabels, galleryContract) {
+        var resolvedLabels = galleryLabels ? galleryLabels.split("|").map(function (label) { return label.trim(); }) : galleryContract === "footwear-v1" ? strictFootwearV1Labels : galleryAngles;
+        if (resolvedLabels.length !== galleryAngles.length || resolvedLabels.some(function (label) { return !label; })) resolvedLabels = galleryAngles;
+        if (galleryContract === "footwear-v1") {
+          return [
+            { label: resolvedLabels[0], src: "assets/blue-field-v2/" + slug + "-stage.png" },
+            { label: resolvedLabels[1], src: "assets/blue-field-v2/gallery/normalized/" + slug + "-2.png" },
+            { label: resolvedLabels[2], src: hoverFrameSource(slug) },
+            { label: resolvedLabels[3], src: "assets/blue-field-v2/gallery/normalized/" + slug + "-4.png" },
+            { label: resolvedLabels[4], src: "assets/blue-field-v2/gallery/normalized/" + slug + "-5.png" }
+          ];
+        }
         return [
           { label: resolvedLabels[0], src: "assets/blue-field-v2/" + slug + "-stage.png" },
           { label: resolvedLabels[1], src: hoverFrameSource(slug) },
@@ -36,13 +47,26 @@
           use: card.dataset.use,
           supply: card.dataset.supply,
           image: card.dataset.image,
-          gallery: gallerySources(card.dataset.gallerySlug),
-          sizes: card.dataset.sizes.split(",")
+          galleryContract: card.dataset.galleryContract || "legacy",
+          gallery: gallerySources(card.dataset.gallerySlug, card.dataset.galleryLabels, card.dataset.galleryContract),
+          sizes: card.dataset.sizes.split(","),
+          sizeLabel: card.dataset.sizeLabel || "Размеры EU"
         };
       });
 
       function productLabel(product) {
         return product.type + " " + product.brand + " " + product.name;
+      }
+
+      function sizeUnit(product) {
+        if (product.sizeLabel === "Размеры EU") return "размер EU";
+        if (product.sizeLabel === "Размеры") return "размер";
+        if (product.kind === "accessory") return "вариант";
+        return "размер";
+      }
+
+      function sizePrompt(product) {
+        return "Выберите " + sizeUnit(product);
       }
 
       document.addEventListener("pointerdown", function () {
@@ -176,6 +200,7 @@
       var sheetSupply = productDialog.querySelector("[data-sheet-supply]");
       var sheetGalleryThumbs = productDialog.querySelector("[data-sheet-gallery-thumbs]");
       var sheetPhotoCaption = productDialog.querySelector("[data-sheet-photo-caption]");
+      var sheetSizeLabel = productDialog.querySelector("[data-sheet-size-label]");
       var addButton = productDialog.querySelector("[data-add-to-cart]");
       var sizeGrid = productDialog.querySelector("[data-size-grid]");
       var sizeButtons = [];
@@ -200,7 +225,7 @@
           button.textContent = size;
           button.dataset.odId = "sheet-size-" + product.id + "-" + size.replace(".", "-");
           button.setAttribute("aria-pressed", "false");
-          button.setAttribute("aria-label", "Выбрать размер EU " + size);
+          button.setAttribute("aria-label", "Выбрать " + sizeUnit(product) + " " + size);
           button.addEventListener("click", function () { selectSheetSize(button); });
           sizeGrid.appendChild(button);
           return button;
@@ -271,6 +296,7 @@
         renderSheetSpecs(product);
         addButton.disabled = true;
         addButton.textContent = "Выберите размер";
+        sheetSizeLabel.textContent = sizePrompt(product);
         renderSheetSizes(product, preferredSize);
         openDialog(productDialog);
       }
@@ -292,11 +318,8 @@
       }
 
       function cardHoverImage(product) {
-        var kind = (product.kind || "").toLocaleLowerCase("ru");
-        var type = (product.type || "").toLocaleLowerCase("ru");
-        if (kind.includes("footwear") || kind.includes("кроссов")) return product.gallery[1] && product.gallery[1].src;
-        if (type.includes("одеж") || type.includes("майк") || type.includes("шорт")) return product.gallery[0] && product.gallery[0].src;
-        return product.gallery[0] && product.gallery[0].src;
+        var hoverIndex = product.galleryContract === "footwear-v1" ? 2 : 1;
+        return product.gallery[hoverIndex] && product.gallery[hoverIndex].src;
       }
 
       function compactPurchaseMeta(card) {
@@ -327,7 +350,7 @@
           button.type = "button";
           button.textContent = size;
           button.dataset.odId = "size-" + product.id + "-" + size.replace(".", "-");
-          button.setAttribute("aria-label", "Открыть " + productLabel(product) + ", размер EU " + size);
+          button.setAttribute("aria-label", "Открыть " + productLabel(product) + ", " + sizeUnit(product) + " " + size);
           button.addEventListener("click", function () {
             openProduct(product, size);
           });

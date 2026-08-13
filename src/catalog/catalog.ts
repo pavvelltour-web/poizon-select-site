@@ -1658,11 +1658,7 @@ function mergeGalleryImages(
   return [...bySource.values()].slice(0, 5)
 }
 
-const catalogGalleryOrders: Record<string, readonly number[]> = {
-  "oofos-ooahh-slide": [1, 0, 2, 3, 4],
-  "nike-sabrina-3": [0, 1, 3, 2, 4],
-  "nike-kd-18": [0, 1, 3, 2, 4],
-}
+const catalogGalleryOrders: Record<string, readonly number[]> = {}
 
 function applyGalleryOrder(
   slug: string,

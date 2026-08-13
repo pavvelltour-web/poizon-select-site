@@ -387,6 +387,7 @@
         box-shadow 180ms var(--ease),
         transform 180ms var(--ease);
     }
+    .product-card[hidden] { display: none !important; }
     body.is-keyboard-nav .product-card:focus-within {
       z-index: 4;
       background: var(--surface);
