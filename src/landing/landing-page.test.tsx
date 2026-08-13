@@ -10,6 +10,22 @@ function productButtons() {
   return screen.getAllByRole("button", { name: /Открыть карточку:/ })
 }
 
+function verifiedSizeOffer(
+  size: string,
+  priceRub: number,
+  overrides: Record<string, unknown> = {},
+) {
+  return {
+    sku_id: `sku-${size}`,
+    size_eu: size,
+    price_rub: priceRub,
+    available: true,
+    checkout_confirmed: true,
+    live_provider_verified: true,
+    ...overrides,
+  }
+}
+
 afterEach(() => {
   vi.useRealTimers()
   vi.restoreAllMocks()
@@ -356,6 +372,7 @@ describe("LandingPage", () => {
               live_provider_verified: true,
               observed_at: "2026-08-14T08:00:00.000Z",
               expires_at: "2026-08-14T09:00:01.000Z",
+              size_offers: [verifiedSizeOffer("42", 15_900)],
             },
           ],
         }),
@@ -405,6 +422,7 @@ describe("LandingPage", () => {
               live_provider_verified: true,
               observed_at: observedAt,
               expires_at: expiresAt,
+              size_offers: [verifiedSizeOffer("42", 12_345)],
             })),
             {
               slug: "not-in-the-storefront",
@@ -412,6 +430,7 @@ describe("LandingPage", () => {
               live_provider_verified: true,
               observed_at: observedAt,
               expires_at: expiresAt,
+              size_offers: [verifiedSizeOffer("42", 12_345)],
             },
           ],
         }),
@@ -431,5 +450,65 @@ describe("LandingPage", () => {
       cards.slice(19).filter((card) => within(card).queryAllByText("По запросу").length > 0)
         .length,
     ).toBe(81)
+  })
+
+  it("uses the exact verified size offer in the product sheet, never another size", async () => {
+    const user = userEvent.setup()
+    const observedAt = new Date(Date.now() - 60 * 60 * 1000).toISOString()
+    const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString()
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({
+          catalog_mode: "curated_live_poizon",
+          snapshot_hours: 12,
+          items: [
+            {
+              slug: "asics-sky-elite-ff-3",
+              price_rub: 15_900,
+              live_provider_verified: true,
+              observed_at: observedAt,
+              expires_at: expiresAt,
+              size_offers: [
+                verifiedSizeOffer("42", 15_900),
+                verifiedSizeOffer("42.5", 16_700),
+                verifiedSizeOffer("43", 14_000, { available: false }),
+              ],
+            },
+          ],
+        }),
+      }),
+    )
+    render(<LandingPage configuredBotUsername={null} />)
+
+    await waitFor(() => {
+      expect(screen.getAllByText("от 15 900 ₽").length).toBeGreaterThan(0)
+    })
+    await user.click(
+      screen.getByRole("button", { name: /Открыть карточку: ASICS SKY ELITE FF 3/ }),
+    )
+    const dock = screen.getByTestId("order-dock")
+    expect(within(dock).getByRole("button", { name: "42" })).toBeInTheDocument()
+    expect(within(dock).getByRole("button", { name: "42.5" })).toBeInTheDocument()
+    expect(within(dock).queryByRole("button", { name: "43" })).toBeNull()
+
+    await user.click(within(dock).getByRole("button", { name: "42.5" }))
+    expect(within(dock).getAllByText("16 700 ₽").length).toBeGreaterThan(0)
+    expect(within(dock).getAllByText("Цена размера").length).toBeGreaterThan(0)
+  })
+
+  it("keeps generic size selection by request when the exact slug has no verified offer", async () => {
+    const user = userEvent.setup()
+    render(<LandingPage configuredBotUsername={null} />)
+
+    await user.click(
+      screen.getByRole("button", { name: /Открыть карточку: ASICS SKY ELITE FF 3/ }),
+    )
+    const dock = screen.getByTestId("order-dock")
+    await user.click(within(dock).getByRole("button", { name: "42" }))
+
+    expect(within(dock).getAllByText("По запросу").length).toBeGreaterThan(0)
+    expect(within(dock).queryByText("от 15 900 ₽")).toBeNull()
   })
 })

@@ -15,6 +15,19 @@ function verifiedItem(overrides: Record<string, unknown> = {}) {
     live_provider_verified: true,
     observed_at: "2026-08-14T08:00:00.000Z",
     expires_at: "2026-08-14T20:00:00.000Z",
+    size_offers: [verifiedSizeOffer()],
+    ...overrides,
+  }
+}
+
+function verifiedSizeOffer(overrides: Record<string, unknown> = {}) {
+  return {
+    sku_id: "af1-42",
+    size_eu: "42",
+    price_rub: 12_500.4,
+    available: true,
+    checkout_confirmed: true,
+    live_provider_verified: true,
     ...overrides,
   }
 }
@@ -37,9 +50,18 @@ describe("verified catalogue price reader", () => {
     expect(parseVerifiedCatalogPrices(verifiedPayload([verifiedItem()]), now)).toEqual({
       "nike-air-force-1-07": {
         slug: "nike-air-force-1-07",
-        totalRub: 12_500,
+        totalRub: 12_500.4,
         observedAt: "2026-08-14T08:00:00.000Z",
         expiresAt: "2026-08-14T20:00:00.000Z",
+        sizeOffers: {
+          "42": {
+            skuId: "af1-42",
+            size: "42",
+            totalRub: 12_500.4,
+            observedAt: "2026-08-14T08:00:00.000Z",
+            expiresAt: "2026-08-14T20:00:00.000Z",
+          },
+        },
       },
     })
   })
@@ -71,12 +93,79 @@ describe("verified catalogue price reader", () => {
           expires_at: "2026-08-14T21:06:00.000Z",
         }),
         verifiedItem({ slug: "ambiguous-product" }),
-        verifiedItem({ slug: "ambiguous-product", price_rub: 13_000 }),
+        verifiedItem({
+          slug: "ambiguous-product",
+          price_rub: 13_000,
+          size_offers: [verifiedSizeOffer({ price_rub: 13_000 })],
+        }),
       ]),
       now,
     )
 
     expect(prices).toEqual({})
+  })
+
+  it("uses only exact, available checkout-confirmed size offers and rejects bad card floors", () => {
+    const prices = parseVerifiedCatalogPrices(
+      verifiedPayload([
+        verifiedItem({
+          slug: "valid-size-offers",
+          price_rub: 12_300,
+          size_offers: [
+            verifiedSizeOffer({ sku_id: "size-42", size_eu: " 42 ", price_rub: 12_500 }),
+            verifiedSizeOffer({ sku_id: "size-42-5", size_eu: "42.5", price_rub: 12_300 }),
+            verifiedSizeOffer({
+              sku_id: "size-43-unavailable",
+              size_eu: "43",
+              price_rub: 11_000,
+              available: false,
+            }),
+            verifiedSizeOffer({
+              sku_id: "size-44-unconfirmed",
+              size_eu: "44",
+              checkout_confirmed: false,
+            }),
+            verifiedSizeOffer({
+              sku_id: "not a valid sku",
+              size_eu: "45",
+              price_rub: 11_000,
+            }),
+          ],
+        }),
+        verifiedItem({
+          slug: "duplicate-size",
+          price_rub: 13_000,
+          size_offers: [
+            verifiedSizeOffer({ sku_id: "one", size_eu: "42", price_rub: 13_000 }),
+            verifiedSizeOffer({ sku_id: "two", size_eu: "42", price_rub: 13_000 }),
+            verifiedSizeOffer({ sku_id: "three", size_eu: "43", price_rub: 13_000 }),
+          ],
+        }),
+        verifiedItem({
+          slug: "mismatched-floor",
+          price_rub: 10_000,
+          size_offers: [verifiedSizeOffer({ price_rub: 12_500 })],
+        }),
+        verifiedItem({
+          slug: "no-eligible-size",
+          size_offers: [verifiedSizeOffer({ available: false })],
+        }),
+      ]),
+      now,
+    )
+
+    expect(prices["valid-size-offers"]?.sizeOffers).toMatchObject({
+      "42": { skuId: "size-42", totalRub: 12_500 },
+      "42.5": { skuId: "size-42-5", totalRub: 12_300 },
+    })
+    expect(prices["valid-size-offers"]?.sizeOffers["43"]).toBeUndefined()
+    expect(prices["valid-size-offers"]?.sizeOffers["45"]).toBeUndefined()
+    expect(prices["duplicate-size"]?.sizeOffers).toMatchObject({
+      "43": { skuId: "three", totalRub: 13_000 },
+    })
+    expect(prices["duplicate-size"]?.sizeOffers["42"]).toBeUndefined()
+    expect(prices["mismatched-floor"]).toBeUndefined()
+    expect(prices["no-eligible-size"]).toBeUndefined()
   })
 
   it("uses the same-origin checkout catalogue and returns no price on failure", async () => {

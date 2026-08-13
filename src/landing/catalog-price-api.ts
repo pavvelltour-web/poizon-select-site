@@ -11,6 +11,15 @@ export interface VerifiedCatalogPrice {
   totalRub: number
   observedAt: string
   expiresAt: string
+  sizeOffers: Readonly<Record<string, VerifiedCatalogSizeOffer>>
+}
+
+export interface VerifiedCatalogSizeOffer {
+  skuId: string
+  size: string
+  totalRub: number
+  observedAt: string
+  expiresAt: string
 }
 
 interface StorefrontPricesResponse {
@@ -24,6 +33,7 @@ const MAX_PRICE_RUB = 10_000_000
 const SNAPSHOT_WINDOW_MS = 12 * 60 * 60 * 1000
 const MAX_FUTURE_OBSERVED_SKEW_MS = 5 * 60 * 1000
 const CATALOG_SLUG_PATTERN = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
+const SKU_ID_PATTERN = /^[A-Za-z0-9_.:-]{1,160}$/
 
 function crmApiBase(): string | null {
   const configured = (import.meta.env.VITE_CRM_API_BASE_URL || "/api").trim()
@@ -40,6 +50,51 @@ function validTimestamp(value: unknown): value is string {
   return typeof value === "string" && Number.isFinite(Date.parse(value))
 }
 
+function validRubPrice(value: unknown): value is number {
+  return (
+    typeof value === "number" &&
+    Number.isFinite(value) &&
+    value > 0 &&
+    value < MAX_PRICE_RUB
+  )
+}
+
+function toExactRubPrice(value: number): number {
+  return Math.round(value * 100) / 100
+}
+
+function parseVerifiedSizeOffer(
+  value: unknown,
+  observedAt: string,
+  expiresAt: string,
+): VerifiedCatalogSizeOffer | null {
+  if (!value || typeof value !== "object") return null
+  const offer = value as Record<string, unknown>
+  const skuId = typeof offer.sku_id === "string" ? offer.sku_id.trim() : ""
+  // `size_eu` is the contract's display size. Trim only the outer whitespace:
+  // e.g. 42.5 and values with meaningful internal punctuation stay exact.
+  const size = typeof offer.size_eu === "string" ? offer.size_eu.trim() : ""
+  if (
+    !skuId ||
+    !SKU_ID_PATTERN.test(skuId) ||
+    !size ||
+    size.length > 32 ||
+    offer.available !== true ||
+    offer.checkout_confirmed !== true ||
+    offer.live_provider_verified !== true ||
+    !validRubPrice(offer.price_rub)
+  ) {
+    return null
+  }
+  return {
+    skuId,
+    size,
+    totalRub: toExactRubPrice(offer.price_rub),
+    observedAt,
+    expiresAt,
+  }
+}
+
 function parseVerifiedPrice(value: unknown, nowMs: number): VerifiedCatalogPrice | null {
   if (!value || typeof value !== "object") return null
   const item = value as Record<string, unknown>
@@ -49,18 +104,17 @@ function parseVerifiedPrice(value: unknown, nowMs: number): VerifiedCatalogPrice
     observed_at: observedAt,
     expires_at: expiresAt,
     live_provider_verified: isProviderVerified,
+    size_offers: rawSizeOffers,
   } = item
   if (
     typeof slug !== "string" ||
     !slug.trim() ||
     !CATALOG_SLUG_PATTERN.test(slug.trim()) ||
     isProviderVerified !== true ||
-    typeof totalRub !== "number" ||
-    !Number.isFinite(totalRub) ||
-    totalRub <= 0 ||
-    totalRub >= MAX_PRICE_RUB ||
+    !validRubPrice(totalRub) ||
     !validTimestamp(observedAt) ||
-    !validTimestamp(expiresAt)
+    !validTimestamp(expiresAt) ||
+    !Array.isArray(rawSizeOffers)
   ) {
     return null
   }
@@ -76,11 +130,32 @@ function parseVerifiedPrice(value: unknown, nowMs: number): VerifiedCatalogPrice
     return null
   }
 
+  const sizeOffers: Record<string, VerifiedCatalogSizeOffer> = {}
+  const ambiguousSizes = new Set<string>()
+  for (const rawOffer of rawSizeOffers) {
+    const offer = parseVerifiedSizeOffer(rawOffer, observedAt, expiresAt)
+    if (!offer || ambiguousSizes.has(offer.size)) continue
+    if (sizeOffers[offer.size]) {
+      delete sizeOffers[offer.size]
+      ambiguousSizes.add(offer.size)
+      continue
+    }
+    sizeOffers[offer.size] = offer
+  }
+  const validSizeOffers = Object.values(sizeOffers)
+  if (validSizeOffers.length === 0) return null
+
+  const minimumOfferRub = Math.min(...validSizeOffers.map((offer) => offer.totalRub))
+  // The card's server price must be the same floor as its valid checkout
+  // offers. Do not display an item floor derived from an unavailable SKU.
+  if (toExactRubPrice(totalRub) !== minimumOfferRub) return null
+
   return {
     slug: slug.trim(),
-    totalRub: Math.round(totalRub),
+    totalRub: toExactRubPrice(totalRub),
     observedAt,
     expiresAt,
+    sizeOffers,
   }
 }
 

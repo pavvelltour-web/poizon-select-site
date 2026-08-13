@@ -186,8 +186,23 @@ export function useLandingStorefront(
     (product: CatalogProduct) => getDisplayPrice(product, verifiedCatalogPrices[product.slug]),
     [verifiedCatalogPrices],
   )
-  const selectedProductPrice = selectedProduct ? getProductPrice(selectedProduct) : null
-  const selectedSizeOptions = selectedProduct ? getSizeOptions(selectedProduct) : []
+  const selectedVerifiedPrice = selectedProduct
+    ? verifiedCatalogPrices[selectedProduct.slug]
+    : undefined
+  const selectedSizeOffer =
+    selectedProduct && selectedSize
+      ? selectedVerifiedPrice?.sizeOffers[selectedSize]
+      : undefined
+  const selectedProductPrice = selectedProduct
+    ? selectedSize
+      ? getDisplayPrice(selectedProduct, selectedSizeOffer, "Цена размера", "")
+      : getProductPrice(selectedProduct)
+    : null
+  const selectedSizeOptions = selectedProduct
+    ? selectedVerifiedPrice
+      ? Object.keys(selectedVerifiedPrice.sizeOffers)
+      : getSizeOptions(selectedProduct)
+    : []
   const selectedImageDisplayIndex =
     selectedVisibleGallery.length === 0 ? 0 : selectedImageIndex + 1
   const filteredProducts = useMemo(

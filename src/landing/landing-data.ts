@@ -247,7 +247,9 @@ export function setImageFallback(
 
 export function getDisplayPrice(
   _product: CatalogProduct,
-  verifiedPrice?: VerifiedCatalogPrice,
+  verifiedPrice?: Pick<VerifiedCatalogPrice, "totalRub" | "expiresAt">,
+  label = "Цена от",
+  valuePrefix = "от ",
 ): DisplayPrice {
   if (verifiedPrice) {
     const expiresAt = new Intl.DateTimeFormat("ru-RU", {
@@ -255,8 +257,8 @@ export function getDisplayPrice(
       minute: "2-digit",
     }).format(new Date(verifiedPrice.expiresAt))
     return {
-      label: "Цена от",
-      value: `от ${formatRub(verifiedPrice.totalRub)}`,
+      label,
+      value: `${valuePrefix}${formatRub(verifiedPrice.totalRub)}`,
       detail: `зафиксирована до ${expiresAt}`,
     }
   }
