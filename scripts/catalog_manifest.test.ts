@@ -15,6 +15,7 @@ describe("catalog manifest integrity", () => {
       .map((product) => product.fallbackImage.replace(/^catalog\//, ""))
       .sort()
     const manifestSlugs = manifest.items.map((item) => item.slug).sort()
+    const productSlugs = catalogProducts.map((product) => product.slug).sort()
     const diskFiles = readdirSync(resolve(repoRoot, "public", "catalog"))
       .filter((file) => file.endsWith(".webp"))
       .sort()
@@ -23,6 +24,9 @@ describe("catalog manifest integrity", () => {
       .sort()
 
     expect(manifest.items).toHaveLength(100)
+    expect(productSlugs).toHaveLength(100)
+    expect(new Set(productSlugs).size).toBe(100)
+    expect(manifestSlugs).toEqual(productSlugs)
     expect(manifestSlugs).toEqual(
       fallbackFiles.map((file) => file.replace(/\.webp$/, "")).sort(),
     )

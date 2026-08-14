@@ -110,6 +110,14 @@ for (const image of ["node:24-alpine", "nginx:1.29-alpine"]) {
     fail(`${image} must be pinned to an immutable digest`)
   }
 }
+if (!dockerfile.includes("COPY site-release/ /usr/share/nginx/html/site-release/")) {
+  fail("Dockerfile must preserve the legacy static release below /site-release/")
+}
+if (/^COPY\s+site-release\/\s+\/usr\/share\/nginx\/html\/\s*$/m.test(dockerfile)) {
+  fail(
+    "Dockerfile must not overwrite the current storefront with the legacy static release",
+  )
+}
 
 const nginx = await text("nginx.conf")
 for (const required of [
@@ -134,6 +142,9 @@ for (const required of [
   "proxy_set_header Host api",
 ]) {
   if (!nginx.includes(required)) fail(`Nginx is missing the same-origin CRM proxy: ${required}`)
+}
+if (/location\s*=\s*\/catalog\/?\s*\{/.test(nginx)) {
+  fail("Nginx must leave /catalog on the current React storefront")
 }
 
 const staticReleaseFiles = [

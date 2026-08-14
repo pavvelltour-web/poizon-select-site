@@ -27,5 +27,7 @@ RUN npm run build:production
 
 FROM runtime-base AS production
 COPY --from=production-build /app/dist /usr/share/nginx/html
-COPY site-release/ /usr/share/nginx/html/
+# The React build is the current 100-item storefront. Keep the old static
+# release available for reference without allowing it to overwrite root.
+COPY site-release/ /usr/share/nginx/html/site-release/
 USER nginx

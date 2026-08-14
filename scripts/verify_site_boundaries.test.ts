@@ -128,6 +128,43 @@ describe("standalone site runtime boundary", () => {
     expect(result.stderr).toContain("static verified reader")
   })
 
+  it("keeps the current storefront at the production root", () => {
+    const fixture = makeFixture()
+    const dockerfile = path.join(fixture, "Dockerfile")
+    writeFileSync(
+      dockerfile,
+      readFileSync(dockerfile, "utf8").replace(
+        "COPY site-release/ /usr/share/nginx/html/site-release/",
+        [
+          "COPY site-release/ /usr/share/nginx/html/site-release/",
+          "COPY site-release/ /usr/share/nginx/html/",
+        ].join("\n"),
+      ),
+      "utf8",
+    )
+
+    const result = runVerifier(fixture)
+
+    expect(result.status).not.toBe(0)
+    expect(result.stderr).toContain("must not overwrite the current storefront")
+  })
+
+  it("keeps the catalog path on the React single-page storefront", () => {
+    const fixture = makeFixture()
+    const nginx = path.join(fixture, "nginx.conf")
+    writeFileSync(
+      nginx,
+      `${readFileSync(nginx, "utf8")}\n` +
+        "location = /catalog { return 302 /site-release/kicksbase-signal-catalog-v4.html; }\n",
+      "utf8",
+    )
+
+    const result = runVerifier(fixture)
+
+    expect(result.status).not.toBe(0)
+    expect(result.stderr).toContain("leave /catalog on the current React storefront")
+  })
+
   it("requires the named release-rights command", () => {
     const fixture = makeFixture()
     const packagePath = path.join(fixture, "package.json")
