@@ -136,6 +136,43 @@ for (const required of [
   if (!nginx.includes(required)) fail(`Nginx is missing the same-origin CRM proxy: ${required}`)
 }
 
+const staticReleaseFiles = [
+  "site-release/kicksbase-direction-03-blue-field-v2.html",
+  "site-release/kicksbase-direction-03-blue-field-v2.js",
+  "site-release/kicksbase-signal-catalog-v4.html",
+  "site-release/verified-catalog-prices.js",
+]
+const [staticDirectionHtml, staticDirectionScript, staticCatalogHtml, staticPriceReader] = await Promise.all(
+  staticReleaseFiles.map(text),
+)
+for (const releaseHtml of [staticDirectionHtml, staticCatalogHtml]) {
+  if (!releaseHtml.includes("verified-catalog-prices.js")) {
+    fail("static production page is missing the verified catalogue reader")
+  }
+  if (/<span class="product-price">(?!По запросу<\/span>)/.test(releaseHtml)) {
+    fail("static production markup exposes an editorial price")
+  }
+}
+for (const required of [
+  'var ENDPOINT = "/api/checkout/orders?mode=catalog"',
+  'credentials: "omit"',
+  'payload.catalog_mode !== "curated_live_poizon"',
+  "payload.snapshot_hours !== 12",
+  "skuCounts",
+  "sizeCounts",
+  "setPrices({})",
+]) {
+  if (!staticPriceReader.includes(required)) {
+    fail(`static verified reader is missing ${required}`)
+  }
+}
+if (/https?:\/\//i.test(staticPriceReader)) {
+  fail("static verified reader may not call an external endpoint")
+}
+if (/dataset\.price\b/.test(staticDirectionScript) || /dataset\.price\b/.test(staticCatalogHtml)) {
+  fail("static production runtime may not fall back to editorial data-price")
+}
+
 const browserFiles = await sourceFiles(path.join(siteRoot, "src"))
 const publicRoot = path.join(siteRoot, "public")
 const publicFiles = await sourceFiles(publicRoot)

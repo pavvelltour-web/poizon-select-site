@@ -14,6 +14,7 @@ const expectedStaticApparelProductCount = Number(process.env.EXPECTED_STATIC_APP
 const expectedStaticAccessoryProductCount = Number(process.env.EXPECTED_STATIC_ACCESSORIES ?? "12")
 const catalogPath = path.join(siteRoot, "site-release", "kicksbase-signal-catalog-v4.html")
 const directionPath = path.join(siteRoot, "site-release", "kicksbase-direction-03-blue-field-v2.html")
+const verifiedPricesPath = path.join(siteRoot, "site-release", "verified-catalog-prices.js")
 const manifestPath = path.join(siteRoot, "site-release", "PRODUCT_MEDIA_MANIFEST.json")
 const assetsPath = path.join(siteRoot, "site-release", "assets", "blue-field-v2")
 const sourceCatalogPath = path.join(siteRoot, "src", "catalog", "catalog.ts")
@@ -221,9 +222,10 @@ describe("static catalog release contract", () => {
     expect(expectedStaticApparelProductCount).toBeGreaterThan(0)
     expect(expectedStaticAccessoryProductCount).toBeGreaterThan(0)
 
-    const [catalogHtml, directionHtml, manifestJson, sourceCatalog] = await Promise.all([
+    const [catalogHtml, directionHtml, verifiedPrices, manifestJson, sourceCatalog] = await Promise.all([
       readFile(catalogPath, "utf8"),
       readFile(directionPath, "utf8"),
+      readFile(verifiedPricesPath, "utf8"),
       readFile(manifestPath, "utf8"),
       readFile(sourceCatalogPath, "utf8"),
     ])
@@ -237,6 +239,24 @@ describe("static catalog release contract", () => {
     }
     const catalog = new JSDOM(catalogHtml, { url: "https://kicksbase.local/" }).window.document
     const direction = new JSDOM(directionHtml, { url: "https://kicksbase.local/" }).window.document
+
+    for (const document of [catalog, direction]) {
+      expect(document.querySelector('script[src^="verified-catalog-prices.js"]')).not.toBeNull()
+      expect(
+        [...document.querySelectorAll(".product-price")].every((price) => price.textContent?.trim() === "По запросу"),
+      ).toBe(true)
+    }
+    for (const required of [
+      'var ENDPOINT = "/api/checkout/orders?mode=catalog"',
+      'credentials: "omit"',
+      'payload.catalog_mode !== "curated_live_poizon"',
+      "payload.snapshot_hours !== 12",
+      "skuCounts",
+      "sizeCounts",
+      "setPrices({})",
+    ]) {
+      expect(verifiedPrices).toContain(required)
+    }
 
     const catalogCards = [...catalog.querySelectorAll<HTMLElement>("[data-catalog-card]")]
     const catalogLinks = catalogCards.map((card) => {

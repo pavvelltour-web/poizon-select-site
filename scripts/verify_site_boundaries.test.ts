@@ -48,6 +48,18 @@ function makeFixture(): string {
   cpSync(path.join(siteRoot, "public"), path.join(fixture, "public"), {
     recursive: true,
   })
+  mkdirSync(path.join(fixture, "site-release"))
+  for (const relative of [
+    "kicksbase-direction-03-blue-field-v2.html",
+    "kicksbase-direction-03-blue-field-v2.js",
+    "kicksbase-signal-catalog-v4.html",
+    "verified-catalog-prices.js",
+  ]) {
+    copyFileSync(
+      path.join(siteRoot, "site-release", relative),
+      path.join(fixture, "site-release", relative),
+    )
+  }
   mkdirSync(path.join(fixture, "scripts"))
   copyFileSync(
     path.join(siteRoot, "scripts", "verify_site_boundaries.mjs"),
@@ -99,6 +111,21 @@ describe("standalone site runtime boundary", () => {
 
     expect(result.status).not.toBe(0)
     expect(result.stderr).toContain("forbidden runtime network call")
+  })
+
+  it("rejects a static reader that loses its verified snapshot gate", () => {
+    const fixture = makeFixture()
+    const priceReader = path.join(fixture, "site-release", "verified-catalog-prices.js")
+    writeFileSync(
+      priceReader,
+      readFileSync(priceReader, "utf8").replace("payload.snapshot_hours !== 12", "false"),
+      "utf8",
+    )
+
+    const result = runVerifier(fixture)
+
+    expect(result.status).not.toBe(0)
+    expect(result.stderr).toContain("static verified reader")
   })
 
   it("requires the named release-rights command", () => {

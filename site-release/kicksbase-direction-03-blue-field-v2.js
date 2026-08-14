@@ -40,7 +40,10 @@
           type: card.dataset.type,
           brand: card.dataset.brand,
           name: card.dataset.name,
-          price: Number(card.dataset.price),
+          // Static markup has editorial metadata only. A retail amount is
+          // assigned later only from the current verified CRM snapshot.
+          price: null,
+          sizeOffers: {},
           category: card.dataset.category,
           categoryLabel: card.dataset.categoryLabel,
           description: card.dataset.description,
@@ -67,6 +70,19 @@
 
       function sizePrompt(product) {
         return "Выберите " + sizeUnit(product);
+      }
+
+      function productPriceText(product, withPrefix) {
+        if (typeof product.price !== "number") return "По запросу";
+        return (withPrefix ? "от " : "") + formatPrice.format(product.price) + " ₽";
+      }
+
+      function verifiedSizes(product) {
+        return Object.keys(product.sizeOffers || {});
+      }
+
+      function verifiedOffer(product, size) {
+        return product && product.sizeOffers ? product.sizeOffers[size] || null : null;
       }
 
       document.addEventListener("pointerdown", function () {
@@ -206,23 +222,30 @@
       var sizeButtons = [];
       var selectedProduct = null;
       var selectedSize = null;
+      var selectedSizePreference = null;
 
       function selectSheetSize(button) {
-        selectedSize = button.textContent;
+        var size = button.dataset.verifiedSize || button.textContent;
+        var offer = verifiedOffer(selectedProduct, size);
+        if (!offer) return;
+        selectedSize = offer.size;
+        selectedSizePreference = offer.size;
         sizeButtons.forEach(function (item) {
           item.setAttribute("aria-pressed", String(item === button));
         });
         addButton.disabled = false;
         addButton.textContent = "Добавить в корзину";
+        sheetPrice.textContent = formatPrice.format(offer.totalRub) + " ₽";
       }
 
       function renderSheetSizes(product, preferredSize) {
         sizeGrid.innerHTML = "";
-        sizeButtons = product.sizes.map(function (size) {
+        sizeButtons = verifiedSizes(product).map(function (size) {
           var button = document.createElement("button");
           button.className = "size-button";
           button.type = "button";
           button.textContent = size;
+          button.dataset.verifiedSize = size;
           button.dataset.odId = "sheet-size-" + product.id + "-" + size.replace(".", "-");
           button.setAttribute("aria-pressed", "false");
           button.setAttribute("aria-label", "Выбрать " + sizeUnit(product) + " " + size);
@@ -287,15 +310,16 @@
       function openProduct(product, preferredSize) {
         selectedProduct = product;
         selectedSize = null;
+        selectedSizePreference = preferredSize || null;
         sheetName.textContent = productLabel(product);
         sheetCategory.textContent = product.categoryLabel;
         sheetDescription.textContent = product.description;
-        sheetPrice.textContent = formatPrice.format(product.price) + " ₽";
+        sheetPrice.textContent = productPriceText(product, true);
         sheetSupply.textContent = product.supply;
         renderSheetGallery(product);
         renderSheetSpecs(product);
         addButton.disabled = true;
-        addButton.textContent = "Выберите размер";
+        addButton.textContent = typeof product.price === "number" ? "Выберите размер" : "Цена по запросу";
         sheetSizeLabel.textContent = sizePrompt(product);
         renderSheetSizes(product, preferredSize);
         openDialog(productDialog);
@@ -334,36 +358,53 @@
         row.appendChild(supply);
       }
 
-      products.forEach(function (product) {
-        addCardPairPreview(product.element, cardHoverImage(product));
-        compactPurchaseMeta(product.element);
-        var openCardButton = product.element.querySelector("[data-product-open]");
-        openCardButton.dataset.odId = "open-product-" + product.id;
-        openCardButton.addEventListener("click", function () {
-          openProduct(product);
-        });
-        product.element.querySelector("[data-favorite]").dataset.odId = "favorite-product-" + product.id;
+      function renderCardPrice(product) {
+        var price = product.element.querySelector(".product-price");
+        if (price) price.textContent = productPriceText(product, true);
+      }
+
+      function renderCardSizes(product) {
         var cardSizes = product.element.querySelector("[data-card-sizes]");
-        [product.sizes[2], product.sizes[4], product.sizes[6]].filter(Boolean).forEach(function (size) {
+        if (!cardSizes) return;
+        // The pre-existing card opener is a large interactive surface. Keep
+        // verified-size controls above that surface without altering layout.
+        cardSizes.style.position = "relative";
+        cardSizes.style.zIndex = "1";
+        cardSizes.textContent = "";
+        var sizes = verifiedSizes(product);
+        sizes.slice(0, 3).forEach(function (size) {
           var button = document.createElement("button");
           button.className = "card-size-button";
           button.type = "button";
           button.textContent = size;
           button.dataset.odId = "size-" + product.id + "-" + size.replace(".", "-");
           button.setAttribute("aria-label", "Открыть " + productLabel(product) + ", " + sizeUnit(product) + " " + size);
-          button.addEventListener("click", function () {
-            openProduct(product, size);
-          });
+          button.addEventListener("click", function () { openProduct(product, size); });
           cardSizes.appendChild(button);
         });
-        var allSizes = document.createElement("button");
-        allSizes.className = "card-size-button card-size-button--all";
-        allSizes.type = "button";
-        allSizes.textContent = "Все";
-        allSizes.dataset.odId = "size-" + product.id + "-all";
-        allSizes.setAttribute("aria-label", "Открыть все размеры: " + productLabel(product));
-        allSizes.addEventListener("click", function () { openProduct(product); });
-        cardSizes.appendChild(allSizes);
+        if (sizes.length > 3) {
+          var allSizes = document.createElement("button");
+          allSizes.className = "card-size-button card-size-button--all";
+          allSizes.type = "button";
+          allSizes.textContent = "Все";
+          allSizes.dataset.odId = "size-" + product.id + "-all";
+          allSizes.setAttribute("aria-label", "Открыть все подтверждённые размеры: " + productLabel(product));
+          allSizes.addEventListener("click", function () { openProduct(product); });
+          cardSizes.appendChild(allSizes);
+        }
+      }
+
+      products.forEach(function (product) {
+        addCardPairPreview(product.element, cardHoverImage(product));
+        compactPurchaseMeta(product.element);
+        renderCardPrice(product);
+        var openCardButton = product.element.querySelector("[data-product-open]");
+        openCardButton.dataset.odId = "open-product-" + product.id;
+        openCardButton.addEventListener("click", function () {
+          openProduct(product);
+        });
+        product.element.querySelector("[data-favorite]").dataset.odId = "favorite-product-" + product.id;
+        renderCardSizes(product);
       });
 
       var favoritesDialog = document.getElementById("favorites-dialog");
@@ -412,7 +453,7 @@
           var name = document.createElement("strong");
           name.textContent = productLabel(product);
           var meta = document.createElement("span");
-          meta.textContent = formatPrice.format(product.price) + " ₽ · " + product.supply;
+          meta.textContent = productPriceText(product, true) + " · " + product.supply;
           copy.appendChild(name);
           copy.appendChild(meta);
           var actions = document.createElement("div");
@@ -515,17 +556,25 @@
         paymentStatus.textContent = "Проверьте сумму и способ оплаты перед переходом.";
       }
 
+      function cartItemOffer(item) {
+        var product = products.find(function (candidate) { return candidate.id === item.productId; });
+        var offer = product && verifiedOffer(product, item.size);
+        return offer && offer.skuId === item.skuId ? offer : null;
+      }
+
       function renderCart() {
         cartCount.textContent = String(cart.length);
         cartCount.classList.toggle("is-visible", cart.length > 0);
         cartEmpty.hidden = cart.length > 0;
         cartTotal.hidden = cart.length === 0;
         paymentMethods.hidden = cart.length === 0;
-        checkoutButton.disabled = cart.length === 0;
         cartList.innerHTML = "";
         var total = 0;
+        var canCheckout = cart.length > 0;
         cart.forEach(function (item, index) {
-          total += item.price;
+          var offer = cartItemOffer(item);
+          if (offer) total += offer.totalRub;
+          else canCheckout = false;
           var row = document.createElement("article");
           row.className = "cart-item";
           row.dataset.odId = "cart-item-" + index;
@@ -550,7 +599,7 @@
           aside.className = "cart-item-aside";
           var price = document.createElement("strong");
           price.className = "cart-item-price";
-          price.textContent = formatPrice.format(item.price) + " ₽";
+          price.textContent = offer ? formatPrice.format(offer.totalRub) + " ₽" : "По запросу";
           var remove = document.createElement("button");
           remove.className = "cart-remove";
           remove.type = "button";
@@ -571,17 +620,21 @@
           row.appendChild(aside);
           cartList.appendChild(row);
         });
-        cartTotalValue.textContent = formatPrice.format(total) + " ₽";
+        checkoutButton.disabled = !canCheckout;
+        cartTotalValue.textContent = canCheckout ? formatPrice.format(total) + " ₽" : "По запросу";
         renderPaymentMethods();
       }
 
       addButton.addEventListener("click", function () {
         if (!selectedProduct || !selectedSize) return;
+        var offer = verifiedOffer(selectedProduct, selectedSize);
+        if (!offer) return;
         cart.push({
           type: selectedProduct.type,
           brand: selectedProduct.brand,
           name: selectedProduct.name,
-          price: selectedProduct.price,
+          productId: selectedProduct.id,
+          skuId: offer.skuId,
           size: selectedSize,
           image: selectedProduct.image,
           description: selectedProduct.description
@@ -590,14 +643,19 @@
         addButton.disabled = true;
         addButton.textContent = "Добавлено";
         window.setTimeout(function () {
-          if (!selectedProduct || !selectedSize) return;
+          if (!selectedProduct || !selectedSize || !verifiedOffer(selectedProduct, selectedSize)) return;
           addButton.disabled = false;
           addButton.textContent = "Добавить в корзину";
         }, 1100);
       });
       checkoutButton.addEventListener("click", function () {
         if (!cart.length) return;
-        var total = cart.reduce(function (sum, item) { return sum + item.price; }, 0);
+        var offers = cart.map(cartItemOffer);
+        if (offers.some(function (offer) { return !offer; })) {
+          renderCart();
+          return;
+        }
+        var total = offers.reduce(function (sum, offer) { return sum + offer.totalRub; }, 0);
         preparePayment(total);
         closeDialog(document.getElementById("cart-dialog"));
         openDialog(paymentDialog);
@@ -648,7 +706,7 @@
           var name = document.createElement("strong");
           name.textContent = productLabel(product);
           var price = document.createElement("span");
-          price.textContent = formatPrice.format(product.price) + " ₽";
+          price.textContent = productPriceText(product, true);
           button.appendChild(name);
           button.appendChild(price);
           button.addEventListener("click", function () {
@@ -699,12 +757,14 @@
         var wantsTraining = /трен|силов/.test(query);
         var wantsWomen = /женск/.test(query);
         var matches = products.filter(function (product) {
-          if (product.price > budget) return false;
+          if (typeof product.price === "number" && product.price > budget) return false;
           if (wantsTraining && product.category !== "training") return false;
           if (wantsWomen && product.name !== "A'One") return false;
           return true;
         }).slice(0, 3);
-        if (!matches.length) matches = products.filter(function (product) { return product.price <= budget; }).slice(0, 3);
+        if (!matches.length) matches = products.filter(function (product) {
+          return typeof product.price !== "number" || product.price <= budget;
+        }).slice(0, 3);
         if (!matches.length) matches = products.slice(0, 3);
         finderResults.innerHTML = "";
         matches.forEach(function (product) {
@@ -714,7 +774,7 @@
           var name = document.createElement("strong");
           name.textContent = productLabel(product);
           var price = document.createElement("span");
-          price.textContent = formatPrice.format(product.price) + " ₽";
+          price.textContent = productPriceText(product, true);
           button.appendChild(name);
           button.appendChild(price);
           button.addEventListener("click", function () { openProduct(product); });
@@ -722,4 +782,32 @@
         });
         finderResults.classList.add("is-visible");
       });
+
+      function applyVerifiedCatalogPrices(currentPrices) {
+        products.forEach(function (product) {
+          var record = currentPrices[product.id];
+          product.price = record ? record.totalRub : null;
+          product.sizeOffers = record ? record.sizeOffers : {};
+          renderCardPrice(product);
+          renderCardSizes(product);
+        });
+
+        if (selectedProduct) {
+          var preferredSize = selectedSize || selectedSizePreference || undefined;
+          selectedSize = null;
+          sheetPrice.textContent = productPriceText(selectedProduct, true);
+          addButton.disabled = true;
+          addButton.textContent = typeof selectedProduct.price === "number" ? "Выберите размер" : "Цена по запросу";
+          renderSheetSizes(selectedProduct, preferredSize);
+        }
+        renderFavorites();
+        renderCart();
+      }
+
+      var verifiedCatalogPrices = window.KicksbaseVerifiedCatalogPrices;
+      if (verifiedCatalogPrices && typeof verifiedCatalogPrices.subscribe === "function") {
+        verifiedCatalogPrices.subscribe(applyVerifiedCatalogPrices);
+      } else {
+        applyVerifiedCatalogPrices({});
+      }
     })();
