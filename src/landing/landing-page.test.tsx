@@ -26,6 +26,67 @@ function verifiedSizeOffer(
   }
 }
 
+function publicLiveOffer(overrides: Record<string, unknown> = {}) {
+  return {
+    offer_ref: "a".repeat(24),
+    size: "42",
+    eu: "42",
+    ru: "41",
+    us: "8.5",
+    cn: "265",
+    available: true,
+    price_cny: 760,
+    quote_rub: 16_700,
+    rf_delivery: 1_000,
+    total_rub: 17_700,
+    price_breakdown: {
+      purchase_rub: 8_588,
+      conversion_fee: 343.52,
+      first_six_percent_fee: 535.89,
+      service_markup: 1_300,
+      final_six_percent_fee: 706.04,
+      delivery_rub: 1_000,
+      total_rub: 17_700,
+      markup_tier: "popular_pair",
+    },
+    ...overrides,
+  }
+}
+
+function publicLiveProduct(overrides: Record<string, unknown> = {}) {
+  const observedAt = new Date(Date.now() - 60_000).toISOString()
+  const expiresAt = new Date(Date.now() + 11 * 60 * 60 * 1000).toISOString()
+  return {
+    product_ref: "b".repeat(24),
+    brand: "Nike",
+    name: "Air Force 1 '07 White",
+    article: "DD8959-100",
+    color: "Белый",
+    kind: "footwear",
+    description: "Белые кроссовки из натуральной кожи.",
+    images: ["https://cdn.poizon.com/products/air-force-1.webp"],
+    in_stock: true,
+    size_context: "Размеры указаны поставщиком.",
+    size_chart: null,
+    size_image: null,
+    offers: [publicLiveOffer()],
+    observed_at: observedAt,
+    expires_at: expiresAt,
+    ...overrides,
+  }
+}
+
+function readyLiveSearch(results: unknown[]) {
+  return {
+    status: "ready",
+    normalized_query: "Nike Air Force 1",
+    clarification: null,
+    clarification_options: [],
+    results,
+    fallback: [],
+  }
+}
+
 afterEach(() => {
   vi.useRealTimers()
   vi.restoreAllMocks()
@@ -193,41 +254,30 @@ describe("LandingPage", () => {
     const user = userEvent.setup()
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
-      json: async () => ({
-        status: "ready",
-        results: [
-          {
-            provider_source: "poizon_batch_sync_api",
-            provider_product_id: "af1-white",
-            brand: "Nike",
-            name: "Air Force 1 '07 White",
-            article: "DD8959-100",
-            kind: "footwear",
-            yuan_rate: 11.3,
-            offers: [
-              {
-                sku_id: "af1-42",
-                size: "42",
-                currency: "CNY",
-                price_cny: 760,
-                quote_rub: 11473.46,
-                rf_delivery: 1000,
-                total_rub: 12473.46,
-                price_breakdown: {
-                  purchase_rub: 8588,
-                  conversion_fee: 343.52,
-                  first_six_percent_fee: 535.89,
-                  service_markup: 1300,
-                  final_six_percent_fee: 706.04,
-                  delivery_rub: 1000,
-                  total_rub: 12473.46,
-                  markup_tier: "popular_pair",
-                },
+      json: async () => readyLiveSearch([
+        publicLiveProduct({
+          offers: [
+            publicLiveOffer(),
+            publicLiveOffer({
+              offer_ref: "c".repeat(24),
+              size: "43",
+              eu: "43",
+              ru: "42",
+              us: "9",
+              cn: "270",
+              available: null,
+              price_cny: 800,
+              quote_rub: 17_300,
+              total_rub: 18_300,
+              price_breakdown: {
+                ...publicLiveOffer().price_breakdown,
+                purchase_rub: 9_040,
+                total_rub: 18_300,
               },
-            ],
-          },
-        ],
-      }),
+            }),
+          ],
+        }),
+      ]),
     })
     vi.stubGlobal("fetch", fetchMock)
     render(<LandingPage configuredBotUsername={null} />)
@@ -238,6 +288,8 @@ describe("LandingPage", () => {
     await waitFor(() => {
       expect(screen.getByLabelText("Результаты поиска")).toBeInTheDocument()
     })
+    const results = screen.getByLabelText("Результаты поиска")
+    expect(within(results).getAllByRole("article")).toHaveLength(1)
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/catalog/search",
       expect.objectContaining({
@@ -246,11 +298,22 @@ describe("LandingPage", () => {
         body: JSON.stringify({ query: "Nike Air Force 1", limit: 4 }),
       }),
     )
-    expect(screen.getByText("Цена сейчас")).toBeInTheDocument()
-    expect(screen.getByText(/12\s?473\s?₽/)).toBeInTheDocument()
+    expect(screen.getByRole("img", { name: "Nike Air Force 1 '07 White" })).toHaveAttribute(
+      "src",
+      "https://cdn.poizon.com/products/air-force-1.webp",
+    )
+    expect(screen.getByText("Белые кроссовки из натуральной кожи.")).toBeInTheDocument()
+    expect(screen.getByText("Цена проверена сейчас")).toBeInTheDocument()
+    expect(screen.getByText(/Выбранный размер: RU 41 · EU 42 · US 8\.5 · CN 265 · ¥760/)).toBeInTheDocument()
+    expect(screen.getByText(/17\s?700\s?₽/)).toBeInTheDocument()
     expect(screen.getByText("Конвертация 4%")).toBeInTheDocument()
     expect(screen.getByText("Финальная комиссия 6%")).toBeInTheDocument()
-  })
+
+    await user.click(screen.getByRole("button", { name: /RU 42 · EU 43 · US 9 · CN 270/ }))
+
+    expect(screen.getByText(/Выбранный размер: RU 42 · EU 43 · US 9 · CN 270 · ¥800/)).toBeInTheDocument()
+    expect(screen.getByText(/18\s?300\s?₽/)).toBeInTheDocument()
+  }, 10_000)
 
   it("makes unavailability explicit instead of using a static price", async () => {
     const user = userEvent.setup()
@@ -275,6 +338,94 @@ describe("LandingPage", () => {
     )
     expect(screen.queryByLabelText("Результаты поиска")).toBeNull()
   })
+
+  it("fails closed when a public search response has unsafe references, quotes, or media", async () => {
+    const user = userEvent.setup()
+    const invalidProducts = [
+      publicLiveProduct({ product_ref: "not-a-public-reference" }),
+      publicLiveProduct({ offers: [publicLiveOffer({ offer_ref: "not-a-public-reference" })] }),
+      publicLiveProduct({ observed_at: "not-a-timestamp" }),
+      publicLiveProduct({ images: ["https://cdn.example.invalid/product.webp"] }),
+      publicLiveProduct({ description: "中文描述不应进入公开页面" }),
+      publicLiveProduct({ in_stock: "true" }),
+      publicLiveProduct({ offers: [publicLiveOffer({ eu: null })] }),
+    ]
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => readyLiveSearch(invalidProducts),
+      }),
+    )
+    render(<LandingPage configuredBotUsername={null} />)
+
+    await user.type(screen.getByRole("searchbox", { name: "Поиск товара" }), "Nike Air Force 1")
+    await user.click(screen.getByRole("button", { name: "Найти товар" }))
+
+    expect(await screen.findByRole("status")).toHaveTextContent(
+      "Сейчас не удалось получить актуальную цену. Каталог не подменяет цену или наличие.",
+    )
+    expect(screen.queryByLabelText("Результаты поиска")).toBeNull()
+  }, 10_000)
+
+  it("re-queries a broad model clarification and keeps four products as four cards", async () => {
+    const user = userEvent.setup()
+    const fourProducts = ["a", "b", "c", "d"].map((character, index) =>
+      publicLiveProduct({
+        product_ref: character.repeat(24),
+        name: `Air Max 95 colour ${index + 1}`,
+        offers: [
+          publicLiveOffer({
+            offer_ref: `${character}${index}`.repeat(12),
+            size: `${42 + index}`,
+            eu: `${42 + index}`,
+          }),
+        ],
+      }),
+    )
+    const fetchMock = vi.fn(async (_url: string, options?: RequestInit) => {
+      const body = options?.body ? JSON.parse(String(options.body)) as { query?: string } : null
+      if (body?.query === "найк аир макс") {
+        return {
+          ok: true,
+          json: async () => ({
+            status: "clarification",
+            normalized_query: "Nike Air Max",
+            clarification: "Poizon: какая версия Air Max нужна?",
+            clarification_options: [
+              { label: "Air Max 95", query: "Nike Air Max 95" },
+              { label: "Air Max Plus", query: "Nike Air Max Plus" },
+            ],
+            results: [],
+            fallback: [],
+          }),
+        }
+      }
+      return { ok: true, json: async () => readyLiveSearch(fourProducts) }
+    })
+    vi.stubGlobal("fetch", fetchMock)
+    render(<LandingPage configuredBotUsername={null} />)
+
+    await user.type(screen.getByRole("searchbox", { name: "Поиск товара" }), "найк аир макс")
+    await user.click(screen.getByRole("button", { name: "Найти товар" }))
+
+    expect(await screen.findByText("Уточните модель или артикул.")).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "Air Max 95" })).toBeInTheDocument()
+    expect(screen.queryByText(/poizon|poison/i)).toBeNull()
+
+    await user.click(screen.getByRole("button", { name: "Air Max 95" }))
+
+    const results = await screen.findByLabelText("Результаты поиска")
+    expect(within(results).getAllByRole("article")).toHaveLength(4)
+    const searchCalls = fetchMock.mock.calls.filter(
+      ([url, options]) => String(url).endsWith("/api/catalog/search") && options?.method === "POST",
+    )
+    expect(searchCalls).toHaveLength(2)
+    expect(JSON.parse(String(searchCalls[1][1]?.body))).toEqual({
+      query: "Nike Air Max 95",
+      limit: 4,
+    })
+  }, 10_000)
 
   it("hydrates a product dialog from a URL and browser back restores catalog context", async () => {
     const user = userEvent.setup()

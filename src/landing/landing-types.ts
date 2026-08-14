@@ -24,7 +24,18 @@ export interface TaskMatch {
 
 export type CopyState = "idle" | "copied" | "failed"
 
-export type LivePoizonSearchStatus = "idle" | "loading" | "ready" | "unavailable"
+export type LivePoizonSearchStatus =
+  | "idle"
+  | "loading"
+  | "clarification"
+  | "ready"
+  | "unavailable"
+
+/** A bounded model choice returned before a broad search is expanded. */
+export interface LivePoizonClarificationOption {
+  label: string
+  query: string
+}
 
 /** Customer-safe subset of the CRM quote; no provider address or secret. */
 export interface LivePoizonPriceBreakdown {
@@ -39,25 +50,38 @@ export interface LivePoizonPriceBreakdown {
 }
 
 export interface LivePoizonOffer {
-  sku_id: string
+  /** Opaque server-issued reference for this exact size; never a provider SKU. */
+  offer_ref: string
   size: string
-  currency: "CNY"
+  eu: string
+  ru: string
+  us: string
+  cn: string
+  available: boolean | null
   price_cny: number
   quote_rub: number
   rf_delivery: number
-  total_rub: number | null
-  price_breakdown: LivePoizonPriceBreakdown | null
+  total_rub: number
+  price_breakdown: LivePoizonPriceBreakdown
 }
 
 export interface LivePoizonProduct {
-  provider_source: "poizon_batch_sync_api"
-  provider_product_id: string
+  /** Opaque server-issued product reference; never a provider product ID. */
+  product_ref: string
   brand: string | null
   name: string
   article: string | null
+  color: string | null
   kind: "footwear" | "apparel" | "accessory"
+  description: string
+  images: string[]
+  in_stock: boolean | null
+  size_context: string | null
+  size_chart: string | null
+  size_image: string | null
   offers: LivePoizonOffer[]
-  yuan_rate: number
+  observed_at: string
+  expires_at: string
 }
 
 export interface StorefrontState {
@@ -71,6 +95,7 @@ export interface StorefrontState {
   liveSearchStatus: LivePoizonSearchStatus
   liveSearchResults: LivePoizonProduct[]
   liveSearchMessage: string | null
+  liveSearchClarificationOptions: LivePoizonClarificationOption[]
   heroProducts: CatalogProduct[]
   filteredProducts: CatalogProduct[]
   selectedProduct: CatalogProduct | null
@@ -97,7 +122,7 @@ export interface StorefrontState {
   resetCatalog: () => void
   setTaskInput: (task: string) => void
   setLiveSearchQuery: (query: string) => void
-  submitLiveSearch: () => Promise<void>
+  submitLiveSearch: (queryOverride?: string) => Promise<void>
   openProduct: (product: CatalogProduct, trigger: HTMLButtonElement) => void
   closeProduct: () => void
   selectProductImage: (index: number) => void

@@ -165,6 +165,24 @@ describe("standalone site runtime boundary", () => {
     expect(result.stderr).toContain("leave /catalog on the current React storefront")
   })
 
+  it("allows only the documented product-image CDN in the image policy", () => {
+    const fixture = makeFixture()
+    const nginx = path.join(fixture, "nginx.conf")
+    writeFileSync(
+      nginx,
+      readFileSync(nginx, "utf8").replace(
+        "https://cdn.poizon.com",
+        "https:",
+      ),
+      "utf8",
+    )
+
+    const result = runVerifier(fixture)
+
+    expect(result.status).not.toBe(0)
+    expect(result.stderr).toContain("img-src 'self' data: https://cdn.poizon.com")
+  })
+
   it("requires the named release-rights command", () => {
     const fixture = makeFixture()
     const packagePath = path.join(fixture, "package.json")

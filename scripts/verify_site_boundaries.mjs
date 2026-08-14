@@ -126,6 +126,7 @@ for (const required of [
   "form-action 'none'",
   "frame-ancestors 'none'",
   "object-src 'none'",
+  "img-src 'self' data: https://cdn.poizon.com",
   "Cross-Origin-Opener-Policy",
   "Permissions-Policy",
   "Referrer-Policy",

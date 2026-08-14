@@ -888,6 +888,27 @@ img {
   color: var(--kb-muted);
 }
 
+.live-poizon-search__clarification {
+  display: grid;
+  gap: 10px;
+  border: 1px solid var(--kb-line);
+  border-radius: var(--kb-radius);
+  padding: 12px;
+  background: var(--kb-bg-2);
+}
+
+.live-poizon-search__choices,
+.live-poizon-search__sizes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.live-poizon-search__choices .button {
+  min-height: 38px;
+  padding: 8px 12px;
+}
+
 .live-poizon-search__results {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -902,6 +923,14 @@ img {
   border-radius: var(--kb-radius);
   padding: 14px;
   background: var(--kb-bg-2);
+}
+
+.live-poizon-search__image {
+  aspect-ratio: 4 / 3;
+  width: 100%;
+  border-radius: calc(var(--kb-radius) - 3px);
+  object-fit: cover;
+  background: var(--kb-panel);
 }
 
 .live-poizon-search__result-heading {
@@ -927,6 +956,67 @@ img {
   color: var(--kb-accent);
   font-size: 1.55rem;
   line-height: 1;
+}
+
+.live-poizon-search__availability,
+.live-poizon-search__size-context,
+.live-poizon-search__size-chart,
+.live-poizon-search__selected-size,
+.live-poizon-search__fixed-until {
+  margin: 0;
+  color: var(--kb-muted);
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
+.live-poizon-search__availability,
+.live-poizon-search__selected-size {
+  color: var(--kb-text-soft);
+  font-weight: 750;
+}
+
+.live-poizon-search__size-image {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+}
+
+.live-poizon-search__size-image img {
+  width: 100%;
+  border: 1px solid var(--kb-line);
+  border-radius: calc(var(--kb-radius) - 3px);
+}
+
+.live-poizon-search__size-image figcaption {
+  color: var(--kb-muted);
+  font-size: 0.78rem;
+}
+
+.live-poizon-search__size-choice {
+  display: grid;
+  gap: 3px;
+  border: 1px solid var(--kb-line-strong);
+  border-radius: 10px;
+  padding: 7px 9px;
+  color: var(--kb-text-soft);
+  text-align: left;
+  background: transparent;
+  cursor: pointer;
+}
+
+.live-poizon-search__size-choice small {
+  color: var(--kb-muted);
+  font-size: 0.72rem;
+}
+
+.live-poizon-search__size-choice[aria-pressed="true"] {
+  border-color: var(--kb-accent);
+  color: var(--kb-accent);
+}
+
+.live-poizon-search__size-choice:disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
 }
 
 .live-poizon-search__breakdown {

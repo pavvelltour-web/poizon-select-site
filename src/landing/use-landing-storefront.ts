@@ -29,6 +29,7 @@ import {
 } from "./landing-data"
 import type {
   ActiveCategory,
+  LivePoizonClarificationOption,
   LivePoizonOffer,
   LivePoizonPriceBreakdown,
   LivePoizonProduct,
@@ -40,6 +41,13 @@ export type LandingStorefront = StorefrontState
 
 const LIVE_SEARCH_UNAVAILABLE =
   "Сейчас не удалось получить актуальную цену. Каталог не подменяет цену или наличие."
+const LIVE_SEARCH_CLARIFICATION_FALLBACK = "Уточните модель или артикул."
+const MAX_LIVE_QUOTE_AGE_MS = 12 * 60 * 60 * 1000
+const MAX_FUTURE_OBSERVED_SKEW_MS = 5 * 60 * 1000
+const PUBLIC_REFERENCE_PATTERN = /^[a-f0-9]{16,64}$/
+const PROVIDER_NAME_PATTERN = /poizon|poison/iu
+const HAN_CHARACTER_PATTERN = /[\u3400-\u9fff\uf900-\ufaff]/u
+const MAX_RUB_PRICE = 10_000_000
 
 function crmSearchEndpoint(): string | null {
   // VITE_* values are public. Keep this same-origin so browsers call the CRM
@@ -53,14 +61,79 @@ function isPriceBreakdown(value: unknown): value is LivePoizonPriceBreakdown {
   if (!value || typeof value !== "object") return false
   const breakdown = value as Record<string, unknown>
   return (
-    typeof breakdown.purchase_rub === "number" &&
-    typeof breakdown.conversion_fee === "number" &&
-    typeof breakdown.first_six_percent_fee === "number" &&
-    typeof breakdown.service_markup === "number" &&
-    typeof breakdown.final_six_percent_fee === "number" &&
-    typeof breakdown.delivery_rub === "number" &&
-    typeof breakdown.total_rub === "number" &&
-    typeof breakdown.markup_tier === "string"
+    validRubAmount(breakdown.purchase_rub) &&
+    validRubAmount(breakdown.conversion_fee, true) &&
+    validRubAmount(breakdown.first_six_percent_fee, true) &&
+    validRubAmount(breakdown.service_markup, true) &&
+    validRubAmount(breakdown.final_six_percent_fee, true) &&
+    validRubAmount(breakdown.delivery_rub, true) &&
+    validRubAmount(breakdown.total_rub) &&
+    isPublicText(breakdown.markup_tier, 1, 80)
+  )
+}
+
+function validRubAmount(value: unknown, allowZero = false): value is number {
+  return (
+    typeof value === "number" &&
+    Number.isFinite(value) &&
+    value >= (allowZero ? 0 : 0.01) &&
+    value <= MAX_RUB_PRICE
+  )
+}
+
+function validCnyAmount(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value) && value > 0 && value <= 100_000
+}
+
+function isSafeText(value: unknown, minimum: number, maximum: number): value is string {
+  return (
+    typeof value === "string" &&
+    value.trim().length >= minimum &&
+    value.length <= maximum &&
+    !/[\u0000-\u001f\u007f]/u.test(value) &&
+    !PROVIDER_NAME_PATTERN.test(value)
+  )
+}
+
+function isPublicText(value: unknown, minimum: number, maximum: number): value is string {
+  return isSafeText(value, minimum, maximum) && !HAN_CHARACTER_PATTERN.test(value)
+}
+
+function isOptionalPublicText(value: unknown, maximum: number): value is string | null {
+  return value === null || (typeof value === "string" && isPublicText(value, 1, maximum))
+}
+
+function isOptionalSafeText(value: unknown, maximum: number): value is string | null {
+  return value === null || (typeof value === "string" && isSafeText(value, 1, maximum))
+}
+
+function isAllowedImageUrl(value: unknown): value is string {
+  if (typeof value !== "string" || value.length > 2048) return false
+  try {
+    const url = new URL(value)
+    return (
+      url.protocol === "https:" &&
+      url.hostname === "cdn.poizon.com" &&
+      !url.username &&
+      !url.password &&
+      !url.port
+    )
+  } catch {
+    return false
+  }
+}
+
+function isCurrentLiveQuote(observedAt: unknown, expiresAt: unknown, nowMs: number): boolean {
+  if (typeof observedAt !== "string" || typeof expiresAt !== "string") return false
+  const observedMs = Date.parse(observedAt)
+  const expiresMs = Date.parse(expiresAt)
+  return (
+    Number.isFinite(observedMs) &&
+    Number.isFinite(expiresMs) &&
+    observedMs <= nowMs + MAX_FUTURE_OBSERVED_SKEW_MS &&
+    expiresMs > nowMs &&
+    expiresMs > observedMs &&
+    expiresMs - observedMs <= MAX_LIVE_QUOTE_AGE_MS
   )
 }
 
@@ -68,31 +141,98 @@ function isLiveOffer(value: unknown): value is LivePoizonOffer {
   if (!value || typeof value !== "object") return false
   const offer = value as Record<string, unknown>
   return (
-    typeof offer.sku_id === "string" &&
-    typeof offer.size === "string" &&
-    offer.currency === "CNY" &&
-    typeof offer.price_cny === "number" &&
-    typeof offer.quote_rub === "number" &&
-    typeof offer.rf_delivery === "number" &&
-    (typeof offer.total_rub === "number" || offer.total_rub === null) &&
-    (offer.price_breakdown === null || isPriceBreakdown(offer.price_breakdown))
+    typeof offer.offer_ref === "string" &&
+    PUBLIC_REFERENCE_PATTERN.test(offer.offer_ref) &&
+    isSafeText(offer.size, 1, 32) &&
+    isSafeText(offer.eu, 0, 32) &&
+    isSafeText(offer.ru, 0, 32) &&
+    isSafeText(offer.us, 0, 32) &&
+    isSafeText(offer.cn, 0, 32) &&
+    (typeof offer.available === "boolean" || offer.available === null) &&
+    validCnyAmount(offer.price_cny) &&
+    validRubAmount(offer.quote_rub) &&
+    validRubAmount(offer.rf_delivery, true) &&
+    validRubAmount(offer.total_rub) &&
+    isPriceBreakdown(offer.price_breakdown)
   )
 }
 
-function isLiveProduct(value: unknown): value is LivePoizonProduct {
+function isLiveProduct(value: unknown, nowMs = Date.now()): value is LivePoizonProduct {
   if (!value || typeof value !== "object") return false
   const product = value as Record<string, unknown>
+  const offers = Array.isArray(product.offers) ? product.offers : []
+  const offerRefs = new Set<string>()
+  const sizeLabels = new Set<string>()
+  for (const offer of offers) {
+    if (!isLiveOffer(offer)) return false
+    if (offerRefs.has(offer.offer_ref) || sizeLabels.has(offer.size)) return false
+    offerRefs.add(offer.offer_ref)
+    sizeLabels.add(offer.size)
+  }
   return (
-    product.provider_source === "poizon_batch_sync_api" &&
-    typeof product.provider_product_id === "string" &&
-    (typeof product.brand === "string" || product.brand === null) &&
-    typeof product.name === "string" &&
-    (typeof product.article === "string" || product.article === null) &&
+    typeof product.product_ref === "string" &&
+    PUBLIC_REFERENCE_PATTERN.test(product.product_ref) &&
+    isOptionalPublicText(product.brand, 120) &&
+    isPublicText(product.name, 2, 240) &&
+    isOptionalPublicText(product.article, 160) &&
+    isOptionalSafeText(product.color, 160) &&
     (product.kind === "footwear" || product.kind === "apparel" || product.kind === "accessory") &&
-    Array.isArray(product.offers) &&
-    product.offers.every(isLiveOffer) &&
-    typeof product.yuan_rate === "number"
+    isPublicText(product.description, 2, 3_000) &&
+    Array.isArray(product.images) &&
+    product.images.length > 0 &&
+    product.images.length <= 12 &&
+    product.images.every(isAllowedImageUrl) &&
+    (typeof product.in_stock === "boolean" || product.in_stock === null) &&
+    isOptionalSafeText(product.size_context, 320) &&
+    isOptionalSafeText(product.size_chart, 2_000) &&
+    (product.size_image === null || isAllowedImageUrl(product.size_image)) &&
+    offers.length > 0 &&
+    isCurrentLiveQuote(product.observed_at, product.expires_at, nowMs)
   )
+}
+
+function parseLiveProducts(value: unknown, nowMs = Date.now()): LivePoizonProduct[] {
+  if (!Array.isArray(value)) return []
+  const products: LivePoizonProduct[] = []
+  const references = new Set<string>()
+  const ambiguousReferences = new Set<string>()
+  for (const item of value) {
+    if (!isLiveProduct(item, nowMs) || ambiguousReferences.has(item.product_ref)) continue
+    if (references.has(item.product_ref)) {
+      const duplicateIndex = products.findIndex((product) => product.product_ref === item.product_ref)
+      if (duplicateIndex >= 0) products.splice(duplicateIndex, 1)
+      references.delete(item.product_ref)
+      ambiguousReferences.add(item.product_ref)
+      continue
+    }
+    references.add(item.product_ref)
+    products.push(item)
+    if (products.length === 4) break
+  }
+  return products
+}
+
+function isLiveClarificationOption(value: unknown): value is LivePoizonClarificationOption {
+  if (!value || typeof value !== "object") return false
+  const option = value as Record<string, unknown>
+  return isPublicText(option.label, 1, 80) && isPublicText(option.query, 2, 160)
+}
+
+function parseLiveClarificationOptions(value: unknown): LivePoizonClarificationOption[] {
+  if (!Array.isArray(value)) return []
+  const seenQueries = new Set<string>()
+  return value
+    .filter(isLiveClarificationOption)
+    .filter((option) => {
+      if (seenQueries.has(option.query)) return false
+      seenQueries.add(option.query)
+      return true
+    })
+    .slice(0, 4)
+}
+
+function safeClarification(value: unknown): string {
+  return isPublicText(value, 2, 320) ? value.trim() : LIVE_SEARCH_CLARIFICATION_FALLBACK
 }
 
 function sortStorefrontProducts(
@@ -131,10 +271,13 @@ export function useLandingStorefront(
   const [taskInput, setTaskInputState] = useState("")
   const [liveSearchQuery, setLiveSearchQueryState] = useState("")
   const [liveSearchStatus, setLiveSearchStatus] = useState<
-    "idle" | "loading" | "ready" | "unavailable"
+    "idle" | "loading" | "clarification" | "ready" | "unavailable"
   >("idle")
   const [liveSearchResults, setLiveSearchResults] = useState<LivePoizonProduct[]>([])
   const [liveSearchMessage, setLiveSearchMessage] = useState<string | null>(null)
+  const [liveSearchClarificationOptions, setLiveSearchClarificationOptions] = useState<
+    LivePoizonClarificationOption[]
+  >([])
   const [verifiedCatalogPrices, setVerifiedCatalogPrices] = useState<
     Readonly<Record<string, VerifiedCatalogPrice>>
   >({})
@@ -360,22 +503,26 @@ export function useLandingStorefront(
       setLiveSearchStatus("idle")
       setLiveSearchMessage(null)
       setLiveSearchResults([])
+      setLiveSearchClarificationOptions([])
     }
   }
 
-  const submitLiveSearch = useCallback(async () => {
-    const query = liveSearchQuery.trim().replace(/\s+/g, " ")
+  const submitLiveSearch = useCallback(async (queryOverride?: string) => {
+    const query = (queryOverride ?? liveSearchQuery).trim().replace(/\s+/g, " ")
+    if (queryOverride) setLiveSearchQueryState(query)
     const endpoint = crmSearchEndpoint()
     if (query.length < 2) {
       setLiveSearchResults([])
       setLiveSearchStatus("unavailable")
       setLiveSearchMessage("Введите название или артикул минимум из двух символов.")
+      setLiveSearchClarificationOptions([])
       return
     }
     if (!endpoint) {
       setLiveSearchResults([])
       setLiveSearchStatus("unavailable")
       setLiveSearchMessage(LIVE_SEARCH_UNAVAILABLE)
+      setLiveSearchClarificationOptions([])
       return
     }
 
@@ -385,6 +532,7 @@ export function useLandingStorefront(
     const requestId = liveSearchRequestIdRef.current + 1
     liveSearchRequestIdRef.current = requestId
     setLiveSearchResults([])
+    setLiveSearchClarificationOptions([])
     setLiveSearchStatus("loading")
     setLiveSearchMessage(null)
 
@@ -399,10 +547,16 @@ export function useLandingStorefront(
       const payload: unknown = await response.json()
       if (requestId !== liveSearchRequestIdRef.current) return
       const data = payload && typeof payload === "object" ? (payload as Record<string, unknown>) : null
-      const results = Array.isArray(data?.results) ? data.results.filter(isLiveProduct) : []
+      const results = parseLiveProducts(data?.results)
       if (response.ok && data?.status === "ready" && results.length > 0) {
         setLiveSearchResults(results)
         setLiveSearchStatus("ready")
+        return
+      }
+      if (response.ok && data?.status === "clarification") {
+        setLiveSearchStatus("clarification")
+        setLiveSearchMessage(safeClarification(data?.clarification))
+        setLiveSearchClarificationOptions(parseLiveClarificationOptions(data?.clarification_options))
         return
       }
       setLiveSearchResults([])
@@ -415,6 +569,7 @@ export function useLandingStorefront(
       setLiveSearchResults([])
       setLiveSearchStatus("unavailable")
       setLiveSearchMessage(LIVE_SEARCH_UNAVAILABLE)
+      setLiveSearchClarificationOptions([])
     }
   }, [liveSearchQuery])
 
@@ -472,6 +627,7 @@ export function useLandingStorefront(
     liveSearchStatus,
     liveSearchResults,
     liveSearchMessage,
+    liveSearchClarificationOptions,
     heroProducts,
     filteredProducts,
     selectedProduct,

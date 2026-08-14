@@ -1,6 +1,7 @@
+import { useState } from "react"
 import { LoaderCircle, Search } from "lucide-react"
 
-import type { LivePoizonOffer } from "../landing-types"
+import type { LivePoizonOffer, LivePoizonProduct } from "../landing-types"
 import type { LandingStorefront } from "../use-landing-storefront"
 
 interface LivePoizonSearchProps {
@@ -13,20 +14,55 @@ const rub = new Intl.NumberFormat("ru-RU", {
   maximumFractionDigits: 0,
 })
 
-const yuan = new Intl.NumberFormat("ru-RU", { maximumFractionDigits: 0 })
+const yuan = new Intl.NumberFormat("ru-RU", {
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 2,
+})
 
 function formatRub(value: number) {
   return rub.format(value)
 }
 
+function formatCny(value: number) {
+  return `¥${yuan.format(value)}`
+}
+
+function formatLiveSize(offer: LivePoizonOffer): string {
+  const labels = [
+    offer.ru ? `RU ${offer.ru}` : null,
+    offer.eu ? `EU ${offer.eu}` : null,
+    offer.us ? `US ${offer.us}` : null,
+    offer.cn ? `CN ${offer.cn}` : null,
+  ].filter((label): label is string => Boolean(label))
+  return labels.length > 0 ? labels.join(" · ") : `Размер: ${offer.size}`
+}
+
+function productTitle(product: LivePoizonProduct): string {
+  if (!product.brand) return product.name
+  return product.name.toLocaleLowerCase().startsWith(product.brand.toLocaleLowerCase())
+    ? product.name
+    : `${product.brand} ${product.name}`
+}
+
+function stockLabel(inStock: boolean | null): string {
+  if (inStock === true) return "В наличии по данным поиска."
+  if (inStock === false) return "Сейчас нет в наличии по данным поиска."
+  return "Наличие уточняется."
+}
+
+function offerStockLabel(offer: LivePoizonOffer): string {
+  if (offer.available === true) return "в наличии"
+  if (offer.available === false) return "нет в наличии"
+  return "наличие уточняется"
+}
+
 function PriceBreakdown({ offer }: { offer: LivePoizonOffer }) {
   const breakdown = offer.price_breakdown
-  if (!breakdown) return null
 
   return (
-    <dl className="live-poizon-search__breakdown">
+    <dl className="live-poizon-search__breakdown" aria-label="Детализация выбранной цены">
       <div>
-        <dt>Цена товара · ¥{yuan.format(offer.price_cny)} × курс ЦБ</dt>
+        <dt>Цена товара · {formatCny(offer.price_cny)}</dt>
         <dd>{formatRub(breakdown.purchase_rub)}</dd>
       </div>
       <div>
@@ -53,6 +89,77 @@ function PriceBreakdown({ offer }: { offer: LivePoizonOffer }) {
   )
 }
 
+function ProductResult({ product }: { product: LivePoizonProduct }) {
+  const availableOffers = product.offers.filter((offer) => offer.available !== false)
+  const defaultOffer = availableOffers[0] ?? product.offers[0]
+  const [selectedOfferRef, setSelectedOfferRef] = useState(defaultOffer.offer_ref)
+  const selectedOffer =
+    product.offers.find((offer) => offer.offer_ref === selectedOfferRef) ?? defaultOffer
+  const title = productTitle(product)
+
+  return (
+    <article className="live-poizon-search__result">
+      <img
+        className="live-poizon-search__image"
+        src={product.images[0]}
+        alt={title}
+        loading="lazy"
+        referrerPolicy="no-referrer"
+      />
+      <div className="live-poizon-search__result-heading">
+        <span>Цена проверена сейчас</span>
+        <small>Выберите размер</small>
+      </div>
+      <h4>{title}</h4>
+      <p>{product.description}</p>
+      {product.article ? <p>Артикул: {product.article}</p> : null}
+      {product.color ? <p>Цвет: {product.color}</p> : null}
+      <p className="live-poizon-search__availability">{stockLabel(product.in_stock)}</p>
+      {product.size_context ? (
+        <p className="live-poizon-search__size-context">{product.size_context}</p>
+      ) : null}
+      {product.size_chart ? <p className="live-poizon-search__size-chart">{product.size_chart}</p> : null}
+      {product.size_image ? (
+        <figure className="live-poizon-search__size-image">
+          <img
+            src={product.size_image}
+            alt={`Таблица размеров для ${title}`}
+            loading="lazy"
+            referrerPolicy="no-referrer"
+          />
+          <figcaption>Таблица размеров</figcaption>
+        </figure>
+      ) : null}
+      <div className="live-poizon-search__sizes" aria-label={`Размеры ${title}`}>
+        {product.offers.map((offer) => {
+          const selected = offer.offer_ref === selectedOffer.offer_ref
+          return (
+            <button
+              aria-pressed={selected}
+              className="live-poizon-search__size-choice"
+              disabled={offer.available === false}
+              key={offer.offer_ref}
+              onClick={() => setSelectedOfferRef(offer.offer_ref)}
+              type="button"
+            >
+              <span>{formatLiveSize(offer)}</span>
+              <small>{offerStockLabel(offer)}</small>
+            </button>
+          )
+        })}
+      </div>
+      <p className="live-poizon-search__selected-size">
+        Выбранный размер: {formatLiveSize(selectedOffer)} · {formatCny(selectedOffer.price_cny)}
+      </p>
+      <strong className="live-poizon-search__total">{formatRub(selectedOffer.total_rub)}</strong>
+      <p className="live-poizon-search__fixed-until">
+        Итог относится к выбранному размеру. Перед оформлением он перепроверяется.
+      </p>
+      <PriceBreakdown offer={selectedOffer} />
+    </article>
+  )
+}
+
 export function LivePoizonSearch({ storefront }: LivePoizonSearchProps) {
   const loading = storefront.liveSearchStatus === "loading"
 
@@ -64,8 +171,8 @@ export function LivePoizonSearch({ storefront }: LivePoizonSearchProps) {
           <h3 id="live-poizon-search-title">Проверьте цену модели, которой нет в витрине.</h3>
         </div>
         <p>
-          Ищем через наш сервис и считаем по актуальному курсу ЦБ. Результат не является
-          статической ценой каталога.
+          Ищем через наш сервис и показываем цену, фото, описание и размеры по текущему
+          запросу. Это не статическая цена каталога.
         </p>
       </div>
 
@@ -98,7 +205,26 @@ export function LivePoizonSearch({ storefront }: LivePoizonSearchProps) {
       </form>
 
       <div className="live-poizon-search__status" aria-live="polite">
-        {loading ? <p>Получаем CNY-цену и свежий курс ЦБ…</p> : null}
+        {loading ? <p>Получаем подтверждённую цену и размеры…</p> : null}
+        {storefront.liveSearchStatus === "clarification" && storefront.liveSearchMessage ? (
+          <div className="live-poizon-search__clarification" role="status">
+            <p>{storefront.liveSearchMessage}</p>
+            {storefront.liveSearchClarificationOptions.length > 0 ? (
+              <div className="live-poizon-search__choices" aria-label="Уточнить модель">
+                {storefront.liveSearchClarificationOptions.map((option) => (
+                  <button
+                    className="button button--quiet"
+                    key={option.query}
+                    onClick={() => void storefront.submitLiveSearch(option.query)}
+                    type="button"
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            ) : null}
+          </div>
+        ) : null}
         {storefront.liveSearchStatus === "unavailable" && storefront.liveSearchMessage ? (
           <p role="status">{storefront.liveSearchMessage}</p>
         ) : null}
@@ -106,36 +232,9 @@ export function LivePoizonSearch({ storefront }: LivePoizonSearchProps) {
 
       {storefront.liveSearchStatus === "ready" ? (
         <div className="live-poizon-search__results" aria-label="Результаты поиска">
-          {storefront.liveSearchResults.flatMap((product) =>
-            product.offers.map((offer) => (
-              <article
-                key={`${product.provider_product_id}:${offer.sku_id}`}
-                className="live-poizon-search__result"
-              >
-                <div className="live-poizon-search__result-heading">
-                  <span>Цена сейчас</span>
-                  <small>Размер: {offer.size}</small>
-                </div>
-                <h4>{[product.brand, product.name].filter(Boolean).join(" ")}</h4>
-                {product.article ? (
-                  <p>
-                    {product.article} · курс ЦБ: {product.yuan_rate.toFixed(2)} ₽/¥
-                  </p>
-                ) : (
-                  <p>Курс ЦБ: {product.yuan_rate.toFixed(2)} ₽/¥</p>
-                )}
-                <strong className="live-poizon-search__total">
-                  {formatRub(offer.total_rub ?? offer.quote_rub + offer.rf_delivery)}
-                </strong>
-                <PriceBreakdown offer={offer} />
-                {storefront.botUrl ? (
-                  <a className="button button--quiet" href={storefront.botUrl}>
-                    Продолжить в Telegram
-                  </a>
-                ) : null}
-              </article>
-            )),
-          )}
+          {storefront.liveSearchResults.map((product) => (
+            <ProductResult key={product.product_ref} product={product} />
+          ))}
         </div>
       ) : null}
     </section>
