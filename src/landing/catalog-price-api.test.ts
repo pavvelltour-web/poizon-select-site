@@ -165,6 +165,16 @@ describe("verified catalogue price reader", () => {
             verifiedSizeOffer({ sku_id: "independent-sku", size_eu: "44", price_rub: 13_000 }),
           ],
         }),
+        verifiedItem({
+          slug: "duplicate-sku-after-size-collision",
+          price_rub: 13_000,
+          size_offers: [
+            verifiedSizeOffer({ sku_id: "sku-a", size_eu: "42", price_rub: 13_000 }),
+            verifiedSizeOffer({ sku_id: "sku-b", size_eu: "42", price_rub: 13_000 }),
+            verifiedSizeOffer({ sku_id: "sku-b", size_eu: "43", price_rub: 13_000 }),
+            verifiedSizeOffer({ sku_id: "sku-c", size_eu: "44", price_rub: 13_000 }),
+          ],
+        }),
       ]),
       now,
     )
@@ -187,6 +197,11 @@ describe("verified catalogue price reader", () => {
     })
     expect(prices["duplicate-sku"]?.sizeOffers["42"]).toBeUndefined()
     expect(prices["duplicate-sku"]?.sizeOffers["43"]).toBeUndefined()
+    expect(prices["duplicate-sku-after-size-collision"]?.sizeOffers).toMatchObject({
+      "44": { skuId: "sku-c", totalRub: 13_000 },
+    })
+    expect(prices["duplicate-sku-after-size-collision"]?.sizeOffers["42"]).toBeUndefined()
+    expect(prices["duplicate-sku-after-size-collision"]?.sizeOffers["43"]).toBeUndefined()
   })
 
   it("uses the same-origin checkout catalogue and returns no price on failure", async () => {

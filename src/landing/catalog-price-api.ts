@@ -130,31 +130,24 @@ function parseVerifiedPrice(value: unknown, nowMs: number): VerifiedCatalogPrice
     return null
   }
 
+  // Resolve ambiguity over the complete eligible payload before publishing an
+  // offer. A one-pass approach is order-dependent: a SKU hidden by a duplicate
+  // display size could otherwise reappear under a later size label.
+  const parsedSizeOffers = rawSizeOffers
+    .map((offer) => parseVerifiedSizeOffer(offer, observedAt, expiresAt))
+    .filter((offer): offer is VerifiedCatalogSizeOffer => offer !== null)
+  const skuCounts = new Map<string, number>()
+  const sizeCounts = new Map<string, number>()
+  for (const offer of parsedSizeOffers) {
+    skuCounts.set(offer.skuId, (skuCounts.get(offer.skuId) ?? 0) + 1)
+    sizeCounts.set(offer.size, (sizeCounts.get(offer.size) ?? 0) + 1)
+  }
   const sizeOffers: Record<string, VerifiedCatalogSizeOffer> = {}
-  const ambiguousSizes = new Set<string>()
-  const publishedSkuSizes = new Map<string, string>()
-  const ambiguousSkuIds = new Set<string>()
-  for (const rawOffer of rawSizeOffers) {
-    const offer = parseVerifiedSizeOffer(rawOffer, observedAt, expiresAt)
-    if (!offer || ambiguousSizes.has(offer.size) || ambiguousSkuIds.has(offer.skuId)) {
-      continue
-    }
-    const publishedSizeForSku = publishedSkuSizes.get(offer.skuId)
-    if (publishedSizeForSku) {
-      // A supplier SKU has one exact size. If it is published under two size
-      // labels, neither alias is safe to show or price in the storefront.
-      delete sizeOffers[publishedSizeForSku]
-      ambiguousSkuIds.add(offer.skuId)
-      if (publishedSizeForSku === offer.size) ambiguousSizes.add(offer.size)
-      continue
-    }
-    if (sizeOffers[offer.size]) {
-      delete sizeOffers[offer.size]
-      ambiguousSizes.add(offer.size)
-      continue
-    }
+  for (const offer of parsedSizeOffers) {
+    // A supplier SKU has one exact size, and one displayed size needs one
+    // exact checkout SKU. Ambiguous entries never reach the storefront.
+    if (skuCounts.get(offer.skuId) !== 1 || sizeCounts.get(offer.size) !== 1) continue
     sizeOffers[offer.size] = offer
-    publishedSkuSizes.set(offer.skuId, offer.size)
   }
   const validSizeOffers = Object.values(sizeOffers)
   if (validSizeOffers.length === 0) return null
