@@ -18,6 +18,7 @@ const yuan = new Intl.NumberFormat("ru-RU", {
   minimumFractionDigits: 0,
   maximumFractionDigits: 2,
 })
+const DESCRIPTION_UNAVAILABLE = "Описание временно недоступно."
 
 function formatRub(value: number) {
   return rub.format(value)
@@ -111,7 +112,7 @@ function ProductResult({ product }: { product: LivePoizonProduct }) {
         <small>Выберите размер</small>
       </div>
       <h4>{title}</h4>
-      <p>{product.description}</p>
+      <p>{product.description ?? DESCRIPTION_UNAVAILABLE}</p>
       {product.article ? <p>Артикул: {product.article}</p> : null}
       {product.color ? <p>Цвет: {product.color}</p> : null}
       <p className="live-poizon-search__availability">{stockLabel(product.in_stock)}</p>

@@ -177,7 +177,7 @@ function isLiveProduct(value: unknown, nowMs = Date.now()): value is LivePoizonP
     isOptionalPublicText(product.article, 160) &&
     isOptionalSafeText(product.color, 160) &&
     (product.kind === "footwear" || product.kind === "apparel" || product.kind === "accessory") &&
-    isPublicText(product.description, 2, 3_000) &&
+    isOptionalPublicText(product.description, 3_000) &&
     Array.isArray(product.images) &&
     product.images.length > 0 &&
     product.images.length <= 12 &&

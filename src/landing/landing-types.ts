@@ -73,7 +73,8 @@ export interface LivePoizonProduct {
   article: string | null
   color: string | null
   kind: "footwear" | "apparel" | "accessory"
-  description: string
+  /** The API may not have translated copy for every item yet. */
+  description: string | null
   images: string[]
   in_stock: boolean | null
   size_context: string | null

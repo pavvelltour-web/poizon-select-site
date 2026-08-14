@@ -339,6 +339,26 @@ describe("LandingPage", () => {
     expect(screen.queryByLabelText("Результаты поиска")).toBeNull()
   })
 
+  it("keeps a verified item visible when its translated description is temporarily unavailable", async () => {
+    const user = userEvent.setup()
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => readyLiveSearch([publicLiveProduct({ description: null })]),
+      }),
+    )
+    render(<LandingPage configuredBotUsername={null} />)
+
+    await user.type(screen.getByRole("searchbox", { name: "Поиск товара" }), "Nike Air Force 1")
+    await user.click(screen.getByRole("button", { name: "Найти товар" }))
+
+    const results = await screen.findByLabelText("Результаты поиска")
+    expect(within(results).getAllByRole("article")).toHaveLength(1)
+    expect(within(results).getByText("Описание временно недоступно.")).toBeInTheDocument()
+    expect(within(results).getByText(/17\s?700\s?₽/)).toBeInTheDocument()
+  })
+
   it("fails closed when a public search response has unsafe references, quotes, or media", async () => {
     const user = userEvent.setup()
     const invalidProducts = [
