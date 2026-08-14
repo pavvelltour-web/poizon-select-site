@@ -45,7 +45,7 @@ const LIVE_SEARCH_CLARIFICATION_FALLBACK = "Уточните модель или
 const MAX_LIVE_QUOTE_AGE_MS = 12 * 60 * 60 * 1000
 const MAX_FUTURE_OBSERVED_SKEW_MS = 5 * 60 * 1000
 const PUBLIC_REFERENCE_PATTERN = /^[a-f0-9]{16,64}$/
-const PROVIDER_NAME_PATTERN = /poizon|poison/iu
+const PROVIDER_NAME_PATTERN = /poizon|poison|пойзон|поизон|пойсон/iu
 const HAN_CHARACTER_PATTERN = /[\u3400-\u9fff\uf900-\ufaff]/u
 const MAX_RUB_PRICE = 10_000_000
 

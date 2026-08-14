@@ -347,6 +347,7 @@ describe("LandingPage", () => {
       publicLiveProduct({ observed_at: "not-a-timestamp" }),
       publicLiveProduct({ images: ["https://cdn.example.invalid/product.webp"] }),
       publicLiveProduct({ description: "中文描述不应进入公开页面" }),
+      publicLiveProduct({ description: "Пойзон подтверждает описание товара." }),
       publicLiveProduct({ in_stock: "true" }),
       publicLiveProduct({ offers: [publicLiveOffer({ eu: null })] }),
     ]
@@ -391,8 +392,9 @@ describe("LandingPage", () => {
           json: async () => ({
             status: "clarification",
             normalized_query: "Nike Air Max",
-            clarification: "Poizon: какая версия Air Max нужна?",
+            clarification: "Пойзон: какая версия Air Max нужна?",
             clarification_options: [
+              { label: "Пойзон Air Max 95", query: "Nike Air Max 95" },
               { label: "Air Max 95", query: "Nike Air Max 95" },
               { label: "Air Max Plus", query: "Nike Air Max Plus" },
             ],
@@ -411,7 +413,7 @@ describe("LandingPage", () => {
 
     expect(await screen.findByText("Уточните модель или артикул.")).toBeInTheDocument()
     expect(screen.getByRole("button", { name: "Air Max 95" })).toBeInTheDocument()
-    expect(screen.queryByText(/poizon|poison/i)).toBeNull()
+    expect(screen.queryByText(/poizon|poison|пойзон|поизон|пойсон/i)).toBeNull()
 
     await user.click(screen.getByRole("button", { name: "Air Max 95" }))
 
