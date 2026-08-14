@@ -16,7 +16,7 @@ export function HeroSection({ storefront }: HeroSectionProps) {
   return (
     <section className="shop-hero" aria-labelledby="hero-title">
       <div className="shop-hero__copy">
-        <p className="eyebrow">POIZON sports edit · Moscow delivery</p>
+        <p className="eyebrow">SPORTS EDIT · Москва</p>
         <h1 id="hero-title">KICKSBASE</h1>
         <p className="shop-hero__lead">
           Спортивная витрина с расчетом до оплаты: игровые пары, защита, форма

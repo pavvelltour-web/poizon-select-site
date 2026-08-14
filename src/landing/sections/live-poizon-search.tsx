@@ -26,7 +26,7 @@ function PriceBreakdown({ offer }: { offer: LivePoizonOffer }) {
   return (
     <dl className="live-poizon-search__breakdown">
       <div>
-        <dt>Poizon · ¥{yuan.format(offer.price_cny)} × курс ЦБ</dt>
+        <dt>Цена товара · ¥{yuan.format(offer.price_cny)} × курс ЦБ</dt>
         <dd>{formatRub(breakdown.purchase_rub)}</dd>
       </div>
       <div>
@@ -60,12 +60,12 @@ export function LivePoizonSearch({ storefront }: LivePoizonSearchProps) {
     <section className="live-poizon-search" aria-labelledby="live-poizon-search-title">
       <div className="live-poizon-search__heading">
         <div>
-          <p className="eyebrow">Живой Poizon</p>
+          <p className="eyebrow">Другие товары по запросу</p>
           <h3 id="live-poizon-search-title">Проверьте цену модели, которой нет в витрине.</h3>
         </div>
         <p>
-          Ищем в Poizon через наш сервер и считаем по актуальному курсу ЦБ. Результат
-          не является статической ценой каталога.
+          Ищем через наш сервис и считаем по актуальному курсу ЦБ. Результат не является
+          статической ценой каталога.
         </p>
       </div>
 
@@ -77,7 +77,7 @@ export function LivePoizonSearch({ storefront }: LivePoizonSearchProps) {
         }}
       >
         <label className="live-poizon-search__input">
-          <span className="sr-only">Поиск в Poizon</span>
+          <span className="sr-only">Поиск товара</span>
           <Search aria-hidden="true" size={18} />
           <input
             type="search"
@@ -93,7 +93,7 @@ export function LivePoizonSearch({ storefront }: LivePoizonSearchProps) {
           ) : (
             <Search aria-hidden="true" size={18} />
           )}
-          {loading ? "Считаем…" : "Найти в Poizon"}
+          {loading ? "Считаем…" : "Найти товар"}
         </button>
       </form>
 
@@ -105,7 +105,7 @@ export function LivePoizonSearch({ storefront }: LivePoizonSearchProps) {
       </div>
 
       {storefront.liveSearchStatus === "ready" ? (
-        <div className="live-poizon-search__results" aria-label="Результаты живого поиска Poizon">
+        <div className="live-poizon-search__results" aria-label="Результаты поиска">
           {storefront.liveSearchResults.flatMap((product) =>
             product.offers.map((offer) => (
               <article
@@ -113,7 +113,7 @@ export function LivePoizonSearch({ storefront }: LivePoizonSearchProps) {
                 className="live-poizon-search__result"
               >
                 <div className="live-poizon-search__result-heading">
-                  <span>Цена Poizon сейчас</span>
+                  <span>Цена сейчас</span>
                   <small>Размер: {offer.size}</small>
                 </div>
                 <h4>{[product.brand, product.name].filter(Boolean).join(" ")}</h4>

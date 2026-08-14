@@ -189,7 +189,7 @@ describe("LandingPage", () => {
     ).toBeInTheDocument()
   })
 
-  it("renders a fresh CRM Poizon quote without substituting the static catalog", async () => {
+  it("renders a fresh external quote without substituting the static catalog", async () => {
     const user = userEvent.setup()
     const fetchMock = vi.fn().mockResolvedValue({
       ok: true,
@@ -232,11 +232,11 @@ describe("LandingPage", () => {
     vi.stubGlobal("fetch", fetchMock)
     render(<LandingPage configuredBotUsername={null} />)
 
-    await user.type(screen.getByRole("searchbox", { name: "Поиск в Poizon" }), "Nike Air Force 1")
-    await user.click(screen.getByRole("button", { name: "Найти в Poizon" }))
+    await user.type(screen.getByRole("searchbox", { name: "Поиск товара" }), "Nike Air Force 1")
+    await user.click(screen.getByRole("button", { name: "Найти товар" }))
 
     await waitFor(() => {
-      expect(screen.getByLabelText("Результаты живого поиска Poizon")).toBeInTheDocument()
+      expect(screen.getByLabelText("Результаты поиска")).toBeInTheDocument()
     })
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/catalog/search",
@@ -246,7 +246,7 @@ describe("LandingPage", () => {
         body: JSON.stringify({ query: "Nike Air Force 1", limit: 4 }),
       }),
     )
-    expect(screen.getByText("Цена Poizon сейчас")).toBeInTheDocument()
+    expect(screen.getByText("Цена сейчас")).toBeInTheDocument()
     expect(screen.getByText(/12\s?473\s?₽/)).toBeInTheDocument()
     expect(screen.getByText("Конвертация 4%")).toBeInTheDocument()
     expect(screen.getByText("Финальная комиссия 6%")).toBeInTheDocument()
@@ -261,19 +261,19 @@ describe("LandingPage", () => {
         json: async () => ({
           status: "unavailable",
           results: [],
-          clarification: "Живой каталог Poizon временно недоступен.",
+          clarification: "Поставщик временно недоступен.",
         }),
       }),
     )
     render(<LandingPage configuredBotUsername={null} />)
 
-    await user.type(screen.getByRole("searchbox", { name: "Поиск в Poizon" }), "Nike Air Force 1")
-    await user.click(screen.getByRole("button", { name: "Найти в Poizon" }))
+    await user.type(screen.getByRole("searchbox", { name: "Поиск товара" }), "Nike Air Force 1")
+    await user.click(screen.getByRole("button", { name: "Найти товар" }))
 
     expect(await screen.findByRole("status")).toHaveTextContent(
-      "Живой каталог Poizon временно недоступен.",
+      "Сейчас не удалось получить актуальную цену. Каталог не подменяет цену или наличие.",
     )
-    expect(screen.queryByLabelText("Результаты живого поиска Poizon")).toBeNull()
+    expect(screen.queryByLabelText("Результаты поиска")).toBeNull()
   })
 
   it("hydrates a product dialog from a URL and browser back restores catalog context", async () => {

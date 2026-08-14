@@ -39,7 +39,7 @@ import type {
 export type LandingStorefront = StorefrontState
 
 const LIVE_SEARCH_UNAVAILABLE =
-  "Живая цена Poizon сейчас недоступна. Статический каталог не подменяет цену или наличие поставщика."
+  "Сейчас не удалось получить актуальную цену. Каталог не подменяет цену или наличие."
 
 function crmSearchEndpoint(): string | null {
   // VITE_* values are public. Keep this same-origin so browsers call the CRM
@@ -407,11 +407,9 @@ export function useLandingStorefront(
       }
       setLiveSearchResults([])
       setLiveSearchStatus("unavailable")
-      setLiveSearchMessage(
-        typeof data?.clarification === "string" && data.clarification.trim()
-          ? data.clarification
-          : LIVE_SEARCH_UNAVAILABLE,
-      )
+      // Provider clarification is not public copy. Keep the customer-facing
+      // message neutral and do not leak an upstream name or implementation.
+      setLiveSearchMessage(LIVE_SEARCH_UNAVAILABLE)
     } catch {
       if (controller.signal.aborted || requestId !== liveSearchRequestIdRef.current) return
       setLiveSearchResults([])
