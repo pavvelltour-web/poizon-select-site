@@ -84,12 +84,23 @@ if (
 ) {
   fail("verify:release must include assets, card thumbnails, release rights, approved media and unified catalog QA")
 }
+if (
+  packageManifest.scripts?.["verify:build-version"] !==
+  "node scripts/verify_build_version.mjs" ||
+  !packageManifest.scripts?.["build:production"]?.startsWith(
+    "npm run verify:build-version && ",
+  )
+) {
+  fail("production builds must require an immutable build version")
+}
 
 const dockerfile = await text("Dockerfile")
 for (const required of [
   "npm ci --ignore-scripts",
   'ARG VITE_BOT_USERNAME=""',
   'ARG VITE_API_BASE_URL=""',
+  'ARG BUILD_VERSION="unknown"',
+  "ENV BUILD_VERSION=$BUILD_VERSION",
   "npm run build:production",
   "USER nginx",
   "EXPOSE 8080",
@@ -147,6 +158,12 @@ if (
 }
 for (const route of ["location = /catalog {", "location = /catalog/ {"]) {
   if (!nginx.includes(route)) fail(`nginx must serve the SPA route with ${route}`)
+}
+if (!nginx.includes("absolute_redirect off;") || !nginx.includes("port_in_redirect off;")) {
+  fail("nginx must keep redirects independent from the internal container port")
+}
+if (!/location = \/catalog\/\s*\{\s*return 308 \/catalog\$is_args\$args;\s*\}/su.test(nginx)) {
+  fail("nginx must canonicalize /catalog/ to /catalog with a query-preserving 308")
 }
 if (nginx.includes("try_files $uri $uri/")) {
   fail("nginx directory fallback can redirect SPA routes to the internal port")

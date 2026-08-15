@@ -1,8 +1,15 @@
 const logoSrc = "/storefront-media/approved/assets/kicksbase-signal/kicksbase-logo.webp"
 
 export function Footer() {
+  const buildVersion = __BUILD_VERSION__ === "unknown" ? null : __BUILD_VERSION__
+
   return (
-    <footer className="site-footer" id="about" data-od-id="site-footer">
+    <footer
+      className="site-footer"
+      id="about"
+      data-od-id="site-footer"
+      data-build-version={buildVersion ?? "unknown"}
+    >
       <div className="footer-grid container">
         <div>
           <a className="brand" href="/" aria-label="KICKSBASE - главная">
@@ -21,6 +28,9 @@ export function Footer() {
           <a href="/personal-data-consent">Согласие</a>
           <a href="/#contacts">Контакты</a>
         </nav>
+        {buildVersion ? (
+          <small className="footer-build">Сборка {buildVersion.slice(0, 12)}</small>
+        ) : null}
       </div>
     </footer>
   )

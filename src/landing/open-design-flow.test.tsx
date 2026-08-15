@@ -43,8 +43,12 @@ function renderCatalogCard(product: CatalogProduct) {
 }
 
 function checkoutCatalogPayload() {
+  const observedAt = new Date(Date.now() - 60_000).toISOString()
+  const expiresAt = new Date(Date.now() + 11 * 60 * 60 * 1000).toISOString()
   return {
     version: "2026-08-02-v3",
+    catalog_mode: "curated_live_poizon",
+    snapshot_hours: 12,
     personal_data_consent_version: "pd-2026-08",
     order_creation_enabled: true,
     online_payment_enabled: true,
@@ -62,12 +66,17 @@ function checkoutCatalogPayload() {
         eta_min_days: 10,
         eta_max_days: 18,
         live_provider_verified: true,
+        display_price_verified: true,
+        checkout_ready: true,
+        observed_at: observedAt,
+        expires_at: expiresAt,
         size_offers: [
           {
             sku_id: "kd-18-40",
             size_eu: "40",
             size_ru: "39",
             price_rub: 31400,
+            price_cny: 1099,
             available: true,
             checkout_confirmed: true,
             live_provider_verified: true,
@@ -77,6 +86,7 @@ function checkoutCatalogPayload() {
             size_eu: "42",
             size_ru: "41",
             price_rub: 32900,
+            price_cny: 1159,
             available: true,
             checkout_confirmed: true,
             live_provider_verified: true,
@@ -238,7 +248,7 @@ describe("approved Open Design product flow", () => {
       dialog.querySelectorAll<HTMLImageElement>(".sheet-gallery-thumb img")[3]?.getAttribute("src"),
     ).toContain(`${catalogRoot}/gallery/nike-kd-18-4.webp`)
     const selectedSize = await within(dialog).findByRole("button", {
-      name: "39 RU, 40 EU, 31 400 ₽",
+      name: "39 RU, 40 EU, 31 400 ₽, в наличии",
     })
     expect(selectedSize).toHaveAttribute("aria-pressed", "true")
     expect(within(dialog).getByText("Размер: RU (EU)")).toBeInTheDocument()
@@ -247,14 +257,14 @@ describe("approved Open Design product flow", () => {
     expect(within(dialog).queryByText(/RU = EU - 1/u)).toBeNull()
     expect(within(dialog).queryByText(/Посадка зависит/u)).toBeNull()
     expect(within(dialog).getByRole("button", {
-      name: "40 RU, 41 EU, нет в наличии",
+      name: "40 RU, 41 EU, цена не указана, наличие уточняется",
     })).toBeDisabled()
     expect(within(dialog).getByRole("button", {
-      name: "34,5 RU, 35.5 EU, нет в наличии",
+      name: "34,5 RU, 35.5 EU, цена не указана, наличие уточняется",
     })).toBeDisabled()
 
     const nextSize = within(dialog).getByRole("button", {
-      name: "41 RU, 42 EU, 32 900 ₽",
+      name: "41 RU, 42 EU, 32 900 ₽, в наличии",
     })
     await user.click(nextSize)
     expect(nextSize).toHaveAttribute("aria-pressed", "true")

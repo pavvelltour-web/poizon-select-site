@@ -9,7 +9,7 @@
   "scripts": {
     "dev": "vite --host 127.0.0.1",
     "build": "npm run verify:assets && npm run verify:boundaries && tsc -b && vite build && npm run verify:dist",
-    "build:production": "npm run verify:release && npm run verify:boundaries && tsc -b && vite build && npm run verify:dist",
+    "build:production": "npm run verify:build-version && npm run verify:release && npm run verify:boundaries && tsc -b && vite build && npm run verify:dist",
     "preview": "vite preview --host 127.0.0.1",
     "test": "vitest run",
     "test:maintainer": "node scripts/run_maintainer_tests.mjs",
@@ -28,6 +28,7 @@
     "verify:assets": "node scripts/verify_catalog_assets.mjs",
     "verify:boundaries": "node scripts/verify_site_boundaries.mjs",
     "verify:dist": "node scripts/verify_dist_portability.mjs",
+    "verify:build-version": "node scripts/verify_build_version.mjs",
     "verify:media-pipeline": "node scripts/verify_product_media_pipeline.mjs",
     "verify:card-thumbnails": "node scripts/verify_catalog_card_thumbnails.mjs",
     "verify:release-rights": "node scripts/verify_release_rights.mjs",

@@ -12,7 +12,7 @@ import {
 } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 
-import type { CatalogProduct } from "../../catalog/catalog"
+import { formatRub, type CatalogProduct } from "../../catalog/catalog"
 import {
   getDisplayPrice,
   getProductGalleryAngleLabel,
@@ -71,14 +71,31 @@ export function ProductDetailPage({ product, storefront }: ProductDetailPageProp
     )
   }
 
-  const price = getDisplayPrice(product, storefront.catalogPriceState.lookup)
   const publishedOffer = storefront.catalogPriceState.items[product.slug]
   const catalogReady =
     storefront.catalogPriceState.status === "ready" &&
-    publishedOffer?.availability === "supplier_verified"
-  const sizeOptions = catalogReady ? publishedOffer.sizes : []
+    publishedOffer?.availability === "supplier_verified" &&
+    publishedOffer.checkoutReady
+  const sizeOffers = storefront.selectedProduct?.slug === product.slug
+    ? storefront.selectedSizeOffers
+    : []
+  const selectedPdpOffer = selectedSize
+    ? sizeOffers.find((offer) => offer.sizeEu === selectedSize) ?? null
+    : null
+  const price = selectedPdpOffer?.priceRub
+    ? {
+      label: selectedPdpOffer.available ? "Цена размера" : "Справочная цена размера",
+      value: formatRub(selectedPdpOffer.priceRub),
+      detail: selectedPdpOffer.available
+        ? "СДЭК рассчитывается отдельно"
+        : "Этот SKU нельзя оформить без подтверждённого наличия",
+    }
+    : getDisplayPrice(product, storefront.catalogPriceState.lookup)
   const orderCreationEnabled =
-    catalogReady && storefront.catalogPriceState.orderCreationEnabled
+    catalogReady &&
+    storefront.catalogPriceState.orderCreationEnabled &&
+    selectedPdpOffer?.available === true &&
+    selectedPdpOffer.checkoutConfirmed
   const sourcingMode = publishedOffer
     ? publishedOffer.fulfillmentMode === "in_stock"
       ? "В наличии в России"
@@ -215,14 +232,17 @@ export function ProductDetailPage({ product, storefront }: ProductDetailPageProp
               <a href="/delivery-returns">Как выбрать размер</a>
             </div>
             <div className="pdp-sizes__grid">
-              {sizeOptions.map((size) => (
+              {sizeOffers.map((offer) => (
                 <button
-                  key={size}
+                  key={offer.sizeEu}
                   type="button"
-                  aria-pressed={selectedSize === size}
-                  onClick={() => setSelectedSize(size)}
+                  aria-pressed={selectedSize === offer.sizeEu}
+                  aria-label={`${offer.sizeEu}, ${offer.priceRub ? formatRub(offer.priceRub) : "цена не указана"}, ${offer.stockStatus === true ? "в наличии" : offer.stockStatus === false ? "нет в наличии" : "наличие уточняется"}`}
+                  disabled={!offer.available || !offer.priceRub}
+                  data-stock-status={offer.stockStatus === null ? "unknown" : String(offer.stockStatus)}
+                  onClick={() => setSelectedSize(offer.sizeEu)}
                 >
-                  {size}
+                  {offer.sizeEu}
                 </button>
               ))}
             </div>

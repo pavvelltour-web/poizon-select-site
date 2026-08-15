@@ -67,13 +67,16 @@ export function CatalogSection({
     storefront.filteredProducts.length - visibleProducts.length,
   )
   const nextPageSize = Math.min(CATALOG_PAGE_SIZE, remainingProducts)
+  const hasProviderResults =
+    storefront.catalogSearch.response?.status === "ready" &&
+    storefront.catalogSearch.response.results.length > 0
   const commerceNotice =
     storefront.catalogPriceState.status === "loading"
-      ? "Проверяем доступность оформления. Цены из витрины уже видны."
+      ? "Загружаем актуальные цены и наличие из 12-часового снимка поставщика."
       : storefront.catalogPriceState.status === "failed"
-        ? "Цены из витрины видны. Оформление вернётся после восстановления связи с сервером."
+        ? "Подтверждённые цены и оформление временно недоступны."
         : !storefront.catalogPriceState.orderCreationEnabled
-          ? "Цены видны. Оформление заказа пока отключено."
+          ? "Справочные цены видны. Оформление доступно только для подтверждённых SKU."
           : !storefront.catalogPriceState.onlinePaymentEnabled
             ? "Заказ можно оформить. Онлайн-оплата пока недоступна."
             : null
@@ -173,6 +176,11 @@ export function CatalogSection({
               ) : null}
             </div>
           </>
+        ) : hasProviderResults ? (
+          <div className="catalog-empty" role="status">
+            <h3>В каталоге сайта этой модели нет.</h3>
+            <p>Актуальные предложения поставщика показаны выше.</p>
+          </div>
         ) : (
           <div className="catalog-empty" role="status">
             <h3>Ничего не нашли по этому запросу.</h3>
@@ -364,26 +372,34 @@ function LiveSearchResultCard({
   botUsername: string | null
 }) {
   const [copyState, setCopyState] = useState<"idle" | "copied" | "failed">("idle")
-  const [selectedOfferRef, setSelectedOfferRef] = useState(result.offers[0]?.offerRef ?? "")
+  const orderableOffers = result.offers.filter((offer) => offer.available === true)
+  const [selectedOfferRef, setSelectedOfferRef] = useState(
+    orderableOffers[0]?.offerRef ?? "",
+  )
   const title = [result.brand, result.name].filter(Boolean).join(" ")
   const sizes = [...new Set(result.offers.map((offer) => offer.sizeEu ?? offer.size))]
   // A fresh result can retain the card's product_ref while its source offers
   // are replaced. Fall back during render instead of resetting state in an
   // effect, so the select and handoff never point at a disappeared offer.
-  const selectedOffer = result.offers.find(
+  const selectedOffer = orderableOffers.find(
     (offer) => offer.offerRef === selectedOfferRef,
-  ) ?? result.offers[0]
-  const lowestOffer = result.offers.reduce((lowest, offer) =>
+  ) ?? orderableOffers[0] ?? null
+  const referenceOffers = orderableOffers.length > 0
+    ? orderableOffers
+    : result.offers.some((offer) => offer.available === null)
+      ? result.offers.filter((offer) => offer.available === null)
+      : result.offers.filter((offer) => offer.available === false)
+  const lowestOffer = referenceOffers.reduce((lowest, offer) =>
     offer.totalRub < lowest.totalRub ? offer : lowest,
   )
-  const availability = result.inStock === true
+  const availability = orderableOffers.length > 0
     ? "В наличии"
-    : result.inStock === false
-      ? "Нет в наличии"
-      : "Наличие уточняется"
+    : result.offers.some((offer) => offer.available === null)
+      ? "Наличие уточняется"
+      : "Нет в наличии"
 
   const copyRequest = async () => {
-    if (!selectedOffer) return
+    if (!selectedOffer || selectedOffer.available !== true) return
     const copied = await copyOrderRequest(buildLiveOrderRequest(result, selectedOffer))
     setCopyState(copied ? "copied" : "failed")
   }
@@ -432,14 +448,28 @@ function LiveSearchResultCard({
           <select
             value={selectedOffer?.offerRef ?? ""}
             onChange={(event) => setSelectedOfferRef(event.target.value)}
+            disabled={orderableOffers.length === 0}
           >
+            {orderableOffers.length === 0 ? (
+              <option value="" disabled>Нет размера с подтверждённым наличием</option>
+            ) : null}
             {result.offers.map((offer) => (
-              <option key={offer.offerRef} value={offer.offerRef}>
-                {offer.sizeEu ?? offer.size}{offer.sizeRu ? ` (RU ${offer.sizeRu})` : ""} — {formatRub(offer.totalRub)}
+              <option
+                key={offer.offerRef}
+                value={offer.offerRef}
+                disabled={offer.available !== true}
+              >
+                {offer.sizeEu ?? offer.size}{offer.sizeRu ? ` (RU ${offer.sizeRu})` : ""} — {formatRub(offer.totalRub)} — {offer.available === true ? "в наличии" : offer.available === false ? "нет в наличии" : "наличие уточняется"}
               </option>
             ))}
           </select>
         </label>
+        {orderableOffers.length === 0 ? (
+          <p className="live-search-card__article" role="status">
+            Цены по размерам справочные. Скопировать, отправить или оформить SKU без
+            подтверждённого наличия нельзя.
+          </p>
+        ) : null}
         <div className="live-search-card__actions">
           {result.sizeImage ? (
             <a
@@ -451,11 +481,13 @@ function LiveSearchResultCard({
               Размерная сетка
             </a>
           ) : null}
-          <button type="button" className="button button--quiet" onClick={() => void copyRequest()}>
-            <Copy aria-hidden="true" size={16} />
-            {copyState === "copied" ? "Запрос скопирован" : "Скопировать запрос"}
-          </button>
-          {botUrl ? (
+          {selectedOffer ? (
+            <button type="button" className="button button--quiet" onClick={() => void copyRequest()}>
+              <Copy aria-hidden="true" size={16} />
+              {copyState === "copied" ? "Запрос скопирован" : "Скопировать запрос"}
+            </button>
+          ) : null}
+          {botUrl && selectedOffer ? (
             <a
               className="button button--primary"
               href={botUrl}
@@ -506,18 +538,28 @@ function CatalogFallbackCard({ item }: { item: CatalogSearchFallback }) {
 function CatalogToolbar({ storefront }: CatalogSectionProps) {
   return (
     <div className="catalog-controls" data-od-id="catalog-controls" aria-label="Фильтры товаров">
-      <label className="catalog-search" htmlFor="catalog-search-input">
-        <span className="sr-only">Поиск по товарам</span>
-        <Search aria-hidden="true" size={18} />
-        <input
-          id="catalog-search-input"
-          type="search"
-          value={storefront.search}
-          onChange={(event) => storefront.setSearchValue(event.target.value)}
-          placeholder="Найти бренд или модель"
-          autoComplete="off"
-        />
-      </label>
+      <form
+        className="catalog-provider-search"
+        aria-labelledby="catalog-provider-search-title"
+        onSubmit={(event) => event.preventDefault()}
+      >
+        <span>
+          <h2 id="catalog-provider-search-title">Поиск по всему каталогу поставщика</h2>
+          <small>Введите модель или артикул — цена и размеры придут сразу по запросу.</small>
+        </span>
+        <label className="catalog-search" htmlFor="catalog-search-input">
+          <span className="sr-only">Поиск по товарам</span>
+          <Search aria-hidden="true" size={18} />
+          <input
+            id="catalog-search-input"
+            type="search"
+            value={storefront.search}
+            onChange={(event) => storefront.setSearchValue(event.target.value)}
+            placeholder="Nike Air Force 1, CW2288-111…"
+            autoComplete="off"
+          />
+        </label>
+      </form>
 
       <label className="catalog-sort">
         <span className="sr-only">Сортировка</span>

@@ -43,8 +43,14 @@ export function buildOrderRequest(
 
 export function buildLiveOrderRequest(
   product: Pick<CatalogSearchResult, "article" | "brand" | "name" | "color" | "expiresAt">,
-  offer: Pick<CatalogSearchOffer, "size" | "sizeEu" | "sizeRu" | "priceCny" | "totalRub">,
+  offer: Pick<
+    CatalogSearchOffer,
+    "size" | "sizeEu" | "sizeRu" | "priceCny" | "totalRub" | "available"
+  >,
 ): string {
+  if (offer.available !== true) {
+    throw new Error("Нельзя передать в заказ SKU без подтверждённого наличия.")
+  }
   const name = cleanLine([product.brand, product.name].filter(Boolean).join(" "))
   const article = product.article ? cleanLine(product.article) : ""
   const color = product.color ? cleanLine(product.color) : ""

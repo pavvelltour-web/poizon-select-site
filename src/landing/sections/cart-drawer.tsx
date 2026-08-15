@@ -113,68 +113,68 @@ export function CartDrawer({ storefront }: CartDrawerProps) {
                     : "Серверный каталог недоступен. Оформление заказа временно заблокировано."}
               </p>
 
-              {storefront.cartLines.map((line, index) => (
-                <article
-                  className={`cart-item cart-line cart-line--${line.validation}`}
-                  key={line.id}
-                  data-od-id={`cart-item-${index}`}
-                >
-                  <div className="cart-item-media"><img
-                    src={resolveAssetUrl(line.product.image)}
-                    width="96"
-                    height="72"
-                    alt=""
-                    loading="lazy"
-                    onError={(event) => setImageFallback(event, line.product.fallbackImage)}
-                  /></div>
-                  <div className="cart-item-copy">
-                    <strong>{line.product.brand} {line.product.name}</strong>
-                    <span>EU {line.size}</span>
-                    <em>
-                      {formatRub(
-                        getEffectiveLinePrice(
-                          line.product,
-                          storefront.catalogPriceState.lookup,
-                          storefront.catalogPriceState.items,
-                          line.size,
-                        ),
-                      )}
-                      {catalogIsReady ? "" : " · предварительно"}
-                    </em>
-                    {line.validation === "invalid" ? (
-                      <small className="cart-line__error">
-                        Товар или размер отсутствует в опубликованном каталоге. Удалите позицию.
-                      </small>
-                    ) : null}
-                  </div>
-                  <div className="cart-line__controls" aria-label="Количество">
-                    <button
-                      type="button"
-                      onClick={() => storefront.setCartLineQuantity(line.id, line.quantity - 1)}
-                      aria-label="Уменьшить количество"
-                    >
-                      <Minus aria-hidden="true" size={14} />
-                    </button>
-                    <span>{line.quantity}</span>
-                    <button
-                      type="button"
-                      onClick={() => storefront.setCartLineQuantity(line.id, line.quantity + 1)}
-                      aria-label="Увеличить количество"
-                    >
-                      <Plus aria-hidden="true" size={14} />
-                    </button>
-                  </div>
-                  <button
-                    className="cart-line__remove"
-                    type="button"
-                    data-od-id={`remove-cart-item-${index}`}
-                    onClick={() => storefront.removeCartLine(line.id)}
-                    aria-label="Удалить товар из заказа"
+              {storefront.cartLines.map((line, index) => {
+                const linePrice = getEffectiveLinePrice(
+                  line.product,
+                  storefront.catalogPriceState.lookup,
+                  storefront.catalogPriceState.items,
+                  line.size,
+                )
+                return (
+                  <article
+                    className={`cart-item cart-line cart-line--${line.validation}`}
+                    key={line.id}
+                    data-od-id={`cart-item-${index}`}
                   >
-                    <Trash2 aria-hidden="true" size={16} />
-                  </button>
-                </article>
-              ))}
+                    <div className="cart-item-media"><img
+                      src={resolveAssetUrl(line.product.image)}
+                      width="96"
+                      height="72"
+                      alt=""
+                      loading="lazy"
+                      onError={(event) => setImageFallback(event, line.product.fallbackImage)}
+                    /></div>
+                    <div className="cart-item-copy">
+                      <strong>{line.product.brand} {line.product.name}</strong>
+                      <span>EU {line.size}</span>
+                      <em>
+                        {linePrice > 0 ? formatRub(linePrice) : "Цена недоступна"}
+                      </em>
+                      {line.validation === "invalid" ? (
+                        <small className="cart-line__error">
+                          Товар или размер отсутствует в опубликованном каталоге. Удалите позицию.
+                        </small>
+                      ) : null}
+                    </div>
+                    <div className="cart-line__controls" aria-label="Количество">
+                      <button
+                        type="button"
+                        onClick={() => storefront.setCartLineQuantity(line.id, line.quantity - 1)}
+                        aria-label="Уменьшить количество"
+                      >
+                        <Minus aria-hidden="true" size={14} />
+                      </button>
+                      <span>{line.quantity}</span>
+                      <button
+                        type="button"
+                        onClick={() => storefront.setCartLineQuantity(line.id, line.quantity + 1)}
+                        aria-label="Увеличить количество"
+                      >
+                        <Plus aria-hidden="true" size={14} />
+                      </button>
+                    </div>
+                    <button
+                      className="cart-line__remove"
+                      type="button"
+                      data-od-id={`remove-cart-item-${index}`}
+                      onClick={() => storefront.removeCartLine(line.id)}
+                      aria-label="Удалить товар из заказа"
+                    >
+                      <Trash2 aria-hidden="true" size={16} />
+                    </button>
+                  </article>
+                )
+              })}
             </div>
 
             <form
@@ -186,7 +186,11 @@ export function CartDrawer({ storefront }: CartDrawerProps) {
             >
               <div className="cart-total checkout-form__total">
                 <span>Товары сейчас</span>
-                <strong>{formatRub(storefront.cartTotalRub)}</strong>
+                <strong>
+                  {storefront.cartTotalRub > 0
+                    ? formatRub(storefront.cartTotalRub)
+                    : "Цена недоступна"}
+                </strong>
                 <small>Доставка СДЭК рассчитывается и оплачивается отдельно после прибытия.</small>
               </div>
 

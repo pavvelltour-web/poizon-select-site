@@ -5,14 +5,20 @@ import {
   addOrIncrementCartLine,
   buildProductSizeOffers,
   buildCheckoutPayload,
+  getEffectiveLinePrice,
   isCatalogSearchResultForProduct,
   parseCatalogSearch,
   parseCheckoutCatalog,
   reconcileCartLines,
 } from "./cart"
 
+const catalogObservedAt = new Date(Date.now() - 60_000).toISOString()
+const catalogExpiresAt = new Date(Date.now() + 11 * 60 * 60 * 1000).toISOString()
+
 const catalogPayload = {
   version: "2026-08-02-v3",
+  catalog_mode: "curated_live_poizon",
+  snapshot_hours: 12,
   personal_data_consent_version: "pd-2026-08",
   order_creation_enabled: true,
   online_payment_enabled: true,
@@ -29,25 +35,31 @@ const catalogPayload = {
       availability: "supplier_verified",
       eta_min_days: 10,
       eta_max_days: 18,
-      live_provider_verified: false,
+      live_provider_verified: true,
+      display_price_verified: true,
+      checkout_ready: true,
+      observed_at: catalogObservedAt,
+      expires_at: catalogExpiresAt,
       size_offers: [
         {
           sku_id: "server-43",
           size_eu: "43",
           size_ru: "42",
           price_rub: 25100,
+          price_cny: 1_200,
           available: true,
           checkout_confirmed: true,
-          live_provider_verified: false,
+          live_provider_verified: true,
         },
         {
           sku_id: "server-44",
           size_eu: "44",
           size_ru: "43",
           price_rub: 25100,
+          price_cny: 1_200,
           available: true,
           checkout_confirmed: true,
-          live_provider_verified: false,
+          live_provider_verified: true,
         },
       ],
     },
@@ -67,6 +79,8 @@ describe("checkout catalogue v10", () => {
       items: {},
       lookup: {},
       version: "2026-08-15-live",
+      catalogMode: "curated_live_poizon",
+      snapshotHours: 12,
       personalDataConsentVersion: null,
       orderCreationEnabled: false,
       onlinePaymentEnabled: false,
@@ -182,13 +196,13 @@ describe("checkout catalogue v10", () => {
       priceRub: 25100,
       sizes: ["43", "44"],
       fulfillmentMode: "made_to_order",
-      liveProviderVerified: false,
+      liveProviderVerified: true,
     })
     expect(parsed?.items["nike-gt-cut-academy"]?.sizeOffers).toContainEqual(
       expect.objectContaining({
         skuId: "server-43",
         checkoutConfirmed: true,
-        liveProviderVerified: false,
+        liveProviderVerified: true,
       }),
     )
     expect(parseCheckoutCatalog({ version: "v1", prices: { shoe: 1 } })).toBeNull()
@@ -269,24 +283,26 @@ describe("checkout catalogue v10", () => {
       items: [{
         ...catalogPayload.items[0],
         sizes: ["42", "43", "44"],
-        live_provider_verified: false,
+        price_rub: 24900,
         size_offers: [
           {
             sku_id: "sku-42",
             size_eu: "42",
             size_ru: "41",
             price_rub: 24900,
+            price_cny: 899,
             available: true,
             checkout_confirmed: true,
-            live_provider_verified: false,
+            live_provider_verified: true,
           },
           {
             sku_id: "sku-43",
             size_eu: "43",
             price_rub: 27000,
+            price_cny: 959,
             available: true,
             checkout_confirmed: true,
-            live_provider_verified: false,
+            live_provider_verified: true,
           },
         ],
       }],
@@ -312,7 +328,7 @@ describe("checkout catalogue v10", () => {
         skuId: "sku-43",
         sizeEu: "43",
         sizeRu: "42",
-        priceCny: null,
+        priceCny: 959,
         priceRub: 27000,
         available: true,
         checkoutConfirmed: true,
@@ -328,10 +344,7 @@ describe("checkout catalogue v10", () => {
     ])
   })
 
-  it("uses a confirmed server size offer despite an unverified live provider", () => {
-    const product = publicCatalogProducts.find(
-      (candidate) => candidate.slug === "nike-gt-cut-academy",
-    )!
+  it("rejects a checkout item without provider verification", () => {
     const parsed = parseCheckoutCatalog({
       ...catalogPayload,
       items: [{
@@ -341,33 +354,14 @@ describe("checkout catalogue v10", () => {
           sku_id: "sku-44",
           size_eu: "44",
           price_rub: 26900,
+          price_cny: 1_200,
           available: true,
           checkout_confirmed: true,
           live_provider_verified: false,
         }],
       }],
-    })!
-    const lines = reconcileCartLines(addOrIncrementCartLine([], product, "44"), parsed.items)
-    const payload = buildCheckoutPayload(
-      lines,
-      { fullName: "Павел", phone: "+79990000000", email: "" },
-      { offerAccepted: true, personalDataAccepted: true },
-      {
-        method: "cdek_pvz",
-        city: "Москва",
-        postalCode: "119607",
-        address: "",
-        pvzCode: "MSK123",
-      },
-      parsed.items,
-      parsed.version,
-    )
-
-    expect(payload.items[0]).toMatchObject({
-      sku_id: "sku-44",
-      size_eu: "44",
-      price_rub: 26900,
     })
+    expect(parsed?.items).toEqual({})
   })
 
   it("fails closed when a server offer is available but not checkout-confirmed", () => {
@@ -378,10 +372,13 @@ describe("checkout catalogue v10", () => {
       ...catalogPayload,
       items: [{
         ...catalogPayload.items[0],
+        price_rub: 26900,
+        checkout_ready: false,
         size_offers: [{
           sku_id: "unconfirmed-44",
           size_eu: "44",
           price_rub: 26900,
+          price_cny: 1_200,
           available: true,
           checkout_confirmed: false,
           live_provider_verified: true,
@@ -426,8 +423,10 @@ describe("checkout catalogue v10", () => {
           sku_id: "server-44-point-0",
           size_eu: "44.0",
           price_rub: 25100,
+          price_cny: 1_200,
           available: true,
           checkout_confirmed: true,
+          live_provider_verified: true,
         }],
       }],
     })!
@@ -440,8 +439,10 @@ describe("checkout catalogue v10", () => {
           sku_id,
           size_eu: "44",
           price_rub: 25100,
+          price_cny: 1_200,
           available: true,
           checkout_confirmed: true,
+          live_provider_verified: true,
         })),
       }],
     })!
@@ -465,12 +466,22 @@ describe("checkout catalogue v10", () => {
       order_creation_enabled: false,
       online_payment_enabled: true,
     })
+    const ordersWithoutOffers = parseCheckoutCatalog({
+      ...catalogPayload,
+      items: [],
+      order_creation_enabled: true,
+      online_payment_enabled: true,
+    })
 
     expect(withoutCapabilities).toMatchObject({
       orderCreationEnabled: false,
       onlinePaymentEnabled: false,
     })
     expect(paymentWithoutOrders).toMatchObject({
+      orderCreationEnabled: false,
+      onlinePaymentEnabled: false,
+    })
+    expect(ordersWithoutOffers).toMatchObject({
       orderCreationEnabled: false,
       onlinePaymentEnabled: false,
     })
@@ -531,6 +542,7 @@ describe("checkout catalogue v10", () => {
     )
 
     expect(lines[0].validation).toBe("invalid")
+    expect(getEffectiveLinePrice(product, parsed.lookup, parsed.items, "99")).toBe(0)
     expect(() =>
       buildCheckoutPayload(
         lines,

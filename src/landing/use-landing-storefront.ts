@@ -29,6 +29,7 @@ import {
   type CheckoutResult,
   type CartLine,
   type CatalogSearchFallback,
+  type PublishedCatalogItem,
   type PublishedCatalogMap,
 } from "./cart"
 import {
@@ -52,6 +53,27 @@ import type {
   StorefrontState,
   UrlState,
 } from "./landing-types"
+
+const CATALOG_REFRESH_RETRY_MS = 60_000
+const MAX_BROWSER_TIMEOUT_MS = 2_147_483_647
+
+export function getCatalogRefreshSchedule(
+  items: Readonly<Record<string, Pick<PublishedCatalogItem, "expiresAt">>>,
+  nowMs = Date.now(),
+): { delayMs: number; expiresAtMs: number | null } {
+  const nextExpiryMs = Math.min(
+    ...Object.values(items)
+      .map((item) => Date.parse(item.expiresAt))
+      .filter(Number.isFinite),
+  )
+  if (!Number.isFinite(nextExpiryMs)) {
+    return { delayMs: CATALOG_REFRESH_RETRY_MS, expiresAtMs: null }
+  }
+  return {
+    delayMs: Math.min(Math.max(0, nextExpiryMs - nowMs), MAX_BROWSER_TIMEOUT_MS),
+    expiresAtMs: nextExpiryMs,
+  }
+}
 
 function createCheckoutIdempotencyKey(): string {
   if (typeof globalThis.crypto?.randomUUID === "function") {
@@ -160,6 +182,7 @@ export function useLandingStorefront(
     onlinePaymentEnabled: false,
     error: null as string | null,
   })
+  const [catalogPriceRefresh, setCatalogPriceRefresh] = useState(0)
   const productTriggerRef = useRef<HTMLElement | null>(null)
   const sheetHeadingRef = useRef<HTMLHeadingElement | null>(null)
   const checkoutAttemptRef = useRef<{ signature: string; key: string } | null>(null)
@@ -199,14 +222,11 @@ export function useLandingStorefront(
   const selectedLiveOffer = selectedSize
     ? selectedSizeOffers.find((offer) => offer.sizeEu === selectedSize) ?? null
     : null
-  const liveDisplayPrice = selectedLiveOffer?.priceRub ?? Math.min(
-    ...selectedSizeOffers.flatMap((offer) => offer.priceRub ? [offer.priceRub] : []),
-  )
   const selectedProductPrice = selectedProduct
-    ? Number.isFinite(liveDisplayPrice)
+    ? selectedLiveOffer?.priceRub
       ? {
-        label: selectedLiveOffer ? "Цена размера" : "Цена от",
-        value: formatRub(liveDisplayPrice),
+        label: "Цена размера",
+        value: formatRub(selectedLiveOffer.priceRub),
         detail: "СДЭК рассчитывается отдельно",
       }
       : getDisplayPrice(selectedProduct, catalogPriceState.lookup)
@@ -342,9 +362,30 @@ export function useLandingStorefront(
 
   useEffect(() => {
     const controller = new AbortController()
-    void refreshCatalogPrices(controller.signal)
-    return () => controller.abort()
-  }, [apiBaseUrl])
+    let refreshTimer: number | undefined
+    void refreshCatalogPrices(controller.signal).then((snapshot) => {
+      if (controller.signal.aborted) return
+      const refreshSchedule = getCatalogRefreshSchedule(snapshot?.items ?? {})
+      refreshTimer = window.setTimeout(() => {
+        if (refreshSchedule.expiresAtMs !== null) {
+          setCatalogPriceState((current) => ({
+            ...current,
+            status: "loading",
+            lookup: null,
+            items: {},
+            orderCreationEnabled: false,
+            onlinePaymentEnabled: false,
+            error: null,
+          }))
+        }
+        setCatalogPriceRefresh((current) => current + 1)
+      }, refreshSchedule.delayMs)
+    })
+    return () => {
+      controller.abort()
+      if (refreshTimer !== undefined) window.clearTimeout(refreshTimer)
+    }
+  }, [apiBaseUrl, catalogPriceRefresh])
 
   useEffect(() => {
     if (!selectedProduct) {

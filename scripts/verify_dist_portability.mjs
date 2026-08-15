@@ -118,6 +118,10 @@ const javascript = (
       .map((file) => readFile(file, "utf8")),
   )
 ).join("\n")
+const buildVersion = process.env.BUILD_VERSION?.trim() ?? ""
+if (/^[a-f0-9]{40}$/u.test(buildVersion) && !javascript.includes(buildVersion)) {
+  fail("bundle is missing the immutable build version")
+}
 if (/["'`]\/catalog\//.test(javascript)) {
   fail("bundle contains a root-absolute catalog URL")
 }

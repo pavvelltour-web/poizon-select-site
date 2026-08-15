@@ -1,6 +1,5 @@
 import {
   CATALOG_PRICE_VERSION,
-  getCatalogPriceRub,
   type CatalogProduct,
 } from "../catalog/catalog"
 
@@ -38,12 +37,16 @@ export interface PublishedCatalogItem {
   productKind: "footwear" | "apparel" | "accessory"
   sizes: string[]
   priceRub: number
-  imageUrl: string
+  imageUrl: string | null
   fulfillmentMode: "made_to_order" | "in_stock"
   availability: string
   etaMinDays: number | null
   etaMaxDays: number | null
   liveProviderVerified: boolean
+  displayPriceVerified: boolean
+  checkoutReady: boolean
+  observedAt: string
+  expiresAt: string
   sizeOffers: readonly PublishedSizeOffer[]
 }
 
@@ -51,8 +54,11 @@ export interface PublishedSizeOffer {
   skuId: string
   sizeEu: string
   sizeRu: string | null
+  sizeUs: string | null
+  sizeCn: string | null
+  priceCny: number
   priceRub: number
-  available: boolean
+  available: boolean | null
   checkoutConfirmed: boolean
   liveProviderVerified: boolean
   observedAt: string | null
@@ -88,6 +94,7 @@ export interface ProductSizeOffer {
   sizeCn: string | null
   priceCny: number | null
   priceRub: number | null
+  stockStatus: boolean | null
   available: boolean
   checkoutConfirmed: boolean
 }
@@ -141,6 +148,8 @@ export interface CheckoutCatalogSnapshot {
   items: PublishedCatalogMap
   lookup: CatalogPriceMap
   version: string
+  catalogMode: "curated_live_poizon"
+  snapshotHours: 12
   personalDataConsentVersion: string | null
   orderCreationEnabled: boolean
   onlinePaymentEnabled: boolean
@@ -239,9 +248,16 @@ function optionalString(value: unknown): string | null {
   return typeof value === "string" && value.trim() ? value.trim() : null
 }
 
-function finitePositiveNumber(value: unknown): number | null {
-  const number = typeof value === "number" ? value : Number(value)
-  return Number.isFinite(number) && number > 0 ? number : null
+function finitePositiveNumber(
+  value: unknown,
+  maximum = Number.MAX_SAFE_INTEGER,
+): number | null {
+  return typeof value === "number" &&
+    Number.isFinite(value) &&
+    value > 0 &&
+    value <= maximum
+    ? value
+    : null
 }
 
 // External search data is untrusted until its URL and quote metadata are validated.
@@ -260,6 +276,12 @@ function safeHttpsUrl(value: unknown): string | null {
 }
 
 const quoteClockSkewMs = 5 * 60 * 1000
+const liveQuoteStalenessMs = 5 * 60 * 1000
+const catalogSnapshotWindowMs = 12 * 60 * 60 * 1000
+const maxPriceRub = 10_000_000
+const maxPriceCny = 100_000
+const catalogSlugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u
+const skuIdPattern = /^[A-Za-z0-9_.:-]{1,160}$/u
 
 function parseQuoteTimestamp(value: unknown): number | null {
   const timestamp = optionalString(value)
@@ -320,8 +342,8 @@ function parseCatalogSearchResult(value: unknown): CatalogSearchResult | null {
       const offer = rawOffer as Record<string, unknown>
       const size = optionalString(offer.size) ?? optionalString(offer.eu)
       const offerRef = optionalString(offer.offer_ref)
-      const totalRub = finitePositiveNumber(offer.total_rub)
-      const sourcePrice = finitePositiveNumber(offer.price_cny)
+      const totalRub = finitePositiveNumber(offer.total_rub, maxPriceRub)
+      const sourcePrice = finitePositiveNumber(offer.price_cny, maxPriceCny)
       if (
         !offerRef ||
         !size ||
@@ -352,8 +374,10 @@ function parseCatalogSearchResult(value: unknown): CatalogSearchResult | null {
     !observedAtMs ||
     !expiresAtMs ||
     observedAtMs > now + quoteClockSkewMs ||
+    observedAtMs < now - liveQuoteStalenessMs ||
     expiresAtMs <= now ||
     expiresAtMs <= observedAtMs ||
+    expiresAtMs - observedAtMs > catalogSnapshotWindowMs ||
     !["footwear", "apparel", "accessory"].includes(kind || "") ||
     images.length === 0 ||
     offers.length === 0
@@ -504,10 +528,16 @@ export function parseCheckoutCatalog(payload: unknown): CheckoutCatalogSnapshot 
   if (!payload || typeof payload !== "object") return null
   const source = payload as Record<string, unknown>
   const version = optionalString(source.version)
-  if (!version || !Array.isArray(source.items)) return null
+  if (
+    !version ||
+    source.catalog_mode !== "curated_live_poizon" ||
+    source.snapshot_hours !== 12 ||
+    !Array.isArray(source.items)
+  ) return null
 
   const items: PublishedCatalogMap = {}
   const lookup: CatalogPriceMap = {}
+  const ambiguousSlugs = new Set<string>()
   for (const rawItem of source.items) {
     if (!rawItem || typeof rawItem !== "object") continue
     const item = rawItem as Record<string, unknown>
@@ -515,51 +545,127 @@ export function parseCheckoutCatalog(payload: unknown): CheckoutCatalogSnapshot 
     const name = optionalString(item.name)
     const brand = optionalString(item.brand)
     const imageUrl = optionalString(item.image_url)
-    const priceRub = finitePositiveNumber(item.price_rub)
+    const priceRub = finitePositiveNumber(item.price_rub, maxPriceRub)
     const productKind = optionalString(item.product_kind)
     const fulfillmentMode = optionalString(item.fulfillment_mode)
     const availability = optionalString(item.availability)
+    const observedAt = optionalString(item.observed_at)
+    const expiresAt = optionalString(item.expires_at)
+    const observedAtMs = parseQuoteTimestamp(item.observed_at)
+    const expiresAtMs = parseQuoteTimestamp(item.expires_at)
+    const now = Date.now()
+    const displayPriceVerified = item.display_price_verified === true
+    const checkoutReady = item.checkout_ready === true
     const sizes = Array.isArray(item.sizes)
       ? [...new Set(item.sizes.map(optionalString).filter((size): size is string => !!size))]
       : []
     if (
       !slug ||
+      !catalogSlugPattern.test(slug) ||
+      ambiguousSlugs.has(slug) ||
       !name ||
       !brand ||
-      !imageUrl ||
       !priceRub ||
+      item.live_provider_verified !== true ||
+      !displayPriceVerified ||
+      typeof item.checkout_ready !== "boolean" ||
+      !observedAt ||
+      !expiresAt ||
+      !observedAtMs ||
+      !expiresAtMs ||
+      observedAtMs > now + quoteClockSkewMs ||
+      expiresAtMs <= now ||
+      expiresAtMs <= observedAtMs ||
+      expiresAtMs - observedAtMs > catalogSnapshotWindowMs ||
       !availability ||
       sizes.length === 0 ||
       !["footwear", "apparel", "accessory"].includes(productKind || "") ||
-      !["made_to_order", "in_stock"].includes(fulfillmentMode || "")
+      !["made_to_order", "in_stock"].includes(fulfillmentMode || "") ||
+      !["supplier_verified", "supplier_stock_unknown", "supplier_unavailable"].includes(
+        availability,
+      )
     ) {
       continue
     }
 
-    const itemLiveProviderVerified = item.live_provider_verified === true
-    const sizeOffers = Array.isArray(item.size_offers)
+    const parsedSizeOffers = Array.isArray(item.size_offers)
       ? item.size_offers.flatMap((rawOffer): PublishedSizeOffer[] => {
         if (!rawOffer || typeof rawOffer !== "object") return []
         const offer = rawOffer as Record<string, unknown>
         const skuId = optionalString(offer.sku_id)
         const sizeEu = optionalString(offer.size_eu) ?? optionalString(offer.size)
-        const price = finitePositiveNumber(offer.price_rub)
-        const offerAvailable = offer.available === true
-        if (!skuId || !sizeEu || !price || !offerAvailable || !sizes.includes(sizeEu)) return []
+        const priceCny = finitePositiveNumber(offer.price_cny, maxPriceCny)
+        const price = finitePositiveNumber(offer.price_rub, maxPriceRub)
+        const offerAvailable = typeof offer.available === "boolean"
+          ? offer.available
+          : offer.available === null
+            ? null
+            : undefined
+        const checkoutConfirmed = offer.checkout_confirmed
+        if (
+          !skuId ||
+          !skuIdPattern.test(skuId) ||
+          !sizeEu ||
+          sizeEu.length > 32 ||
+          !priceCny ||
+          !price ||
+          offerAvailable === undefined ||
+          typeof checkoutConfirmed !== "boolean" ||
+          (checkoutConfirmed && offerAvailable !== true) ||
+          offer.live_provider_verified !== true ||
+          !sizes.includes(sizeEu)
+        ) return []
         return [{
           skuId,
           sizeEu,
           sizeRu: optionalString(offer.size_ru) ?? optionalString(offer.ru),
+          sizeUs: optionalString(offer.size_us) ?? optionalString(offer.us),
+          sizeCn: optionalString(offer.size_cn) ?? optionalString(offer.cn),
+          priceCny,
           priceRub: price,
-          available: true,
-          checkoutConfirmed: offer.checkout_confirmed === true,
-          liveProviderVerified:
-            offer.live_provider_verified === true || itemLiveProviderVerified,
-          observedAt: optionalString(offer.observed_at),
-          expiresAt: optionalString(offer.expires_at),
+          available: offerAvailable,
+          checkoutConfirmed,
+          liveProviderVerified: true,
+          observedAt,
+          expiresAt,
         }]
       })
       : []
+    const skuCounts = new Map<string, number>()
+    const sizeCounts = new Map<string, number>()
+    for (const offer of parsedSizeOffers) {
+      skuCounts.set(offer.skuId, (skuCounts.get(offer.skuId) ?? 0) + 1)
+      sizeCounts.set(offer.sizeEu, (sizeCounts.get(offer.sizeEu) ?? 0) + 1)
+    }
+    const sizeOffers = parsedSizeOffers.filter(
+      (offer) => skuCounts.get(offer.skuId) === 1 && sizeCounts.get(offer.sizeEu) === 1,
+    )
+    if (sizeOffers.length === 0) continue
+
+    const orderableOffers = sizeOffers.filter(
+      (offer) => offer.available === true && offer.checkoutConfirmed,
+    )
+    const confirmedStockOffers = sizeOffers.filter((offer) => offer.available === true)
+    const unknownStockOffers = sizeOffers.filter((offer) => offer.available === null)
+    const unavailableOffers = sizeOffers.filter((offer) => offer.available === false)
+    if (
+      checkoutReady !== (orderableOffers.length > 0) ||
+      (availability === "supplier_verified" && confirmedStockOffers.length === 0) ||
+      (availability === "supplier_stock_unknown" &&
+        (confirmedStockOffers.length > 0 || unknownStockOffers.length === 0)) ||
+      (availability === "supplier_unavailable" &&
+        (confirmedStockOffers.length > 0 ||
+          unknownStockOffers.length > 0 ||
+          unavailableOffers.length === 0))
+    ) continue
+
+    const floorOffers = confirmedStockOffers.length > 0
+      ? confirmedStockOffers
+      : unknownStockOffers.length > 0
+        ? unknownStockOffers
+        : unavailableOffers
+    if (priceRub !== Math.min(...floorOffers.map((offer) => offer.priceRub))) continue
+
     const normalized: PublishedCatalogItem = {
       slug,
       name,
@@ -572,23 +678,31 @@ export function parseCheckoutCatalog(payload: unknown): CheckoutCatalogSnapshot 
       availability,
       etaMinDays: finitePositiveNumber(item.eta_min_days),
       etaMaxDays: finitePositiveNumber(item.eta_max_days),
-      liveProviderVerified: itemLiveProviderVerified,
+      liveProviderVerified: true,
+      displayPriceVerified,
+      checkoutReady,
+      observedAt,
+      expiresAt,
       sizeOffers,
     }
+    if (items[slug]) {
+      delete items[slug]
+      delete lookup[slug]
+      ambiguousSlugs.add(slug)
+      continue
+    }
     items[slug] = normalized
-    const confirmedSizeOffers = sizeOffers.filter(
-      (offer) => offer.available && offer.checkoutConfirmed,
-    )
-    lookup[slug] = confirmedSizeOffers.length > 0
-      ? Math.min(...confirmedSizeOffers.map((offer) => offer.priceRub))
-      : priceRub
+    lookup[slug] = priceRub
   }
 
-  const orderCreationEnabled = source.order_creation_enabled === true
+  const orderCreationEnabled = source.order_creation_enabled === true &&
+    Object.values(items).some((item) => item.checkoutReady)
   return {
     items,
     lookup,
     version,
+    catalogMode: "curated_live_poizon",
+    snapshotHours: 12,
     personalDataConsentVersion: optionalString(source.personal_data_consent_version),
     orderCreationEnabled,
     onlinePaymentEnabled:
@@ -635,11 +749,11 @@ export function getEffectiveLinePrice(
 ): number {
   if (catalogItems && size) {
     const sizeOffer = getPublishedSizeOffer(catalogItems[product.slug], size)
-    if (sizeOffer) return sizeOffer.priceRub
+    return sizeOffer?.priceRub ?? 0
   }
-  if (!catalogPrices) return getCatalogPriceRub(product)
+  if (!catalogPrices) return 0
   const override = catalogPrices[product.slug]
-  if (!Number.isFinite(override) || override <= 0) return getCatalogPriceRub(product)
+  if (!Number.isFinite(override) || override <= 0) return 0
   return override
 }
 
@@ -685,7 +799,7 @@ export function getPublishedSizeOffer(
   if (!item) return null
   const matchingOffers = item.sizeOffers.filter(
     (offer) =>
-      offer.available &&
+      offer.available === true &&
       offer.checkoutConfirmed &&
       offer.sizeEu === sizeEu,
   )
@@ -714,12 +828,17 @@ export function buildProductSizeOffers(
     liveByExactSize.set(offer.size, liveOffers)
   }
   for (const offer of checkoutItem?.sizeOffers ?? []) {
-    if (!offer.available || !offer.checkoutConfirmed) continue
     sizeLabels.set(canonicalSize(offer.sizeEu), offer.sizeEu)
   }
 
   return sortSizeLabels([...sizeLabels.values()]).map((sizeEu) => {
-    const checkoutOffer = getPublishedSizeOffer(checkoutItem, sizeEu)
+    const publishedOffers = checkoutItem?.sizeOffers.filter(
+      (offer) => offer.sizeEu === sizeEu,
+    ) ?? []
+    const publishedOffer = publishedOffers.length === 1 ? publishedOffers[0] ?? null : null
+    const checkoutOffer = publishedOffer?.available === true && publishedOffer.checkoutConfirmed
+      ? publishedOffer
+      : null
     const matchingLiveOffer = checkoutOffer
       ? (liveByExactSize.get(checkoutOffer.sizeEu) ?? []).find(
         (liveOffer) =>
@@ -740,6 +859,7 @@ export function buildProductSizeOffers(
         sizeCn: matchingLiveOffer.sizeCn,
         priceCny: matchingLiveOffer.priceCny,
         priceRub: matchingLiveOffer.totalRub,
+        stockStatus: true,
         available: true,
         checkoutConfirmed: true,
       }
@@ -753,11 +873,26 @@ export function buildProductSizeOffers(
           nikeRuFallback(brand, checkoutOffer.sizeEu),
         sizeUs: null,
         sizeCn: null,
-        priceCny: null,
+        priceCny: checkoutOffer.priceCny,
         priceRub: checkoutOffer.priceRub,
+        stockStatus: true,
         available: true,
         checkoutConfirmed: true,
       }
+    }
+
+    if (publishedOffer) return {
+      skuId: null,
+      sizeEu: publishedOffer.sizeEu,
+      sizeRu: displayRuSize(publishedOffer.sizeRu) ??
+        nikeRuFallback(brand, publishedOffer.sizeEu),
+      sizeUs: publishedOffer.sizeUs,
+      sizeCn: publishedOffer.sizeCn,
+      priceCny: publishedOffer.priceCny,
+      priceRub: publishedOffer.priceRub,
+      stockStatus: publishedOffer.available,
+      available: false,
+      checkoutConfirmed: false,
     }
 
     return {
@@ -768,6 +903,7 @@ export function buildProductSizeOffers(
       sizeCn: null,
       priceCny: null,
       priceRub: null,
+      stockStatus: null,
       available: false,
       checkoutConfirmed: false,
     }

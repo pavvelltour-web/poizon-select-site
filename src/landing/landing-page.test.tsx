@@ -19,8 +19,12 @@ function checkoutCatalogPayload(
     onlinePaymentEnabled: true,
   },
 ) {
+  const observedAt = new Date(Date.now() - 60_000).toISOString()
+  const expiresAt = new Date(Date.now() + 11 * 60 * 60 * 1000).toISOString()
   return {
     version: "2026-08-02-v3",
+    catalog_mode: "curated_live_poizon",
+    snapshot_hours: 12,
     personal_data_consent_version: "pd-2026-08",
     order_creation_enabled: capabilities.orderCreationEnabled,
     online_payment_enabled: capabilities.onlinePaymentEnabled,
@@ -37,12 +41,17 @@ function checkoutCatalogPayload(
         availability: "supplier_verified",
         eta_min_days: 10,
         eta_max_days: 18,
-        live_provider_verified: false,
+        live_provider_verified: true,
+        display_price_verified: true,
+        checkout_ready: true,
+        observed_at: observedAt,
+        expires_at: expiresAt,
         size_offers: sizes.map((size) => ({
           sku_id: `gt-cut-${size}`,
           size_eu: size,
           size_ru: String(Number(size) - 1),
           price_rub: 24500,
+          price_cny: 1_100,
           available: true,
           checkout_confirmed: true,
           live_provider_verified: true,
@@ -131,6 +140,36 @@ function catalogSearchPayload(normalizedQuery = "Nike Air Force 1") {
   }
 }
 
+function broadUnknownSearchPayload() {
+  const observedAt = new Date(Date.now() - 60_000).toISOString()
+  const expiresAt = new Date(Date.now() + 14 * 60_000).toISOString()
+  const counts = [12, 12, 11, 11]
+  return {
+    status: "ready",
+    normalized_query: "Nike Air Force 1",
+    results: counts.map((count, productIndex) => ({
+      product_ref: `nike-air-force-1-${productIndex + 1}`,
+      brand: "Nike",
+      name: `Air Force 1 ${productIndex + 1}`,
+      article: `AF1-${productIndex + 1}`,
+      color: "White",
+      in_stock: null,
+      kind: "footwear",
+      images: [`https://cdn.example.test/air-force-${productIndex + 1}.webp`],
+      observed_at: observedAt,
+      expires_at: expiresAt,
+      offers: Array.from({ length: count }, (_, offerIndex) => ({
+        offer_ref: `af1-${productIndex + 1}-${offerIndex + 1}`,
+        size: String(35 + offerIndex * 0.5),
+        eu: String(35 + offerIndex * 0.5),
+        available: null,
+        price_cny: 600 + offerIndex * 10,
+        total_rub: 15_000 + offerIndex * 200,
+      })),
+    })),
+  }
+}
+
 afterEach(() => {
   vi.restoreAllMocks()
   vi.unstubAllGlobals()
@@ -150,7 +189,7 @@ describe("LandingPage", () => {
       "href",
       "/catalog",
     )
-    expect(screen.queryByText("по запросу")).toBeNull()
+    expect(screen.getAllByText("По запросу").length).toBeGreaterThan(0)
     const firstCard = productLinks()[0]
     expect(firstCard).toHaveAccessibleName(/Nike KD 18/)
     expect(within(firstCard).getByText("Кроссовки Nike KD 18")).toBeInTheDocument()
@@ -170,6 +209,9 @@ describe("LandingPage", () => {
     window.history.replaceState(null, "", "/catalog")
     render(<LandingPage configuredBotUsername={null} />)
     expect(productLinks()).toHaveLength(CATALOG_PAGE_SIZE)
+    expect(
+      screen.getByRole("heading", { name: "Поиск по всему каталогу поставщика" }),
+    ).toBeInTheDocument()
     expect(
       screen.getByText(`${publicCatalogProducts.length} товаров, показано 24`),
     ).toBeInTheDocument()
@@ -318,7 +360,7 @@ describe("LandingPage", () => {
 
     const dialog = screen.getByRole("dialog", { name: /Ronaldinho #10 Jersey/ })
     expect(dialog).toHaveAttribute("id", "product-dialog")
-    expect(within(dialog).getAllByText(/^\d{1,3}(?: \d{3})+ ₽$/).length).toBeGreaterThan(0)
+    expect(within(dialog).getAllByText("По запросу").length).toBeGreaterThan(0)
     expect(screen.getByRole("button", { name: "Открыть фото в полном размере" })).toBeInTheDocument()
     expect(screen.queryByText(/VITE_BOT_USERNAME|менеджер/i)).toBeNull()
   })
@@ -606,8 +648,25 @@ describe("LandingPage", () => {
     expect(screen.getByText("В наличии")).toBeInTheDocument()
     expect(screen.getByText("Размеры: EU")).toBeInTheDocument()
     expect(screen.getByText("Размерная сетка: EU 40–46")).toBeInTheDocument()
-    expect(screen.getByText("Нет в наличии")).toBeInTheDocument()
+    expect(screen.getByText("Наличие уточняется")).toBeInTheDocument()
     expect(screen.getByRole("option", { name: /42 \(RU 41\).*20 900 ₽/ })).toBeInTheDocument()
+    const [confirmedCard, unknownCard] = screen.getAllByTestId("live-search-result")
+    expect(within(confirmedCard!).getByRole("combobox", { name: "Размер и предложение" }))
+      .toBeEnabled()
+    expect(within(confirmedCard!).getByRole("button", { name: "Скопировать запрос" }))
+      .toBeInTheDocument()
+    expect(within(confirmedCard!).getByRole("link", { name: "Открыть @SelectBuyerBot" }))
+      .toBeInTheDocument()
+    expect(within(unknownCard!).getByRole("combobox", { name: "Размер и предложение" }))
+      .toBeDisabled()
+    expect(within(unknownCard!).getByRole("option", { name: /43.*наличие уточняется/ }))
+      .toBeDisabled()
+    expect(within(unknownCard!).queryByRole("button", { name: "Скопировать запрос" }))
+      .toBeNull()
+    expect(within(unknownCard!).queryByRole("link", { name: /Открыть @/ }))
+      .toBeNull()
+    expect(within(unknownCard!).getByText(/Цены по размерам справочные/))
+      .toBeInTheDocument()
     const sizeChartLinks = screen.getAllByRole("link", { name: "Размерная сетка" })
     expect(sizeChartLinks.some(
       (link) => link.getAttribute("href") === "https://cdn.example.test/air-max-95-size-chart.webp",
@@ -631,6 +690,39 @@ describe("LandingPage", () => {
         { query: "air max", limit: 4 },
         { query: "Nike Air Max 95", limit: 4 },
       ]))
+  })
+
+  it("renders all 46 broad-search unknown-stock prices as reference-only", async () => {
+    const user = userEvent.setup()
+    const fetchMock = vi.fn(async (url: string, options?: RequestInit) => ({
+      ok: true,
+      status: 200,
+      json: async () => url.endsWith("/api/catalog/search") && options?.method === "POST"
+        ? broadUnknownSearchPayload()
+        : checkoutCatalogPayload(),
+    }))
+    vi.stubGlobal("fetch", fetchMock)
+    window.history.replaceState(null, "", "/catalog")
+    render(<LandingPage configuredBotUsername="@SelectBuyerBot" />)
+
+    await user.type(
+      screen.getByRole("searchbox", { name: "Поиск по товарам" }),
+      "Nike Air Force 1",
+    )
+
+    const liveCards = await screen.findAllByTestId("live-search-result")
+    expect(liveCards).toHaveLength(4)
+    expect(screen.getAllByRole("option", { name: /наличие уточняется/ })).toHaveLength(46)
+    for (const card of liveCards) {
+      expect(within(card).getByRole("combobox", { name: "Размер и предложение" }))
+        .toBeDisabled()
+      expect(within(card).queryByRole("button", { name: "Скопировать запрос" }))
+        .toBeNull()
+      expect(within(card).queryByRole("link", { name: /Открыть @/ })).toBeNull()
+      expect(within(card).getByText(/Цены по размерам справочные/)).toBeInTheDocument()
+    }
+    const staticCard = productLinks()[0]
+    expect(within(staticCard!).getAllByText("По запросу").length).toBeGreaterThan(0)
   })
 
   it("does not look up a provider when a customer opens a published product card", async () => {
@@ -679,14 +771,14 @@ describe("LandingPage", () => {
     await waitFor(() => {
       expect(
         screen.getByText(
-          "Цены из витрины видны. Оформление вернётся после восстановления связи с сервером.",
+          "Подтверждённые цены и оформление временно недоступны.",
         ),
       ).toBeInTheDocument()
     })
 
     const firstCard = productLinks()[0]
-    expect(within(firstCard).getByText("34 500 ₽")).toBeInTheDocument()
-    expect(within(firstCard).queryByText("—")).toBeNull()
+    expect(within(firstCard).getAllByText("По запросу").length).toBeGreaterThan(0)
+    expect(within(firstCard).queryByText("34 500 ₽")).toBeNull()
   })
 
   it("maps a legacy product query to the canonical product page", async () => {
@@ -748,7 +840,7 @@ describe("LandingPage", () => {
     render(<LandingPage configuredBotUsername={null} />)
 
     expect(await screen.findByRole("button", {
-      name: "43 RU, 44 EU, 24 500 ₽",
+      name: "43 RU, 44 EU, 24 500 ₽, в наличии",
     })).toBeEnabled()
     expect(fetchMock.mock.calls.filter(([url]) =>
       String(url).endsWith("/api/catalog/search"),
@@ -797,7 +889,7 @@ describe("LandingPage", () => {
     render(<LandingPage configuredBotUsername={null} />)
 
     await user.click(await screen.findByRole("button", {
-      name: "43 RU, 44 EU, 24 500 ₽",
+      name: "43 RU, 44 EU, 24 500 ₽, в наличии",
     }))
     const purchaseButton = screen.getByRole("button", { name: /Добавить в заказ/ })
     expect(purchaseButton).toHaveAttribute("data-selected-size", "44")
@@ -881,7 +973,7 @@ describe("LandingPage", () => {
     render(<LandingPage configuredBotUsername={null} />)
 
     await user.click(await screen.findByRole("button", {
-      name: "43 RU, 44 EU, 24 500 ₽",
+      name: "43 RU, 44 EU, 24 500 ₽, в наличии",
     }))
     const purchaseButton = await screen.findByRole("button", {
       name: "Оформление временно недоступно",

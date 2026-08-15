@@ -56,6 +56,7 @@ describe("Telegram order handoff", () => {
       sizeRu: "41",
       priceCny: 699,
       totalRub: 17_700,
+      available: true,
     })
 
     expect(request).toBe(
@@ -63,6 +64,26 @@ describe("Telegram order handoff", () => {
     )
     expect(request).not.toMatch(/Poizon|SKU|https:/)
   })
+
+  it.each([null, false])(
+    "rejects a live handoff when provider availability is %s",
+    (available) => {
+      expect(() => buildLiveOrderRequest({
+        brand: "Nike",
+        name: "Air Force 1 '07 White",
+        article: "DV0788-104",
+        color: "White",
+        expiresAt: "2026-08-01T10:15:00Z",
+      }, {
+        size: "42",
+        sizeEu: "42",
+        sizeRu: "41",
+        priceCny: 699,
+        totalRub: 17_700,
+        available,
+      })).toThrow("без подтверждённого наличия")
+    },
+  )
 
   it("keeps all 100 catalog handoffs unique, one-line and bot-ready", () => {
     const requests = catalogProducts.map((product) => buildOrderRequest(product))

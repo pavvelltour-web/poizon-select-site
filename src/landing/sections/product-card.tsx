@@ -144,16 +144,28 @@ export function ProductCard({
   const sizes = publishedOffer?.sizes.length ? publishedOffer.sizes : fallbackSizes(product.kind)
   const cardSizes = (sizes.length >= 7 ? [sizes[2], sizes[4], sizes[6]] : sizes.slice(0, 3))
     .filter((size): size is string => Boolean(size))
-  const available = !(
-    catalogStatus === "ready" &&
-    (!publishedOffer || publishedOffer.availability !== "supplier_verified")
-  )
-  const productDisplayName = product.kind === "footwear" && product.category === "recovery"
-    ? `${product.brand} ${product.name}`
-    : `${product.kind === "footwear" ? "Кроссовки " : ""}${product.brand} ${product.name}`
   const eta = publishedOffer?.etaMinDays && publishedOffer.etaMaxDays
     ? `Доставка ${publishedOffer.etaMinDays}–${publishedOffer.etaMaxDays} дней`
     : "Доставка 10–18 дней"
+  const orderable = Boolean(
+    catalogStatus === "ready" &&
+    publishedOffer?.availability === "supplier_verified" &&
+    publishedOffer.liveProviderVerified &&
+    publishedOffer.displayPriceVerified &&
+    publishedOffer.checkoutReady,
+  )
+  const supplyLabel = catalogStatus === "loading"
+    ? "Проверяем наличие"
+    : publishedOffer?.availability === "supplier_stock_unknown"
+      ? "Наличие уточняется"
+      : publishedOffer?.availability === "supplier_unavailable"
+        ? "Нет в наличии"
+        : orderable
+          ? eta
+          : "Требует проверки"
+  const productDisplayName = product.kind === "footwear" && product.category === "recovery"
+    ? `${product.brand} ${product.name}`
+    : `${product.kind === "footwear" ? "Кроссовки " : ""}${product.brand} ${product.name}`
 
   const openProduct = (event: MouseEvent<HTMLElement>, preferredSize?: string) => {
     if (!onOpen || event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return
@@ -187,7 +199,7 @@ export function ProductCard({
         className="product-open product-card__link"
         href={getProductPath(product)}
         data-od-id={`open-product-${product.slug}`}
-        aria-label={`Открыть товар: ${product.brand} ${product.name}. Цена ${displayPrice}${available ? "" : ". Нет в продаже"}`}
+        aria-label={`Открыть товар: ${product.brand} ${product.name}. Цена ${displayPrice}${orderable ? "" : `. ${supplyLabel}`}`}
         onClick={openProduct}
         onFocus={requestHover}
         onPointerEnter={requestHoverOnPointer}
@@ -240,7 +252,7 @@ export function ProductCard({
           <span className="product-use">{getProductUse(product)}</span>
           <span className="product-price-row">
             <span className="product-price">{displayPrice}</span>
-            <span className="product-supply">{available ? eta : "Нет в продаже"}</span>
+            <span className="product-supply">{supplyLabel}</span>
           </span>
         </span>
       </a>
@@ -257,9 +269,23 @@ export function ProductCard({
       <div className="card-sizes">
         <span>Размеры {product.kind === "footwear" ? "EU" : ""}</span>
         <div className="card-size-options">
-          {cardSizes.map((size) => (
-            <button className="card-size-button" key={size} type="button" data-od-id={`size-${product.slug}-${size.replaceAll(".", "-")}`} onClick={(event) => openProduct(event, size)}>{size}</button>
-          ))}
+          {cardSizes.map((size) => {
+            const offer = publishedOffer?.sizeOffers.find(
+              (candidate) => candidate.sizeEu === size,
+            )
+            return (
+              <button
+                className="card-size-button"
+                key={size}
+                type="button"
+                data-od-id={`size-${product.slug}-${size.replaceAll(".", "-")}`}
+                disabled={offer?.available !== true || !offer.checkoutConfirmed}
+                onClick={(event) => openProduct(event, size)}
+              >
+                {size}
+              </button>
+            )
+          })}
           <button className="card-size-button card-size-button--all" type="button" data-od-id={`size-${product.slug}-all`} onClick={(event) => openProduct(event)}>Все</button>
         </div>
       </div>

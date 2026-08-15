@@ -83,7 +83,8 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
   )
   const catalogReady =
     storefront.catalogPriceState.status === "ready" &&
-    publishedOffer?.availability === "supplier_verified"
+    publishedOffer?.availability === "supplier_verified" &&
+    publishedOffer.checkoutReady
   const canAddToCart = Boolean(
     catalogReady &&
     storefront.catalogPriceState.orderCreationEnabled &&
@@ -284,9 +285,10 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
                   className="size-price-cell"
                   type="button"
                   data-od-id={`sheet-size-${product.slug}-${offer.sizeEu.replaceAll(".", "-")}`}
-                  aria-label={`${offer.sizeRu ?? "Размер RU не указан"} RU, ${offer.sizeEu} EU, ${offer.priceRub ? formatRub(offer.priceRub) : "нет в наличии"}`}
+                  aria-label={`${offer.sizeRu ?? "Размер RU не указан"} RU, ${offer.sizeEu} EU, ${offer.priceRub ? formatRub(offer.priceRub) : "цена не указана"}, ${offer.stockStatus === true ? "в наличии" : offer.stockStatus === false ? "нет в наличии" : "наличие уточняется"}`}
                   aria-pressed={storefront.selectedSize === offer.sizeEu}
                   disabled={!offer.available || !offer.priceRub}
+                  data-stock-status={offer.stockStatus === null ? "unknown" : String(offer.stockStatus)}
                   onClick={() => storefront.setSelectedSize(offer.sizeEu)}
                 >
                   <span className="size-price-cell__sizes">

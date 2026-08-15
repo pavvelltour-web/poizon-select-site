@@ -203,9 +203,17 @@ export function getDisplayPrice(
   product: CatalogProduct,
   catalogPriceLookup: CatalogPriceMap | null = null,
 ): DisplayPrice {
+  const verifiedPrice = catalogPriceLookup?.[product.slug]
+  if (!Number.isFinite(verifiedPrice) || !verifiedPrice || verifiedPrice <= 0) {
+    return {
+      label: "Цена",
+      value: "По запросу",
+      detail: "Покажем после проверки 12-часового снимка поставщика",
+    }
+  }
   return {
     label: "Цена",
-    value: formatRub(getCatalogLinePrice(product, catalogPriceLookup)),
+    value: formatRub(verifiedPrice),
     detail: "СДЭК рассчитывается отдельно",
   }
 }

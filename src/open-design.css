@@ -937,6 +937,13 @@
       text-decoration: underline;
       text-underline-offset: 4px;
     }
+    .footer-build {
+      grid-column: 1 / -1;
+      color: var(--muted);
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
     dialog {
       color: var(--fg);
     }
