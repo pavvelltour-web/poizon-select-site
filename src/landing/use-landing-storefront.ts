@@ -598,7 +598,7 @@ export function useLandingStorefront(
     if (
       catalogPriceState.status !== "ready" ||
       !offer ||
-      offer.availability !== "catalog_listed" ||
+      offer.availability !== "supplier_verified" ||
       !confirmedSizeOffer
     ) {
       setCheckoutResult(

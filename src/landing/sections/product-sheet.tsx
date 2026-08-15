@@ -83,7 +83,7 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
   )
   const catalogReady =
     storefront.catalogPriceState.status === "ready" &&
-    publishedOffer?.availability === "catalog_listed"
+    publishedOffer?.availability === "supplier_verified"
   const canAddToCart = Boolean(
     catalogReady &&
     storefront.catalogPriceState.orderCreationEnabled &&

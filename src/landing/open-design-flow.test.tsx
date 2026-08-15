@@ -58,7 +58,7 @@ function checkoutCatalogPayload() {
         price_rub: 31400,
         image_url: `${approvedRoot}/nike-kd-18/01-side.png`,
         fulfillment_mode: "made_to_order",
-        availability: "catalog_listed",
+        availability: "supplier_verified",
         eta_min_days: 10,
         eta_max_days: 18,
         live_provider_verified: true,

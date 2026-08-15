@@ -146,7 +146,7 @@ export function ProductCard({
     .filter((size): size is string => Boolean(size))
   const available = !(
     catalogStatus === "ready" &&
-    (!publishedOffer || publishedOffer.availability !== "catalog_listed")
+    (!publishedOffer || publishedOffer.availability !== "supplier_verified")
   )
   const productDisplayName = product.kind === "footwear" && product.category === "recovery"
     ? `${product.brand} ${product.name}`

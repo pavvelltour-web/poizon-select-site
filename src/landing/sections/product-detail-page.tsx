@@ -75,7 +75,7 @@ export function ProductDetailPage({ product, storefront }: ProductDetailPageProp
   const publishedOffer = storefront.catalogPriceState.items[product.slug]
   const catalogReady =
     storefront.catalogPriceState.status === "ready" &&
-    publishedOffer?.availability === "catalog_listed"
+    publishedOffer?.availability === "supplier_verified"
   const sizeOptions = catalogReady ? publishedOffer.sizes : []
   const orderCreationEnabled =
     catalogReady && storefront.catalogPriceState.orderCreationEnabled

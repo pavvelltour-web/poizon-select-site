@@ -26,7 +26,7 @@ const catalogPayload = {
       price_rub: 25100,
       image_url: "https://kicksbase.ru/catalog/server.webp",
       fulfillment_mode: "made_to_order",
-      availability: "catalog_listed",
+      availability: "supplier_verified",
       eta_min_days: 10,
       eta_max_days: 18,
       live_provider_verified: false,
@@ -55,6 +55,24 @@ const catalogPayload = {
 }
 
 describe("checkout catalogue v10", () => {
+  it("accepts an empty fail-closed live catalog response", () => {
+    expect(parseCheckoutCatalog({
+      version: "2026-08-15-live",
+      catalog_mode: "curated_live_poizon",
+      snapshot_hours: 12,
+      items: [],
+      order_creation_enabled: false,
+      online_payment_enabled: false,
+    })).toEqual({
+      items: {},
+      lookup: {},
+      version: "2026-08-15-live",
+      personalDataConsentVersion: null,
+      orderCreationEnabled: false,
+      onlinePaymentEnabled: false,
+    })
+  })
+
   it("parses a published catalog response without presenting a live provider quote", () => {
     const parsed = parseCatalogSearch({
       status: "catalog",

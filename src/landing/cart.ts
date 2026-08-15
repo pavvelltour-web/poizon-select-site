@@ -584,7 +584,6 @@ export function parseCheckoutCatalog(payload: unknown): CheckoutCatalogSnapshot 
       : priceRub
   }
 
-  if (Object.keys(items).length === 0) return null
   const orderCreationEnabled = source.order_creation_enabled === true
   return {
     items,
@@ -866,7 +865,7 @@ export function reconcileCartLines(
 ): CartLine[] {
   return lines.map((line) => ({
     ...line,
-    validation: catalogItems[line.product.slug]?.availability === "catalog_listed" &&
+    validation: catalogItems[line.product.slug]?.availability === "supplier_verified" &&
       Boolean(getPublishedSizeOffer(catalogItems[line.product.slug], line.size))
       ? "valid"
       : "invalid",
@@ -886,7 +885,7 @@ export function buildCheckoutPayload(
     const sizeOffer = getPublishedSizeOffer(offer, line.size)
     if (
       !offer ||
-      offer.availability !== "catalog_listed" ||
+      offer.availability !== "supplier_verified" ||
       !sizeOffer ||
       line.validation !== "valid"
     ) {
