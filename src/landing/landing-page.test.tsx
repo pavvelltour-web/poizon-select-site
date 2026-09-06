@@ -36,6 +36,7 @@ function checkoutCatalogPayload(
         product_kind: "footwear",
         sizes,
         price_rub: 24500,
+        price_status: "current",
         image_url: "https://kicksbase.ru/catalog/nike-gt-cut-academy.webp",
         fulfillment_mode: "made_to_order",
         availability: "supplier_verified",
@@ -52,12 +53,23 @@ function checkoutCatalogPayload(
           size_ru: String(Number(size) - 1),
           price_rub: 24500,
           price_cny: 1_100,
+          price_status: "current",
+          source_updated_at: observedAt,
+          source_expires_at: new Date(Date.parse(observedAt) + 48 * 60 * 60_000).toISOString(),
           available: true,
           checkout_confirmed: true,
           live_provider_verified: true,
         })),
       },
     ],
+  }
+}
+
+function supplierMetadata(index: number) {
+  return {
+    slug: `supplier-model-${index}`, brand: "adidas", name: `Supplier model ${index}`,
+    article: `ARTICLE-${index}`, kind: "footwear", category: "basketball", source: "poizon",
+    product_ref: index.toString(16).padStart(64, "0"), images: [`https://cdn.poizon.com/product-${index}.jpg`],
   }
 }
 
@@ -179,6 +191,65 @@ afterEach(() => {
 })
 
 describe("LandingPage", () => {
+  it("counts supplier additions in the same catalogue without changing the original100", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => ({
+      ...checkoutCatalogPayload(), catalog_products: Array.from({ length: 90 }, (_, index) => supplierMetadata(index)),
+    }) }))
+    window.history.replaceState(null, "", "/catalog")
+    render(<LandingPage configuredBotUsername={null} />)
+    expect(await screen.findByText(/^190 товаров/)).toBeInTheDocument()
+  })
+
+  it("resolves a direct supplier product URL after metadata arrives without invented prices or sizes", async () => {
+    let resolveResponse!: (value: unknown) => void
+    vi.stubGlobal("fetch", vi.fn(() => new Promise((resolve) => { resolveResponse = resolve })))
+    window.history.replaceState(null, "", "/product/supplier-model-1")
+    render(<LandingPage configuredBotUsername={null} />)
+    expect(screen.getByText("Загружаем товар из каталога Poizon…")).toBeInTheDocument()
+    await act(async () => resolveResponse({ ok: true, json: async () => ({
+      ...checkoutCatalogPayload(), items: [], catalog_products: [supplierMetadata(1)],
+    }) }))
+    const dialog = await screen.findByRole("dialog")
+    expect(within(dialog).getByRole("heading", { name: /adidas Supplier model 1/ })).toBeInTheDocument()
+    expect([...dialog.querySelectorAll("img")].some((image) => image.src === supplierMetadata(1).images[0])).toBe(true)
+    expect(dialog.querySelectorAll(".size-price-cell")).toHaveLength(0)
+    expect(within(dialog).getAllByText("По запросу").length).toBeGreaterThan(0)
+    expect(screen.queryByRole("heading", { name: "Такой страницы нет." })).not.toBeInTheDocument()
+  })
+
+  it("preserves a saved supplier SKU until metadata is available and restores its exact current price", async () => {
+    const stored = [{ slug: "supplier-model-1", size: "44", quantity: 1 }]
+    localStorage.setItem("kicksbase-cart-v1", JSON.stringify(stored))
+    let resolveResponse!: (value: unknown) => void
+    vi.stubGlobal("fetch", vi.fn(() => new Promise((resolve) => { resolveResponse = resolve })))
+    window.history.replaceState(null, "", "/?cart=1")
+    render(<LandingPage configuredBotUsername={null} />)
+    expect(JSON.parse(localStorage.getItem("kicksbase-cart-v1")!)).toEqual(stored)
+    const payload = checkoutCatalogPayload(["44"])
+    Object.assign(payload.items[0], { slug: "supplier-model-1", brand: "adidas", name: "Supplier model 1" })
+    await act(async () => resolveResponse({ ok: true, json: async () => ({
+      ...payload, catalog_products: [supplierMetadata(1)],
+    }) }))
+    const drawer = await screen.findByRole("dialog", { name: "Корзина" })
+    expect(within(drawer).getByText("adidas Supplier model 1")).toBeInTheDocument()
+    expect(drawer.querySelector(".cart-line--valid")).toHaveTextContent("24 500 ₽")
+    expect(JSON.parse(localStorage.getItem("kicksbase-cart-v1")!)).toEqual(stored)
+  })
+
+  it("labels every historical SKU amount and keeps it unavailable to checkout", async () => {
+    const payload = checkoutCatalogPayload(["44"])
+    payload.items[0].price_status = "historical"
+    payload.items[0].size_offers[0].price_status = "historical"
+    payload.items[0].size_offers[0].source_updated_at = "2020-01-01T00:00:00Z"
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => payload }))
+    window.history.replaceState(null, "", "/product/nike-gt-cut-academy")
+    render(<LandingPage configuredBotUsername={null} />)
+    const historicalSize = await screen.findByRole("button", { name: /44 EU, последняя известная цена: 24 500 ₽/ })
+    expect(historicalSize).toBeDisabled()
+    expect(historicalSize).toHaveTextContent("Последняя цена · 01.01.2020")
+    expect(screen.getAllByText("Последняя цена: от 24 500 ₽").length).toBeGreaterThan(0)
+  })
+
   it("shows verified Poizon no-stock evidence on the catalogue card and opened product without a price", async () => {
     const user = userEvent.setup()
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => ({
@@ -865,7 +936,7 @@ describe("LandingPage", () => {
     window.history.replaceState(null, "", "/?product=not-a-real-product")
     render(<LandingPage configuredBotUsername={null} />)
 
-    expect(screen.getByRole("heading", { name: "Такой страницы нет." })).toBeInTheDocument()
+    expect(await screen.findByRole("heading", { name: "Такой страницы нет." })).toBeInTheDocument()
     await waitFor(() => {
       expect(window.location.pathname).toBe("/product/not-a-real-product")
     })

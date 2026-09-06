@@ -91,7 +91,7 @@ export function ProductDetailPage({ product, storefront }: ProductDetailPageProp
         ? "СДЭК рассчитывается отдельно"
         : "Этот SKU нельзя оформить без подтверждённого наличия",
     }
-    : getDisplayPrice(product, storefront.catalogPriceState.lookup)
+    : getDisplayPrice(product, storefront.catalogPriceState.lookup, publishedOffer)
   const orderCreationEnabled =
     catalogReady &&
     storefront.catalogPriceState.orderCreationEnabled &&
@@ -236,7 +236,7 @@ export function ProductDetailPage({ product, storefront }: ProductDetailPageProp
                   key={offer.sizeEu}
                   type="button"
                   aria-pressed={selectedSize === offer.sizeEu}
-                  aria-label={`${offer.sizeEu}, ${offer.priceRub ? formatRub(offer.priceRub) : "цена не указана"}, ${offer.stockStatus === true ? "в наличии" : offer.stockStatus === false ? "нет в наличии" : "наличие уточняется"}`}
+                  aria-label={`${offer.sizeEu}, ${offer.priceStatus === "historical" ? "последняя известная цена: " : ""}${offer.priceRub ? formatRub(offer.priceRub) : "цена не указана"}, ${offer.stockStatus === true ? "в наличии" : offer.stockStatus === false ? "нет в наличии" : "наличие уточняется"}`}
                   disabled={!offer.available || !offer.priceRub}
                   data-stock-status={offer.stockStatus === null ? "unknown" : String(offer.stockStatus)}
                   onClick={() => setSelectedSize(offer.sizeEu)}

@@ -70,7 +70,7 @@ describe("observed production catalogue payloads", () => {
     )
   })
 
-  it("accepts the verified 12-hour endpoint contract but preserves null stock as reference-only", () => {
+  it("retains legacy endpoint prices as historical references when source freshness is missing", () => {
     const parsed = parseCheckoutCatalog({
       version: "poizon-live-v1",
       catalog_mode: "curated_live_poizon",
@@ -105,7 +105,9 @@ describe("observed production catalogue payloads", () => {
     })
 
     const item = parsed?.items["nike-air-force-1-07-white"]
-    expect(parsed?.lookup["nike-air-force-1-07-white"]).toBe(16_700)
+    expect(parsed?.lookup["nike-air-force-1-07-white"]).toBeUndefined()
+    expect(item?.priceRub).toBe(16_700)
+    expect(item?.priceStatus).toBe("historical")
     expect(item?.sizeOffers[0]).toMatchObject({
       skuId: "af1-42",
       available: null,

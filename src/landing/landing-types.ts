@@ -1,6 +1,7 @@
 import type { CatalogCategory, CatalogProduct, CatalogSort } from "../catalog/catalog"
 import type { RefObject } from "react"
 import type { CatalogAvailabilityMap } from "./catalog-availability"
+import type { SupplierCatalogProduct } from "./supplier-catalog"
 import type {
   CartLine,
   CheckoutDelivery,
@@ -35,6 +36,7 @@ export interface CatalogPriceState {
   lookup: CatalogPriceMap | null
   items: PublishedCatalogMap
   catalogStatuses: CatalogAvailabilityMap
+  catalogProducts: readonly SupplierCatalogProduct[]
   version: string
   personalDataConsentVersion: string | null
   orderCreationEnabled: boolean
@@ -58,6 +60,7 @@ export interface CatalogSearchState {
 export type CopyState = "idle" | "copied" | "failed"
 
 export interface StorefrontState {
+  products: readonly CatalogProduct[]
   botUsername: string | null
   botUrl: string | null
   category: ActiveCategory

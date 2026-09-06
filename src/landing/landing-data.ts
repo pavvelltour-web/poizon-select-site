@@ -19,7 +19,7 @@ import {
   type CatalogSort,
   type ProductKind,
 } from "../catalog/catalog"
-import type { CatalogPriceMap } from "./cart"
+import type { CatalogPriceMap, PublishedCatalogItem } from "./cart"
 import type { ActiveCategory, DisplayPrice, TaskMatch, UrlState } from "./landing-types"
 import type { LucideIcon } from "lucide-react"
 import type { SyntheticEvent } from "react"
@@ -202,7 +202,15 @@ function getCatalogLinePrice(
 export function getDisplayPrice(
   product: CatalogProduct,
   catalogPriceLookup: CatalogPriceMap | null = null,
+  publishedItem?: PublishedCatalogItem | null,
 ): DisplayPrice {
+  if (publishedItem?.priceStatus === "historical" && Date.parse(publishedItem.expiresAt) > Date.now()) {
+    return {
+      label: "Последняя известная цена",
+      value: `Последняя цена: от ${formatRub(publishedItem.priceRub)}`,
+      detail: "Историческая цена источника. Актуальную цену нужно подтвердить",
+    }
+  }
   const verifiedPrice = catalogPriceLookup?.[product.slug]
   if (!Number.isFinite(verifiedPrice) || !verifiedPrice || verifiedPrice <= 0) {
     return {
@@ -345,6 +353,7 @@ export function getSourcingDetail(product: CatalogProduct): string {
 }
 
 export function getSizeOptions(product: CatalogProduct): readonly string[] {
+  if (product.supplierProductRef) return []
   if (product.kind === "apparel") return apparelSizes
   if (product.kind === "accessory") {
     const productText = `${product.name} ${product.query}`.toLowerCase()

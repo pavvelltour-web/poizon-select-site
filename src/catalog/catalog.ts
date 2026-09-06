@@ -81,6 +81,7 @@ export interface PriceQuote {
 }
 
 export interface CatalogProduct {
+  supplierProductRef?: string
   slug: string
   brand: string
   name: string

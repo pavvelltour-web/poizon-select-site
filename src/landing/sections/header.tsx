@@ -1,11 +1,14 @@
 import { Heart, Menu, Search, ShoppingBag, UserRound, X } from "lucide-react"
 import { useEffect, useMemo, useRef, useState, type RefObject } from "react"
 
-import { formatRub, publicCatalogProducts, type CatalogProduct } from "../../catalog/catalog"
-import { getProductPath, getProductTypeLabel, resolveAssetUrl } from "../landing-data"
+import { publicCatalogProducts, type CatalogProduct } from "../../catalog/catalog"
+import { getDisplayPrice, getProductPath, getProductTypeLabel, resolveAssetUrl } from "../landing-data"
+import type { CatalogPriceMap } from "../cart"
 import { useModalDialog } from "../use-modal-dialog"
 
 interface HeaderProps {
+  products?: readonly CatalogProduct[]
+  catalogPriceLookup?: CatalogPriceMap | null
   cartCount: number
   openCart: () => void
   personalDataConsentVersion: string | null
@@ -20,6 +23,8 @@ interface HeaderProps {
 const logoSrc = "/storefront-media/approved/assets/kicksbase-signal/kicksbase-logo.webp"
 
 export function Header({
+  products = publicCatalogProducts,
+  catalogPriceLookup = null,
   cartCount,
   openCart,
   personalDataConsentVersion,
@@ -176,16 +181,16 @@ export function Header({
   const searchResults = useMemo(() => {
     const query = searchQuery.trim().toLocaleLowerCase("ru")
     if (query.length < 2) return []
-    return publicCatalogProducts
+    return products
       .filter((product) => `${getProductTypeLabel(product)} ${product.brand} ${product.name}`.toLocaleLowerCase("ru").includes(query))
       .slice(0, 6)
-  }, [searchQuery])
+  }, [products, searchQuery])
   const favoriteProducts = useMemo(
     () => favoriteSlugs.flatMap((slug) => {
-      const product = publicCatalogProducts.find((item) => item.slug === slug)
+      const product = products.find((item) => item.slug === slug)
       return product ? [product] : []
     }),
-    [favoriteSlugs],
+    [products, favoriteSlugs],
   )
 
   const requestCode = async () => {
@@ -438,7 +443,7 @@ export function Header({
                   }}
                 >
                   <strong>{getProductTypeLabel(product)} {product.brand} {product.name}</strong>
-                  <span>{product.orderQuote ? formatRub(product.orderQuote.totalRub) : "Открыть"}</span>
+                  <span>{getDisplayPrice(product, catalogPriceLookup).value}</span>
                 </button>
               ))}
               {searchQuery.trim().length >= 2 && searchResults.length === 0 ? <p className="empty-state">Ничего не нашли.</p> : null}

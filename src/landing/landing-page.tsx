@@ -1,7 +1,6 @@
 import { AnimatePresence } from "motion/react"
 import { useEffect, useRef, useState, type ReactNode } from "react"
 
-import { findPublicProductBySlug } from "../catalog/catalog"
 import { CatalogSection } from "./sections/catalog-section"
 import { CheckoutOutcomePage } from "./checkout-outcome-page"
 import { CartDrawer } from "./sections/cart-drawer"
@@ -50,7 +49,7 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
     }
   }
   const productRoute = productRouteMatch !== null || legacyProductSlug !== null
-  const routeProduct = findPublicProductBySlug(productRouteSlug)
+  const routeProduct = storefront.products.find((product) => product.slug === productRouteSlug) ?? null
   const catalogRoute = pathname === "/catalog"
   const legalDesignRoute =
     staticRouteName(pathname) === "offer" ||
@@ -112,6 +111,8 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
         <LegalHeader cartCount={storefront.cartCount} openCart={storefront.openCart} />
       ) : (
         <Header
+          products={storefront.products}
+          catalogPriceLookup={storefront.catalogPriceState.lookup}
           cartCount={storefront.cartCount}
           openCart={storefront.openCart}
           personalDataConsentVersion={
@@ -141,7 +142,9 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
         ) : staticRoute ? (
           <StaticRoutePage route={staticRoute} />
         ) : productRoute && !routeProduct ? (
-          <ProductDetailPage product={routeProduct} storefront={storefront} />
+          storefront.catalogPriceState.status === "loading"
+            ? <p role="status">Загружаем товар из каталога Poizon…</p>
+            : <ProductDetailPage product={routeProduct} storefront={storefront} />
         ) : catalogRoute ? (
           <>
             <section className="catalog-intro container" data-od-id="catalog-intro" aria-labelledby="catalog-page-title">

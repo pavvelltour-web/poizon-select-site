@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import type { CatalogAvailabilityMap } from "./catalog-availability"
+import { mergeSupplierCatalog, type SupplierCatalogProduct } from "./supplier-catalog"
 
 import {
   publicCatalogProducts,
   CATALOG_PRICE_VERSION,
   filterCatalog,
-  findPublicProductBySlug,
   formatRub,
   sortCatalog,
   type CatalogSort,
@@ -177,6 +177,7 @@ export function useLandingStorefront(
     lookup: null as Record<string, number> | null,
     items: {} as PublishedCatalogMap,
     catalogStatuses: {} as CatalogAvailabilityMap,
+    catalogProducts: [] as readonly SupplierCatalogProduct[],
     version: CATALOG_PRICE_VERSION,
     personalDataConsentVersion: null as string | null,
     orderCreationEnabled: false,
@@ -184,6 +185,7 @@ export function useLandingStorefront(
     error: null as string | null,
   })
   const [catalogPriceRefresh, setCatalogPriceRefresh] = useState(0)
+  const [cartRestored, setCartRestored] = useState(false)
   const productTriggerRef = useRef<HTMLElement | null>(null)
   const sheetHeadingRef = useRef<HTMLHeadingElement | null>(null)
   const checkoutAttemptRef = useRef<{ signature: string; key: string } | null>(null)
@@ -194,7 +196,11 @@ export function useLandingStorefront(
   const botUrl = buildTelegramBotUrl(botUsername)
   const apiBaseUrl = String(import.meta.env.VITE_API_BASE_URL || "").trim() || ""
 
-  const selectedProduct = findPublicProductBySlug(selectedSlug)
+  const products = useMemo(
+    () => mergeSupplierCatalog(publicCatalogProducts, catalogPriceState.catalogProducts),
+    [catalogPriceState.catalogProducts],
+  )
+  const selectedProduct = products.find((product) => product.slug === selectedSlug) ?? null
   const selectedVisibleGallery = selectedProduct?.gallery.slice(0, 5) ?? []
   const selectedImage =
     selectedVisibleGallery[selectedImageIndex] ??
@@ -230,30 +236,30 @@ export function useLandingStorefront(
         value: formatRub(selectedLiveOffer.priceRub),
         detail: "СДЭК рассчитывается отдельно",
       }
-      : getDisplayPrice(selectedProduct, catalogPriceState.lookup)
+      : getDisplayPrice(selectedProduct, catalogPriceState.lookup, catalogPriceState.items[selectedProduct.slug])
     : null
   const selectedImageDisplayIndex =
     selectedVisibleGallery.length === 0 ? 0 : selectedImageIndex + 1
   const filteredProducts = useMemo(
-    () => sortCatalog(filterCatalog(publicCatalogProducts, category, search), sort, catalogPriceState.lookup),
-    [category, search, sort, catalogPriceState.lookup],
+    () => sortCatalog(filterCatalog(products, category, search), sort, catalogPriceState.lookup),
+    [products, category, search, sort, catalogPriceState.lookup],
   )
   const request = selectedProduct
     ? buildOrderRequest(selectedProduct, selectedSize ?? undefined)
     : ""
   const catalogFallbacks = useMemo(
     () =>
-      filterCatalog(publicCatalogProducts, category, search)
+      filterCatalog(products, category, search)
         .slice(0, 4)
         .map(catalogFallback),
-    [category, search],
+    [products, category, search],
   )
   const taskFallbacks = useMemo(
     () =>
-      findTaskMatches(publicCatalogProducts, taskInput)
+      findTaskMatches(products, taskInput)
         .slice(0, 4)
         .map((match) => catalogFallback(match.product)),
-    [taskInput],
+    [products, taskInput],
   )
   const cartCount = cartLines.reduce((sum, line) => sum + line.quantity, 0)
   const currentCartTotalRub = cartTotalRub(
@@ -309,6 +315,7 @@ export function useLandingStorefront(
         lookup: nextPriceState.lookup,
         items: nextPriceState.items,
         catalogStatuses: nextPriceState.catalogStatuses,
+        catalogProducts: nextPriceState.catalogProducts,
         version: nextPriceState.version,
         personalDataConsentVersion: nextPriceState.personalDataConsentVersion,
         orderCreationEnabled: nextPriceState.orderCreationEnabled,
@@ -360,8 +367,10 @@ export function useLandingStorefront(
   }, [selectedSlug])
 
   useEffect(() => {
-    setCartLines(loadCart(publicCatalogProducts))
-  }, [])
+    if (cartRestored || catalogPriceState.status !== "ready") return
+    setCartLines(reconcileCartLines(loadCart(products), catalogPriceState.items))
+    setCartRestored(true)
+  }, [cartRestored, catalogPriceState.status, catalogPriceState.items, products])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -513,8 +522,8 @@ export function useLandingStorefront(
   }, [apiBaseUrl, taskFallbacks, taskInput])
 
   useEffect(() => {
-    saveCart(cartLines)
-  }, [cartLines])
+    if (cartRestored) saveCart(cartLines)
+  }, [cartLines, cartRestored])
 
   const selectCategory = (nextCategory: ActiveCategory) => {
     setCategory(nextCategory)
@@ -812,6 +821,7 @@ export function useLandingStorefront(
   }
 
   return {
+    products,
     botUsername,
     botUrl,
     category,

@@ -95,7 +95,7 @@ function useCardImageLoadPlan(key: string) {
     setRetryPending(true)
   }
 
-  return { candidate, retryPending, failed, retryOrFail }
+  return { candidate, retryPending, failed, retryOrFail, fail: () => setFailed(true) }
 }
 
 export function ProductCard({
@@ -109,7 +109,7 @@ export function ProductCard({
   onToggleFavorite,
   onOpen,
 }: ProductCardProps) {
-  const price = getDisplayPrice(product, catalogPriceLookup)
+  const price = getDisplayPrice(product, catalogPriceLookup, publishedOffer)
   const [hoverRequested, setHoverRequested] = useState(false)
   const [hoverReady, setHoverReady] = useState(false)
   const hoverImageRef = useRef<HTMLImageElement | null>(null)
@@ -130,21 +130,21 @@ export function ProductCard({
   const primaryLoad = useCardImageLoadPlan(product.slug)
   const hoverLoad = useCardImageLoadPlan(`${product.slug}:${hoverImage}`)
   const isPriorityCard = index < 2
-  const primarySource = getCardImageSource(
+  const primarySource: CardImageSource = product.supplierProductRef ? { src: primaryImage } : getCardImageSource(
     primaryLoad.candidate,
     primaryThumbnail640,
     primaryThumbnail960,
     primaryThumbnail1280,
     resolveAssetUrl(product.fallbackImage),
   )
-  const hoverSource = getCardImageSource(
+  const hoverSource: CardImageSource = product.supplierProductRef ? { src: hoverImage } : getCardImageSource(
     hoverLoad.candidate,
     hoverThumbnail640,
     hoverThumbnail960,
     hoverThumbnail1280,
     hoverImage,
   )
-  const sizes = publishedOffer?.sizes.length ? publishedOffer.sizes : fallbackSizes(product.kind)
+  const sizes = publishedOffer?.sizes.length ? publishedOffer.sizes : product.supplierProductRef ? [] : fallbackSizes(product.kind)
   const cardSizes = (sizes.length >= 7 ? [sizes[2], sizes[4], sizes[6]] : sizes.slice(0, 3))
     .filter((size): size is string => Boolean(size))
   const orderable = Boolean(
@@ -209,7 +209,7 @@ export function ProductCard({
             fetchPriority={isPriorityCard ? "high" : "auto"}
             decoding="async"
             alt=""
-            onError={primaryLoad.retryOrFail}
+            onError={product.supplierProductRef ? primaryLoad.fail : primaryLoad.retryOrFail}
           />
           {primaryLoad.retryPending ? (
             <span className="product-media__loading" aria-hidden="true">
@@ -233,7 +233,7 @@ export function ProductCard({
                 alt=""
                 decoding="async"
                 onLoad={() => setHoverReady(true)}
-                onError={hoverLoad.retryOrFail}
+                onError={product.supplierProductRef ? hoverLoad.fail : hoverLoad.retryOrFail}
               />
             ) : null}
           </span>

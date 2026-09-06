@@ -30,3 +30,23 @@ again at the moment of the action.
 The baseline catalogue still contains 100 product references. This count is
 independent of the number of fresh verified SPU/SKU offers returned by Poizon.
 Release acceptance must record both counts from the actual provider-backed API.
+
+The additive `catalog_products` array contains only additional canonical supplier
+products: `slug`, `brand`, `name`, nullable `article`, `kind`, `category`, HTTPS
+`images`, `source: "poizon"`, and a SHA-256 `product_ref`. The original 100
+products and their media remain unchanged. Duplicate slugs or supplier references
+are excluded; metadata cannot supply prices, invented size ranges, or checkout
+authority. Supplier images must use one of the three existing CSP origins.
+Additional products participate in catalogue filters, product links, favourites,
+header search, and saved carts. Saved carts wait for canonical metadata before
+restoration, preventing unknown supplier products from being silently deleted.
+
+A current price requires explicit `price_status: "current"` on both the item
+and SKU, with valid `source_updated_at` and `source_expires_at`. Source expiry
+is the server-configured freshness boundary (at most 48 hours after the source
+update), separate from the local 12-hour snapshot lifetime. The browser expires
+the quote at the earlier boundary. Legacy, missing, or historical evidence is
+labelled **Последняя цена**, excluded from current-price sorting, and cannot
+confirm stock or checkout. Historical SKU rows display their source date when
+available. A priced subset with no available SKU cannot prove the entire SPU is
+absent; the full no-stock label requires explicit `catalog_statuses` evidence.

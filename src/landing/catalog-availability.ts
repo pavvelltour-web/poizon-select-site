@@ -50,10 +50,12 @@ export function catalogAvailabilityLabel(
   if (availability?.expiresAt && Date.parse(availability.expiresAt) <= Date.now()) {
     return "Данные Poizon устарели"
   }
+  if (!availability && item?.availability === "supplier_unavailable" && item.priceStatus === "current") {
+    return "Показанных размеров нет в наличии на Poizon"
+  }
   const status = availability?.status ?? (
-    item?.availability === "supplier_verified" ? "in_stock" :
-      item?.availability === "supplier_unavailable" ? "out_of_stock" :
-        item?.availability === "supplier_stock_unknown" ? "stock_unknown" : "unverified"
+    item?.availability === "supplier_verified" && item.priceStatus === "current" ? "in_stock" :
+      item ? "stock_unknown" : "unverified"
   )
   switch (status) {
     case "out_of_stock": return "Нет в наличии на Poizon"

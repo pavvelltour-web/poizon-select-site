@@ -3,6 +3,7 @@ import {
   type CatalogProduct,
 } from "../catalog/catalog"
 import { parseCatalogAvailability, type CatalogAvailabilityMap } from "./catalog-availability"
+import { parseSupplierCatalog, type SupplierCatalogProduct } from "./supplier-catalog"
 
 export interface CartLine {
   id: string
@@ -38,6 +39,7 @@ export interface PublishedCatalogItem {
   productKind: "footwear" | "apparel" | "accessory"
   sizes: string[]
   priceRub: number
+  priceStatus: "current" | "historical"
   imageUrl: string | null
   fulfillmentMode: "made_to_order" | "in_stock"
   availability: string
@@ -59,6 +61,9 @@ export interface PublishedSizeOffer {
   sizeCn: string | null
   priceCny: number
   priceRub: number
+  priceStatus: "current" | "historical"
+  sourceUpdatedAt: string | null
+  sourceExpiresAt: string | null
   available: boolean | null
   checkoutConfirmed: boolean
   liveProviderVerified: boolean
@@ -95,6 +100,8 @@ export interface ProductSizeOffer {
   sizeCn: string | null
   priceCny: number | null
   priceRub: number | null
+  priceStatus: "current" | "historical" | null
+  sourceUpdatedAt: string | null
   stockStatus: boolean | null
   available: boolean
   checkoutConfirmed: boolean
@@ -148,6 +155,7 @@ export interface CatalogSearchResponse {
 export interface CheckoutCatalogSnapshot {
   items: PublishedCatalogMap
   catalogStatuses: CatalogAvailabilityMap
+  catalogProducts: readonly SupplierCatalogProduct[]
   lookup: CatalogPriceMap
   version: string
   catalogMode: "curated_live_poizon"
@@ -280,6 +288,7 @@ function safeHttpsUrl(value: unknown): string | null {
 const quoteClockSkewMs = 5 * 60 * 1000
 const liveQuoteStalenessMs = 5 * 60 * 1000
 const catalogSnapshotWindowMs = 12 * 60 * 60 * 1000
+const maximumSourceAgeMs = 48 * 60 * 60 * 1000
 const maxPriceRub = 10_000_000
 const maxPriceCny = 100_000
 const catalogSlugPattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u
@@ -604,6 +613,15 @@ export function parseCheckoutCatalog(payload: unknown): CheckoutCatalogSnapshot 
             ? null
             : undefined
         const checkoutConfirmed = offer.checkout_confirmed
+        const sourceUpdatedAtMs = parseQuoteTimestamp(offer.source_updated_at)
+        const sourceExpiresAtMs = parseQuoteTimestamp(offer.source_expires_at)
+        const currentSource = sourceUpdatedAtMs !== null &&
+          sourceExpiresAtMs !== null && sourceExpiresAtMs > now &&
+          sourceExpiresAtMs > sourceUpdatedAtMs &&
+          sourceUpdatedAtMs <= now + quoteClockSkewMs &&
+          sourceExpiresAtMs - sourceUpdatedAtMs <= maximumSourceAgeMs
+        const priceStatus = item.price_status === "current" &&
+          offer.price_status === "current" && currentSource ? "current" : "historical"
         if (
           !skuId ||
           !skuIdPattern.test(skuId) ||
@@ -625,6 +643,9 @@ export function parseCheckoutCatalog(payload: unknown): CheckoutCatalogSnapshot 
           sizeCn: optionalString(offer.size_cn) ?? optionalString(offer.cn),
           priceCny,
           priceRub: price,
+          priceStatus,
+          sourceUpdatedAt: sourceUpdatedAtMs === null ? null : optionalString(offer.source_updated_at),
+          sourceExpiresAt: sourceExpiresAtMs === null ? null : optionalString(offer.source_expires_at),
           available: offerAvailable,
           checkoutConfirmed,
           liveProviderVerified: true,
@@ -668,6 +689,19 @@ export function parseCheckoutCatalog(payload: unknown): CheckoutCatalogSnapshot 
         : unavailableOffers
     if (priceRub !== Math.min(...floorOffers.map((offer) => offer.priceRub))) continue
 
+    const priceStatus = item.price_status === "current" &&
+      floorOffers.every((offer) => offer.priceStatus === "current") ? "current" : "historical"
+    const effectiveExpiresAt = priceStatus === "current"
+      ? new Date(Math.min(expiresAtMs, ...sizeOffers.filter((offer) => offer.priceStatus === "current")
+        .map((offer) => Date.parse(offer.sourceExpiresAt!)))).toISOString()
+      : expiresAt
+    const safeSizeOffers = sizeOffers.map((offer) => ({
+      ...offer,
+      available: offer.priceStatus === "current" ? offer.available : null,
+      checkoutConfirmed: offer.checkoutConfirmed && offer.priceStatus === "current" && priceStatus === "current",
+      expiresAt: effectiveExpiresAt,
+    }))
+
     const normalized: PublishedCatalogItem = {
       slug,
       name,
@@ -675,6 +709,7 @@ export function parseCheckoutCatalog(payload: unknown): CheckoutCatalogSnapshot 
       productKind: productKind as PublishedCatalogItem["productKind"],
       sizes,
       priceRub,
+      priceStatus,
       imageUrl,
       fulfillmentMode: fulfillmentMode as PublishedCatalogItem["fulfillmentMode"],
       availability,
@@ -682,10 +717,10 @@ export function parseCheckoutCatalog(payload: unknown): CheckoutCatalogSnapshot 
       etaMaxDays: finitePositiveNumber(item.eta_max_days),
       liveProviderVerified: true,
       displayPriceVerified,
-      checkoutReady,
+      checkoutReady: checkoutReady && safeSizeOffers.some((offer) => offer.checkoutConfirmed),
       observedAt,
-      expiresAt,
-      sizeOffers,
+      expiresAt: effectiveExpiresAt,
+      sizeOffers: safeSizeOffers,
     }
     if (items[slug]) {
       delete items[slug]
@@ -694,7 +729,7 @@ export function parseCheckoutCatalog(payload: unknown): CheckoutCatalogSnapshot 
       continue
     }
     items[slug] = normalized
-    lookup[slug] = priceRub
+    if (priceStatus === "current") lookup[slug] = priceRub
   }
 
   const orderCreationEnabled = source.order_creation_enabled === true &&
@@ -702,6 +737,7 @@ export function parseCheckoutCatalog(payload: unknown): CheckoutCatalogSnapshot 
   return {
     items,
     catalogStatuses: parseCatalogAvailability(source.catalog_statuses),
+    catalogProducts: parseSupplierCatalog(source.catalog_products),
     lookup,
     version,
     catalogMode: "curated_live_poizon",
@@ -821,10 +857,11 @@ export function getPublishedSizeOffer(
   item: PublishedCatalogItem | undefined,
   sizeEu: string,
 ): PublishedSizeOffer | null {
-  if (!item || Date.parse(item.expiresAt) <= Date.now()) return null
+  if (!item || item.priceStatus !== "current" || Date.parse(item.expiresAt) <= Date.now()) return null
   const matchingOffers = item.sizeOffers.filter(
     (offer) =>
       offer.available === true &&
+      offer.priceStatus === "current" &&
       offer.checkoutConfirmed &&
       offer.sizeEu === sizeEu,
   )
@@ -861,9 +898,7 @@ export function buildProductSizeOffers(
       (offer) => offer.sizeEu === sizeEu,
     ) ?? []
     const publishedOffer = publishedOffers.length === 1 ? publishedOffers[0] ?? null : null
-    const checkoutOffer = publishedOffer?.available === true && publishedOffer.checkoutConfirmed
-      ? publishedOffer
-      : null
+    const checkoutOffer = getPublishedSizeOffer(checkoutItem, sizeEu)
     const matchingLiveOffer = checkoutOffer
       ? (liveByExactSize.get(checkoutOffer.sizeEu) ?? []).find(
         (liveOffer) =>
@@ -884,6 +919,8 @@ export function buildProductSizeOffers(
         sizeCn: matchingLiveOffer.sizeCn,
         priceCny: matchingLiveOffer.priceCny,
         priceRub: matchingLiveOffer.totalRub,
+        priceStatus: "current",
+        sourceUpdatedAt: checkoutOffer.sourceUpdatedAt,
         stockStatus: true,
         available: true,
         checkoutConfirmed: true,
@@ -900,6 +937,8 @@ export function buildProductSizeOffers(
         sizeCn: null,
         priceCny: checkoutOffer.priceCny,
         priceRub: checkoutOffer.priceRub,
+        priceStatus: "current",
+        sourceUpdatedAt: checkoutOffer.sourceUpdatedAt,
         stockStatus: true,
         available: true,
         checkoutConfirmed: true,
@@ -915,6 +954,8 @@ export function buildProductSizeOffers(
       sizeCn: publishedOffer.sizeCn,
       priceCny: publishedOffer.priceCny,
       priceRub: publishedOffer.priceRub,
+      priceStatus: publishedOffer.priceStatus,
+      sourceUpdatedAt: publishedOffer.sourceUpdatedAt,
       stockStatus: publishedOffer.available,
       available: false,
       checkoutConfirmed: false,
@@ -928,6 +969,8 @@ export function buildProductSizeOffers(
       sizeCn: null,
       priceCny: null,
       priceRub: null,
+      priceStatus: null,
+      sourceUpdatedAt: null,
       stockStatus: null,
       available: false,
       checkoutConfirmed: false,

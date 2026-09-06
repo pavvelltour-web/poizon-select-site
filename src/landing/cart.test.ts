@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest"
 
 import { publicCatalogProducts } from "../catalog/catalog"
+import { getDisplayPrice } from "./landing-data"
 import {
   addOrIncrementCartLine,
   buildProductSizeOffers,
@@ -14,6 +15,7 @@ import {
 
 const catalogObservedAt = new Date(Date.now() - 60_000).toISOString()
 const catalogExpiresAt = new Date(Date.now() + 11 * 60 * 60 * 1000).toISOString()
+const sourceExpiresAt = new Date(Date.parse(catalogObservedAt) + 48 * 60 * 60_000).toISOString()
 
 const catalogPayload = {
   version: "2026-08-02-v3",
@@ -30,6 +32,7 @@ const catalogPayload = {
       product_kind: "footwear",
       sizes: ["43", "44"],
       price_rub: 25100,
+      price_status: "current",
       image_url: "https://kicksbase.ru/catalog/server.webp",
       fulfillment_mode: "made_to_order",
       availability: "supplier_verified",
@@ -47,6 +50,9 @@ const catalogPayload = {
           size_ru: "42",
           price_rub: 25100,
           price_cny: 1_200,
+          price_status: "current",
+          source_updated_at: catalogObservedAt,
+          source_expires_at: sourceExpiresAt,
           available: true,
           checkout_confirmed: true,
           live_provider_verified: true,
@@ -57,6 +63,9 @@ const catalogPayload = {
           size_ru: "43",
           price_rub: 25100,
           price_cny: 1_200,
+          price_status: "current",
+          source_updated_at: catalogObservedAt,
+          source_expires_at: sourceExpiresAt,
           available: true,
           checkout_confirmed: true,
           live_provider_verified: true,
@@ -67,6 +76,41 @@ const catalogPayload = {
 }
 
 describe("checkout catalogue v10", () => {
+  it.each(["historical", undefined])("keeps %s prices explicitly historical and unable to authorize checkout", (status) => {
+    const payload = structuredClone(catalogPayload)
+    Object.assign(payload.items[0], { price_status: status })
+    const parsed = parseCheckoutCatalog(payload)!
+    const item = parsed.items["nike-gt-cut-academy"]
+    expect(item.priceStatus).toBe("historical")
+    expect(item.checkoutReady).toBe(false)
+    expect(item.sizeOffers.every((offer) => !offer.checkoutConfirmed)).toBe(true)
+    expect(parsed.lookup).toEqual({})
+    expect(parsed.orderCreationEnabled).toBe(false)
+    expect(getDisplayPrice(publicCatalogProducts.find((product) => product.slug === item.slug)!, parsed.lookup, item).value)
+      .toBe("Последняя цена: от 25 100 ₽")
+  })
+
+  it.each([null, "2020-01-01T00:00:00Z", "not-a-date"])("requires a current source timestamp, even with a fresh HTTP check: %s", (timestamp) => {
+    const payload = structuredClone(catalogPayload)
+    payload.items[0].size_offers.forEach((offer) => Object.assign(offer, { source_updated_at: timestamp }))
+    const parsed = parseCheckoutCatalog(payload)!
+    expect(parsed.items["nike-gt-cut-academy"].priceStatus).toBe("historical")
+    expect(parsed.lookup).toEqual({})
+    expect(parsed.orderCreationEnabled).toBe(false)
+  })
+
+  it("expires current authority when the source price reaches its limit before the HTTP snapshot", () => {
+    const payload = structuredClone(catalogPayload)
+    const sourceTime = Date.now() - 47 * 60 * 60_000
+    payload.items[0].size_offers.forEach((offer) => {
+      offer.source_updated_at = new Date(sourceTime).toISOString()
+      offer.source_expires_at = new Date(sourceTime + 48 * 60 * 60_000).toISOString()
+    })
+    const item = parseCheckoutCatalog(payload)!.items["nike-gt-cut-academy"]
+    expect(item.priceStatus).toBe("current")
+    expect(item.expiresAt).toBe(new Date(sourceTime + 48 * 60 * 60_000).toISOString())
+  })
+
   it("accepts an empty fail-closed live catalog response", () => {
     expect(parseCheckoutCatalog({
       version: "2026-08-15-live",
@@ -78,6 +122,7 @@ describe("checkout catalogue v10", () => {
     })).toEqual({
       items: {},
       catalogStatuses: {},
+      catalogProducts: [],
       lookup: {},
       version: "2026-08-15-live",
       catalogMode: "curated_live_poizon",
@@ -288,6 +333,9 @@ describe("checkout catalogue v10", () => {
         size_offers: [
           {
             sku_id: "sku-42",
+            price_status: "current",
+            source_updated_at: observedAt,
+            source_expires_at: sourceExpiresAt,
             size_eu: "42",
             size_ru: "41",
             price_rub: 24900,
@@ -298,6 +346,9 @@ describe("checkout catalogue v10", () => {
           },
           {
             sku_id: "sku-43",
+            price_status: "current",
+            source_updated_at: observedAt,
+            source_expires_at: sourceExpiresAt,
             size_eu: "43",
             price_rub: 27000,
             price_cny: 959,
