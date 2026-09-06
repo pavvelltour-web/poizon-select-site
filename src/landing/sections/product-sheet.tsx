@@ -13,6 +13,7 @@ import { motion } from "motion/react"
 import { useEffect, useRef, useState } from "react"
 
 import { formatRub } from "../../catalog/catalog"
+import { catalogAvailabilityLabel } from "../catalog-availability"
 import {
   getProductGalleryAngleLabel,
   getProductTypeLabel,
@@ -90,13 +91,11 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
     storefront.catalogPriceState.orderCreationEnabled &&
     selectedSizeOffer?.checkoutConfirmed,
   )
-  const sourcingMode = publishedOffer
-    ? publishedOffer.fulfillmentMode === "in_stock"
-      ? "В наличии в России"
-      : "Под заказ из Китая"
-    : storefront.catalogPriceState.status === "loading"
-      ? "Проверяем данные"
-      : "Недоступно для заказа"
+  const sourcingMode = catalogAvailabilityLabel(
+    publishedOffer,
+    storefront.catalogPriceState.catalogStatuses[product.slug],
+    storefront.catalogPriceState.status,
+  )
 
   return (
     <>

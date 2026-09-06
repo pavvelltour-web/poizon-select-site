@@ -221,7 +221,7 @@ describe("catalogProducts", () => {
     ).toEqual([])
   })
 
-  it("sorts deterministically with prices for every catalog item", () => {
+  it("sorts using displayed provider prices and puts missing prices last in either direction", () => {
     const courtNike = filterCatalog(publicCatalogProducts, "court-shoes", "NIKE")
 
     expect(sortCatalog(courtNike, "featured").map((product) => product.slug)).toEqual([
@@ -236,12 +236,12 @@ describe("catalogProducts", () => {
       "nike-free-metcon-6",
       "nike-ja-3",
     ])
-    expect(sortCatalog(catalogProducts, "price-asc")[0].slug).toBe(
-      "adidas-crazyflight-shorts",
-    )
-    expect(sortCatalog(catalogProducts, "price-asc").at(-1)?.slug).toBe(
-      "supreme-mm6-zip-hoodie-black",
-    )
+    const prices = { "nike-kd-18": 100, "adidas-crazyflight-shorts": 99_000 }
+    expect(sortCatalog(catalogProducts, "price-asc", prices).slice(0, 2).map((item) => item.slug))
+      .toEqual(["nike-kd-18", "adidas-crazyflight-shorts"])
+    expect(sortCatalog(catalogProducts, "price-desc", prices).slice(0, 2).map((item) => item.slug))
+      .toEqual(["adidas-crazyflight-shorts", "nike-kd-18"])
+    expect(sortCatalog(catalogProducts, "price-asc", null)).toEqual(catalogProducts)
     expect(sortCatalog(catalogProducts, "name")[0].brand).toBe("adidas")
   })
 

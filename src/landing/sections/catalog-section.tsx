@@ -7,7 +7,7 @@ import {
   RotateCcw,
   Send,
 } from "lucide-react"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 
 import { formatRub, publicCatalogProducts, type CatalogSort } from "../../catalog/catalog"
 import {
@@ -106,6 +106,7 @@ export function CatalogSection({
                 catalogPriceLookup={storefront.catalogPriceState.lookup}
                 catalogStatus={storefront.catalogPriceState.status}
                 publishedOffer={storefront.catalogPriceState.items[product.slug] ?? null}
+                catalogAvailability={storefront.catalogPriceState.catalogStatuses[product.slug]}
                 featured={index < 2}
                 index={index}
                 favorite={favoriteSlugs.includes(product.slug)}
@@ -152,6 +153,7 @@ export function CatalogSection({
                   catalogPriceLookup={storefront.catalogPriceState.lookup}
                   catalogStatus={storefront.catalogPriceState.status}
                   publishedOffer={storefront.catalogPriceState.items[product.slug] ?? null}
+                  catalogAvailability={storefront.catalogPriceState.catalogStatuses[product.slug]}
                   featured={index < 2}
                   index={index}
                   favorite={favoriteSlugs.includes(product.slug)}
@@ -372,7 +374,22 @@ function LiveSearchResultCard({
   botUsername: string | null
 }) {
   const [copyState, setCopyState] = useState<"idle" | "copied" | "failed">("idle")
-  const orderableOffers = result.offers.filter((offer) => offer.available === true)
+  const [quoteClock, setQuoteClock] = useState(Date.now)
+  const expiresAtMs = Date.parse(result.expiresAt)
+  const expired = !Number.isFinite(expiresAtMs) || expiresAtMs <= quoteClock || expiresAtMs <= Date.now()
+  useEffect(() => {
+    const update = () => setQuoteClock(Date.now())
+    const timer = window.setTimeout(update, Math.max(0, expiresAtMs - Date.now()))
+    window.addEventListener("focus", update)
+    document.addEventListener("visibilitychange", update)
+    return () => {
+      window.clearTimeout(timer)
+      window.removeEventListener("focus", update)
+      document.removeEventListener("visibilitychange", update)
+    }
+  }, [expiresAtMs])
+  const availableOffers = result.offers.filter((offer) => offer.available === true)
+  const orderableOffers = expired ? [] : availableOffers
   const [selectedOfferRef, setSelectedOfferRef] = useState(
     orderableOffers[0]?.offerRef ?? "",
   )
@@ -384,24 +401,34 @@ function LiveSearchResultCard({
   const selectedOffer = orderableOffers.find(
     (offer) => offer.offerRef === selectedOfferRef,
   ) ?? orderableOffers[0] ?? null
-  const referenceOffers = orderableOffers.length > 0
-    ? orderableOffers
+  const referenceOffers = availableOffers.length > 0
+    ? availableOffers
     : result.offers.some((offer) => offer.available === null)
       ? result.offers.filter((offer) => offer.available === null)
       : result.offers.filter((offer) => offer.available === false)
   const lowestOffer = referenceOffers.reduce((lowest, offer) =>
     offer.totalRub < lowest.totalRub ? offer : lowest,
   )
-  const availability = orderableOffers.length > 0
-    ? "В наличии"
+  const availability = expired
+    ? "Данные Poizon устарели. Повторите поиск."
+    : orderableOffers.length > 0
+    ? "В наличии на Poizon"
     : result.offers.some((offer) => offer.available === null)
       ? "Наличие уточняется"
-      : "Нет в наличии"
+      : "Показанных размеров нет в наличии на Poizon"
 
   const copyRequest = async () => {
     if (!selectedOffer || selectedOffer.available !== true) return
-    const copied = await copyOrderRequest(buildLiveOrderRequest(result, selectedOffer))
-    setCopyState(copied ? "copied" : "failed")
+    if (Date.parse(result.expiresAt) <= Date.now()) {
+      setQuoteClock(Date.now())
+      return
+    }
+    try {
+      const copied = await copyOrderRequest(buildLiveOrderRequest(result, selectedOffer))
+      setCopyState(copied ? "copied" : "failed")
+    } catch {
+      setCopyState("failed")
+    }
   }
 
   return (
@@ -418,7 +445,7 @@ function LiveSearchResultCard({
       <div className="live-search-card__content">
         <p className="live-search-card__source">
           <BadgeCheck aria-hidden="true" size={16} />
-          Актуальная карточка по запросу
+          {expired ? "Требуется повторная проверка" : "Актуальная карточка по запросу"}
         </p>
         <h3>{title}</h3>
         {result.article ? <p className="live-search-card__article">Артикул: {result.article}</p> : null}
@@ -436,13 +463,13 @@ function LiveSearchResultCard({
         {result.sizeChart ? (
           <p className="live-search-card__sizes">Размерная сетка: {result.sizeChart}</p>
         ) : null}
-        <p className="live-search-card__price">
+        {!expired ? <><p className="live-search-card__price">
           <span>от</span>
           <strong>{formatRub(lowestOffer.totalRub)}</strong>
         </p>
         <p className="live-search-card__provider-price">
           Официальная цена: ¥{new Intl.NumberFormat("zh-CN", { maximumFractionDigits: 2 }).format(lowestOffer.priceCny)}
-        </p>
+        </p></> : null}
         <label className="live-search-card__offer">
           <span>Размер и предложение</span>
           <select
@@ -457,9 +484,9 @@ function LiveSearchResultCard({
               <option
                 key={offer.offerRef}
                 value={offer.offerRef}
-                disabled={offer.available !== true}
+                disabled={expired || offer.available !== true}
               >
-                {offer.sizeEu ?? offer.size}{offer.sizeRu ? ` (RU ${offer.sizeRu})` : ""} — {formatRub(offer.totalRub)} — {offer.available === true ? "в наличии" : offer.available === false ? "нет в наличии" : "наличие уточняется"}
+                {offer.sizeEu ?? offer.size}{offer.sizeRu ? ` (RU ${offer.sizeRu})` : ""} — {expired ? "цена устарела" : `${formatRub(offer.totalRub)} — ${offer.available === true ? "в наличии" : offer.available === false ? "нет в наличии" : "наличие уточняется"}`}
               </option>
             ))}
           </select>
@@ -493,7 +520,10 @@ function LiveSearchResultCard({
               href={botUrl}
               target="_blank"
               rel="noreferrer"
-              onClick={() => void copyRequest()}
+              onClick={(event) => {
+                if (Date.parse(result.expiresAt) <= Date.now()) event.preventDefault()
+                void copyRequest()
+              }}
             >
               <Send aria-hidden="true" size={16} />
               Открыть @{botUsername ?? "Telegram"}

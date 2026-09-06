@@ -2,6 +2,7 @@ import {
   CATALOG_PRICE_VERSION,
   type CatalogProduct,
 } from "../catalog/catalog"
+import { parseCatalogAvailability, type CatalogAvailabilityMap } from "./catalog-availability"
 
 export interface CartLine {
   id: string
@@ -146,6 +147,7 @@ export interface CatalogSearchResponse {
 
 export interface CheckoutCatalogSnapshot {
   items: PublishedCatalogMap
+  catalogStatuses: CatalogAvailabilityMap
   lookup: CatalogPriceMap
   version: string
   catalogMode: "curated_live_poizon"
@@ -699,6 +701,7 @@ export function parseCheckoutCatalog(payload: unknown): CheckoutCatalogSnapshot 
     Object.values(items).some((item) => item.checkoutReady)
   return {
     items,
+    catalogStatuses: parseCatalogAvailability(source.catalog_statuses),
     lookup,
     version,
     catalogMode: "curated_live_poizon",
@@ -715,9 +718,8 @@ export async function fetchCheckoutCatalog(
   signal?: AbortSignal,
 ): Promise<CheckoutCatalogSnapshot> {
   const endpoint = `${apiBaseUrl.replace(/\/$/, "")}/api/checkout/orders?mode=catalog`
-  const response = await fetch(endpoint, { credentials: "include", signal })
-  const payload = await response.json().catch(() => null)
-  const parsed = response.ok ? parseCheckoutCatalog(payload) : null
+  const payload = await fetchCatalogJson(endpoint, {}, signal, 15_000)
+  const parsed = parseCheckoutCatalog(payload)
   if (!parsed) throw new Error("Не удалось получить подтверждённый каталог для заказа.")
   return parsed
 }
@@ -728,17 +730,40 @@ export async function fetchCatalogSearch(
   signal?: AbortSignal,
 ): Promise<CatalogSearchResponse> {
   const endpoint = `${apiBaseUrl.replace(/\/$/, "")}/api/catalog/search`
-  const response = await fetch(endpoint, {
+  const payload = await fetchCatalogJson(endpoint, {
     method: "POST",
-    credentials: "include",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ query, limit: 4 }),
-    signal,
-  })
-  const payload = await response.json().catch(() => null)
-  const parsed = response.ok ? parseCatalogSearch(payload) : null
+  }, signal, 65_000)
+  const parsed = parseCatalogSearch(payload)
   if (!parsed) throw new Error("Поиск по каталогу временно недоступен.")
   return parsed
+}
+
+async function fetchCatalogJson(
+  endpoint: string,
+  options: RequestInit,
+  signal: AbortSignal | undefined,
+  timeoutMs: number,
+): Promise<unknown> {
+  const controller = new AbortController()
+  const cancel = () => controller.abort()
+  if (signal?.aborted) controller.abort()
+  else signal?.addEventListener("abort", cancel, { once: true })
+  const timeout = setTimeout(cancel, timeoutMs)
+  try {
+    const response = await fetch(endpoint, { ...options, credentials: "include", signal: controller.signal })
+    if (!response.ok) throw new Error("Данные Poizon временно недоступны. Повторите запрос.")
+    return await response.json()
+  } catch (error) {
+    if (controller.signal.aborted && !signal?.aborted) {
+      throw new Error("Poizon не ответил вовремя. Повторите запрос.")
+    }
+    throw error
+  } finally {
+    clearTimeout(timeout)
+    signal?.removeEventListener("abort", cancel)
+  }
 }
 
 export function getEffectiveLinePrice(
@@ -796,7 +821,7 @@ export function getPublishedSizeOffer(
   item: PublishedCatalogItem | undefined,
   sizeEu: string,
 ): PublishedSizeOffer | null {
-  if (!item) return null
+  if (!item || Date.parse(item.expiresAt) <= Date.now()) return null
   const matchingOffers = item.sizeOffers.filter(
     (offer) =>
       offer.available === true &&

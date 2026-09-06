@@ -77,6 +77,7 @@ describe("checkout catalogue v10", () => {
       online_payment_enabled: false,
     })).toEqual({
       items: {},
+      catalogStatuses: {},
       lookup: {},
       version: "2026-08-15-live",
       catalogMode: "curated_live_poizon",

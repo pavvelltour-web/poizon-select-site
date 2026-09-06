@@ -51,6 +51,9 @@ export function buildLiveOrderRequest(
   if (offer.available !== true) {
     throw new Error("Нельзя передать в заказ SKU без подтверждённого наличия.")
   }
+  if (!Number.isFinite(Date.parse(product.expiresAt)) || Date.parse(product.expiresAt) <= Date.now()) {
+    throw new Error("Цена Poizon устарела. Повторите поиск перед заказом.")
+  }
   const name = cleanLine([product.brand, product.name].filter(Boolean).join(" "))
   const article = product.article ? cleanLine(product.article) : ""
   const color = product.color ? cleanLine(product.color) : ""

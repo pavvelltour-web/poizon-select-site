@@ -212,9 +212,9 @@ export function getDisplayPrice(
     }
   }
   return {
-    label: "Цена",
-    value: formatRub(verifiedPrice),
-    detail: "СДЭК рассчитывается отдельно",
+    label: "Цена от",
+    value: `от ${formatRub(verifiedPrice)}`,
+    detail: "Минимум по размерам. СДЭК рассчитывается отдельно",
   }
 }
 

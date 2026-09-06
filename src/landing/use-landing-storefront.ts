@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react"
+import type { CatalogAvailabilityMap } from "./catalog-availability"
 
 import {
   publicCatalogProducts,
@@ -29,7 +30,6 @@ import {
   type CheckoutResult,
   type CartLine,
   type CatalogSearchFallback,
-  type PublishedCatalogItem,
   type PublishedCatalogMap,
 } from "./cart"
 import {
@@ -58,12 +58,12 @@ const CATALOG_REFRESH_RETRY_MS = 60_000
 const MAX_BROWSER_TIMEOUT_MS = 2_147_483_647
 
 export function getCatalogRefreshSchedule(
-  items: Readonly<Record<string, Pick<PublishedCatalogItem, "expiresAt">>>,
+  items: Readonly<Record<string, { expiresAt: string | null }>>,
   nowMs = Date.now(),
 ): { delayMs: number; expiresAtMs: number | null } {
   const nextExpiryMs = Math.min(
     ...Object.values(items)
-      .map((item) => Date.parse(item.expiresAt))
+      .map((item) => Date.parse(item.expiresAt ?? ""))
       .filter(Number.isFinite),
   )
   if (!Number.isFinite(nextExpiryMs)) {
@@ -176,6 +176,7 @@ export function useLandingStorefront(
     status: "loading" as "loading" | "ready" | "failed",
     lookup: null as Record<string, number> | null,
     items: {} as PublishedCatalogMap,
+    catalogStatuses: {} as CatalogAvailabilityMap,
     version: CATALOG_PRICE_VERSION,
     personalDataConsentVersion: null as string | null,
     orderCreationEnabled: false,
@@ -234,18 +235,18 @@ export function useLandingStorefront(
   const selectedImageDisplayIndex =
     selectedVisibleGallery.length === 0 ? 0 : selectedImageIndex + 1
   const filteredProducts = useMemo(
-    () => sortCatalog(filterCatalog(publicCatalogProducts, category, search), sort),
-    [category, search, sort],
+    () => sortCatalog(filterCatalog(publicCatalogProducts, category, search), sort, catalogPriceState.lookup),
+    [category, search, sort, catalogPriceState.lookup],
   )
   const request = selectedProduct
     ? buildOrderRequest(selectedProduct, selectedSize ?? undefined)
     : ""
   const catalogFallbacks = useMemo(
     () =>
-      sortCatalog(filterCatalog(publicCatalogProducts, category, search), sort)
+      filterCatalog(publicCatalogProducts, category, search)
         .slice(0, 4)
         .map(catalogFallback),
-    [category, search, sort],
+    [category, search],
   )
   const taskFallbacks = useMemo(
     () =>
@@ -307,6 +308,7 @@ export function useLandingStorefront(
         status: "ready",
         lookup: nextPriceState.lookup,
         items: nextPriceState.items,
+        catalogStatuses: nextPriceState.catalogStatuses,
         version: nextPriceState.version,
         personalDataConsentVersion: nextPriceState.personalDataConsentVersion,
         orderCreationEnabled: nextPriceState.orderCreationEnabled,
@@ -322,6 +324,7 @@ export function useLandingStorefront(
         status: "failed",
         lookup: null,
         items: {},
+        catalogStatuses: {},
         orderCreationEnabled: false,
         onlinePaymentEnabled: false,
         error: error instanceof Error ? error.message : "Каталог заказа недоступен.",
@@ -365,7 +368,12 @@ export function useLandingStorefront(
     let refreshTimer: number | undefined
     void refreshCatalogPrices(controller.signal).then((snapshot) => {
       if (controller.signal.aborted) return
-      const refreshSchedule = getCatalogRefreshSchedule(snapshot?.items ?? {})
+      const refreshSchedule = getCatalogRefreshSchedule({
+        ...snapshot?.items,
+        ...Object.fromEntries(Object.entries(snapshot?.catalogStatuses ?? {})
+          .filter(([, status]) => status.expiresAt && Date.parse(status.expiresAt) > Date.now())
+          .map(([slug, status]) => [`status:${slug}`, status])),
+      })
       refreshTimer = window.setTimeout(() => {
         if (refreshSchedule.expiresAtMs !== null) {
           setCatalogPriceState((current) => ({
@@ -373,6 +381,7 @@ export function useLandingStorefront(
             status: "loading",
             lookup: null,
             items: {},
+            catalogStatuses: {},
             orderCreationEnabled: false,
             onlinePaymentEnabled: false,
             error: null,

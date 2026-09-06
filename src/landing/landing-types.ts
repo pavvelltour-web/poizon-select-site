@@ -1,5 +1,6 @@
 import type { CatalogCategory, CatalogProduct, CatalogSort } from "../catalog/catalog"
 import type { RefObject } from "react"
+import type { CatalogAvailabilityMap } from "./catalog-availability"
 import type {
   CartLine,
   CheckoutDelivery,
@@ -33,6 +34,7 @@ export interface CatalogPriceState {
   status: "loading" | "ready" | "failed"
   lookup: CatalogPriceMap | null
   items: PublishedCatalogMap
+  catalogStatuses: CatalogAvailabilityMap
   version: string
   personalDataConsentVersion: string | null
   orderCreationEnabled: boolean

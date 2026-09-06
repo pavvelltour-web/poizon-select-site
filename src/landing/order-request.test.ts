@@ -44,12 +44,13 @@ describe("Telegram order handoff", () => {
   })
 
   it("keeps the live article, colour and selected quote without supplier internals", () => {
+    const expiresAt = new Date(Date.now() + 60_000).toISOString()
     const request = buildLiveOrderRequest({
       brand: "Nike",
       name: "Air Force 1 '07 White",
       article: "DV0788-104",
       color: "White",
-      expiresAt: "2026-08-01T10:15:00Z",
+      expiresAt,
     }, {
       size: "42",
       sizeEu: "42",
@@ -60,7 +61,7 @@ describe("Telegram order handoff", () => {
     })
 
     expect(request).toBe(
-      "Nike Air Force 1 '07 White\nАртикул: DV0788-104\nЦвет: White\nРазмер: 42 (RU 41)\nЦена: ¥699\nИтоговая цена: 17700 ₽\nДействует до: 2026-08-01T10:15:00Z",
+      `Nike Air Force 1 '07 White\nАртикул: DV0788-104\nЦвет: White\nРазмер: 42 (RU 41)\nЦена: ¥699\nИтоговая цена: 17700 ₽\nДействует до: ${expiresAt}`,
     )
     expect(request).not.toMatch(/Poizon|SKU|https:/)
   })
@@ -84,6 +85,14 @@ describe("Telegram order handoff", () => {
       })).toThrow("без подтверждённого наличия")
     },
   )
+
+  it.each(["invalid", new Date(Date.now() - 1).toISOString()])("rejects an expired handoff: %s", (expiresAt) => {
+    expect(() => buildLiveOrderRequest({
+      brand: "Nike", name: "Air Force 1", article: "CW2288-111", color: "White", expiresAt,
+    }, {
+      size: "42", sizeEu: "42", sizeRu: null, priceCny: 699, totalRub: 17_700, available: true,
+    })).toThrow("Цена Poizon устарела")
+  })
 
   it("keeps all 100 catalog handoffs unique, one-line and bot-ready", () => {
     const requests = catalogProducts.map((product) => buildOrderRequest(product))

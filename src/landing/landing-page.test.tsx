@@ -1,4 +1,4 @@
-import { fireEvent, render, screen, waitFor, within } from "@testing-library/react"
+import { act, fireEvent, render, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
@@ -171,6 +171,7 @@ function broadUnknownSearchPayload() {
 }
 
 afterEach(() => {
+  vi.useRealTimers()
   vi.restoreAllMocks()
   vi.unstubAllGlobals()
   localStorage.clear()
@@ -178,6 +179,49 @@ afterEach(() => {
 })
 
 describe("LandingPage", () => {
+  it("shows verified Poizon no-stock evidence on the catalogue card and opened product without a price", async () => {
+    const user = userEvent.setup()
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => ({
+      ...checkoutCatalogPayload(), items: [], catalog_statuses: {
+        "nike-kd-18": {
+          status: "out_of_stock", source: "poizon",
+          checked_at: new Date(Date.now() - 60_000).toISOString(),
+          expires_at: new Date(Date.now() + 60_000).toISOString(),
+        },
+      },
+    }) }))
+    window.history.replaceState(null, "", "/catalog")
+    render(<LandingPage configuredBotUsername={null} />)
+    expect(await screen.findByText("Нет в наличии на Poizon")).toBeInTheDocument()
+    const link = screen.getByRole("link", { name: /Открыть товар: Nike KD 18/ })
+    expect(within(link).getByText("По запросу")).toBeInTheDocument()
+    await user.click(link)
+    const dialog = await screen.findByRole("dialog", { name: /Nike KD 18/ })
+    expect(within(dialog).getAllByText("Нет в наличии на Poizon")).toHaveLength(2)
+    expect(within(dialog).queryByText("Под заказ из Китая")).toBeNull()
+  })
+
+  it("removes current prices and Telegram handoff when a live result expires while open", async () => {
+    vi.useFakeTimers()
+    const live = readySearchPayload()
+    live.results[0].expires_at = new Date(Date.now() + 5_000).toISOString()
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => ({
+      ok: true, json: async () => url.includes("mode=catalog") ? checkoutCatalogPayload() : live,
+    })))
+    window.history.replaceState(null, "", "/catalog?q=Nike")
+    render(<LandingPage configuredBotUsername="SelectBuyerBot" />)
+    await act(async () => { await vi.advanceTimersByTimeAsync(400) })
+    await act(async () => { await vi.advanceTimersByTimeAsync(400) })
+    const card = screen.getByTestId("live-search-result")
+    expect(within(card).getByText("16 700 ₽")).toBeInTheDocument()
+    expect(within(card).getByRole("button", { name: "Скопировать запрос" })).toBeInTheDocument()
+    await act(async () => { await vi.advanceTimersByTimeAsync(5_000) })
+    expect(within(card).getByText("Данные Poizon устарели. Повторите поиск.")).toBeInTheDocument()
+    expect(within(card).queryByText("16 700 ₽")).toBeNull()
+    expect(within(card).queryByRole("button", { name: "Скопировать запрос" })).toBeNull()
+    expect(within(card).queryByRole("link", { name: /Открыть @/ })).toBeNull()
+  })
+
   it("renders the approved eight-product home and progressively reveals the full catalog", () => {
     const view = render(<LandingPage configuredBotUsername={null} />)
 
@@ -645,7 +689,7 @@ describe("LandingPage", () => {
       expect(screen.getAllByTestId("live-search-result")).toHaveLength(2)
     })
     expect(screen.getByText("Чёрная версия с видимым амортизирующим блоком.")).toBeInTheDocument()
-    expect(screen.getByText("В наличии")).toBeInTheDocument()
+    expect(screen.getByText("В наличии на Poizon")).toBeInTheDocument()
     expect(screen.getByText("Размеры: EU")).toBeInTheDocument()
     expect(screen.getByText("Размерная сетка: EU 40–46")).toBeInTheDocument()
     expect(screen.getByText("Наличие уточняется")).toBeInTheDocument()

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, type MouseEvent, type PointerEvent } from 
 import type { CatalogProduct } from "../../catalog/catalog"
 import { getCardThumbnailUrl } from "../../catalog/card-thumbnail-versions"
 import type { CatalogPriceMap, PublishedCatalogItem } from "../cart"
+import { catalogAvailabilityLabel, type CatalogAvailability } from "../catalog-availability"
 import {
   getDisplayPrice,
   getProductPath,
@@ -19,6 +20,7 @@ interface ProductCardProps {
   catalogPriceLookup: CatalogPriceMap | null
   catalogStatus: "loading" | "ready" | "failed"
   publishedOffer: PublishedCatalogItem | null
+  catalogAvailability?: CatalogAvailability
   favorite?: boolean
   onToggleFavorite?: (slug: string) => void
   onOpen?: (product: CatalogProduct, trigger: HTMLElement, preferredSize?: string) => void
@@ -102,6 +104,7 @@ export function ProductCard({
   catalogPriceLookup,
   catalogStatus,
   publishedOffer,
+  catalogAvailability,
   favorite = false,
   onToggleFavorite,
   onOpen,
@@ -144,9 +147,6 @@ export function ProductCard({
   const sizes = publishedOffer?.sizes.length ? publishedOffer.sizes : fallbackSizes(product.kind)
   const cardSizes = (sizes.length >= 7 ? [sizes[2], sizes[4], sizes[6]] : sizes.slice(0, 3))
     .filter((size): size is string => Boolean(size))
-  const eta = publishedOffer?.etaMinDays && publishedOffer.etaMaxDays
-    ? `Доставка ${publishedOffer.etaMinDays}–${publishedOffer.etaMaxDays} дней`
-    : "Доставка 10–18 дней"
   const orderable = Boolean(
     catalogStatus === "ready" &&
     publishedOffer?.availability === "supplier_verified" &&
@@ -154,15 +154,7 @@ export function ProductCard({
     publishedOffer.displayPriceVerified &&
     publishedOffer.checkoutReady,
   )
-  const supplyLabel = catalogStatus === "loading"
-    ? "Проверяем наличие"
-    : publishedOffer?.availability === "supplier_stock_unknown"
-      ? "Наличие уточняется"
-      : publishedOffer?.availability === "supplier_unavailable"
-        ? "Нет в наличии"
-        : orderable
-          ? eta
-          : "Требует проверки"
+  const supplyLabel = catalogAvailabilityLabel(publishedOffer, catalogAvailability, catalogStatus)
   const productDisplayName = product.kind === "footwear" && product.category === "recovery"
     ? `${product.brand} ${product.name}`
     : `${product.kind === "footwear" ? "Кроссовки " : ""}${product.brand} ${product.name}`

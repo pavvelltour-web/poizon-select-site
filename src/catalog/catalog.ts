@@ -1998,10 +1998,6 @@ function matchesCatalogCategory(
   return false
 }
 
-function priceRank(product: CatalogProduct): number {
-  return getCatalogPriceRub(product) / 1000
-}
-
 const featuredProductOrder = [
   "nike-kd-18",
   "nike-gt-cut-academy",
@@ -2023,6 +2019,7 @@ function featuredRank(product: CatalogProduct, fallback: number): number {
 export function sortCatalog(
   products: readonly CatalogProduct[],
   sort: CatalogSort,
+  publishedPrices: Readonly<Record<string, number>> | null = null,
 ): CatalogProduct[] {
   const indexedProducts = products.map((product, index) => ({ product, index }))
 
@@ -2036,8 +2033,13 @@ export function sortCatalog(
       return left.product.name.localeCompare(right.product.name, "ru")
     }
 
-    const leftPrice = priceRank(left.product)
-    const rightPrice = priceRank(right.product)
+    const publishedPrice = (product: CatalogProduct) => {
+      const price = publishedPrices?.[product.slug]
+      return typeof price === "number" && Number.isFinite(price) && price > 0
+        ? price : Number.POSITIVE_INFINITY
+    }
+    const leftPrice = publishedPrice(left.product)
+    const rightPrice = publishedPrice(right.product)
     const pricedDelta =
       Number.isFinite(leftPrice) === Number.isFinite(rightPrice)
         ? 0

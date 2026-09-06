@@ -13,6 +13,7 @@ import {
 import { useEffect, useRef, useState } from "react"
 
 import { formatRub, type CatalogProduct } from "../../catalog/catalog"
+import { catalogAvailabilityLabel } from "../catalog-availability"
 import {
   getDisplayPrice,
   getProductGalleryAngleLabel,
@@ -96,19 +97,17 @@ export function ProductDetailPage({ product, storefront }: ProductDetailPageProp
     storefront.catalogPriceState.orderCreationEnabled &&
     selectedPdpOffer?.available === true &&
     selectedPdpOffer.checkoutConfirmed
-  const sourcingMode = publishedOffer
-    ? publishedOffer.fulfillmentMode === "in_stock"
-      ? "В наличии в России"
-      : "Под заказ из Китая"
-    : storefront.catalogPriceState.status === "loading"
-      ? "Проверяем данные"
-      : "Недоступно для заказа"
-  const eta = publishedOffer?.etaMinDays && publishedOffer.etaMaxDays
+  const sourcingMode = catalogAvailabilityLabel(
+    publishedOffer,
+    storefront.catalogPriceState.catalogStatuses[product.slug],
+    storefront.catalogPriceState.status,
+  )
+  const eta = catalogReady && publishedOffer?.etaMinDays && publishedOffer.etaMaxDays
     ? `От ${publishedOffer.etaMinDays} до ${publishedOffer.etaMaxDays} дней до Москвы`
     : "Срок будет показан после серверной проверки"
-  const deliveryRoute = publishedOffer?.fulfillmentMode === "in_stock"
+  const deliveryRoute = catalogReady && publishedOffer?.fulfillmentMode === "in_stock"
     ? "Со склада в России"
-    : publishedOffer
+    : catalogReady
       ? "Из Китая через Москву"
       : "После проверки заказа"
   const imageSrc = currentImage?.src ?? product.fallbackImage
