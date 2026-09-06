@@ -50,6 +50,7 @@ import {
 import type {
   ActiveCategory,
   CatalogSearchState,
+  CatalogPriceState,
   StorefrontState,
   UrlState,
 } from "./landing-types"
@@ -60,7 +61,6 @@ const MAX_BROWSER_TIMEOUT_MS = 2_147_483_647
 export function getCatalogRefreshSchedule(
   items: Readonly<Record<string, { expiresAt: string | null }>>,
   nowMs = Date.now(),
-  incomplete = false,
 ): { delayMs: number; expiresAtMs: number | null } {
   const nextExpiryMs = Math.min(
     ...Object.values(items)
@@ -71,8 +71,24 @@ export function getCatalogRefreshSchedule(
     return { delayMs: CATALOG_REFRESH_RETRY_MS, expiresAtMs: null }
   }
   return {
-    delayMs: Math.min(Math.max(0, nextExpiryMs - nowMs), incomplete ? CATALOG_REFRESH_RETRY_MS : MAX_BROWSER_TIMEOUT_MS),
+    delayMs: Math.min(Math.max(0, nextExpiryMs - nowMs), CATALOG_REFRESH_RETRY_MS),
     expiresAtMs: nextExpiryMs,
+  }
+}
+
+function withoutExpiredCatalogEvidence(current: CatalogPriceState): CatalogPriceState {
+  const nowMs = Date.now()
+  const items = Object.fromEntries(Object.entries(current.items)
+    .filter(([, item]) => Date.parse(item.expiresAt ?? "") > nowMs))
+  return {
+    ...current,
+    items,
+    lookup: current.lookup && Object.fromEntries(Object.entries(current.lookup)
+      .filter(([slug]) => items[slug])),
+    catalogStatuses: Object.fromEntries(Object.entries(current.catalogStatuses).map(([slug, status]) =>
+      status.expiresAt && Date.parse(status.expiresAt) <= nowMs
+        ? [slug, { ...status, status: "stale" as const, expiresAt: null }]
+        : [slug, status])),
   }
 }
 
@@ -327,16 +343,16 @@ export function useLandingStorefront(
       return nextPriceState
     } catch (error) {
       if (signal?.aborted) return null
-      setCatalogPriceState((current) => ({
-        ...current,
-        status: "failed",
-        lookup: null,
-        items: {},
-        catalogStatuses: {},
-        orderCreationEnabled: false,
-        onlinePaymentEnabled: false,
-        error: error instanceof Error ? error.message : "Каталог заказа недоступен.",
-      }))
+      setCatalogPriceState((current) => {
+        const retained = withoutExpiredCatalogEvidence(current)
+        return {
+          ...retained,
+          status: Object.keys(retained.items).length > 0 ? "ready" : "failed",
+          orderCreationEnabled: false,
+          onlinePaymentEnabled: false,
+          error: error instanceof Error ? error.message : "Каталог заказа недоступен.",
+        }
+      })
       setCartLines((lines) => lines.map((line) => ({ ...line, validation: "pending" })))
       return null
     }
@@ -383,21 +399,8 @@ export function useLandingStorefront(
         ...Object.fromEntries(Object.entries(snapshot?.catalogStatuses ?? {})
           .filter(([, status]) => status.expiresAt && Date.parse(status.expiresAt) > Date.now())
           .map(([slug, status]) => [`status:${slug}`, status])),
-      }, Date.now(), Object.values(snapshot?.catalogStatuses ?? {}).some((status) =>
-        ["unverified", "stale", "source_unavailable"].includes(status.status)))
+      })
       refreshTimer = window.setTimeout(() => {
-        if (refreshSchedule.expiresAtMs !== null && refreshSchedule.expiresAtMs <= Date.now()) {
-          setCatalogPriceState((current) => ({
-            ...current,
-            status: "loading",
-            lookup: null,
-            items: {},
-            catalogStatuses: {},
-            orderCreationEnabled: false,
-            onlinePaymentEnabled: false,
-            error: null,
-          }))
-        }
         setCatalogPriceRefresh((current) => current + 1)
       }, refreshSchedule.delayMs)
     })
@@ -406,6 +409,20 @@ export function useLandingStorefront(
       if (refreshTimer !== undefined) window.clearTimeout(refreshTimer)
     }
   }, [apiBaseUrl, catalogPriceRefresh])
+
+  useEffect(() => {
+    const { expiresAtMs } = getCatalogRefreshSchedule({
+      ...catalogPriceState.items,
+      ...Object.fromEntries(Object.entries(catalogPriceState.catalogStatuses)
+        .map(([slug, status]) => [`status:${slug}`, status])),
+    })
+    if (expiresAtMs === null) return
+    // Expiry must still run while the next catalogue request is pending or fails.
+    const timer = window.setTimeout(() => {
+      setCatalogPriceState(withoutExpiredCatalogEvidence)
+    }, Math.min(Math.max(0, expiresAtMs - Date.now()), MAX_BROWSER_TIMEOUT_MS))
+    return () => window.clearTimeout(timer)
+  }, [catalogPriceState.items, catalogPriceState.catalogStatuses])
 
   useEffect(() => {
     if (!selectedProduct) {

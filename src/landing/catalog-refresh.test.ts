@@ -4,22 +4,22 @@ import { getCatalogRefreshSchedule } from "./use-landing-storefront"
 
 const now = Date.parse("2026-08-15T09:00:00.000Z")
 
-describe("12-hour storefront catalogue refresh", () => {
-  it("rechecks a partially warmed catalogue promptly while retaining still-current offers", () => {
+describe("storefront catalogue refresh and expiry", () => {
+  it("rechecks a healthy complete catalogue once per minute", () => {
     expect(getCatalogRefreshSchedule({
       ready: { expiresAt: "2026-08-15T18:00:00.000Z" },
-    }, now, true)).toEqual({
+    }, now)).toEqual({
       delayMs: 60_000,
       expiresAtMs: Date.parse("2026-08-15T18:00:00.000Z"),
     })
   })
-  it("refreshes and invalidates the browser snapshot at the earliest item expiry", () => {
+  it("refreshes before the minute boundary when evidence expires sooner", () => {
     expect(getCatalogRefreshSchedule({
       later: { expiresAt: "2026-08-15T20:00:00.000Z" },
-      earlier: { expiresAt: "2026-08-15T18:00:00.000Z" },
+      earlier: { expiresAt: "2026-08-15T09:00:30.000Z" },
     }, now)).toEqual({
-      delayMs: 9 * 60 * 60 * 1000,
-      expiresAtMs: Date.parse("2026-08-15T18:00:00.000Z"),
+      delayMs: 30_000,
+      expiresAtMs: Date.parse("2026-08-15T09:00:30.000Z"),
     })
   })
 

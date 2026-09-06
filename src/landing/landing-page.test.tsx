@@ -191,6 +191,64 @@ afterEach(() => {
 })
 
 describe("LandingPage", () => {
+  it("refreshes a fully ready catalogue once per minute and updates its SKU, minimum, and price order", async () => {
+    vi.useFakeTimers()
+    const initial = checkoutCatalogPayload(["44"])
+    initial.items.push({
+      ...initial.items[0], slug: "nike-kd-18", name: "KD 18", price_rub: 25_500,
+      size_offers: initial.items[0].size_offers.map((offer) => ({ ...offer, sku_id: "kd-18-44", price_rub: 25_500 })),
+    })
+    const next = structuredClone(initial)
+    next.items[0].price_rub = 26_000
+    next.items[0].size_offers[0].price_rub = 26_000
+    let finishRefresh!: (value: unknown) => void
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce({ ok: true, json: async () => initial })
+      .mockImplementationOnce(() => new Promise((resolve) => { finishRefresh = resolve }))
+      .mockResolvedValue({ ok: true, json: async () => next })
+    vi.stubGlobal("fetch", fetchMock)
+    window.history.replaceState(null, "", "/catalog?sort=price-asc")
+    render(<LandingPage configuredBotUsername={null} />)
+    await act(async () => { await vi.advanceTimersByTimeAsync(1) })
+    expect(productLinks()[0]).toHaveAttribute("href", "/product/nike-gt-cut-academy")
+    fireEvent.click(productLinks()[0])
+    fireEvent.click(screen.getByRole("button", { name: /44 EU, 24 500 ₽, в наличии/ }))
+    await act(async () => { await vi.advanceTimersByTimeAsync(59_998) })
+    expect(fetchMock).toHaveBeenCalledTimes(1)
+    await act(async () => { await vi.advanceTimersByTimeAsync(1) })
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+    expect(screen.getByRole("button", { name: /44 EU, 24 500 ₽, в наличии/ })).toBeEnabled()
+    await act(async () => finishRefresh({ ok: true, json: async () => next }))
+    expect(screen.getByRole("button", { name: /44 EU, 26 000 ₽, в наличии/ })).toHaveAttribute("aria-pressed", "true")
+    expect(productLinks()[0]).toHaveAttribute("href", "/product/nike-kd-18")
+    expect(productLinks()[1]).toHaveAccessibleName(/Цена от 26 000 ₽/)
+    await act(async () => { await vi.advanceTimersByTimeAsync(59_999) })
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+  })
+
+  it.each(["failed", "pending"])("retains valid prices during a %s refresh but expires them independently", async (outcome) => {
+    vi.useFakeTimers()
+    const initial = checkoutCatalogPayload(["44"])
+    initial.items[0].size_offers[0].source_expires_at = new Date(Date.now() + 90_000).toISOString()
+    const fetchMock = vi.fn().mockResolvedValueOnce({ ok: true, json: async () => initial })
+      .mockImplementation(() => outcome === "failed"
+        ? Promise.reject(new Error("temporary source outage"))
+        : new Promise(() => {}))
+    vi.stubGlobal("fetch", fetchMock)
+    window.history.replaceState(null, "", "/catalog?sort=price-asc")
+    render(<LandingPage configuredBotUsername={null} />)
+    await act(async () => { await vi.advanceTimersByTimeAsync(1) })
+    fireEvent.click(productLinks()[0])
+    await act(async () => { await vi.advanceTimersByTimeAsync(59_999) })
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+    expect(screen.getByRole("button", { name: /44 EU, 24 500 ₽, в наличии/ })).toBeEnabled()
+    if (outcome === "failed") expect(screen.getByText(/Не удалось обновить цены/)).toBeInTheDocument()
+    await act(async () => { await vi.advanceTimersByTimeAsync(30_000) })
+    expect(screen.queryByRole("button", { name: /44 EU, 24 500 ₽, в наличии/ })).not.toBeInTheDocument()
+    expect(productLinks().some((link) => link.getAttribute("aria-label")?.includes("Цена от 24 500 ₽"))).toBe(false)
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+  })
+
   it("refreshes a partial cache without hiding an unexpired SKU while the next response is pending", async () => {
     vi.useFakeTimers()
     const initial = {

@@ -28,9 +28,12 @@ prices are invalidated at snapshot expiry. Live result prices and Telegram
 handoff actions expire in an open tab, and handoff construction checks expiry
 again at the moment of the action.
 
-Partially warmed catalogues and transient source failures are rechecked once
-per minute without invalidating still-current quotes, so already-open tabs can
-receive products as the server worker finishes refreshing them.
+The next catalogue read is scheduled within 60 seconds of the previous request
+finishing, including for fully priced catalogues. The 12-hour snapshot lifetime is
+maximum read validity, not a price refresh interval. A transient request failure
+retains only still-valid displayed quotes, reports the failed refresh, and disables
+checkout until a successful read. A separate expiry timer removes expired price
+and stock authority even while the next request is pending or failing.
 
 The baseline catalogue still contains 100 product references. This count is
 independent of the number of fresh verified SPU/SKU offers returned by Poizon.

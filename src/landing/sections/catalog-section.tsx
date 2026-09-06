@@ -72,14 +72,16 @@ export function CatalogSection({
     storefront.catalogSearch.response.results.length > 0
   const commerceNotice =
     storefront.catalogPriceState.status === "loading"
-      ? "Загружаем актуальные цены и наличие из 12-часового снимка поставщика."
+      ? "Загружаем цены и наличие Poizon."
       : storefront.catalogPriceState.status === "failed"
         ? "Подтверждённые цены и оформление временно недоступны."
-        : !storefront.catalogPriceState.orderCreationEnabled
-          ? "Справочные цены видны. Оформление доступно только для подтверждённых SKU."
-          : !storefront.catalogPriceState.onlinePaymentEnabled
-            ? "Заказ можно оформить. Онлайн-оплата пока недоступна."
-            : null
+        : storefront.catalogPriceState.error
+          ? "Не удалось обновить цены. Повторим запрос автоматически."
+          : !storefront.catalogPriceState.orderCreationEnabled
+            ? "Справочные цены видны. Оформление доступно только для подтверждённых SKU."
+            : !storefront.catalogPriceState.onlinePaymentEnabled
+              ? "Заказ можно оформить. Онлайн-оплата пока недоступна."
+              : null
 
   if (mode === "popular") {
     const popularProducts = approvedPopularSlugs.flatMap((slug) => {
