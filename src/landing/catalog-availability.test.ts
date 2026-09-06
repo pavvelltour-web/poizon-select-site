@@ -37,6 +37,27 @@ describe("Poizon catalogue availability evidence", () => {
     expect(snapshot.orderCreationEnabled).toBe(false)
   })
 
+  it("identifies an unavailable CBR rate without fabricating a price or blaming Poizon stock", () => {
+    const snapshot = parseCheckoutCatalog({
+      version: "poizon-live-v1", catalog_mode: "curated_live_poizon", snapshot_hours: 12,
+      items: [], catalog_statuses: { product: {
+        ...observation, status: "source_unavailable", reason_code: "cny_rub_rate_unavailable",
+      } },
+    })!
+    expect(catalogAvailabilityLabel(null, snapshot.catalogStatuses.product, "ready"))
+      .toBe("Курс ЦБ недоступен")
+    expect(snapshot.lookup).toEqual({})
+    expect(snapshot.orderCreationEnabled).toBe(false)
+  })
+
+  it("does not expose an unrecognized provider reason as customer copy", () => {
+    const states = parseCatalogAvailability({ product: {
+      ...observation, status: "source_unavailable", reason_code: "private provider details",
+    } })
+    expect(states.product).not.toHaveProperty("reasonCode")
+    expect(catalogAvailabilityLabel(null, states.product, "ready")).toBe("Poizon временно недоступен")
+  })
+
   it.each([null, "invalid", new Date(Date.now() - 1).toISOString()])(
     "downgrades out-of-stock metadata without a valid current expiry: %s", (expires_at) => {
       const states = parseCatalogAvailability({ product: { ...observation, expires_at, status: "out_of_stock" } })

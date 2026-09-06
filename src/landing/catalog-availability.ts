@@ -9,6 +9,7 @@ export interface CatalogAvailability {
   checkedAt: string | null
   expiresAt: string | null
   source: "poizon"
+  reasonCode?: "cny_rub_rate_unavailable"
 }
 
 export type CatalogAvailabilityMap = Record<string, CatalogAvailability>
@@ -35,7 +36,10 @@ export function parseCatalogAvailability(value: unknown): CatalogAvailabilityMap
       expires > checked && expires - checked <= 12 * 60 * 60_000
     const status = ["in_stock", "out_of_stock"].includes(item.status) && !fresh
       ? "stale" : item.status as CatalogAvailabilityStatus
-    result[slug] = { status, checkedAt, expiresAt, source: "poizon" }
+    result[slug] = {
+      status, checkedAt, expiresAt, source: "poizon",
+      ...(item.reason_code === "cny_rub_rate_unavailable" ? { reasonCode: item.reason_code } : {}),
+    }
   }
   return result
 }
@@ -64,7 +68,8 @@ export function catalogAvailabilityLabel(
     case "price_unavailable": return "Цена Poizon не подтверждена"
     case "not_matched": return "Точное совпадение на Poizon не подтверждено"
     case "not_found": return "Товар не найден на Poizon"
-    case "source_unavailable": return "Poizon временно недоступен"
+    case "source_unavailable": return availability?.reasonCode === "cny_rub_rate_unavailable"
+      ? "Курс ЦБ недоступен" : "Poizon временно недоступен"
     case "stale": return "Данные Poizon устарели"
     default: return "Наличие на Poizon не проверено"
   }
