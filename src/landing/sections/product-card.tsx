@@ -155,7 +155,7 @@ export function ProductCard({
     publishedOffer.checkoutReady,
   )
   const supplyLabel = catalogAvailabilityLabel(publishedOffer, catalogAvailability, catalogStatus)
-  const productDisplayName = product.kind === "footwear" && product.category === "recovery"
+  const productDisplayName = product.supplierProductRef || (product.kind === "footwear" && product.category === "recovery")
     ? `${product.brand} ${product.name}`
     : `${product.kind === "footwear" ? "Кроссовки " : ""}${product.brand} ${product.name}`
 
@@ -197,7 +197,7 @@ export function ProductCard({
         onPointerEnter={requestHoverOnPointer}
       >
         <span className={`product-media ${primaryLoad.retryPending ? "is-media-retrying" : ""} ${primaryLoad.failed ? "is-media-failed" : ""} ${hoverReady ? "is-hover-ready" : ""}`}>
-          {isPriorityCard ? <span className="badge-stack"><span className="product-badge badge-choice">Выбор клиентов</span></span> : null}
+          {isPriorityCard && !product.supplierProductRef ? <span className="badge-stack"><span className="product-badge badge-choice">Выбор клиентов</span></span> : null}
           <img
             className="product-card__image"
             src={primarySource.src}

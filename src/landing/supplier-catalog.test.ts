@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { publicCatalogProducts } from "../catalog/catalog"
-import { findTaskMatches, getDisplayPrice, getSizeOptions } from "./landing-data"
+import { findTaskMatches, getDisplayPrice, getProductTypeLabel, getProductUse, getSizeOptions } from "./landing-data"
 import { mergeSupplierCatalog, parseSupplierCatalog } from "./supplier-catalog"
 
 function metadata(index: number) {
@@ -12,6 +12,25 @@ function metadata(index: number) {
 }
 
 describe("additional canonical supplier products", () => {
+  it("does not invent an indoor or everyday use case for a source-labelled training product", () => {
+    const [product] = mergeSupplierCatalog([], parseSupplierCatalog([
+      { ...metadata(1), brand: "Nike", name: "Nike High Jump Elite", category: "training" },
+    ]))
+    expect(product.name).toBe("High Jump Elite")
+    expect(product.query).toBe("Nike High Jump Elite ARTICLE-1")
+    expect(product.sportPriority).toBe(false)
+    expect(findTaskMatches([product], "для зала")).toEqual([])
+    expect(getProductTypeLabel(product)).toBe("Обувь")
+    expect(getProductUse(product)).toBe("Модель из каталога Poizon")
+  })
+
+  it.each(["Li Ning", "Li-Ning", "LINING"])("does not repeat a leading source brand: %s", (prefix) => {
+    const [product] = mergeSupplierCatalog([], parseSupplierCatalog([
+      { ...metadata(1), brand: "Li-Ning", name: `${prefix} DLO 1` },
+    ]))
+    expect(product.name).toBe("DLO 1")
+  })
+
   it("does not treat absent supplier prices as zero-cost budget matches", () => {
     const products = mergeSupplierCatalog([], parseSupplierCatalog([metadata(1)]))
     expect(findTaskMatches(products, "до 10000")).toEqual([])

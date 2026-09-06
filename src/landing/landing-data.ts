@@ -237,6 +237,7 @@ export function getProductBadge(product: CatalogProduct): string {
 }
 
 export function getProductUse(product: CatalogProduct): string {
+  if (product.supplierProductRef) return "Модель из каталога Poizon"
   if (product.category === "recovery") {
     return "Для отдыха после тренировки и повседневной носки."
   }
@@ -254,6 +255,7 @@ export function getProductUse(product: CatalogProduct): string {
 }
 
 export function getProductTypeLabel(product: CatalogProduct): string {
+  if (product.supplierProductRef) return kindLabels[product.kind]
   const name = `${product.name} ${product.query}`.toLowerCase()
 
   if (product.kind === "footwear") {

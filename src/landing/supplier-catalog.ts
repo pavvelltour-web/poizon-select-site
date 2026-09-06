@@ -75,14 +75,20 @@ export function mergeSupplierCatalog(
 ): readonly CatalogProduct[] {
   if (additions.length === 0) return originals
   const originalSlugs = new Set(originals.map((product) => product.slug))
-  return [...originals, ...additions.filter((product) => !originalSlugs.has(product.slug)).map((product): CatalogProduct => ({
-    slug: product.slug, brand: product.brand, name: product.name,
-    category: product.category, categoryLabel: categoryLabels[product.category], kind: product.kind,
-    supplierProductRef: product.productRef,
-    sportPriority: ["volleyball", "basketball", "training"].includes(product.category),
-    query: [product.brand, product.name, product.article].filter(Boolean).join(" "),
-    note: "Модель из каталога Poizon",
-    image: product.images[0], fallbackImage: product.images[0],
-    gallery: product.images.map((src, index) => ({ src, alt: `${product.brand} ${product.name}, фото ${index + 1}` })),
-  }))]
+  const newProducts = additions.filter((product) => !originalSlugs.has(product.slug)).map((product): CatalogProduct => {
+    const brandPrefix = product.brand.split(/[\s-]+/u)
+      .map((part) => part.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("[\\s-]*")
+    const name = product.name.replace(new RegExp(`^${brandPrefix}\\s+`, "iu"), "")
+    return {
+      slug: product.slug, brand: product.brand, name,
+      category: product.category, categoryLabel: categoryLabels[product.category], kind: product.kind,
+      supplierProductRef: product.productRef,
+      sportPriority: ["volleyball", "basketball"].includes(product.category),
+      query: [product.brand, name, product.article].filter(Boolean).join(" "),
+      note: "Модель из каталога Poizon",
+      image: product.images[0], fallbackImage: product.images[0],
+      gallery: product.images.map((src, index) => ({ src, alt: `${product.brand} ${name}, фото ${index + 1}` })),
+    }
+  })
+  return [...originals, ...newProducts]
 }
