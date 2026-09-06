@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 import { publicCatalogProducts } from "../catalog/catalog"
-import { getDisplayPrice, getSizeOptions } from "./landing-data"
+import { findTaskMatches, getDisplayPrice, getSizeOptions } from "./landing-data"
 import { mergeSupplierCatalog, parseSupplierCatalog } from "./supplier-catalog"
 
 function metadata(index: number) {
@@ -12,6 +12,14 @@ function metadata(index: number) {
 }
 
 describe("additional canonical supplier products", () => {
+  it("does not treat absent supplier prices as zero-cost budget matches", () => {
+    const products = mergeSupplierCatalog([], parseSupplierCatalog([metadata(1)]))
+    expect(findTaskMatches(products, "до 10000")).toEqual([])
+    expect(findTaskMatches(products, "недорого")).toEqual([])
+    expect(findTaskMatches(products, "до 10000", { "supplier-model-1": 9000 })).toHaveLength(1)
+    expect(findTaskMatches(products, "до 10000", { "supplier-model-1": 11000 })).toEqual([])
+  })
+
   it("supports more than100 products while preserving every original product and image", () => {
     const products = mergeSupplierCatalog(publicCatalogProducts, parseSupplierCatalog(Array.from({ length: 90 }, (_, i) => metadata(i))))
     expect(products).toHaveLength(190)

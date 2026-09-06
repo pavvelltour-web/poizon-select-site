@@ -14,7 +14,6 @@ import {
 import {
   catalogCategories,
   formatRub,
-  getCatalogPriceRub,
   type CatalogProduct,
   type CatalogSort,
   type ProductKind,
@@ -194,10 +193,8 @@ function getCatalogLinePrice(
   product: CatalogProduct,
   catalogPriceLookup: CatalogPriceMap | null = null,
 ): number {
-  if (!catalogPriceLookup) return getCatalogPriceRub(product)
-  const override = catalogPriceLookup[product.slug]
-  if (!Number.isFinite(override) || override <= 0) return getCatalogPriceRub(product)
-  return override
+  const override = catalogPriceLookup?.[product.slug]
+  return typeof override === "number" && Number.isFinite(override) && override > 0 ? override : 0
 }
 export function getDisplayPrice(
   product: CatalogProduct,
@@ -448,11 +445,10 @@ function scoreTaskProduct(
     : null
   if (budgetRub) {
     const price = getCatalogLinePrice(product, catalogPriceLookup)
-    if (price <= budgetRub) add(10)
-    else add(-8)
+    if (price > 0) add(price <= budgetRub ? 10 : -8)
   } else if (/бюджет|дешев|недорог/.test(normalizedTask)) {
     const price = getCatalogLinePrice(product, catalogPriceLookup)
-    if (price < 12_000) add(8)
+    if (price > 0 && price < 12_000) add(8)
   }
 
   const requestedSize = normalizedTask.match(/(?:^|\s)(3[5-9]|4[0-8])(?:[.,]5)?(?:\s|$)/u)?.[1]
@@ -501,6 +497,9 @@ export function findTaskMatches(
       if (right.score !== left.score) return right.score - left.score
       const leftPrice = getCatalogLinePrice(left.product, catalogPriceLookup)
       const rightPrice = getCatalogLinePrice(right.product, catalogPriceLookup)
+      if (!leftPrice && !rightPrice) return 0
+      if (!leftPrice) return 1
+      if (!rightPrice) return -1
       return leftPrice - rightPrice
     })
 }

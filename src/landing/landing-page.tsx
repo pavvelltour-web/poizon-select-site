@@ -143,8 +143,14 @@ export function LandingPage({ configuredBotUsername }: LandingPageProps) {
           <StaticRoutePage route={staticRoute} />
         ) : productRoute && !routeProduct ? (
           storefront.catalogPriceState.status === "loading"
-            ? <p role="status">Загружаем товар из каталога Poizon…</p>
-            : <ProductDetailPage product={routeProduct} storefront={storefront} />
+            ? <p id="route-main" role="status">Загружаем товар из каталога Poizon…</p>
+            : storefront.catalogPriceState.status === "failed"
+              ? <section id="route-main" className="container">
+                <h1>Каталог Poizon временно недоступен</h1>
+                <p>Не удалось проверить этот товар. Повторите попытку после восстановления связи.</p>
+                <a href="/catalog">Открыть каталог</a>
+              </section>
+              : <ProductDetailPage product={routeProduct} storefront={storefront} />
         ) : catalogRoute ? (
           <>
             <section className="catalog-intro container" data-od-id="catalog-intro" aria-labelledby="catalog-page-title">

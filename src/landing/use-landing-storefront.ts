@@ -256,10 +256,10 @@ export function useLandingStorefront(
   )
   const taskFallbacks = useMemo(
     () =>
-      findTaskMatches(products, taskInput)
+      findTaskMatches(products, taskInput, catalogPriceState.lookup)
         .slice(0, 4)
         .map((match) => catalogFallback(match.product)),
-    [products, taskInput],
+    [products, taskInput, catalogPriceState.lookup],
   )
   const cartCount = cartLines.reduce((sum, line) => sum + line.quantity, 0)
   const currentCartTotalRub = cartTotalRub(

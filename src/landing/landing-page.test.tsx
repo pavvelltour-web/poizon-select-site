@@ -236,6 +236,14 @@ describe("LandingPage", () => {
     expect(JSON.parse(localStorage.getItem("kicksbase-cart-v1")!)).toEqual(stored)
   })
 
+  it("does not claim a supplier product URL is missing when catalogue metadata cannot load", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("source unavailable")))
+    window.history.replaceState(null, "", "/product/supplier-model-1")
+    render(<LandingPage configuredBotUsername={null} />)
+    expect(await screen.findByRole("heading", { name: "Каталог Poizon временно недоступен" })).toBeInTheDocument()
+    expect(screen.queryByRole("heading", { name: "Такой страницы нет." })).not.toBeInTheDocument()
+  })
+
   it("labels every historical SKU amount and keeps it unavailable to checkout", async () => {
     const payload = checkoutCatalogPayload(["44"])
     payload.items[0].price_status = "historical"
@@ -933,6 +941,7 @@ describe("LandingPage", () => {
   })
 
   it("keeps invalid legacy product links on an accessible canonical not-found page", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => checkoutCatalogPayload() }))
     window.history.replaceState(null, "", "/?product=not-a-real-product")
     render(<LandingPage configuredBotUsername={null} />)
 
