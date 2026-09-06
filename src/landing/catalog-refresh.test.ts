@@ -5,6 +5,14 @@ import { getCatalogRefreshSchedule } from "./use-landing-storefront"
 const now = Date.parse("2026-08-15T09:00:00.000Z")
 
 describe("12-hour storefront catalogue refresh", () => {
+  it("rechecks a partially warmed catalogue promptly while retaining still-current offers", () => {
+    expect(getCatalogRefreshSchedule({
+      ready: { expiresAt: "2026-08-15T18:00:00.000Z" },
+    }, now, true)).toEqual({
+      delayMs: 60_000,
+      expiresAtMs: Date.parse("2026-08-15T18:00:00.000Z"),
+    })
+  })
   it("refreshes and invalidates the browser snapshot at the earliest item expiry", () => {
     expect(getCatalogRefreshSchedule({
       later: { expiresAt: "2026-08-15T20:00:00.000Z" },

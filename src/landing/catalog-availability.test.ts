@@ -18,13 +18,13 @@ describe("Poizon catalogue availability evidence", () => {
     expect(snapshot.lookup).toEqual({})
     expect(snapshot.orderCreationEnabled).toBe(false)
     expect(catalogAvailabilityLabel(null, snapshot.catalogStatuses["nike-kd-18"], "ready"))
-      .toBe("Нет в наличии на Poizon")
+      .toBe("Проверенные размеры отсутствуют на Poizon")
   })
 
   it.each(["source_unavailable", "not_found", "not_matched", "stock_unknown", "unverified"])(
     "does not label %s as no stock", (status) => {
       const states = parseCatalogAvailability({ product: { ...observation, status } })
-      expect(catalogAvailabilityLabel(null, states.product, "ready")).not.toContain("Нет в наличии")
+      expect(catalogAvailabilityLabel(null, states.product, "ready")).not.toContain("отсутствуют на Poizon")
     },
   )
 

@@ -16,8 +16,9 @@ slug. Each status contains `status`, `checked_at`, `expires_at`, and `source:
 `price_unavailable`, `not_matched`, `not_found`, `source_unavailable`, `stale`,
 and `unverified`. Status metadata does not create an amount or checkout permission.
 
-A current, confirmed `out_of_stock` outcome is shown as **Нет в наличии на
-Poizon**, including when no price exists. A failed provider request, unmatched
+A current, confirmed `out_of_stock` outcome is shown as **Проверенные размеры
+отсутствуют на Poizon**, including when no price exists. This covers the reviewed
+SKU allowlist and cannot prove absence of unreturned sizes. A failed provider request, unmatched
 identity, missing product, unknown stock, or stale observation has its own text.
 Missing or expired evidence never establishes absence.
 
@@ -26,6 +27,10 @@ Both retain the same-origin boundary and `credentials: "include"`. Catalogue
 prices are invalidated at snapshot expiry. Live result prices and Telegram
 handoff actions expire in an open tab, and handoff construction checks expiry
 again at the moment of the action.
+
+Partially warmed catalogues and transient source failures are rechecked once
+per minute without invalidating still-current quotes, so already-open tabs can
+receive products as the server worker finishes refreshing them.
 
 The baseline catalogue still contains 100 product references. This count is
 independent of the number of fresh verified SPU/SKU offers returned by Poizon.
@@ -49,4 +54,4 @@ the quote at the earlier boundary. Legacy, missing, or historical evidence is
 labelled **Последняя цена**, excluded from current-price sorting, and cannot
 confirm stock or checkout. Historical SKU rows display their source date when
 available. A priced subset with no available SKU cannot prove the entire SPU is
-absent; the full no-stock label requires explicit `catalog_statuses` evidence.
+absent; the reviewed-SKU no-stock label requires explicit `catalog_statuses` evidence.

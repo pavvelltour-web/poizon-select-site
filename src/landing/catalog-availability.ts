@@ -58,7 +58,7 @@ export function catalogAvailabilityLabel(
       item ? "stock_unknown" : "unverified"
   )
   switch (status) {
-    case "out_of_stock": return "Нет в наличии на Poizon"
+    case "out_of_stock": return "Проверенные размеры отсутствуют на Poizon"
     case "in_stock": return "В наличии на Poizon"
     case "stock_unknown": return "Наличие на Poizon не подтверждено"
     case "price_unavailable": return "Цена Poizon не подтверждена"

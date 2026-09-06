@@ -281,7 +281,7 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
               {storefront.selectedSizeOffers.map((offer) => (
                 <button
                   key={offer.sizeEu}
-                  className="size-price-cell"
+                  className={`size-price-cell${offer.priceStatus === "historical" ? " size-price-cell--historical" : ""}`}
                   type="button"
                   data-od-id={`sheet-size-${product.slug}-${offer.sizeEu.replaceAll(".", "-")}`}
                   aria-label={`${offer.sizeRu ?? "Размер RU не указан"} RU, ${offer.sizeEu} EU, ${offer.priceStatus === "historical" ? "последняя известная цена: " : ""}${offer.priceRub ? formatRub(offer.priceRub) : "цена не указана"}, ${offer.stockStatus === true ? "в наличии" : offer.stockStatus === false ? "нет в наличии" : "наличие уточняется"}`}

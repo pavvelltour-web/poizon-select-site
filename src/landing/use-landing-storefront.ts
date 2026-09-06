@@ -60,6 +60,7 @@ const MAX_BROWSER_TIMEOUT_MS = 2_147_483_647
 export function getCatalogRefreshSchedule(
   items: Readonly<Record<string, { expiresAt: string | null }>>,
   nowMs = Date.now(),
+  incomplete = false,
 ): { delayMs: number; expiresAtMs: number | null } {
   const nextExpiryMs = Math.min(
     ...Object.values(items)
@@ -70,7 +71,7 @@ export function getCatalogRefreshSchedule(
     return { delayMs: CATALOG_REFRESH_RETRY_MS, expiresAtMs: null }
   }
   return {
-    delayMs: Math.min(Math.max(0, nextExpiryMs - nowMs), MAX_BROWSER_TIMEOUT_MS),
+    delayMs: Math.min(Math.max(0, nextExpiryMs - nowMs), incomplete ? CATALOG_REFRESH_RETRY_MS : MAX_BROWSER_TIMEOUT_MS),
     expiresAtMs: nextExpiryMs,
   }
 }
@@ -382,9 +383,10 @@ export function useLandingStorefront(
         ...Object.fromEntries(Object.entries(snapshot?.catalogStatuses ?? {})
           .filter(([, status]) => status.expiresAt && Date.parse(status.expiresAt) > Date.now())
           .map(([slug, status]) => [`status:${slug}`, status])),
-      })
+      }, Date.now(), Object.values(snapshot?.catalogStatuses ?? {}).some((status) =>
+        ["unverified", "stale", "source_unavailable"].includes(status.status)))
       refreshTimer = window.setTimeout(() => {
-        if (refreshSchedule.expiresAtMs !== null) {
+        if (refreshSchedule.expiresAtMs !== null && refreshSchedule.expiresAtMs <= Date.now()) {
           setCatalogPriceState((current) => ({
             ...current,
             status: "loading",

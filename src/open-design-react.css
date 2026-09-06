@@ -634,6 +634,23 @@ button.catalog-link {
   white-space: nowrap;
 }
 
+.product-sheet .size-price-cell--historical:disabled {
+  color: #666;
+  opacity: 1;
+}
+
+.product-sheet .size-price-cell--historical .size-price-cell__price {
+  overflow: visible;
+  white-space: normal;
+}
+
+.product-sheet .size-price-cell__price small {
+  display: block;
+  margin-top: 4px;
+  font-size: 10px;
+  line-height: 1.25;
+}
+
 .product-sheet .product-size__status {
   margin: 9px 0 0;
   color: var(--muted);

@@ -191,6 +191,31 @@ afterEach(() => {
 })
 
 describe("LandingPage", () => {
+  it("refreshes a partial cache without hiding an unexpired SKU while the next response is pending", async () => {
+    vi.useFakeTimers()
+    const initial = {
+      ...checkoutCatalogPayload(["44"]),
+      catalog_statuses: { "nike-kd-18": { status: "unverified", source: "poizon", checked_at: null, expires_at: null } },
+    }
+    let finishRefresh!: (value: unknown) => void
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce({ ok: true, json: async () => initial })
+      .mockImplementationOnce(() => new Promise((resolve) => { finishRefresh = resolve }))
+    vi.stubGlobal("fetch", fetchMock)
+    window.history.replaceState(null, "", "/product/nike-gt-cut-academy")
+    render(<LandingPage configuredBotUsername={null} />)
+    await act(async () => { await vi.advanceTimersByTimeAsync(1) })
+    expect(screen.getByRole("button", { name: /44 EU, 24 500 ₽, в наличии/ })).toBeEnabled()
+    await act(async () => { await vi.advanceTimersByTimeAsync(60_000) })
+    expect(fetchMock).toHaveBeenCalledTimes(2)
+    expect(screen.getByRole("button", { name: /44 EU, 24 500 ₽, в наличии/ })).toBeEnabled()
+    const next = checkoutCatalogPayload(["44"])
+    next.items[0].price_rub = 26_000
+    next.items[0].size_offers[0].price_rub = 26_000
+    await act(async () => finishRefresh({ ok: true, json: async () => next }))
+    expect(screen.getByRole("button", { name: /44 EU, 26 000 ₽, в наличии/ })).toBeEnabled()
+  })
+
   it("counts supplier additions in the same catalogue without changing the original100", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => ({
       ...checkoutCatalogPayload(), catalog_products: Array.from({ length: 90 }, (_, index) => supplierMetadata(index)),
@@ -271,12 +296,12 @@ describe("LandingPage", () => {
     }) }))
     window.history.replaceState(null, "", "/catalog")
     render(<LandingPage configuredBotUsername={null} />)
-    expect(await screen.findByText("Нет в наличии на Poizon")).toBeInTheDocument()
+    expect(await screen.findByText("Проверенные размеры отсутствуют на Poizon")).toBeInTheDocument()
     const link = screen.getByRole("link", { name: /Открыть товар: Nike KD 18/ })
     expect(within(link).getByText("По запросу")).toBeInTheDocument()
     await user.click(link)
     const dialog = await screen.findByRole("dialog", { name: /Nike KD 18/ })
-    expect(within(dialog).getAllByText("Нет в наличии на Poizon")).toHaveLength(2)
+    expect(within(dialog).getAllByText("Проверенные размеры отсутствуют на Poizon")).toHaveLength(2)
     expect(within(dialog).queryByText("Под заказ из Китая")).toBeNull()
   })
 
