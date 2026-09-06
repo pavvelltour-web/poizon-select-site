@@ -410,6 +410,10 @@ button.catalog-link {
   min-height: min(760px, calc(100dvh - 24px));
 }
 
+.product-sheet .product-sheet-grid > * {
+  min-width: 0;
+}
+
 .product-sheet .sheet-media {
   align-self: start;
   height: min(838px, calc(100dvh - 24px));
