@@ -339,6 +339,8 @@ describe("LandingPage", () => {
     expect(historicalSize).toBeDisabled()
     expect(historicalSize).toHaveTextContent("Последняя цена · 01.01.2020")
     expect(screen.getAllByText("Последняя цена: от 24 500 ₽").length).toBeGreaterThan(0)
+    expect(screen.getByRole("button", { name: "Недоступно для заказа" })).toBeDisabled()
+    expect(screen.queryByRole("button", { name: "Проверяем каталог" })).toBeNull()
   })
 
   it("shows verified Poizon no-stock evidence on the catalogue card and opened product without a price", async () => {

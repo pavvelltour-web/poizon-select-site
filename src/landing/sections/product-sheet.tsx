@@ -335,8 +335,10 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
               <ShoppingCart aria-hidden="true" size={18} />
               {storefront.selectedSizeOfferStatus === "loading"
                 ? "Проверяем размеры"
-                : !catalogReady
+                : storefront.catalogPriceState.status === "loading"
                 ? "Проверяем каталог"
+                : !catalogReady
+                  ? "Недоступно для заказа"
                 : !storefront.catalogPriceState.orderCreationEnabled
                   ? "Оформление временно недоступно"
                 : selectedSizeOffer && !selectedSizeOffer.checkoutConfirmed
