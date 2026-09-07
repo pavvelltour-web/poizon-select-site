@@ -228,9 +228,10 @@ describe("approved Open Design product flow", () => {
     )
   })
 
-  it("keeps the KD 18 card, selected size and five gallery frames in one product", async () => {
+  it("keeps the bundled KD 18 fallback, selected size and five gallery frames in one product", async () => {
     stubCheckoutCatalog()
     const user = userEvent.setup()
+    window.history.replaceState(null, "", "/catalog")
     render(<LandingPage configuredBotUsername={null} />)
 
     const card = document.querySelector<HTMLElement>('[data-od-id="product-card-nike-kd-18"]')

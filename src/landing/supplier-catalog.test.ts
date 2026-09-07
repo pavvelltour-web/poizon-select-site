@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest"
 import { publicCatalogProducts } from "../catalog/catalog"
 import { findTaskMatches, getDisplayPrice, getProductTypeLabel, getProductUse, getSizeOptions } from "./landing-data"
-import { mergeSupplierCatalog, parseSupplierCatalog } from "./supplier-catalog"
+import {
+  filterAuthoritativeOriginals,
+  mergeSupplierCatalog,
+  parseSupplierCatalog,
+  resolveStorefrontCatalog,
+} from "./supplier-catalog"
 
 function metadata(index: number) {
   return {
@@ -51,6 +56,37 @@ describe("additional canonical supplier products", () => {
       expect(getDisplayPrice(added).value).toBe("По запросу")
       expect(getSizeOptions(added)).toEqual([])
     }
+  })
+
+  it("uses ready server statuses as authoritative catalogue membership", () => {
+    const retainedOriginals = publicCatalogProducts.slice(0, 29)
+    const additions = parseSupplierCatalog(Array.from({ length: 171 }, (_, index) => metadata(index)))
+    const statuses = Object.fromEntries([
+      ...retainedOriginals.map((product) => [product.slug, { status: "in_stock" }]),
+      ...additions.map((product) => [product.slug, { status: "in_stock" }]),
+    ])
+    const originals = filterAuthoritativeOriginals(publicCatalogProducts, statuses, true)
+    const products = mergeSupplierCatalog(originals, additions)
+
+    expect(originals).toEqual(retainedOriginals)
+    expect(products).toHaveLength(200)
+    expect(new Set(products.map((product) => product.slug)).size).toBe(200)
+    expect(resolveStorefrontCatalog(publicCatalogProducts, additions, statuses, true)).toEqual(products)
+  })
+
+  it("keeps the bundled catalogue while server membership is loading, absent or incomplete", () => {
+    expect(filterAuthoritativeOriginals(publicCatalogProducts, {}, false)).toBe(publicCatalogProducts)
+    expect(filterAuthoritativeOriginals(publicCatalogProducts, {}, true)).toBe(publicCatalogProducts)
+    const incompleteStatuses = Object.fromEntries(
+      publicCatalogProducts.map((product) => [product.slug, { status: "in_stock" }]),
+    )
+    expect(filterAuthoritativeOriginals(publicCatalogProducts, incompleteStatuses, true)).toBe(publicCatalogProducts)
+    expect(resolveStorefrontCatalog(
+      publicCatalogProducts,
+      parseSupplierCatalog(Array.from({ length: 170 }, (_, index) => metadata(index))),
+      Object.fromEntries(Array.from({ length: 200 }, (_, index) => [`status-${index}`, {}])),
+      true,
+    )).toBe(publicCatalogProducts)
   })
 
   it("fails closed for duplicate slug or provider identity, including malformed colliding rows", () => {

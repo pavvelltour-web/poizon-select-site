@@ -31,14 +31,21 @@ interface CatalogSectionProps {
 export const CATALOG_PAGE_SIZE = 24
 
 const approvedPopularSlugs = [
-  "nike-kd-18",
-  "nike-sabrina-3",
-  "nike-aone",
-  "asics-sky-elite-ff-3",
-  "li-ning-wade-808-4-ultra",
-  "new-balance-two-wxy-v5",
-  "anta-kai-1",
-  "nike-free-metcon-6",
+  "nike-kobe-6-protro-sail-all-star-8b22ec15",
+  "nike-kobe-6-protro-dodgers-d517dd2b",
+  "nike-g-t-hustle-3-pink-a4e142b6",
+  "nike-lebron-22-pink-white-341fa592",
+  "nike-lebron-witness-8-ep-black-purple-82ec8905",
+  "nike-kd-18-white-blue-59f615d1",
+  "air-jordan-40-blue-grey-71071960",
+  "nike-ja-3-blue-yellow-99122218",
+] as const
+
+const loadingPopularSlugs = [
+  "nike-lebron-nxxt-genisus",
+  "adidas-harden-volume-9",
+  "jordan-luka-4",
+  "nike-ja-3",
 ] as const
 
 const finderScenarios = [
@@ -84,10 +91,16 @@ export function CatalogSection({
               : null
 
   if (mode === "popular") {
-    const popularProducts = approvedPopularSlugs.flatMap((slug) => {
-      const product = publicCatalogProducts.find((item) => item.slug === slug)
+    const approvedProducts = approvedPopularSlugs.flatMap((slug) => {
+      const product = storefront.products.find((item) => item.slug === slug)
       return product ? [product] : []
     })
+    const popularProducts = approvedProducts.length === approvedPopularSlugs.length
+      ? approvedProducts
+      : loadingPopularSlugs.flatMap((slug) => {
+        const product = publicCatalogProducts.find((item) => item.slug === slug)
+        return product ? [product] : []
+      })
 
     return (
       <>

@@ -92,3 +92,32 @@ export function mergeSupplierCatalog(
   })
   return [...originals, ...newProducts]
 }
+
+export function filterAuthoritativeOriginals(
+  originals: readonly CatalogProduct[],
+  catalogStatuses: Readonly<Record<string, unknown>>,
+  catalogReady: boolean,
+): readonly CatalogProduct[] {
+  if (!catalogReady || Object.keys(catalogStatuses).length !== 200) return originals
+  return originals.filter((product) => Object.hasOwn(catalogStatuses, product.slug))
+}
+
+export function resolveStorefrontCatalog(
+  originals: readonly CatalogProduct[],
+  additions: readonly SupplierCatalogProduct[],
+  catalogStatuses: Readonly<Record<string, unknown>>,
+  catalogReady: boolean,
+): readonly CatalogProduct[] {
+  const authoritativeOriginals = filterAuthoritativeOriginals(
+    originals,
+    catalogStatuses,
+    catalogReady,
+  )
+  if (authoritativeOriginals === originals) return originals
+
+  const merged = mergeSupplierCatalog(authoritativeOriginals, additions)
+  const statusSlugs = new Set(Object.keys(catalogStatuses))
+  return merged.length === 200 && merged.every((product) => statusSlugs.has(product.slug))
+    ? merged
+    : originals
+}

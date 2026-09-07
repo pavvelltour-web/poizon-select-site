@@ -73,6 +73,20 @@ function supplierMetadata(index: number) {
   }
 }
 
+function canonicalSupplierCatalogPayload(payload = checkoutCatalogPayload()) {
+  const additions = Array.from({ length: 171 }, (_, index) => supplierMetadata(index))
+  const retainedOriginals = publicCatalogProducts.slice(0, 29)
+  const catalogStatuses = Object.fromEntries([
+    ...retainedOriginals.map((product) => [product.slug, {
+      status: "in_stock", source: "poizon", checked_at: null, expires_at: null,
+    }]),
+    ...additions.map((product) => [product.slug, {
+      status: "in_stock", source: "poizon", checked_at: null, expires_at: null,
+    }]),
+  ])
+  return { ...payload, catalog_products: additions, catalog_statuses: catalogStatuses }
+}
+
 function readyGtCutSearchPayload() {
   const payload = readySearchPayload("Nike G.T. Cut Academy basketball volleyball")
   return {
@@ -274,13 +288,13 @@ describe("LandingPage", () => {
     expect(screen.getByRole("button", { name: /44 EU, 26 000 ₽, в наличии/ })).toBeEnabled()
   })
 
-  it("counts supplier additions in the same catalogue without changing the original100", async () => {
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => ({
-      ...checkoutCatalogPayload(), catalog_products: Array.from({ length: 90 }, (_, index) => supplierMetadata(index)),
-    }) }))
+  it("accepts only the complete canonical 29 plus 171 catalogue", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () =>
+      canonicalSupplierCatalogPayload(),
+    }))
     window.history.replaceState(null, "", "/catalog")
     render(<LandingPage configuredBotUsername={null} />)
-    expect(await screen.findByText(/^190 товаров/)).toBeInTheDocument()
+    expect(await screen.findByText(/^200 товаров/)).toBeInTheDocument()
   })
 
   it("resolves a direct supplier product URL after metadata arrives without invented prices or sizes", async () => {
@@ -289,9 +303,9 @@ describe("LandingPage", () => {
     window.history.replaceState(null, "", "/product/supplier-model-1")
     render(<LandingPage configuredBotUsername={null} />)
     expect(screen.getByText("Загружаем товар из каталога Poizon…")).toBeInTheDocument()
-    await act(async () => resolveResponse({ ok: true, json: async () => ({
-      ...checkoutCatalogPayload(), items: [], catalog_products: [supplierMetadata(1)],
-    }) }))
+    await act(async () => resolveResponse({ ok: true, json: async () =>
+      canonicalSupplierCatalogPayload({ ...checkoutCatalogPayload(), items: [] }),
+    }))
     const dialog = await screen.findByRole("dialog")
     expect(within(dialog).getByRole("heading", { name: /adidas Supplier model 1/ })).toBeInTheDocument()
     expect([...dialog.querySelectorAll("img")].some((image) => image.src === supplierMetadata(1).images[0])).toBe(true)
@@ -310,9 +324,9 @@ describe("LandingPage", () => {
     expect(JSON.parse(localStorage.getItem("kicksbase-cart-v1")!)).toEqual(stored)
     const payload = checkoutCatalogPayload(["44"])
     Object.assign(payload.items[0], { slug: "supplier-model-1", brand: "adidas", name: "Supplier model 1" })
-    await act(async () => resolveResponse({ ok: true, json: async () => ({
-      ...payload, catalog_products: [supplierMetadata(1)],
-    }) }))
+    await act(async () => resolveResponse({ ok: true, json: async () =>
+      canonicalSupplierCatalogPayload(payload),
+    }))
     const drawer = await screen.findByRole("dialog", { name: "Корзина" })
     expect(within(drawer).getByText("adidas Supplier model 1")).toBeInTheDocument()
     expect(drawer.querySelector(".cart-line--valid")).toHaveTextContent("24 500 ₽")
@@ -386,21 +400,21 @@ describe("LandingPage", () => {
     expect(within(card).queryByRole("link", { name: /Открыть @/ })).toBeNull()
   })
 
-  it("renders the approved eight-product home and progressively reveals the full catalog", () => {
+  it("renders safe bundled placeholders before the live popular set and progressively reveals the full catalog", () => {
     const view = render(<LandingPage configuredBotUsername={null} />)
 
     expect(
       screen.getByRole("heading", { name: "Выберите пару под свой запрос." }),
     ).toBeInTheDocument()
-    expect(productLinks()).toHaveLength(8)
+    expect(productLinks()).toHaveLength(4)
     expect(screen.getByRole("link", { name: "Открыть весь каталог" })).toHaveAttribute(
       "href",
       "/catalog",
     )
     expect(screen.getAllByText("По запросу").length).toBeGreaterThan(0)
     const firstCard = productLinks()[0]
-    expect(firstCard).toHaveAccessibleName(/Nike KD 18/)
-    expect(within(firstCard).getByText("Кроссовки Nike KD 18")).toBeInTheDocument()
+    expect(firstCard).toHaveAccessibleName(/LeBron NXXT Genisus/)
+    expect(within(firstCard).getByText(/LeBron NXXT Genisus/)).toBeInTheDocument()
     expect(
       screen.getByText(/Срок и итоговую стоимость показываем до оплаты/),
     ).toBeInTheDocument()

@@ -1,6 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import type { CatalogAvailabilityMap } from "./catalog-availability"
-import { mergeSupplierCatalog, type SupplierCatalogProduct } from "./supplier-catalog"
+import {
+  resolveStorefrontCatalog,
+  type SupplierCatalogProduct,
+} from "./supplier-catalog"
 
 import {
   publicCatalogProducts,
@@ -213,10 +216,14 @@ export function useLandingStorefront(
   const botUrl = buildTelegramBotUrl(botUsername)
   const apiBaseUrl = String(import.meta.env.VITE_API_BASE_URL || "").trim() || ""
 
-  const products = useMemo(
-    () => mergeSupplierCatalog(publicCatalogProducts, catalogPriceState.catalogProducts),
-    [catalogPriceState.catalogProducts],
-  )
+  const products = useMemo(() => {
+    return resolveStorefrontCatalog(
+      publicCatalogProducts,
+      catalogPriceState.catalogProducts,
+      catalogPriceState.catalogStatuses,
+      catalogPriceState.status === "ready",
+    )
+  }, [catalogPriceState.catalogProducts, catalogPriceState.catalogStatuses, catalogPriceState.status])
   const selectedProduct = products.find((product) => product.slug === selectedSlug) ?? null
   const selectedVisibleGallery = selectedProduct?.gallery.slice(0, 5) ?? []
   const selectedImage =
