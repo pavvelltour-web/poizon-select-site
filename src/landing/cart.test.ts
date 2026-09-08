@@ -87,7 +87,7 @@ describe("checkout catalogue v10", () => {
     expect(parsed.lookup).toEqual({})
     expect(parsed.orderCreationEnabled).toBe(false)
     expect(getDisplayPrice(publicCatalogProducts.find((product) => product.slug === item.slug)!, parsed.lookup, item).value)
-      .toBe("Последняя цена: от 25 100 ₽")
+      .toBe("Цена уточняется")
   })
 
   it.each([null, "2020-01-01T00:00:00Z", "not-a-date"])("requires a current source timestamp, even with a fresh HTTP check: %s", (timestamp) => {
@@ -108,7 +108,9 @@ describe("checkout catalogue v10", () => {
     })
     const item = parseCheckoutCatalog(payload)!.items["nike-gt-cut-academy"]
     expect(item.priceStatus).toBe("current")
-    expect(item.expiresAt).toBe(new Date(sourceTime + 48 * 60 * 60_000).toISOString())
+    expect(item.expiresAt).toBe(payload.items[0].expires_at)
+    expect(item.sizeOffers.every((offer) =>
+      offer.expiresAt === new Date(sourceTime + 48 * 60 * 60_000).toISOString())).toBe(true)
   })
 
   it("accepts an empty fail-closed live catalog response", () => {
@@ -123,6 +125,8 @@ describe("checkout catalogue v10", () => {
       items: {},
       catalogStatuses: {},
       catalogProducts: [],
+      catalogColorways: {},
+      catalogCount: null,
       lookup: {},
       version: "2026-08-15-live",
       catalogMode: "curated_live_poizon",

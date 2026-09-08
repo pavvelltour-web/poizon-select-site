@@ -201,19 +201,15 @@ export function getDisplayPrice(
   catalogPriceLookup: CatalogPriceMap | null = null,
   publishedItem?: PublishedCatalogItem | null,
 ): DisplayPrice {
-  if (publishedItem?.priceStatus === "historical" && Date.parse(publishedItem.expiresAt) > Date.now()) {
-    return {
-      label: "Последняя известная цена",
-      value: `Последняя цена: от ${formatRub(publishedItem.priceRub)}`,
-      detail: "Историческая цена источника. Актуальную цену нужно подтвердить",
-    }
-  }
   const verifiedPrice = catalogPriceLookup?.[product.slug]
-  if (!Number.isFinite(verifiedPrice) || !verifiedPrice || verifiedPrice <= 0) {
+  const hasCurrentItem = !publishedItem || (
+    publishedItem.priceStatus === "current" && Date.parse(publishedItem.expiresAt) > Date.now()
+  )
+  if (!hasCurrentItem || !Number.isFinite(verifiedPrice) || !verifiedPrice || verifiedPrice <= 0) {
     return {
       label: "Цена",
-      value: "По запросу",
-      detail: "Покажем после проверки 12-часового снимка поставщика",
+      value: "Цена уточняется",
+      detail: "Пока нет подтверждённой цены",
     }
   }
   return {

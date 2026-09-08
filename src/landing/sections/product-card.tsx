@@ -1,9 +1,11 @@
 import { Heart, ImageOff, LoaderCircle } from "lucide-react"
 import { useEffect, useRef, useState, type MouseEvent, type PointerEvent } from "react"
 
-import type { CatalogProduct } from "../../catalog/catalog"
+import { formatRub, type CatalogProduct } from "../../catalog/catalog"
 import { getCardThumbnailUrl } from "../../catalog/card-thumbnail-versions"
 import type { CatalogPriceMap, PublishedCatalogItem } from "../cart"
+import type { AvailableCatalogColorway } from "../catalog-colorways"
+import { ProductColorways } from "./product-colorways"
 import { catalogAvailabilityLabel, type CatalogAvailability } from "../catalog-availability"
 import {
   getDisplayPrice,
@@ -21,15 +23,10 @@ interface ProductCardProps {
   catalogStatus: "loading" | "ready" | "failed"
   publishedOffer: PublishedCatalogItem | null
   catalogAvailability?: CatalogAvailability
+  colorways?: readonly AvailableCatalogColorway[]
   favorite?: boolean
   onToggleFavorite?: (slug: string) => void
   onOpen?: (product: CatalogProduct, trigger: HTMLElement, preferredSize?: string) => void
-}
-
-function fallbackSizes(kind: CatalogProduct["kind"]): readonly string[] {
-  if (kind === "apparel") return ["XS", "S", "M", "L", "XL"]
-  if (kind === "accessory") return ["Один размер"]
-  return ["36", "37", "38", "39", "40", "41", "42", "43", "44", "45", "46"]
 }
 
 const CARD_IMAGE_RETRY_DELAYS = [180, 560, 0] as const
@@ -105,6 +102,7 @@ export function ProductCard({
   catalogStatus,
   publishedOffer,
   catalogAvailability,
+  colorways = [],
   favorite = false,
   onToggleFavorite,
   onOpen,
@@ -144,9 +142,11 @@ export function ProductCard({
     hoverThumbnail1280,
     hoverImage,
   )
-  const sizes = publishedOffer?.sizes.length ? publishedOffer.sizes : product.supplierProductRef ? [] : fallbackSizes(product.kind)
-  const cardSizes = (sizes.length >= 7 ? [sizes[2], sizes[4], sizes[6]] : sizes.slice(0, 3))
-    .filter((size): size is string => Boolean(size))
+  const cardOffers = catalogStatus === "ready" && publishedOffer?.priceStatus === "current" &&
+    Date.parse(publishedOffer.expiresAt) > Date.now()
+    ? publishedOffer.sizeOffers.filter((offer) => offer.available === true && offer.priceStatus === "current" &&
+      offer.priceRub > 0 && Date.parse(offer.sourceExpiresAt ?? "") > Date.now())
+    : []
   const orderable = Boolean(
     catalogStatus === "ready" &&
     publishedOffer?.availability === "supplier_verified" &&
@@ -248,6 +248,7 @@ export function ProductCard({
           </span>
         </span>
       </a>
+      <ProductColorways product={product} variants={colorways} compact />
       <button
         className={`favorite-button ${favorite ? "is-active" : ""}`}
         type="button"
@@ -261,25 +262,21 @@ export function ProductCard({
       <div className="card-sizes">
         <span>Размеры {product.kind === "footwear" ? "EU" : ""}</span>
         <div className="card-size-options">
-          {cardSizes.map((size) => {
-            const offer = publishedOffer?.sizeOffers.find(
-              (candidate) => candidate.sizeEu === size,
-            )
-            return (
-              <button
+          {cardOffers.map((offer) => (
+              <a
                 className="card-size-button"
-                key={size}
-                type="button"
-                data-od-id={`size-${product.slug}-${size.replaceAll(".", "-")}`}
-                disabled={offer?.available !== true || !offer.checkoutConfirmed}
-                onClick={(event) => openProduct(event, size)}
+                key={offer.skuId}
+                href={getProductPath(product)}
+                data-od-id={`size-${product.slug}-${offer.sizeEu.replaceAll(".", "-")}`}
+                aria-label={`Размер ${offer.sizeEu}, ${formatRub(offer.priceRub)}`}
+                onClick={(event) => openProduct(event, offer.sizeEu)}
               >
-                {size}
-              </button>
-            )
-          })}
-          <button className="card-size-button card-size-button--all" type="button" data-od-id={`size-${product.slug}-all`} onClick={(event) => openProduct(event)}>Все</button>
+                <span>{offer.sizeEu}</span><strong>{formatRub(offer.priceRub)}</strong>
+              </a>
+          ))}
+          <a className="card-size-button card-size-button--all" href={getProductPath(product)} data-od-id={`size-${product.slug}-all`} onClick={(event) => openProduct(event)}>Все размеры</a>
         </div>
+        {cardOffers.length === 0 ? <p className="card-sizes__empty">Доступные размеры уточняются</p> : null}
       </div>
     </article>
   )

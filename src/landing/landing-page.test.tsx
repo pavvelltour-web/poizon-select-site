@@ -84,7 +84,7 @@ function canonicalSupplierCatalogPayload(payload = checkoutCatalogPayload()) {
       status: "in_stock", source: "poizon", checked_at: null, expires_at: null,
     }]),
   ])
-  return { ...payload, catalog_products: additions, catalog_statuses: catalogStatuses }
+  return { ...payload, catalog_count: 200, catalog_products: additions, catalog_statuses: catalogStatuses }
 }
 
 function readyGtCutSearchPayload() {
@@ -310,7 +310,7 @@ describe("LandingPage", () => {
     expect(within(dialog).getByRole("heading", { name: /adidas Supplier model 1/ })).toBeInTheDocument()
     expect([...dialog.querySelectorAll("img")].some((image) => image.src === supplierMetadata(1).images[0])).toBe(true)
     expect(dialog.querySelectorAll(".size-price-cell")).toHaveLength(0)
-    expect(within(dialog).getAllByText("По запросу").length).toBeGreaterThan(0)
+    expect(within(dialog).getAllByText("Цена уточняется").length).toBeGreaterThan(0)
     expect(screen.queryByRole("heading", { name: "Такой страницы нет." })).not.toBeInTheDocument()
   })
 
@@ -341,7 +341,7 @@ describe("LandingPage", () => {
     expect(screen.queryByRole("heading", { name: "Такой страницы нет." })).not.toBeInTheDocument()
   })
 
-  it("labels every historical SKU amount and keeps it unavailable to checkout", async () => {
+  it("hides historical SKU amounts and dates while keeping checkout unavailable", async () => {
     const payload = checkoutCatalogPayload(["44"])
     payload.items[0].price_status = "historical"
     payload.items[0].size_offers[0].price_status = "historical"
@@ -349,11 +349,13 @@ describe("LandingPage", () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => payload }))
     window.history.replaceState(null, "", "/product/nike-gt-cut-academy")
     render(<LandingPage configuredBotUsername={null} />)
-    const historicalSize = await screen.findByRole("button", { name: /44 EU, последняя известная цена: 24 500 ₽/ })
+    const historicalSize = await screen.findByRole("button", { name: /44 EU, цена уточняется, наличие уточняется/ })
+    const dialog = screen.getByRole("dialog", { name: /Nike G.T. Cut Academy/ })
     expect(historicalSize).toBeDisabled()
-    expect(historicalSize).toHaveTextContent("Последняя цена · 01.01.2020")
-    expect(screen.getAllByText("Последняя цена: от 24 500 ₽").length).toBeGreaterThan(0)
-    expect(screen.getByRole("button", { name: "Недоступно для заказа" })).toBeDisabled()
+    expect(dialog).not.toHaveTextContent(/24\s*500|01\.01\.2020|2020-01-01|Последняя цена/)
+    expect(within(dialog).queryByRole("button", { name: /последняя известная цена|24\s*500/ })).not.toBeInTheDocument()
+    expect(within(dialog).getAllByText("Цена уточняется").length).toBeGreaterThan(0)
+    expect(within(dialog).getByRole("button", { name: "Недоступно для заказа" })).toBeDisabled()
     expect(screen.queryByRole("button", { name: "Проверяем каталог" })).toBeNull()
   })
 
@@ -370,12 +372,12 @@ describe("LandingPage", () => {
     }) }))
     window.history.replaceState(null, "", "/catalog")
     render(<LandingPage configuredBotUsername={null} />)
-    expect(await screen.findByText("Проверенные размеры отсутствуют на Poizon")).toBeInTheDocument()
+    expect(await screen.findByText("Проверенных размеров нет в наличии")).toBeInTheDocument()
     const link = screen.getByRole("link", { name: /Открыть товар: Nike KD 18/ })
-    expect(within(link).getByText("По запросу")).toBeInTheDocument()
+    expect(within(link).getByText("Цена уточняется")).toBeInTheDocument()
     await user.click(link)
     const dialog = await screen.findByRole("dialog", { name: /Nike KD 18/ })
-    expect(within(dialog).getAllByText("Проверенные размеры отсутствуют на Poizon")).toHaveLength(2)
+    expect(within(dialog).getAllByText("Проверенных размеров нет в наличии")).toHaveLength(2)
     expect(within(dialog).queryByText("Под заказ из Китая")).toBeNull()
   })
 
@@ -411,7 +413,7 @@ describe("LandingPage", () => {
       "href",
       "/catalog",
     )
-    expect(screen.getAllByText("По запросу").length).toBeGreaterThan(0)
+    expect(screen.getAllByText("Цена уточняется").length).toBeGreaterThan(0)
     const firstCard = productLinks()[0]
     expect(firstCard).toHaveAccessibleName(/LeBron NXXT Genisus/)
     expect(within(firstCard).getByText(/LeBron NXXT Genisus/)).toBeInTheDocument()
@@ -582,7 +584,7 @@ describe("LandingPage", () => {
 
     const dialog = screen.getByRole("dialog", { name: /Ronaldinho #10 Jersey/ })
     expect(dialog).toHaveAttribute("id", "product-dialog")
-    expect(within(dialog).getAllByText("По запросу").length).toBeGreaterThan(0)
+    expect(within(dialog).getAllByText("Цена уточняется").length).toBeGreaterThan(0)
     expect(screen.getByRole("button", { name: "Открыть фото в полном размере" })).toBeInTheDocument()
     expect(screen.queryByText(/VITE_BOT_USERNAME|менеджер/i)).toBeNull()
   })
@@ -870,9 +872,9 @@ describe("LandingPage", () => {
     expect(screen.getByText("В наличии на Poizon")).toBeInTheDocument()
     expect(screen.getByText("Размеры: EU")).toBeInTheDocument()
     expect(screen.getByText("Размерная сетка: EU 40–46")).toBeInTheDocument()
-    expect(screen.getByText("Наличие уточняется")).toBeInTheDocument()
     expect(screen.getByRole("option", { name: /42 \(RU 41\).*20 900 ₽/ })).toBeInTheDocument()
     const [confirmedCard, unknownCard] = screen.getAllByTestId("live-search-result")
+    expect(within(unknownCard!).getByText("Наличие уточняется")).toBeInTheDocument()
     expect(within(confirmedCard!).getByRole("combobox", { name: "Размер и предложение" }))
       .toBeEnabled()
     expect(within(confirmedCard!).getByRole("button", { name: "Скопировать запрос" }))
@@ -887,7 +889,7 @@ describe("LandingPage", () => {
       .toBeNull()
     expect(within(unknownCard!).queryByRole("link", { name: /Открыть @/ }))
       .toBeNull()
-    expect(within(unknownCard!).getByText(/Цены по размерам справочные/))
+    expect(within(unknownCard!).getByText(/Выбор размера станет доступен после подтверждения наличия/))
       .toBeInTheDocument()
     const sizeChartLinks = screen.getAllByRole("link", { name: "Размерная сетка" })
     expect(sizeChartLinks.some(
@@ -941,10 +943,10 @@ describe("LandingPage", () => {
       expect(within(card).queryByRole("button", { name: "Скопировать запрос" }))
         .toBeNull()
       expect(within(card).queryByRole("link", { name: /Открыть @/ })).toBeNull()
-      expect(within(card).getByText(/Цены по размерам справочные/)).toBeInTheDocument()
+      expect(within(card).getByText(/Выбор размера станет доступен после подтверждения наличия/)).toBeInTheDocument()
     }
     const staticCard = productLinks()[0]
-    expect(within(staticCard!).getAllByText("По запросу").length).toBeGreaterThan(0)
+    expect(within(staticCard!).getAllByText("Цена уточняется").length).toBeGreaterThan(0)
   })
 
   it("does not look up a provider when a customer opens a published product card", async () => {
@@ -999,7 +1001,7 @@ describe("LandingPage", () => {
     })
 
     const firstCard = productLinks()[0]
-    expect(within(firstCard).getAllByText("По запросу").length).toBeGreaterThan(0)
+    expect(within(firstCard).getAllByText("Цена уточняется").length).toBeGreaterThan(0)
     expect(within(firstCard).queryByText("34 500 ₽")).toBeNull()
   })
 

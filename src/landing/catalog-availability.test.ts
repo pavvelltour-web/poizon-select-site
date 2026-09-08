@@ -18,13 +18,13 @@ describe("Poizon catalogue availability evidence", () => {
     expect(snapshot.lookup).toEqual({})
     expect(snapshot.orderCreationEnabled).toBe(false)
     expect(catalogAvailabilityLabel(null, snapshot.catalogStatuses["nike-kd-18"], "ready"))
-      .toBe("Проверенные размеры отсутствуют на Poizon")
+      .toBe("Проверенных размеров нет в наличии")
   })
 
   it.each(["source_unavailable", "not_found", "not_matched", "stock_unknown", "unverified"])(
     "does not label %s as no stock", (status) => {
       const states = parseCatalogAvailability({ product: { ...observation, status } })
-      expect(catalogAvailabilityLabel(null, states.product, "ready")).not.toContain("отсутствуют на Poizon")
+      expect(catalogAvailabilityLabel(null, states.product, "ready")).not.toContain("нет в наличии")
     },
   )
 
@@ -45,7 +45,7 @@ describe("Poizon catalogue availability evidence", () => {
       } },
     })!
     expect(catalogAvailabilityLabel(null, snapshot.catalogStatuses.product, "ready"))
-      .toBe("Курс ЦБ недоступен")
+      .toBe("Цена уточняется")
     expect(snapshot.lookup).toEqual({})
     expect(snapshot.orderCreationEnabled).toBe(false)
   })
@@ -55,7 +55,7 @@ describe("Poizon catalogue availability evidence", () => {
       ...observation, status: "source_unavailable", reason_code: "private provider details",
     } })
     expect(states.product).not.toHaveProperty("reasonCode")
-    expect(catalogAvailabilityLabel(null, states.product, "ready")).toBe("Poizon временно недоступен")
+    expect(catalogAvailabilityLabel(null, states.product, "ready")).toBe("Не удалось проверить наличие")
   })
 
   it.each([null, "invalid", new Date(Date.now() - 1).toISOString()])(

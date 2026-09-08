@@ -240,9 +240,9 @@ describe("approved Open Design product flow", () => {
     expect(preview?.getAttribute("src")).toContain(`${catalogRoot}/thumbs/nike-kd-18-1-640.webp`)
 
     await waitFor(() => {
-      expect(within(card!).getByRole("button", { name: "40" })).toBeEnabled()
+      expect(within(card!).getByRole("link", { name: "Размер 40, 31 400 ₽" })).toBeInTheDocument()
     })
-    const selectedSizeTrigger = within(card!).getByRole("button", { name: "40" })
+    const selectedSizeTrigger = within(card!).getByRole("link", { name: "Размер 40, 31 400 ₽" })
     await user.click(selectedSizeTrigger)
 
     const dialog = screen.getByRole("dialog", { name: /Nike KD 18/ })
@@ -265,10 +265,10 @@ describe("approved Open Design product flow", () => {
     expect(within(dialog).queryByText(/RU = EU - 1/u)).toBeNull()
     expect(within(dialog).queryByText(/Посадка зависит/u)).toBeNull()
     expect(within(dialog).getByRole("button", {
-      name: "40 RU, 41 EU, цена не указана, наличие уточняется",
+      name: "40 RU, 41 EU, цена уточняется, наличие уточняется",
     })).toBeDisabled()
     expect(within(dialog).getByRole("button", {
-      name: "34,5 RU, 35.5 EU, цена не указана, наличие уточняется",
+      name: "34,5 RU, 35.5 EU, цена уточняется, наличие уточняется",
     })).toBeDisabled()
 
     const nextSize = within(dialog).getByRole("button", {

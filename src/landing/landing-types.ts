@@ -1,6 +1,7 @@
 import type { CatalogCategory, CatalogProduct, CatalogSort } from "../catalog/catalog"
 import type { RefObject } from "react"
 import type { CatalogAvailabilityMap } from "./catalog-availability"
+import type { CatalogColorwayMap } from "./catalog-colorways"
 import type { SupplierCatalogProduct } from "./supplier-catalog"
 import type {
   CartLine,
@@ -36,6 +37,8 @@ export interface CatalogPriceState {
   lookup: CatalogPriceMap | null
   items: PublishedCatalogMap
   catalogStatuses: CatalogAvailabilityMap
+  catalogCount: number | null
+  catalogColorways: CatalogColorwayMap
   catalogProducts: readonly SupplierCatalogProduct[]
   version: string
   personalDataConsentVersion: string | null

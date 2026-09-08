@@ -901,8 +901,8 @@ button.catalog-link {
 }
 
 .product-card {
-  content-visibility: auto;
-  contain-intrinsic-size: auto 460px;
+  /* A card must allow its size panel to paint above neighbouring rows. */
+  content-visibility: visible;
 }
 
 .product-open,
@@ -1133,4 +1133,194 @@ button.catalog-link {
   .product-name {
     font-size: 17px;
   }
+}
+
+/* Hover changes only the painted card, never the catalogue's grid tracks.
+   The clip includes a gutter for the last row's panel; it cannot enlarge the
+   document or the catalogue's scrollable area when a card is hovered. */
+.product-grid {
+  padding: 12px 12px 220px;
+  margin: -12px -12px -220px;
+  overflow: clip;
+  isolation: isolate;
+}
+
+.product-card.product-card--normalized {
+  overflow: visible;
+  transform: none;
+  transform-origin: center center;
+}
+
+.product-card--normalized .card-sizes {
+  position: absolute;
+  z-index: 5;
+  top: calc(100% - 1px);
+  right: -1px;
+  left: -1px;
+  max-height: 190px;
+  margin: 0;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-top: 0;
+  border-radius: 0 0 20px 20px;
+  background: var(--surface);
+  box-shadow: 0 18px 25px oklch(0.18 0.02 260 / 0.10);
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: none;
+  transition: opacity 160ms var(--ease), visibility 160ms var(--ease);
+}
+
+.product-card--normalized .card-size-options {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.product-card--normalized .card-size-button {
+  display: grid;
+  place-content: center;
+  gap: 4px;
+  min-height: 48px;
+  text-align: center;
+  text-decoration: none;
+}
+
+.card-size-button strong {
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.card-sizes__empty {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.product-card--normalized:focus-within {
+  z-index: 5;
+}
+
+.product-card--normalized:focus-within .card-sizes,
+body.is-keyboard-nav .product-card--normalized:focus-within .card-sizes {
+  max-height: 190px;
+  padding: 12px;
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+  transform: none;
+}
+
+.product-card--normalized:focus-within .product-media,
+body.is-keyboard-nav .product-card--normalized:focus-within .product-media {
+  transform: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .product-card.product-card--normalized:hover {
+    z-index: 5;
+    transform: scale(1.025);
+  }
+
+  .product-card--normalized:hover .product-media {
+    transform: none;
+  }
+
+  .product-card--normalized:hover .card-sizes {
+    max-height: 190px;
+    padding: 12px;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .product-card.product-card--normalized,
+  .product-card--normalized .card-sizes {
+    transition: none;
+  }
+
+  .product-card.product-card--normalized:hover {
+    transform: none;
+  }
+}
+
+.product-colorways {
+  min-width: 0;
+  margin: 18px 0;
+}
+
+.product-colorways p {
+  margin: 0 0 8px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.product-colorways__options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.product-colorways a {
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 4px;
+  width: 88px;
+  padding: 3px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--fg);
+  text-decoration: none;
+  font-size: 11px;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.product-colorways a[aria-current="page"] {
+  border: 2px solid var(--fg);
+  padding: 2px;
+}
+
+.product-colorways a:focus-visible {
+  outline: 2px solid var(--accent-dark);
+  outline-offset: 3px;
+}
+
+.product-colorways img {
+  display: block;
+  width: 100%;
+  height: 48px;
+  border-radius: 5px;
+  object-fit: contain;
+  background: var(--product-stage);
+}
+
+.product-colorways--compact {
+  margin: 0 14px 14px;
+}
+
+.product-colorways--compact a {
+  width: 48px;
+}
+
+.product-colorways--compact img {
+  height: 38px;
+}
+
+.pdp-sizes__grid button {
+  display: grid;
+  gap: 6px;
+  min-height: 62px;
+  padding: 8px 4px;
+}
+
+.pdp-sizes__grid button strong {
+  font-size: 12px;
+  white-space: nowrap;
 }

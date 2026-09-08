@@ -18,6 +18,7 @@ import {
   addOrIncrementCartLine,
   buildProductSizeOffers,
   cartTotalRub,
+  expireCatalogItem,
   fetchCatalogSearch,
   fetchCheckoutCatalog,
   loadCart,
@@ -62,12 +63,19 @@ const CATALOG_REFRESH_RETRY_MS = 60_000
 const MAX_BROWSER_TIMEOUT_MS = 2_147_483_647
 
 export function getCatalogRefreshSchedule(
-  items: Readonly<Record<string, { expiresAt: string | null }>>,
+  items: Readonly<Record<string, {
+    expiresAt: string | null
+    sizeOffers?: readonly { expiresAt: string | null; priceStatus: "current" | "historical" }[]
+  }>>,
   nowMs = Date.now(),
 ): { delayMs: number; expiresAtMs: number | null } {
   const nextExpiryMs = Math.min(
     ...Object.values(items)
-      .map((item) => Date.parse(item.expiresAt ?? ""))
+      .flatMap((item) => [
+        Date.parse(item.expiresAt ?? ""),
+        ...(item.sizeOffers ?? []).filter((offer) => offer.priceStatus === "current")
+          .map((offer) => Date.parse(offer.expiresAt ?? "")),
+      ])
       .filter(Number.isFinite),
   )
   if (!Number.isFinite(nextExpiryMs)) {
@@ -79,17 +87,22 @@ export function getCatalogRefreshSchedule(
   }
 }
 
-function withoutExpiredCatalogEvidence(current: CatalogPriceState): CatalogPriceState {
+export function withoutExpiredCatalogEvidence(current: CatalogPriceState): CatalogPriceState {
   const nowMs = Date.now()
-  const items = Object.fromEntries(Object.entries(current.items)
-    .filter(([, item]) => Date.parse(item.expiresAt ?? "") > nowMs))
+  const items = Object.fromEntries(Object.entries(current.items).flatMap(([slug, item]) => {
+    const retained = expireCatalogItem(item, nowMs)
+    return retained ? [[slug, retained]] : []
+  })) as PublishedCatalogMap
   return {
     ...current,
     items,
-    lookup: current.lookup && Object.fromEntries(Object.entries(current.lookup)
-      .filter(([slug]) => items[slug])),
+    lookup: current.lookup && Object.fromEntries(Object.entries(items)
+      .filter(([, item]) => item.priceStatus === "current")
+      .map(([slug, item]) => [slug, item.priceRub])),
+    orderCreationEnabled: current.orderCreationEnabled && Object.values(items).some((item) => item.checkoutReady),
     catalogStatuses: Object.fromEntries(Object.entries(current.catalogStatuses).map(([slug, status]) =>
-      status.expiresAt && Date.parse(status.expiresAt) <= nowMs
+      (status.expiresAt && Date.parse(status.expiresAt) <= nowMs) ||
+      (status.status === "in_stock" && current.items[slug] && items[slug]?.priceStatus !== "current")
         ? [slug, { ...status, status: "stale" as const, expiresAt: null }]
         : [slug, status])),
   }
@@ -197,6 +210,8 @@ export function useLandingStorefront(
     lookup: null as Record<string, number> | null,
     items: {} as PublishedCatalogMap,
     catalogStatuses: {} as CatalogAvailabilityMap,
+    catalogCount: null as number | null,
+    catalogColorways: {} as import("./catalog-colorways").CatalogColorwayMap,
     catalogProducts: [] as readonly SupplierCatalogProduct[],
     version: CATALOG_PRICE_VERSION,
     personalDataConsentVersion: null as string | null,
@@ -222,8 +237,9 @@ export function useLandingStorefront(
       catalogPriceState.catalogProducts,
       catalogPriceState.catalogStatuses,
       catalogPriceState.status === "ready",
+      catalogPriceState.catalogCount,
     )
-  }, [catalogPriceState.catalogProducts, catalogPriceState.catalogStatuses, catalogPriceState.status])
+  }, [catalogPriceState.catalogProducts, catalogPriceState.catalogStatuses, catalogPriceState.status, catalogPriceState.catalogCount])
   const selectedProduct = products.find((product) => product.slug === selectedSlug) ?? null
   const selectedVisibleGallery = selectedProduct?.gallery.slice(0, 5) ?? []
   const selectedImage =
@@ -254,7 +270,7 @@ export function useLandingStorefront(
     ? selectedSizeOffers.find((offer) => offer.sizeEu === selectedSize) ?? null
     : null
   const selectedProductPrice = selectedProduct
-    ? selectedLiveOffer?.priceRub
+    ? selectedLiveOffer?.stockStatus === true && selectedLiveOffer.priceStatus === "current" && selectedLiveOffer.priceRub
       ? {
         label: "Цена размера",
         value: formatRub(selectedLiveOffer.priceRub),
@@ -339,6 +355,8 @@ export function useLandingStorefront(
         lookup: nextPriceState.lookup,
         items: nextPriceState.items,
         catalogStatuses: nextPriceState.catalogStatuses,
+        catalogCount: nextPriceState.catalogCount,
+        catalogColorways: nextPriceState.catalogColorways,
         catalogProducts: nextPriceState.catalogProducts,
         version: nextPriceState.version,
         personalDataConsentVersion: nextPriceState.personalDataConsentVersion,
@@ -455,7 +473,8 @@ export function useLandingStorefront(
   useEffect(() => {
     if (!["ready", "failed"].includes(selectedSizeOfferState.status)) return
     setSelectedSizeState((current) => current && selectedSizeOffers.some(
-      (offer) => offer.available && offer.sizeEu === current,
+      (offer) => offer.stockStatus === true && offer.priceStatus === "current" &&
+        offer.priceRub && offer.priceRub > 0 && offer.sizeEu === current,
     ) ? current : null)
   }, [selectedSizeOfferState.status, selectedSizeOffers])
 
@@ -639,7 +658,8 @@ export function useLandingStorefront(
   }
 
   const setSelectedSize = (size: string) => {
-    if (!selectedSizeOffers.some((offer) => offer.available && offer.sizeEu === size)) return
+    if (!selectedSizeOffers.some((offer) => offer.stockStatus === true && offer.priceStatus === "current" &&
+      offer.priceRub && offer.priceRub > 0 && offer.sizeEu === size)) return
     setSelectedSizeState(size)
     setCopyState("idle")
   }

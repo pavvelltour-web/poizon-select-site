@@ -67,7 +67,7 @@ describe("200-card PoisonBank price presentation", () => {
     })
   })
 
-  it("renders current, historical and unavailable prices as three distinct states", () => {
+  it("shows current prices and hides historical amounts without granting checkout", () => {
     const current = currentItem(1)
     const historical = { ...currentItem(2), price_status: "historical" }
     const unavailable = {
@@ -89,11 +89,15 @@ describe("200-card PoisonBank price presentation", () => {
 
     expect(getDisplayPrice({ ...base, slug: current.slug }, parsed.lookup, parsed.items[current.slug]))
       .toMatchObject({ label: "Цена от", value: "от 15 100 ₽" })
-    expect(getDisplayPrice({ ...base, slug: historical.slug }, parsed.lookup, parsed.items[historical.slug]))
-      .toMatchObject({ label: "Последняя известная цена", value: "Последняя цена: от 15 200 ₽" })
+    const historicalDisplay = getDisplayPrice({ ...base, slug: historical.slug }, parsed.lookup, parsed.items[historical.slug])
+    expect(historicalDisplay).toMatchObject({ label: "Цена", value: "Цена уточняется" })
+    expect(JSON.stringify(historicalDisplay)).not.toMatch(/15\s*200|Последняя|историч/iu)
     expect(getDisplayPrice({ ...base, slug: unavailable.slug }, parsed.lookup, parsed.items[unavailable.slug]))
-      .toMatchObject({ label: "Цена", value: "По запросу" })
+      .toMatchObject({ label: "Цена", value: "Цена уточняется" })
+    expect(parsed.items[historical.slug].priceStatus).toBe("historical")
     expect(parsed.items[historical.slug].checkoutReady).toBe(false)
+    expect(parsed.items[historical.slug].sizeOffers.every((offer) => !offer.checkoutConfirmed)).toBe(true)
+    expect(parsed.lookup[historical.slug]).toBeUndefined()
     expect(parsed.items[unavailable.slug]).toBeUndefined()
     expect(parsed.lookup[unavailable.slug]).toBeUndefined()
   })

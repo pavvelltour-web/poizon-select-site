@@ -49,28 +49,27 @@ export function catalogAvailabilityLabel(
   availability: CatalogAvailability | null | undefined,
   loadStatus: "loading" | "ready" | "failed",
 ): string {
-  if (loadStatus === "loading") return "Проверяем наличие на Poizon"
-  if (loadStatus === "failed") return "Poizon временно недоступен"
+  if (loadStatus === "loading") return "Проверяем наличие"
+  if (loadStatus === "failed") return "Не удалось проверить наличие"
   if (availability?.expiresAt && Date.parse(availability.expiresAt) <= Date.now()) {
-    return "Данные Poizon устарели"
+    return "Наличие уточняется"
+  }
+  if (!availability && item && Date.parse(item.expiresAt) <= Date.now()) {
+    return "Наличие уточняется"
   }
   if (!availability && item?.availability === "supplier_unavailable" && item.priceStatus === "current") {
-    return "Показанных размеров нет в наличии на Poizon"
+    return "Показанных размеров нет в наличии"
   }
   const status = availability?.status ?? (
     item?.availability === "supplier_verified" && item.priceStatus === "current" ? "in_stock" :
       item ? "stock_unknown" : "unverified"
   )
   switch (status) {
-    case "out_of_stock": return "Проверенные размеры отсутствуют на Poizon"
-    case "in_stock": return "В наличии на Poizon"
-    case "stock_unknown": return "Наличие на Poizon не подтверждено"
-    case "price_unavailable": return "Цена Poizon не подтверждена"
-    case "not_matched": return "Точное совпадение на Poizon не подтверждено"
-    case "not_found": return "Товар не найден на Poizon"
+    case "out_of_stock": return "Проверенных размеров нет в наличии"
+    case "in_stock": return item?.priceStatus === "historical" ? "Наличие уточняется" : "В наличии на Poizon"
+    case "price_unavailable": return "Цена уточняется"
     case "source_unavailable": return availability?.reasonCode === "cny_rub_rate_unavailable"
-      ? "Курс ЦБ недоступен" : "Poizon временно недоступен"
-    case "stale": return "Данные Poizon устарели"
-    default: return "Наличие на Poizon не проверено"
+      ? "Цена уточняется" : "Не удалось проверить наличие"
+    default: return "Наличие уточняется"
   }
 }

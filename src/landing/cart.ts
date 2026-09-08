@@ -3,7 +3,8 @@ import {
   type CatalogProduct,
 } from "../catalog/catalog"
 import { parseCatalogAvailability, type CatalogAvailabilityMap } from "./catalog-availability"
-import { parseSupplierCatalog, type SupplierCatalogProduct } from "./supplier-catalog"
+import { parseCatalogCount, parseSupplierCatalog, type SupplierCatalogProduct } from "./supplier-catalog"
+import { parseCatalogColorways, type CatalogColorwayMap } from "./catalog-colorways"
 
 export interface CartLine {
   id: string
@@ -154,6 +155,8 @@ export interface CatalogSearchResponse {
 
 export interface CheckoutCatalogSnapshot {
   items: PublishedCatalogMap
+  catalogCount: number | null
+  catalogColorways: CatalogColorwayMap
   catalogStatuses: CatalogAvailabilityMap
   catalogProducts: readonly SupplierCatalogProduct[]
   lookup: CatalogPriceMap
@@ -535,6 +538,54 @@ export function isCatalogSearchResultForProduct(
   )
 }
 
+/** Retain the server quote lifetime while withdrawing individual expired SKU evidence. */
+export function expireCatalogItem(
+  item: PublishedCatalogItem,
+  now = Date.now(),
+): PublishedCatalogItem | null {
+  const observedAt = parseQuoteTimestamp(item.observedAt)
+  const quoteExpiresAt = parseQuoteTimestamp(item.expiresAt)
+  if (!Number.isFinite(now) || observedAt === null || quoteExpiresAt === null ||
+    observedAt > now + quoteClockSkewMs || quoteExpiresAt <= now || quoteExpiresAt <= observedAt ||
+    quoteExpiresAt - observedAt > catalogSnapshotWindowMs) return null
+
+  const sizeOffers = item.sizeOffers.map((offer): PublishedSizeOffer => {
+    const sourceUpdatedAt = parseQuoteTimestamp(offer.sourceUpdatedAt)
+    const sourceExpiresAt = parseQuoteTimestamp(offer.sourceExpiresAt)
+    const offerExpiresAt = parseQuoteTimestamp(offer.expiresAt)
+    const current = item.priceStatus === "current" && offer.priceStatus === "current" &&
+      item.liveProviderVerified && item.displayPriceVerified && offer.liveProviderVerified &&
+      finitePositiveNumber(offer.priceRub, maxPriceRub) !== null &&
+      finitePositiveNumber(offer.priceCny, maxPriceCny) !== null &&
+      sourceUpdatedAt !== null && sourceExpiresAt !== null && offerExpiresAt !== null &&
+      sourceUpdatedAt <= now + quoteClockSkewMs && sourceExpiresAt > now && offerExpiresAt > now &&
+      sourceExpiresAt > sourceUpdatedAt && sourceExpiresAt - sourceUpdatedAt <= maximumSourceAgeMs
+    return {
+      ...offer,
+      priceStatus: current ? "current" : "historical",
+      available: current ? offer.available : null,
+      checkoutConfirmed: current && offer.available === true && offer.checkoutConfirmed,
+      expiresAt: current
+        ? new Date(Math.min(quoteExpiresAt, sourceExpiresAt!, offerExpiresAt!)).toISOString()
+        : offer.expiresAt,
+    }
+  })
+  const currentOffers = sizeOffers.filter((offer) => offer.priceStatus === "current")
+  const availableOffers = currentOffers.filter((offer) => offer.available === true)
+  const unknownOffers = currentOffers.filter((offer) => offer.available === null)
+  const floorOffers = availableOffers.length > 0 ? availableOffers
+    : unknownOffers.length > 0 ? unknownOffers : currentOffers
+  return {
+    ...item,
+    sizeOffers,
+    priceStatus: floorOffers.length > 0 ? "current" : "historical",
+    priceRub: floorOffers.length > 0 ? Math.min(...floorOffers.map((offer) => offer.priceRub)) : item.priceRub,
+    availability: availableOffers.length > 0 ? "supplier_verified"
+      : unknownOffers.length > 0 || currentOffers.length === 0 ? "supplier_stock_unknown" : "supplier_unavailable",
+    checkoutReady: item.checkoutReady && availableOffers.some((offer) => offer.checkoutConfirmed),
+  }
+}
+
 export function parseCheckoutCatalog(payload: unknown): CheckoutCatalogSnapshot | null {
   if (!payload || typeof payload !== "object") return null
   const source = payload as Record<string, unknown>
@@ -689,27 +740,17 @@ export function parseCheckoutCatalog(payload: unknown): CheckoutCatalogSnapshot 
         : unavailableOffers
     if (priceRub !== Math.min(...floorOffers.map((offer) => offer.priceRub))) continue
 
-    const priceStatus = item.price_status === "current" &&
-      floorOffers.every((offer) => offer.priceStatus === "current") ? "current" : "historical"
-    const effectiveExpiresAt = priceStatus === "current"
-      ? new Date(Math.min(expiresAtMs, ...sizeOffers.filter((offer) => offer.priceStatus === "current")
-        .map((offer) => Date.parse(offer.sourceExpiresAt!)))).toISOString()
-      : expiresAt
-    const safeSizeOffers = sizeOffers.map((offer) => ({
-      ...offer,
-      available: offer.priceStatus === "current" ? offer.available : null,
-      checkoutConfirmed: offer.checkoutConfirmed && offer.priceStatus === "current" && priceStatus === "current",
-      expiresAt: effectiveExpiresAt,
-    }))
-
-    const normalized: PublishedCatalogItem = {
+    // First verify the amount the server actually published above. Only then
+    // derive the current floor from its still-valid exact SKU amounts; an expired
+    // cheaper SKU must not invalidate unrelated current sizes in the same quote.
+    const normalized = expireCatalogItem({
       slug,
       name,
       brand,
       productKind: productKind as PublishedCatalogItem["productKind"],
       sizes,
       priceRub,
-      priceStatus,
+      priceStatus: item.price_status === "current" ? "current" : "historical",
       imageUrl,
       fulfillmentMode: fulfillmentMode as PublishedCatalogItem["fulfillmentMode"],
       availability,
@@ -717,11 +758,12 @@ export function parseCheckoutCatalog(payload: unknown): CheckoutCatalogSnapshot 
       etaMaxDays: finitePositiveNumber(item.eta_max_days),
       liveProviderVerified: true,
       displayPriceVerified,
-      checkoutReady: checkoutReady && safeSizeOffers.some((offer) => offer.checkoutConfirmed),
+      checkoutReady,
       observedAt,
-      expiresAt: effectiveExpiresAt,
-      sizeOffers: safeSizeOffers,
-    }
+      expiresAt,
+      sizeOffers,
+    }, now)
+    if (!normalized) continue
     if (items[slug]) {
       delete items[slug]
       delete lookup[slug]
@@ -729,7 +771,7 @@ export function parseCheckoutCatalog(payload: unknown): CheckoutCatalogSnapshot 
       continue
     }
     items[slug] = normalized
-    if (priceStatus === "current") lookup[slug] = priceRub
+    if (normalized.priceStatus === "current") lookup[slug] = normalized.priceRub
   }
 
   const orderCreationEnabled = source.order_creation_enabled === true &&
@@ -737,6 +779,8 @@ export function parseCheckoutCatalog(payload: unknown): CheckoutCatalogSnapshot 
   return {
     items,
     catalogStatuses: parseCatalogAvailability(source.catalog_statuses),
+    catalogCount: parseCatalogCount(source.catalog_count),
+    catalogColorways: parseCatalogColorways(source.catalog_colorways),
     catalogProducts: parseSupplierCatalog(source.catalog_products),
     lookup,
     version,
@@ -857,8 +901,9 @@ export function getPublishedSizeOffer(
   item: PublishedCatalogItem | undefined,
   sizeEu: string,
 ): PublishedSizeOffer | null {
-  if (!item || item.priceStatus !== "current" || Date.parse(item.expiresAt) <= Date.now()) return null
-  const matchingOffers = item.sizeOffers.filter(
+  const currentItem = item ? expireCatalogItem(item) : null
+  if (!currentItem || currentItem.priceStatus !== "current") return null
+  const matchingOffers = currentItem.sizeOffers.filter(
     (offer) =>
       offer.available === true &&
       offer.priceStatus === "current" &&
@@ -874,6 +919,7 @@ export function buildProductSizeOffers(
   liveResult: CatalogSearchResult | null,
   checkoutItem: PublishedCatalogItem | undefined,
 ): ProductSizeOffer[] {
+  const currentItem = checkoutItem ? expireCatalogItem(checkoutItem) : null
   const sizeLabels = new Map<string, string>()
   for (const size of sizeUniverse) {
     const normalized = canonicalSize(size)
@@ -889,16 +935,16 @@ export function buildProductSizeOffers(
     liveOffers.push(offer)
     liveByExactSize.set(offer.size, liveOffers)
   }
-  for (const offer of checkoutItem?.sizeOffers ?? []) {
+  for (const offer of currentItem?.sizeOffers ?? []) {
     sizeLabels.set(canonicalSize(offer.sizeEu), offer.sizeEu)
   }
 
   return sortSizeLabels([...sizeLabels.values()]).map((sizeEu) => {
-    const publishedOffers = checkoutItem?.sizeOffers.filter(
+    const publishedOffers = currentItem?.sizeOffers.filter(
       (offer) => offer.sizeEu === sizeEu,
     ) ?? []
     const publishedOffer = publishedOffers.length === 1 ? publishedOffers[0] ?? null : null
-    const checkoutOffer = getPublishedSizeOffer(checkoutItem, sizeEu)
+    const checkoutOffer = getPublishedSizeOffer(currentItem ?? undefined, sizeEu)
     const matchingLiveOffer = checkoutOffer
       ? (liveByExactSize.get(checkoutOffer.sizeEu) ?? []).find(
         (liveOffer) =>

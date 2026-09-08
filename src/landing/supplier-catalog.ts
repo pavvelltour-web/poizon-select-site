@@ -93,12 +93,21 @@ export function mergeSupplierCatalog(
   return [...originals, ...newProducts]
 }
 
+export function parseCatalogCount(value: unknown): number | null {
+  return typeof value === "number" && Number.isInteger(value) && value > 0 && value <= 10_000
+    ? value : null
+}
+
 export function filterAuthoritativeOriginals(
   originals: readonly CatalogProduct[],
   catalogStatuses: Readonly<Record<string, unknown>>,
   catalogReady: boolean,
+  catalogCount: number | null = null,
 ): readonly CatalogProduct[] {
-  if (!catalogReady || Object.keys(catalogStatuses).length !== 200) return originals
+  const count = parseCatalogCount(catalogCount)
+  const statusSlugs = Object.keys(catalogStatuses)
+  if (!catalogReady || count === null || statusSlugs.length !== count ||
+    statusSlugs.some((slug) => slug.length > 160 || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/u.test(slug))) return originals
   return originals.filter((product) => Object.hasOwn(catalogStatuses, product.slug))
 }
 
@@ -107,17 +116,22 @@ export function resolveStorefrontCatalog(
   additions: readonly SupplierCatalogProduct[],
   catalogStatuses: Readonly<Record<string, unknown>>,
   catalogReady: boolean,
+  catalogCount: number | null = null,
 ): readonly CatalogProduct[] {
   const authoritativeOriginals = filterAuthoritativeOriginals(
     originals,
     catalogStatuses,
     catalogReady,
+    catalogCount,
   )
   if (authoritativeOriginals === originals) return originals
 
   const merged = mergeSupplierCatalog(authoritativeOriginals, additions)
   const statusSlugs = new Set(Object.keys(catalogStatuses))
-  return merged.length === 200 && merged.every((product) => statusSlugs.has(product.slug))
+  const productSlugs = new Set(merged.map((product) => product.slug))
+  const supplierRefs = merged.flatMap((product) => product.supplierProductRef ? [product.supplierProductRef] : [])
+  return merged.length === catalogCount && productSlugs.size === catalogCount &&
+    new Set(supplierRefs).size === supplierRefs.length && merged.every((product) => statusSlugs.has(product.slug))
     ? merged
     : originals
 }

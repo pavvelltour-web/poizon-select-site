@@ -14,6 +14,8 @@ import { useEffect, useRef, useState } from "react"
 
 import { formatRub } from "../../catalog/catalog"
 import { catalogAvailabilityLabel } from "../catalog-availability"
+import { getAvailableColorways } from "../catalog-colorways"
+import { ProductColorways } from "./product-colorways"
 import {
   getProductGalleryAngleLabel,
   getProductTypeLabel,
@@ -74,7 +76,7 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
   const publishedOffer = storefront.catalogPriceState.items[product.slug]
   const selectedSizeOffer = storefront.selectedSize
     ? storefront.selectedSizeOffers.find(
-      (offer) => offer.sizeEu === storefront.selectedSize && offer.available,
+      (offer) => offer.sizeEu === storefront.selectedSize,
     ) ?? null
     : null
   const selectedProductInCart = Boolean(
@@ -89,6 +91,7 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
   const canAddToCart = Boolean(
     catalogReady &&
     storefront.catalogPriceState.orderCreationEnabled &&
+    selectedSizeOffer?.available &&
     selectedSizeOffer?.checkoutConfirmed,
   )
   const sourcingMode = catalogAvailabilityLabel(
@@ -250,6 +253,7 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
           <p className="sheet-description product-sheet__description">{getProductUse(product)}</p>
           <p className="sheet-price">{price?.value}</p>
           <p className="sheet-supply">{sourcingMode}</p>
+          <ProductColorways product={product} variants={getAvailableColorways(product, storefront.catalogPriceState.catalogColorways, storefront.products, storefront.catalogPriceState.items, storefront.catalogPriceState.catalogStatuses)} />
 
           <div
             className="product-size product-size--matrix"
@@ -281,12 +285,12 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
               {storefront.selectedSizeOffers.map((offer) => (
                 <button
                   key={offer.sizeEu}
-                  className={`size-price-cell${offer.priceStatus === "historical" ? " size-price-cell--historical" : ""}`}
+                  className="size-price-cell"
                   type="button"
                   data-od-id={`sheet-size-${product.slug}-${offer.sizeEu.replaceAll(".", "-")}`}
-                  aria-label={`${offer.sizeRu ?? "Размер RU не указан"} RU, ${offer.sizeEu} EU, ${offer.priceStatus === "historical" ? "последняя известная цена: " : ""}${offer.priceRub ? formatRub(offer.priceRub) : "цена не указана"}, ${offer.stockStatus === true ? "в наличии" : offer.stockStatus === false ? "нет в наличии" : "наличие уточняется"}`}
+                  aria-label={`${offer.sizeRu ?? "Размер RU не указан"} RU, ${offer.sizeEu} EU, ${offer.priceStatus === "current" && offer.priceRub ? formatRub(offer.priceRub) : "цена уточняется"}, ${offer.stockStatus === true ? "в наличии" : offer.stockStatus === false ? "нет в наличии" : "наличие уточняется"}`}
                   aria-pressed={storefront.selectedSize === offer.sizeEu}
-                  disabled={!offer.available || !offer.priceRub}
+                  disabled={offer.stockStatus !== true || offer.priceStatus !== "current" || !offer.priceRub}
                   data-stock-status={offer.stockStatus === null ? "unknown" : String(offer.stockStatus)}
                   onClick={() => storefront.setSelectedSize(offer.sizeEu)}
                 >
@@ -295,8 +299,7 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
                     <small>({offer.sizeEu})</small>
                   </span>
                   <span className="size-price-cell__price">
-                    {offer.priceRub ? formatRub(offer.priceRub) : "— ₽"}
-                    {offer.priceStatus === "historical" ? <small>Последняя цена{offer.sourceUpdatedAt ? ` · ${new Date(offer.sourceUpdatedAt).toLocaleDateString("ru-RU")}` : ": дата источника не указана"}</small> : null}
+                    {offer.priceStatus === "current" && offer.priceRub ? formatRub(offer.priceRub) : "— ₽"}
                   </span>
                 </button>
               ))}
@@ -307,12 +310,13 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
               <p className="product-size__status sr-only" role="status">
                 {storefront.selectedSizeOfferError ?? "Размеры временно недоступны."}
               </p>
-            ) : !storefront.selectedSizeOffers.some((offer) => offer.available) ? (
+            ) : !storefront.selectedSizeOffers.some((offer) =>
+              offer.stockStatus === true && offer.priceStatus === "current" && offer.priceRub && offer.priceRub > 0) ? (
               <p className="product-size__status sr-only" role="status">Актуальных предложений по размерам нет.</p>
             ) : null}
             {selectedSizeOffer && !selectedSizeOffer.checkoutConfirmed ? (
               <p className="product-size__status sr-only" role="status">
-                Цена ещё не подтверждена для оплаты. Оформите запрос менеджеру.
+                Оформление этого размера временно недоступно.
               </p>
             ) : null}
           </div>
@@ -342,7 +346,7 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
                 : !storefront.catalogPriceState.orderCreationEnabled
                   ? "Оформление временно недоступно"
                 : selectedSizeOffer && !selectedSizeOffer.checkoutConfirmed
-                  ? "Заказ через менеджера"
+                  ? "Недоступно для заказа"
                 : storefront.selectedSize
                   ? selectedProductInCart
                     ? "Добавлено"

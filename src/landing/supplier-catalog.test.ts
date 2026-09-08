@@ -53,7 +53,7 @@ describe("additional canonical supplier products", () => {
       expect(added.image).toMatch(/^https:\/\/cdn\.poizon\.com\//)
       expect(added.orderQuote).toBeUndefined()
       expect(added.chinaPriceYuan).toBeUndefined()
-      expect(getDisplayPrice(added).value).toBe("По запросу")
+      expect(getDisplayPrice(added).value).toBe("Цена уточняется")
       expect(getSizeOptions(added)).toEqual([])
     }
   })
@@ -65,13 +65,13 @@ describe("additional canonical supplier products", () => {
       ...retainedOriginals.map((product) => [product.slug, { status: "in_stock" }]),
       ...additions.map((product) => [product.slug, { status: "in_stock" }]),
     ])
-    const originals = filterAuthoritativeOriginals(publicCatalogProducts, statuses, true)
+    const originals = filterAuthoritativeOriginals(publicCatalogProducts, statuses, true, 200)
     const products = mergeSupplierCatalog(originals, additions)
 
     expect(originals).toEqual(retainedOriginals)
     expect(products).toHaveLength(200)
     expect(new Set(products.map((product) => product.slug)).size).toBe(200)
-    expect(resolveStorefrontCatalog(publicCatalogProducts, additions, statuses, true)).toEqual(products)
+    expect(resolveStorefrontCatalog(publicCatalogProducts, additions, statuses, true, 200)).toEqual(products)
   })
 
   it("keeps the bundled catalogue while server membership is loading, absent or incomplete", () => {
@@ -80,12 +80,13 @@ describe("additional canonical supplier products", () => {
     const incompleteStatuses = Object.fromEntries(
       publicCatalogProducts.map((product) => [product.slug, { status: "in_stock" }]),
     )
-    expect(filterAuthoritativeOriginals(publicCatalogProducts, incompleteStatuses, true)).toBe(publicCatalogProducts)
+    expect(filterAuthoritativeOriginals(publicCatalogProducts, incompleteStatuses, true, 200)).toBe(publicCatalogProducts)
     expect(resolveStorefrontCatalog(
       publicCatalogProducts,
       parseSupplierCatalog(Array.from({ length: 170 }, (_, index) => metadata(index))),
       Object.fromEntries(Array.from({ length: 200 }, (_, index) => [`status-${index}`, {}])),
       true,
+      200,
     )).toBe(publicCatalogProducts)
   })
 

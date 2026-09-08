@@ -14,6 +14,8 @@ import { useEffect, useRef, useState } from "react"
 
 import { formatRub, type CatalogProduct } from "../../catalog/catalog"
 import { catalogAvailabilityLabel } from "../catalog-availability"
+import { getAvailableColorways } from "../catalog-colorways"
+import { ProductColorways } from "./product-colorways"
 import {
   getDisplayPrice,
   getProductGalleryAngleLabel,
@@ -38,6 +40,9 @@ export function ProductDetailPage({ product, storefront }: ProductDetailPageProp
 
   const gallery = product?.gallery.slice(0, 6) ?? []
   const currentImage = gallery[imageIndex] ?? gallery[0] ?? null
+  const sizeOffers = product && storefront.selectedProduct?.slug === product.slug
+    ? storefront.selectedSizeOffers
+    : []
 
   const previousImage = () => {
     if (gallery.length <= 1) return
@@ -60,6 +65,14 @@ export function ProductDetailPage({ product, storefront }: ProductDetailPageProp
     setSelectedSize(null)
   }, [product?.slug])
 
+  useEffect(() => {
+    if (selectedSize && !sizeOffers.some((offer) => offer.sizeEu === selectedSize &&
+      offer.stockStatus === true && offer.priceStatus === "current" &&
+      offer.priceRub !== null && Number.isFinite(offer.priceRub) && offer.priceRub > 0)) {
+      setSelectedSize(null)
+    }
+  }, [selectedSize, sizeOffers])
+
   if (!product) {
     return (
       <article className="pdp-not-found" id="route-main">
@@ -77,19 +90,14 @@ export function ProductDetailPage({ product, storefront }: ProductDetailPageProp
     storefront.catalogPriceState.status === "ready" &&
     publishedOffer?.availability === "supplier_verified" &&
     publishedOffer.checkoutReady
-  const sizeOffers = storefront.selectedProduct?.slug === product.slug
-    ? storefront.selectedSizeOffers
-    : []
   const selectedPdpOffer = selectedSize
     ? sizeOffers.find((offer) => offer.sizeEu === selectedSize) ?? null
     : null
-  const price = selectedPdpOffer?.priceRub
+  const price = selectedPdpOffer?.stockStatus === true && selectedPdpOffer.priceStatus === "current" && selectedPdpOffer.priceRub
     ? {
-      label: selectedPdpOffer.available ? "Цена размера" : "Справочная цена размера",
+      label: "Цена размера",
       value: formatRub(selectedPdpOffer.priceRub),
-      detail: selectedPdpOffer.available
-        ? "СДЭК рассчитывается отдельно"
-        : "Этот SKU нельзя оформить без подтверждённого наличия",
+      detail: "СДЭК рассчитывается отдельно",
     }
     : getDisplayPrice(product, storefront.catalogPriceState.lookup, publishedOffer)
   const orderCreationEnabled =
@@ -104,7 +112,7 @@ export function ProductDetailPage({ product, storefront }: ProductDetailPageProp
   )
   const eta = catalogReady && publishedOffer?.etaMinDays && publishedOffer.etaMaxDays
     ? `От ${publishedOffer.etaMinDays} до ${publishedOffer.etaMaxDays} дней до Москвы`
-    : "Срок будет показан после серверной проверки"
+    : "Срок доставки уточняется"
   const deliveryRoute = catalogReady && publishedOffer?.fulfillmentMode === "in_stock"
     ? "Со склада в России"
     : catalogReady
@@ -224,6 +232,7 @@ export function ProductDetailPage({ product, storefront }: ProductDetailPageProp
             <strong>{price.value}</strong>
             <small>{price.detail}</small>
           </div>
+          <ProductColorways product={product} variants={getAvailableColorways(product, storefront.catalogPriceState.catalogColorways, storefront.products, storefront.catalogPriceState.items, storefront.catalogPriceState.catalogStatuses)} />
 
           <div className="pdp-sizes">
             <div>
@@ -236,12 +245,13 @@ export function ProductDetailPage({ product, storefront }: ProductDetailPageProp
                   key={offer.sizeEu}
                   type="button"
                   aria-pressed={selectedSize === offer.sizeEu}
-                  aria-label={`${offer.sizeEu}, ${offer.priceStatus === "historical" ? "последняя известная цена: " : ""}${offer.priceRub ? formatRub(offer.priceRub) : "цена не указана"}, ${offer.stockStatus === true ? "в наличии" : offer.stockStatus === false ? "нет в наличии" : "наличие уточняется"}`}
-                  disabled={!offer.available || !offer.priceRub}
+                  aria-label={`${offer.sizeEu}, ${offer.priceStatus === "current" && offer.priceRub ? formatRub(offer.priceRub) : "цена уточняется"}, ${offer.stockStatus === true ? "в наличии" : offer.stockStatus === false ? "нет в наличии" : "наличие уточняется"}`}
+                  disabled={offer.stockStatus !== true || offer.priceStatus !== "current" || !offer.priceRub}
                   data-stock-status={offer.stockStatus === null ? "unknown" : String(offer.stockStatus)}
                   onClick={() => setSelectedSize(offer.sizeEu)}
                 >
-                  {offer.sizeEu}
+                  <span>{offer.sizeEu}</span>
+                  <strong>{offer.priceStatus === "current" && offer.priceRub ? formatRub(offer.priceRub) : "— ₽"}</strong>
                 </button>
               ))}
             </div>

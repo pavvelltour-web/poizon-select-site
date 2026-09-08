@@ -20,6 +20,7 @@ import type { CatalogSearchFallback, CatalogSearchResult } from "../cart"
 import type { CatalogSearchState } from "../landing-types"
 import type { LandingStorefront } from "../use-landing-storefront"
 import { ProductCard } from "./product-card"
+import { getAvailableColorways } from "../catalog-colorways"
 
 interface CatalogSectionProps {
   storefront: LandingStorefront
@@ -85,7 +86,7 @@ export function CatalogSection({
         : storefront.catalogPriceState.error
           ? "Не удалось обновить цены. Повторим запрос автоматически."
           : !storefront.catalogPriceState.orderCreationEnabled
-            ? "Справочные цены видны. Оформление доступно только для подтверждённых SKU."
+            ? "Оформление заказов временно недоступно."
             : !storefront.catalogPriceState.onlinePaymentEnabled
               ? "Заказ можно оформить. Онлайн-оплата пока недоступна."
               : null
@@ -122,6 +123,7 @@ export function CatalogSection({
                 catalogStatus={storefront.catalogPriceState.status}
                 publishedOffer={storefront.catalogPriceState.items[product.slug] ?? null}
                 catalogAvailability={storefront.catalogPriceState.catalogStatuses[product.slug]}
+                colorways={getAvailableColorways(product, storefront.catalogPriceState.catalogColorways, storefront.products, storefront.catalogPriceState.items, storefront.catalogPriceState.catalogStatuses)}
                 featured={index < 2}
                 index={index}
                 favorite={favoriteSlugs.includes(product.slug)}
@@ -169,6 +171,7 @@ export function CatalogSection({
                   catalogStatus={storefront.catalogPriceState.status}
                   publishedOffer={storefront.catalogPriceState.items[product.slug] ?? null}
                   catalogAvailability={storefront.catalogPriceState.catalogStatuses[product.slug]}
+                  colorways={getAvailableColorways(product, storefront.catalogPriceState.catalogColorways, storefront.products, storefront.catalogPriceState.items, storefront.catalogPriceState.catalogStatuses)}
                   featured={index < 2}
                   index={index}
                   favorite={favoriteSlugs.includes(product.slug)}
@@ -508,8 +511,7 @@ function LiveSearchResultCard({
         </label>
         {orderableOffers.length === 0 ? (
           <p className="live-search-card__article" role="status">
-            Цены по размерам справочные. Скопировать, отправить или оформить SKU без
-            подтверждённого наличия нельзя.
+            Выбор размера станет доступен после подтверждения наличия.
           </p>
         ) : null}
         <div className="live-search-card__actions">
