@@ -25,7 +25,9 @@ const approvedMedia = new Map(products.flatMap((product) => {
   const frames = [...product.frames].sort((left, right) => left.position - right.position)
   if (product.missing_angles.length !== 0 || frames.length !== requiredAngles.length ||
     frames.some((frame, index) => frame.position !== index + 1 ||
-      frame.angle !== requiredAngles[index] || frame.visual_review.status !== "approved")) return []
+      frame.angle !== requiredAngles[index] ||
+      frame.file !== `/catalog/supplier/${product.slug}-${frame.position}.webp` ||
+      frame.visual_review.status !== "approved")) return []
   return [[product.slug, { productRef: product.product_ref, images: frames.map((frame) => frame.file) }] as const]
 }))
 

@@ -107,6 +107,19 @@ test("treats unknown angles and wrong canonical order as incomplete", () => with
   await assert.rejects(state.verify({ requireComplete: true }), /standardization incomplete/u)
 }))
 
+for (const mismatch of ["slug", "position"]) {
+  test(`rejects a wrong output ${mismatch} even when every file, hash and visual approval is consistent`, () => withFixture(async (state) => {
+    for (const frame of state.frames) await rm(path.join(state.root, `public${frame.file}`))
+    for (const [index, frame] of state.frames.entries()) {
+      frame.file = mismatch === "slug"
+        ? `/catalog/supplier/another-product-${frame.position}.webp`
+        : `/catalog/supplier/${slug}-${frame.position % 5 + 1}.webp`
+      await writeFile(path.join(state.root, `public${frame.file}`), samples[index])
+    }
+    await assert.rejects(state.verify({ requireComplete: true }), /exact product slug and frame position/u)
+  }))
+}
+
 const rejectedMutations = [
   ["a missing expected product", (s) => { s.manifest.expected_product_slugs.push("missing-product") }, /exactly cover/u],
   ["a duplicated inventory slug", (s) => { s.manifest.expected_product_slugs.push(slug) }, /unique supplier-footwear inventory/u],
@@ -114,6 +127,7 @@ const rejectedMutations = [
   ["a changed canvas standard", (s) => { s.manifest.standard.dimensions = [1200, 900] }, /LeBron/u],
   ["an incorrect frame position", (s) => { s.frames[1].position = 3 }, /consecutive/u],
   ["a repeated canonical angle", (s) => { s.frames[1].angle = "lateral" }, /repeats a canonical angle/u],
+  ["a missing frame angle", (s) => { delete s.frames[0].angle }, /unsupported angle/u],
   ["a dishonest missing-angle declaration", (s) => { s.product.missing_angles = ["rear"] }, /truthfully list/u],
   ["a stale output hash", (s) => { s.frames[0].output_sha256 = "a".repeat(64) }, /output hash or byte size mismatch/u],
   ["a stale output size", (s) => { s.frames[0].output_bytes += 1 }, /output hash or byte size mismatch/u],
@@ -124,7 +138,7 @@ const rejectedMutations = [
   ["generated pixels classified as supplier photography", (s) => { s.frames[0].provenance.generator = "built-in image_gen" }, /must use generated-reference/u],
   ["a stale downloaded-source hash", (s) => { s.frames[0].provenance.source_sha256 = "a".repeat(64) }, /downloaded source hash mismatch/u],
   ["source path traversal", (s) => { s.frames[0].provenance.source_download_path = "catalog-media/intake/../../secret" }, /safe project-relative/u],
-  ["an output traversal path", (s) => { s.frames[0].file = "/catalog/supplier/../../../secret.webp" }, /safe project-relative/u],
+  ["an output traversal path", (s) => { s.frames[0].file = "/catalog/supplier/../../../secret.webp" }, /exact product slug and frame position/u],
   ["a source URL with credentials", (s) => { s.frames[0].provenance.source_url = "https://user:password@cdn.poizon.com/photo.jpg" }, /without credentials/u],
   ["a stale visual approval", (s) => { s.frames[0].visual_review.output_sha256 = "a".repeat(64) }, /visual approval is stale/u],
   ["a visual approval without evidence", (s) => { delete s.frames[0].visual_review.evidence }, /evidence must be nonempty/u],

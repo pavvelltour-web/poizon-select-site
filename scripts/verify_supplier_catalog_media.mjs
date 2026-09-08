@@ -183,6 +183,9 @@ export async function verifySupplierCatalogMedia({
         knownAngles.add(frame.angle)
       }
       if (typeof frame.file !== "string" || !frame.file.startsWith("/catalog/supplier/") || !frame.file.endsWith(".webp")) fail(`${field} must use a local /catalog/supplier/ WebP`)
+      if (frame.file !== `/catalog/supplier/${product.slug}-${frame.position}.webp`) {
+        fail(`${field}.file must match the exact product slug and frame position`)
+      }
       const output = await readContainedFile(projectRoot, `public${frame.file}`, `${field}.file`, "public/catalog/supplier/")
       if (files.has(frame.file)) fail(`${field} duplicates an active image path`)
       files.add(frame.file)
