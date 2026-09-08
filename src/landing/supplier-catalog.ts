@@ -1,4 +1,5 @@
 import type { CatalogProduct, ProductCategory, ProductKind } from "../catalog/catalog"
+import { getSupplierCatalogMedia } from "./supplier-catalog-media"
 
 export interface SupplierCatalogProduct {
   slug: string
@@ -76,6 +77,7 @@ export function mergeSupplierCatalog(
   if (additions.length === 0) return originals
   const originalSlugs = new Set(originals.map((product) => product.slug))
   const newProducts = additions.filter((product) => !originalSlugs.has(product.slug)).map((product): CatalogProduct => {
+    const images = getSupplierCatalogMedia(product)
     const brandPrefix = product.brand.split(/[\s-]+/u)
       .map((part) => part.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")).join("[\\s-]*")
     const name = product.name.replace(new RegExp(`^${brandPrefix}\\s+`, "iu"), "")
@@ -86,8 +88,8 @@ export function mergeSupplierCatalog(
       sportPriority: ["volleyball", "basketball"].includes(product.category),
       query: [product.brand, name, product.article].filter(Boolean).join(" "),
       note: "Модель из каталога Poizon",
-      image: product.images[0], fallbackImage: product.images[0],
-      gallery: product.images.map((src, index) => ({ src, alt: `${product.brand} ${name}, фото ${index + 1}` })),
+      image: images[0], fallbackImage: images[0],
+      gallery: images.map((src, index) => ({ src, alt: `${product.brand} ${name}, фото ${index + 1}` })),
     }
   })
   return [...originals, ...newProducts]
