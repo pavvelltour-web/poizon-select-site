@@ -403,6 +403,7 @@ describe("LandingPage", () => {
   })
 
   it("renders safe bundled placeholders before the live popular set and progressively reveals the full catalog", () => {
+    vi.stubGlobal("fetch", vi.fn(() => new Promise(() => {})))
     const view = render(<LandingPage configuredBotUsername={null} />)
 
     expect(
@@ -437,8 +438,8 @@ describe("LandingPage", () => {
       screen.getByRole("heading", { name: "Поиск по всему каталогу поставщика" }),
     ).toBeInTheDocument()
     expect(
-      screen.getByText(`${publicCatalogProducts.length} товаров, показано 24`),
-    ).toBeInTheDocument()
+      screen.getByText("Загружаем каталог…"),
+    ).toHaveAttribute("aria-busy", "true")
     expect(
       screen.getByRole("button", { name: `Показать ещё ${CATALOG_PAGE_SIZE}` }),
     ).toBeInTheDocument()
@@ -449,7 +450,8 @@ describe("LandingPage", () => {
 
     expect(productLinks()).toHaveLength(publicCatalogProducts.length)
     expect(screen.queryByRole("button", { name: /Показать ещё/ })).toBeNull()
-    expect(screen.getByText("Показан весь каталог")).toBeInTheDocument()
+    expect(screen.getByText("Каталог загружается")).toBeInTheDocument()
+    expect(screen.queryByText("Показан весь каталог")).toBeNull()
   })
 
   it("canonicalizes the trailing-slash catalog route and renders the full catalog view", () => {
@@ -632,11 +634,12 @@ describe("LandingPage", () => {
     expect(window.location.search).toBe("?category=volleyball&q=nike&sort=price-desc")
   })
 
-  it("makes the complete accessories category available by URL", () => {
+  it("makes the complete accessories category available by URL", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => checkoutCatalogPayload() }))
     window.history.replaceState(null, "", "/catalog?category=accessories")
     render(<LandingPage configuredBotUsername={null} />)
 
-    expect(screen.getByText("25 товаров, показано 24")).toBeInTheDocument()
+    expect(await screen.findByText("25 товаров, показано 24")).toBeInTheDocument()
     expect(productLinks()).toHaveLength(CATALOG_PAGE_SIZE)
     expect(window.location.search).toBe("?category=accessories")
   })

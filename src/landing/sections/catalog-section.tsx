@@ -75,6 +75,7 @@ export function CatalogSection({
     storefront.filteredProducts.length - visibleProducts.length,
   )
   const nextPageSize = Math.min(CATALOG_PAGE_SIZE, remainingProducts)
+  const catalogLoading = storefront.catalogPriceState.status === "loading"
   const hasProviderResults =
     storefront.catalogSearch.response?.status === "ready" &&
     storefront.catalogSearch.response.results.length > 0
@@ -157,7 +158,11 @@ export function CatalogSection({
 
         <div className="catalog-status" aria-live="polite">
           <h2 id="catalog-products-title">Все модели</h2>
-          <p>{storefront.filteredProducts.length} товаров{remainingProducts > 0 ? `, показано ${visibleProducts.length}` : ""}</p>
+          <p aria-busy={catalogLoading}>
+            {catalogLoading
+              ? "Загружаем каталог…"
+              : `${storefront.filteredProducts.length} товаров${remainingProducts > 0 ? `, показано ${visibleProducts.length}` : ""}`}
+          </p>
         </div>
 
         {storefront.filteredProducts.length > 0 ? (
@@ -182,7 +187,9 @@ export function CatalogSection({
             </div>
             <div className="catalog-link-row">
               <span className="catalog-total">
-                {remainingProducts > 0 ? `Осталось ${remainingProducts}` : "Показан весь каталог"}
+                {catalogLoading
+                  ? "Каталог загружается"
+                  : remainingProducts > 0 ? `Осталось ${remainingProducts}` : "Показан весь каталог"}
               </span>
               {remainingProducts > 0 ? (
                 <button
