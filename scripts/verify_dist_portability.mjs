@@ -1,6 +1,7 @@
 import { access, readdir, readFile } from "node:fs/promises"
 import { fileURLToPath } from "node:url"
 import path from "node:path"
+import { verifyCatalogBundleUrls } from "./catalog_bundle_urls.mjs"
 
 const siteRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
 const distRoot = path.join(siteRoot, "dist")
@@ -122,8 +123,11 @@ const buildVersion = process.env.BUILD_VERSION?.trim() ?? ""
 if (/^[a-f0-9]{40}$/u.test(buildVersion) && !javascript.includes(buildVersion)) {
   fail("bundle is missing the immutable build version")
 }
-if (/["'`]\/catalog\//.test(javascript)) {
-  fail("bundle contains a root-absolute catalog URL")
+const supplierMedia = JSON.parse(await readFile(path.join(siteRoot, "catalog-media/supplier-catalog-media.json"), "utf8"))
+try {
+  verifyCatalogBundleUrls(javascript, supplierMedia, files.map((file) => `/${path.relative(distRoot, file).split(path.sep).join("/")}`))
+} catch (error) {
+  fail(error.message)
 }
 if (!javascript.includes("catalog/") || !javascript.includes(".webp")) {
   fail("bundle is missing the relative catalog URL builder")

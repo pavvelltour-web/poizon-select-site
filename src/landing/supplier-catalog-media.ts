@@ -19,6 +19,7 @@ interface ReviewedProductMedia {
 }
 
 const requiredAngles = ["lateral", "medial", "three-quarter", "rear", "outsole"]
+const supplierMediaPrefix = "/catalog/supplier/"
 
 const products: readonly ReviewedProductMedia[] = manifest.products
 const approvedMedia = new Map(products.flatMap((product) => {
@@ -26,7 +27,8 @@ const approvedMedia = new Map(products.flatMap((product) => {
   if (product.missing_angles.length !== 0 || frames.length !== requiredAngles.length ||
     frames.some((frame, index) => frame.position !== index + 1 ||
       frame.angle !== requiredAngles[index] ||
-      frame.file !== `/catalog/supplier/${product.slug}-${frame.position}.webp` ||
+      typeof frame.file !== "string" || !frame.file.startsWith(supplierMediaPrefix) ||
+      frame.file.slice(supplierMediaPrefix.length) !== `${product.slug}-${frame.position}.webp` ||
       frame.visual_review.status !== "approved")) return []
   return [[product.slug, { productRef: product.product_ref, images: frames.map((frame) => frame.file) }] as const]
 }))

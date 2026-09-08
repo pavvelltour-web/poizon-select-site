@@ -6,6 +6,7 @@ import path from "node:path"
 import { fileURLToPath } from "node:url"
 import test from "node:test"
 import { readNormalizedWebpDimensions } from "./catalog_webp.mjs"
+import { verifyCatalogBundleUrls } from "./catalog_bundle_urls.mjs"
 import { formatSupplierMediaReport, REQUIRED_ANGLES, verifySupplierCatalogMedia } from "./verify_supplier_catalog_media.mjs"
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
@@ -255,4 +256,55 @@ test("structural WebP parser rejects corruption and appended metadata", () => {
   extended.writeUInt32LE(extended.length - 8, 4)
   assert.throws(() => readNormalizedWebpDimensions(extended), /only one VP8\/VP8L/u)
   assert.throws(() => readNormalizedWebpDimensions(Buffer.from("not a WebP")), /not a RIFF/u)
+})
+
+test("permits only the bare supplier validation prefix in quoted or template bundle literals", () => {
+  const empty = { products: [{ slug, frames: [] }] }
+  for (const quote of ['"', "'", "`"]) {
+    assert.deepEqual(verifyCatalogBundleUrls(`const prefix=${quote}/catalog/supplier/${quote};`, empty, []), [])
+  }
+  assert.deepEqual(verifyCatalogBundleUrls('const image="catalog/legacy.webp";', empty, []), [])
+})
+
+test("permits exact declared supplier frame literals only when those files exist in dist", () => {
+  const frames = [1, 2, 3, 4, 5].map((position) => ({ position, file: `/catalog/supplier/${slug}-${position}.webp` }))
+  const manifest = { products: [{ slug, frames }] }
+  const files = frames.map((frame) => frame.file)
+  for (const quote of ['"', "'", "`"]) {
+    const bundle = files.map((file) => `${quote}${file}${quote}`).join(",")
+    assert.deepEqual(verifyCatalogBundleUrls(bundle, manifest, files), files)
+    assert.throws(() => verifyCatalogBundleUrls(bundle, manifest, files.slice(0, 4)), /missing supplier catalog file/u)
+  }
+  // Unreferenced manifest entries do not become invented bundle requirements.
+  assert.deepEqual(verifyCatalogBundleUrls('"/catalog/supplier/"', manifest, []), [])
+})
+
+test("keeps legacy and undeclared root catalog URLs prohibited despite the supplier exception", () => {
+  const file = `/catalog/supplier/${slug}-1.webp`
+  const manifest = { products: [{ slug, frames: [{ position: 1, file }] }] }
+  for (const reference of [
+    "/catalog/legacy.webp", "/catalog/gallery/legacy-2.webp", "/catalog/thumbs/legacy-1.webp", "/catalog/",
+    "/catalog/supplier", "/catalog/supplier/undeclared-1.webp", `/catalog/supplier/${slug}-2.webp`,
+    `/catalog/supplier/${slug}-0.webp`, `/catalog/supplier/${slug}-6.webp`,
+    "/catalog/supplier/../legacy.webp", "/catalog/supplier/%2e%2e/legacy.webp",
+    `${file}?v=1`, `${file}#frame`, '/catalog/supplier/${product.slug}-${position}.webp',
+  ]) {
+    for (const quote of ['"', "'", "`"]) {
+      assert.throws(() => verifyCatalogBundleUrls(`${quote}${reference}${quote}`, manifest, [file, reference]), /root-absolute catalog URL/u)
+    }
+  }
+  assert.throws(() => verifyCatalogBundleUrls('"/catalog/supplier/', manifest, []), /root-absolute catalog URL/u)
+  assert.throws(() => verifyCatalogBundleUrls('"/catalog/supplier/", "/catalog/legacy.webp"', manifest, []), /root-absolute catalog URL/u)
+})
+
+test("does not trust a manifest declaration with another slug, frame number or traversal path", () => {
+  for (const product of [
+    { slug, frames: [{ position: 1, file: "/catalog/supplier/another-slug-1.webp" }] },
+    { slug, frames: [{ position: 1, file: `/catalog/supplier/${slug}-2.webp` }] },
+    { slug, frames: [{ position: 6, file: `/catalog/supplier/${slug}-6.webp` }] },
+    { slug: "../legacy", frames: [{ position: 1, file: "/catalog/supplier/../legacy-1.webp" }] },
+  ]) {
+    const file = product.frames[0].file
+    assert.throws(() => verifyCatalogBundleUrls(JSON.stringify(file), { products: [product] }, [file]), /exact product slug/u)
+  }
 })
