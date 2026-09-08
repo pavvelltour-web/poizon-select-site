@@ -72,6 +72,33 @@ afterEach(() => {
 })
 
 describe("standalone site runtime boundary", () => {
+  it.each([1, 6])("checks the public supplier-gallery position %s boundary", (position) => {
+    const fixture = makeFixture()
+    const supplierDirectory = path.join(fixture, "public", "catalog", "supplier")
+    mkdirSync(supplierDirectory)
+    copyFileSync(
+      path.join(fixture, "public", "catalog", "adidas-campus-00s-core-black.webp"),
+      path.join(supplierDirectory, `test-supplier-${position}.webp`),
+    )
+    const result = runVerifier(fixture)
+    if (position === 1) expect(result.status, result.stderr).toBe(0)
+    else {
+      expect(result.status).not.toBe(0)
+      expect(result.stderr).toContain("unexpected release artifact")
+    }
+  })
+
+  it("rejects removing the strict supplier-gallery completion gate", () => {
+    const fixture = makeFixture()
+    const manifestPath = path.join(fixture, "package.json")
+    const manifest = JSON.parse(readFileSync(manifestPath, "utf8"))
+    manifest.scripts["verify:media-supplier"] = "node scripts/verify_supplier_catalog_media.mjs"
+    writeFileSync(manifestPath, JSON.stringify(manifest), "utf8")
+    const result = runVerifier(fixture)
+    expect(result.status).not.toBe(0)
+    expect(result.stderr).toContain("verify:media-supplier must require complete reviewed supplier galleries")
+  })
+
   it("rejects a browser runtime network call", () => {
     const fixture = makeFixture()
     writeFileSync(

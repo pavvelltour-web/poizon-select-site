@@ -1,0 +1,2321 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-09-08T12:19:57Z",
+  "status": "inventory-in-progress",
+  "baseline_frontend_sha": "ac97505dc28992e2af907810e9c2f3792fc126ce",
+  "standard": {
+    "dimensions": [
+      1600,
+      1200
+    ],
+    "background_rgb": [
+      242,
+      243,
+      243
+    ],
+    "safe_margin_ratio": 0.08,
+    "required_angles": [
+      "lateral",
+      "medial",
+      "three-quarter",
+      "rear",
+      "outsole"
+    ],
+    "outsole_direction": "heel-up-toe-down"
+  },
+  "expected_product_slugs": [
+    "li-ning-dlo-1-cushioning-slip-resistant-abrasion-resistant-rebound-gr-2adc6fb0",
+    "li-ning-shining-2-v2-basketball-shoes-men-s-low-top-floating-green-sk-3dd1b30b",
+    "nike-giannis-immortality-4-low-top-basketball-shoes-men-s-white-1825e752",
+    "li-ning-flash-strike-12-cushioning-slip-resistant-abrasion-resistant-fcc501a0",
+    "li-ning-wade-all-city-13-low-top-basketball-shoes-men-s-plain-purple-a24987f9",
+    "jordan-zion-3-fresh-paint-f1aade88",
+    "li-ning-badfive-3-low-cushioning-abrasion-resistant-lightweight-low-t-103b32bb",
+    "li-ning-blade-4-v2-cushioning-slip-resistant-support-lightweight-rebo-5b0d5469",
+    "li-ning-wow-10-low-top-basketball-shoes-men-s-white-green-f5d870b7",
+    "li-ning-wade-all-city-12-announcement-versatile-abrasion-resistant-su-60c822b3",
+    "jordan-luka-3-slip-resistant-abrasion-resistant-low-top-basketball-sh-bdfb07c7",
+    "li-ning-blade-5-slip-resistant-coverage-lightweight-rebound-low-top-p-de33a8c5",
+    "li-ning-wade-all-city-12-wade-allcity-12-cushioning-abrasion-resistan-35a7c12f",
+    "initiation-adidas-black-pure-ruby-17a8bed7",
+    "jordan-heir-cushioning-abrasion-resistant-breathable-low-top-basketba-156335c2",
+    "hoka-one-one-mafate-speed-2-cushioning-slip-resistant-abrasion-resist-2d30ada8",
+    "mizuno-racer-s-fabric-breathable-cushioning-low-top-casual-training-l-b3977a50",
+    "salomon-xa-pro-3d-breathable-support-low-top-running-shoes-unisex-bla-ec483d22",
+    "salomon-xa-pro-3d-low-top-all-terrain-contagrip-running-shoes-unisex-546f2fce",
+    "salomon-speedcross-3-fabric-breathable-low-top-running-shoes-unisex-b-714d291b",
+    "salomon-xa-pro-3d-mesh-slip-resistant-abrasion-resistant-breathable-c-94698418",
+    "salomon-xt-pathway-2-comfortable-breathable-low-top-sensifittm-contag-0d58214a",
+    "asics-gel-kayano-14-cushioning-abrasion-resistant-breathable-low-top-1c6ad1a1",
+    "mizuno-speed-breathable-abrasion-resistant-low-top-casual-training-lo-c46145bf",
+    "adidas-supernova-ease-breathable-support-impact-resistant-low-top-run-fdc01276",
+    "hoka-one-one-bondi-9-synthetic-leather-breathable-cushioning-low-top-37b7eb38",
+    "hoka-one-one-mafate-speed-4-textile-synthetic-leather-breathable-low-6a37505c",
+    "asics-gel-ds-trainer-14-soft-and-comfortable-textile-synthetic-leathe-ab37efb8",
+    "hoka-one-one-clifton-9-textile-synthetic-leather-abrasion-resistant-w-958baa79",
+    "salomon-xt-quest-waterproof-and-breathable-low-top-running-shoes-unis-ff82df5f",
+    "salomon-acs-pro-breathable-low-top-running-shoes-unisex-alloy-color-072972be",
+    "asics-gel-kahana-8-fl-breathable-low-top-speva-trail-running-shoes-me-722a81b9",
+    "asics-novablast-5-mesh-breathable-low-top-running-shoes-men-s-white-p-12e0a5bd",
+    "asics-magic-speed-4-breathable-low-top-casual-training-running-shoes-894a5cac",
+    "asics-gel-cumulus-16-classic-and-versatile-fabric-breathable-low-top-ea1711fd",
+    "terrex-agravic-wmns-adidas-speed-ultra-white-impact-orange-women-s-9c0e87b4",
+    "hoka-one-one-breathable-low-top-casual-city-commuting-running-shoes-m-ad955e7a",
+    "asics-novablast-5-black-carrier-grey-women-s-00695237",
+    "adidas-climacool-1-textile-tpu-slip-resistant-abrasion-resistant-low-f6d32e81",
+    "adizero-aruku-adidas-silver-metallic-cbf2eb23",
+    "hoka-one-one-mach-6-textile-synthetic-leather-slip-resistant-abrasion-cff935e8",
+    "nike-x-jakob-a-ingebrigtsen-vaporfly-4-low-top-zoomx-marathon-racing-c6739b57",
+    "puma-softride-enzo-evo-low-top-casual-running-shoes-unisex-white-5d9dae67",
+    "salomon-acs-pro-fabric-breathable-low-top-running-shoes-unisex-gray-3b4cd414",
+    "salomon-xt-quest-fabric-breathable-low-top-running-shoes-unisex-gray-75d6aa4e",
+    "asics-gel-1130-breathable-low-top-casual-training-running-shoes-unise-731773c2",
+    "asics-gel-sonoma-fe-breathable-low-top-running-shoes-men-s-gray-white-47bb3deb",
+    "asics-metaspeed-edge-fabric-breathable-low-top-casual-running-shoes-u-b4aecf66",
+    "asics-gel-nimbus-10-1-breathable-low-top-casual-city-commuting-runnin-de92d8bb",
+    "adidas-vl-court-2-0-low-top-skateboard-shoes-unisex-white-gray-72b904c9",
+    "adidas-originals-samba-xlg-low-top-german-army-trainers-unisex-white-65efee94",
+    "adidas-barreda-low-top-german-army-trainers-unisex-green-white-5e2725a1",
+    "adidas-barreda-low-top-german-army-trainers-unisex-gray-eef49e10",
+    "adidas-originals-stadt-low-top-skateboard-shoes-unisex-brown-a76e407e",
+    "adidas-originals-samba-og-black-wonder-white-women-s-d12e6aa1",
+    "adidas-originals-samba-og-low-top-skateboard-shoes-unisex-beige-b7e8c3c8",
+    "adidas-originals-samba-og-low-top-german-army-trainers-women-s-white-9fc583c8",
+    "samba-adidas-originals-xlg-white-night-indigo-denim-f3e2adf2",
+    "adidas-originals-samba-xlg-low-top-german-army-trainers-unisex-dark-i-62ae8c35",
+    "nike-astro-grabber-casual-shoes-women-s-green-bc4dd678",
+    "nike-cortez-leather-slip-resistant-abrasion-resistant-low-top-casual-7bc18186",
+    "nike-cortez-casual-shoes-women-s-green-5bf1edf7",
+    "nike-air-max-dn-premium-metallic-gold-women-s-4c698630",
+    "intimidation-adidas-low-ivory-beige-black-49f03621",
+    "adidas-grand-court-platform-abrasion-resistant-low-top-tennis-shoes-w-b9d9b3d1",
+    "nike-tech-hera-blue-grey-women-s-f0e960aa",
+    "nike-a-c-e-low-top-casual-shoes-women-s-beige-pink-b8307986",
+    "nike-gamma-force-slip-resistant-abrasion-resistant-low-top-skateboard-76fe1fd3",
+    "nike-court-vision-low-next-nature-white-sail-jade-horizon-women-s-08fcb5e7",
+    "nike-dunk-abrasion-resistant-low-top-skateboard-shoes-unisex-silver-w-95bc0ce1",
+    "nike-high-jump-elite-white-barely-green-vapor-green-bright-spruce-0276885d",
+    "nike-air-tech-challenge-ii-stone-blue-2025-4e6c3530",
+    "nike-free-metcon-6-breathable-support-breathable-support-training-sho-78295a57",
+    "nike-air-tech-challenge-2-slip-resistant-abrasion-resistant-slip-resi-54f37d76",
+    "asics-gel-tactic-13-low-top-volleyball-shoes-men-s-white-05098107",
+    "mizuno-dynablitz-white-gold-87bd8f8d",
+    "nike-g-t-hustle-3-pink-a4e142b6",
+    "nike-g-t-hustle-3-navy-blue-5eec12d5",
+    "nike-kobe-6-protro-sail-all-star-8b22ec15",
+    "nike-lebron-22-pink-white-341fa592",
+    "nike-lebron-witness-8-ep-black-purple-82ec8905",
+    "nike-kd-18-white-blue-59f615d1",
+    "air-jordan-40-blue-grey-71071960",
+    "jordan-zion-4-white-black-0f3d597d",
+    "jordan-tatum-3-white-pink-10f9c40f",
+    "nike-kobe-6-protro-dodgers-d517dd2b",
+    "nike-lebron-21-christ-the-king-c2f9764a",
+    "nike-lebron-7-qs-mvp-26c2929a",
+    "nike-lebron-20-four-horsemen-32e5536c",
+    "nike-kd-trey-5-x-ink-splatter-f5c8e668",
+    "nike-kd-10-finals-ep-9e4067ac",
+    "nike-g-t-hustle-academy-beige-fd4a58eb",
+    "nike-g-t-hustle-3-blue-4594ef27",
+    "nike-g-t-hustle-green-eedd0863",
+    "nike-g-t-hustle-3-grey-b3d420a7",
+    "nike-lebron-witness-8-grey-blue-a09cc404",
+    "nike-lebron-witness-7-grey-4d461dc4",
+    "nike-lebron-witness-8-beige-green-7e448e17",
+    "nike-lebron-witness-8-white-blue-d9ab9145",
+    "nike-book-1-white-orange-ee357e92",
+    "nike-book-1-grey-4f750628",
+    "asics-gelburst-28-black-41a82020",
+    "nike-ja-3-blue-yellow-99122218",
+    "nike-book-1-black-f9e943e4",
+    "nike-book-1-pink-08fa5c3a",
+    "nike-giannis-immortality-3-white-black-b61567d5",
+    "nike-sabrina-2-white-e19dfbb4",
+    "nike-sabrina-1-purple-yellow-e8a0104e",
+    "nike-sabrina-1-magnetic-1ec56f7f",
+    "nike-sabrina-2-marine-blue-e330b13a",
+    "air-jordan-37-low-lapis-pf-4957b048",
+    "air-jordan-36-gc-pf-5c883c1b",
+    "jordan-tatum-3-pink-57cbeda3",
+    "jordan-tatum-3-black-gold-c5cca8fe",
+    "jordan-tatum-3-ghost-green-c17ddd85",
+    "adidas-harden-vol-7-blue-b9689707",
+    "adidas-dame-9-silver-black-80d73cb2",
+    "adidas-dame-certified-white-red-c208ce84",
+    "jordan-luka-4-black-white-red-b195cf7b",
+    "jordan-luka-1-mint-foam-pf-2924a8cc",
+    "jordan-luka-2-tropical-twist-5dfc9a69",
+    "jordan-zion-2-hope-diamond-83649706",
+    "jordan-zion-4-black-67541171",
+    "li-ning-wade-all-city-13-beige-208b1028",
+    "li-ning-wade-808-5-ultra-v2-island-blue-ff61bfbb",
+    "li-ning-wade-all-city-13-encore-early-lotus-72755460",
+    "li-ning-wade-son-of-flash-white-bfadd05e",
+    "li-ning-wade-all-city-13-encore-champagne-4910d95f",
+    "nike-g-t-cut-3-blue-pink-70d7a0ab",
+    "li-ning-wade-all-city-12-grey-31872acc",
+    "li-ning-wade-shadow-5-v2-cloud-blue-2d81c9da",
+    "li-ning-way-of-wade-7-orange-grey-3dbb3e71",
+    "li-ning-way-of-wade-11-white-black-c07cc813",
+    "li-ning-way-of-wade-1-white-d703b8cf",
+    "li-ning-way-of-wade-10-away-4dece901",
+    "li-ning-way-of-wade-10-white-grey-2f5933e1",
+    "li-ning-way-of-wade-11-sky-blue-ad31efd8",
+    "li-ning-way-of-wade-1-grey-white-61e6e2d9",
+    "anta-kai-grey-black-red-5406984e",
+    "anta-kai-1-white-silver-080c764d",
+    "anta-kai-1-black-gold-f0b34b7d",
+    "anta-kai-1-sky-blue-purple-orange-fc6aaec4",
+    "anta-kai-1-white-blue-c331c5be",
+    "anta-kai-1-mother-s-day-3113a23a",
+    "anta-kai-2-black-green-orange-a0f5265c",
+    "puma-mb-01-white-blue-6f29c9a0",
+    "puma-mb-05-pink-silver-093213fd",
+    "puma-mb-01-white-grey-f875d2d6",
+    "puma-mb-04-red-yellow-46cf9cb1",
+    "puma-mb-04-black-blue-cea7dc3c",
+    "puma-mb-01-white-8d8c508d",
+    "puma-mb-01-white-red-26702691",
+    "under-armour-curry-splash-25-white-12a06cd2",
+    "under-armour-curry-11-white-black-grey-ebd530ef",
+    "under-armour-curry-3-black-2f1059ea",
+    "under-armour-curry-4-low-flotro-curry-camp-97644500",
+    "nike-zoom-freak-5-tb-wolf-grey-f32aee96",
+    "nike-zoom-freak-5-pe-all-star-01f805fd",
+    "nike-kobe-11-black-85f88d35",
+    "nike-sabrina-2-grey-white-1768e4ba",
+    "nike-ja-3-white-d3bae028",
+    "nike-g-t-cut-3-white-a99769cb",
+    "nike-ja-2-black-grey-34b0a87c",
+    "kool-aid-x-nike-ja-2-dark-red-f0da819a",
+    "air-jordan-39-black-b8022d3e",
+    "nike-g-t-cut-3-turbo-black-label-d5ed4765",
+    "solefly-x-air-jordan-3-white-green-be041bf6",
+    "hoka-mafate-speed-4-lite-white-black",
+    "adidas-barreda-yellow",
+    "adidas-barreda-black",
+    "asics-gel-1130-white-silver-purple",
+    "asics-gel-kayano-14-beige-silver-blue",
+    "asics-gel-kayano-14-black",
+    "nike-lebron-22-christmas",
+    "nike-giannis-immortality-4-beige",
+    "nike-kd-18-pink"
+  ],
+  "products": [
+    {
+      "slug": "li-ning-dlo-1-cushioning-slip-resistant-abrasion-resistant-rebound-gr-2adc6fb0",
+      "product_ref": "020f8a3238be09526557d6a6992801dbadbd8e20e444394ba72ce5a22ace6aa4",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "li-ning-shining-2-v2-basketball-shoes-men-s-low-top-floating-green-sk-3dd1b30b",
+      "product_ref": "afe6b90a0edfd45cadd6b6217c739e88335538a897d10c33fa8e6745d521e9ea",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "nike-giannis-immortality-4-low-top-basketball-shoes-men-s-white-1825e752",
+      "product_ref": "58b3787a4942d39519346c379aed1ec00a1a3255d6b98faf4e5b008a39d1cf25",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "li-ning-flash-strike-12-cushioning-slip-resistant-abrasion-resistant-fcc501a0",
+      "product_ref": "b178c26bce7f279f4c1f3d536680780e647e90e0e2eeb3c19070d76d0c8e6cd4",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "li-ning-wade-all-city-13-low-top-basketball-shoes-men-s-plain-purple-a24987f9",
+      "product_ref": "c44501b20625a45be9216a95b339724092a830595bf71c66108d57663ec47c8b",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "jordan-zion-3-fresh-paint-f1aade88",
+      "product_ref": "dea86431cf507b7822d8a2ef0bea3d06a3c5e9e82c81c4dc3a98ec0d3cd355dd",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "li-ning-badfive-3-low-cushioning-abrasion-resistant-lightweight-low-t-103b32bb",
+      "product_ref": "dadfe1d834e27e34b4ae75bb37cfc0989af4fbb50357e506efd9d9a45165f9df",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "li-ning-blade-4-v2-cushioning-slip-resistant-support-lightweight-rebo-5b0d5469",
+      "product_ref": "d0e02ab73ce8b08e12620e2decdc14f56a78fe61b9b6e96c57db694880036476",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "li-ning-wow-10-low-top-basketball-shoes-men-s-white-green-f5d870b7",
+      "product_ref": "1568b639949c44e88bf685aa63f0f756c9c0f1d92fae7885cd84aed38e378c80",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "li-ning-wade-all-city-12-announcement-versatile-abrasion-resistant-su-60c822b3",
+      "product_ref": "9153bdfb45c5ea9f96045710e1b9b9479bdb95dadfa183cf272d404a03aa4820",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "jordan-luka-3-slip-resistant-abrasion-resistant-low-top-basketball-sh-bdfb07c7",
+      "product_ref": "9ed359bedb110ca11904efb25bd1fb38d10211ef4b67aea7107925b1b49bfecc",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "li-ning-blade-5-slip-resistant-coverage-lightweight-rebound-low-top-p-de33a8c5",
+      "product_ref": "1a1c766ce071a48dcf6f2d6ed406a167bac6f76ac7bc4f01b6f98f0aac3a15c7",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "li-ning-wade-all-city-12-wade-allcity-12-cushioning-abrasion-resistan-35a7c12f",
+      "product_ref": "5b93ed4d3c3d97ffe9f202739e11bd35ecf004d2baf80c9684acb1f9cf9f6e30",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "initiation-adidas-black-pure-ruby-17a8bed7",
+      "product_ref": "d1e21ab1a5b9c707cf1f2e8cd402aa07229687357b003d6eabe29582c8d92f74",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "jordan-heir-cushioning-abrasion-resistant-breathable-low-top-basketba-156335c2",
+      "product_ref": "82478f2dc788cb7e7848564aea25b0b523e8acb3f0c8bb8e79ff5e3181c21aa7",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "hoka-one-one-mafate-speed-2-cushioning-slip-resistant-abrasion-resist-2d30ada8",
+      "product_ref": "42e0ef327c05c6642f57cdc24872d22917c837f5d2f99bcf0ec22cc956a51aa2",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "mizuno-racer-s-fabric-breathable-cushioning-low-top-casual-training-l-b3977a50",
+      "product_ref": "624dc6342d9a405483ff78b5249b204135390ebd00506ad229350d0240a7096e",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "salomon-xa-pro-3d-breathable-support-low-top-running-shoes-unisex-bla-ec483d22",
+      "product_ref": "d1382f3d3f42c673affd199374de204d24d13c0739a0b40810553283e9284e7c",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "salomon-xa-pro-3d-low-top-all-terrain-contagrip-running-shoes-unisex-546f2fce",
+      "product_ref": "58121aea3d00ab4feeb49b985e0c138886e1a836a1b89a808a47852663f0241f",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "salomon-speedcross-3-fabric-breathable-low-top-running-shoes-unisex-b-714d291b",
+      "product_ref": "3f0264115df8766030dc274f24774b66d6f8d0d1b7cae11dfc3e834f63d25d23",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "salomon-xa-pro-3d-mesh-slip-resistant-abrasion-resistant-breathable-c-94698418",
+      "product_ref": "a1201295226a3c40fb75eb76d43413a0a8a175edc9077c9cc7f4eb0d54bf77c9",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "salomon-xt-pathway-2-comfortable-breathable-low-top-sensifittm-contag-0d58214a",
+      "product_ref": "e443f12c03e65528de35b2e213cbb04172c95f185447e7555fa6e75e38ea6a9e",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "asics-gel-kayano-14-cushioning-abrasion-resistant-breathable-low-top-1c6ad1a1",
+      "product_ref": "57ac2fcf10afa25627becb3e4c0f0f7292aa583aa5135d23f952522509a25a50",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "mizuno-speed-breathable-abrasion-resistant-low-top-casual-training-lo-c46145bf",
+      "product_ref": "68e9c5bda5d7693c02c5c6f9fc1f52a75c2b843a69ee25594a9f082873204b47",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "adidas-supernova-ease-breathable-support-impact-resistant-low-top-run-fdc01276",
+      "product_ref": "1dfc9fee927ca268d8f26fbfdb75f359f8e64ded43b9bcbe2223422c769b7f4d",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "hoka-one-one-bondi-9-synthetic-leather-breathable-cushioning-low-top-37b7eb38",
+      "product_ref": "8ac4da7ef8f2b521eecc39516158730ad1b7365ffb32a44fa94707850c563f11",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "hoka-one-one-mafate-speed-4-textile-synthetic-leather-breathable-low-6a37505c",
+      "product_ref": "6071b75b0f3e92eb401951fd0b0ecb518949ca46c45cab5d64c11574bee6315b",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "asics-gel-ds-trainer-14-soft-and-comfortable-textile-synthetic-leathe-ab37efb8",
+      "product_ref": "a765ca0941cc3af94a5f779a342719eb61e41a689bebb91e8365c682751ba196",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "hoka-one-one-clifton-9-textile-synthetic-leather-abrasion-resistant-w-958baa79",
+      "product_ref": "1ec580e659cef0ada604d275f39786a2fcdebbb258e8ebc805bece5ab1023a00",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "salomon-xt-quest-waterproof-and-breathable-low-top-running-shoes-unis-ff82df5f",
+      "product_ref": "a38f53d001b4d4fe9ad567a77386584d3df316e24b9f4a575cbb4a75c0aca4a9",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "salomon-acs-pro-breathable-low-top-running-shoes-unisex-alloy-color-072972be",
+      "product_ref": "11c28c78e6c8e230a3a9514b499de8072de304cf1157df30721fbab4c51810f3",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "asics-gel-kahana-8-fl-breathable-low-top-speva-trail-running-shoes-me-722a81b9",
+      "product_ref": "d70ca035ed8a23e4ccc6e121fdb2a0706a7e76f2b24ea601dc7dc694611236a1",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "asics-novablast-5-mesh-breathable-low-top-running-shoes-men-s-white-p-12e0a5bd",
+      "product_ref": "0d4c7ec0550c88644bb20510fa8544eadcd3180665e96b89bedbc7493c742a84",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "asics-magic-speed-4-breathable-low-top-casual-training-running-shoes-894a5cac",
+      "product_ref": "97dcee4e1dd4c0e1697ce80add796a6250efa171c27e5883fe9921bf4cc7cc5f",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "asics-gel-cumulus-16-classic-and-versatile-fabric-breathable-low-top-ea1711fd",
+      "product_ref": "4dedc20b8f66bb1674b3da077f966fb813262b948a8969aafbd57b21e3ee7629",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "terrex-agravic-wmns-adidas-speed-ultra-white-impact-orange-women-s-9c0e87b4",
+      "product_ref": "3c8fe0fd0ece7f7683beee005b1b7a2ceaa459b0eb9786499dd1518e9053438e",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "hoka-one-one-breathable-low-top-casual-city-commuting-running-shoes-m-ad955e7a",
+      "product_ref": "5537719b5c1513c2d6ac1711f35f8da30ce71ff97353c1ab0b780667639f70b7",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "asics-novablast-5-black-carrier-grey-women-s-00695237",
+      "product_ref": "53ea28a2ce94cc5d9400482abbdb8d757c8ba90465603607ae25ecc9b3ed88c8",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "adidas-climacool-1-textile-tpu-slip-resistant-abrasion-resistant-low-f6d32e81",
+      "product_ref": "221a4ab2e0399c2111ec46aed69d074427a27d609658817c28b525c642a25c79",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "adizero-aruku-adidas-silver-metallic-cbf2eb23",
+      "product_ref": "ab5e5e22f3221063b0ef5814272effaa3de711fabc6c49a9bac62152f1b88ca8",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "hoka-one-one-mach-6-textile-synthetic-leather-slip-resistant-abrasion-cff935e8",
+      "product_ref": "7277eb60c12c1695d37ef49dffb682ba861256e12f679cb6b7726d551f2f7d63",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "nike-x-jakob-a-ingebrigtsen-vaporfly-4-low-top-zoomx-marathon-racing-c6739b57",
+      "product_ref": "84a91a5a95d9a20613d5c7b9b365197b3275874751817433a7403dfe6eadf51a",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "puma-softride-enzo-evo-low-top-casual-running-shoes-unisex-white-5d9dae67",
+      "product_ref": "c2def6bd5169d3dac0743a2533a6390f2bd0e62cf19ee5fec0167fe34f96549e",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "salomon-acs-pro-fabric-breathable-low-top-running-shoes-unisex-gray-3b4cd414",
+      "product_ref": "38c4c460df316f5fde35088823ddc22d52dbc1aa0ddfc2a4dcfce94683475d0f",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "salomon-xt-quest-fabric-breathable-low-top-running-shoes-unisex-gray-75d6aa4e",
+      "product_ref": "5cc90c0e3d7cc8e3b4a3c4e86c1a1d8bf60ec233a906cbaa9529174bd366c5e1",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "asics-gel-1130-breathable-low-top-casual-training-running-shoes-unise-731773c2",
+      "product_ref": "3defae38e80af4836ff7065cb7bcdadedc386bb086078481afbea816ad8d139c",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "asics-gel-sonoma-fe-breathable-low-top-running-shoes-men-s-gray-white-47bb3deb",
+      "product_ref": "5dec8d233dd3b1141aad2fe69b01cf76043d70abc6c9b44d9083a70b93862ef7",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "asics-metaspeed-edge-fabric-breathable-low-top-casual-running-shoes-u-b4aecf66",
+      "product_ref": "b3a86c84ea761362e9802fd596e52ca36fa86a9877e55d00dad5dca4c2773ac9",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "asics-gel-nimbus-10-1-breathable-low-top-casual-city-commuting-runnin-de92d8bb",
+      "product_ref": "d0308b4b09b6b95c5fe6e104f50b10cbb68b9497d45a2b42c13e202eaccf7c28",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "adidas-vl-court-2-0-low-top-skateboard-shoes-unisex-white-gray-72b904c9",
+      "product_ref": "b15c0ffba1ac4b0819923eb348b47a9bf6bf04e6edf1db28d2d2a348c3f031a1",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "adidas-originals-samba-xlg-low-top-german-army-trainers-unisex-white-65efee94",
+      "product_ref": "aee87fee34e8555b7f09bdd936b0551fce37f85e62a04e43adc35795589e7b56",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "adidas-barreda-low-top-german-army-trainers-unisex-green-white-5e2725a1",
+      "product_ref": "250409c22963a46d9db94933c0b12cedd79e3fc62a39b1c35f6f0771d30e4d04",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "adidas-barreda-low-top-german-army-trainers-unisex-gray-eef49e10",
+      "product_ref": "0b047e29a662eae7296ab8b9e3f8b4a36451829fd9f30c37967afa7ebeb03629",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "adidas-originals-stadt-low-top-skateboard-shoes-unisex-brown-a76e407e",
+      "product_ref": "deb2c545e672777ef03e3749b9bd0973a2674b366a56bb9e038d2b40050e4687",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "adidas-originals-samba-og-black-wonder-white-women-s-d12e6aa1",
+      "product_ref": "ee96e1ff841d2ff7839d6d5d4457744b18a6e2c5ac5f683d69eaaf547c630d59",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "adidas-originals-samba-og-low-top-skateboard-shoes-unisex-beige-b7e8c3c8",
+      "product_ref": "50b6d5ee5933d75c1674e4dd777337361b36ac41d4f8d54ce425786be685d10d",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "adidas-originals-samba-og-low-top-german-army-trainers-women-s-white-9fc583c8",
+      "product_ref": "fe184f373c2347ba3bd80b3a45eda586cf4f2c7f6c3afd488d2a13672f7453b9",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "samba-adidas-originals-xlg-white-night-indigo-denim-f3e2adf2",
+      "product_ref": "c4200db22a77aa136de59951192a7a1a63f57c481d33c9143a086de36141c4a1",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "adidas-originals-samba-xlg-low-top-german-army-trainers-unisex-dark-i-62ae8c35",
+      "product_ref": "bdff86390191a962d4988e5acba11ef9e445a6757b2be30141829c323466bbc3",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "nike-astro-grabber-casual-shoes-women-s-green-bc4dd678",
+      "product_ref": "e158f6600722577910e12dc201178a074921d3c638a9185fca3fd62af95ed54b",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "nike-cortez-leather-slip-resistant-abrasion-resistant-low-top-casual-7bc18186",
+      "product_ref": "0b51221b354259e638dc8a29489b8cc768f30acc28e84abcf123341a58224081",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "nike-cortez-casual-shoes-women-s-green-5bf1edf7",
+      "product_ref": "c8eeeca0caef2842a0d27453d482804044569db1bb469967527d3e02d929b19a",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "nike-air-max-dn-premium-metallic-gold-women-s-4c698630",
+      "product_ref": "1b54318aff4215bb7a54f41f747da714108dba5afae291a716e636e605d96691",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "intimidation-adidas-low-ivory-beige-black-49f03621",
+      "product_ref": "e642d392ffdff975bf16f0731baae3ad868a9786f15246269e6c1a43b760c9bd",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "adidas-grand-court-platform-abrasion-resistant-low-top-tennis-shoes-w-b9d9b3d1",
+      "product_ref": "4821337bc88ceb9619b05607c6347252f0b3b8f9498ca45d3d7fd2a0838c14b3",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "nike-tech-hera-blue-grey-women-s-f0e960aa",
+      "product_ref": "e1337fc32cfd721717ada3a403d325ca3ff946391d57029acb86c81f3175c9ab",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "nike-a-c-e-low-top-casual-shoes-women-s-beige-pink-b8307986",
+      "product_ref": "6580c264593098b25fe5d674246822a07c3d2e4f4c9a93dafe1defb3baca8051",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "nike-gamma-force-slip-resistant-abrasion-resistant-low-top-skateboard-76fe1fd3",
+      "product_ref": "c08661c6d999d3f17e5878b643a5808c4219f9629e57e57b35cfe65d2a747453",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "nike-court-vision-low-next-nature-white-sail-jade-horizon-women-s-08fcb5e7",
+      "product_ref": "4789ee1d403e5e342c973b6a2393bf286805d3ff68d74e90a15f6a75fbb107a2",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "nike-dunk-abrasion-resistant-low-top-skateboard-shoes-unisex-silver-w-95bc0ce1",
+      "product_ref": "3d7f82df2d96b13d2102c88e2480142fc3ce095b84722584e6d3b3a267a5fb72",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "nike-high-jump-elite-white-barely-green-vapor-green-bright-spruce-0276885d",
+      "product_ref": "74cbb09ecb7f245851c5cc0f4e684ca4d7a363b486f6d5efdac2a5f957f3949c",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "nike-air-tech-challenge-ii-stone-blue-2025-4e6c3530",
+      "product_ref": "734261bca7ed9d121a7ffc263bd1e91e16dcbf8e8ee70a10da4d577467d25980",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "nike-free-metcon-6-breathable-support-breathable-support-training-sho-78295a57",
+      "product_ref": "d085e05306ed57ec1fdb582954543a9580fc8e455f06cd7f0d0466cc8d763a9f",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "nike-air-tech-challenge-2-slip-resistant-abrasion-resistant-slip-resi-54f37d76",
+      "product_ref": "e77546ff7eb691a457f91b6853520106b134f810c9520809fc725c4ab0432c36",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "asics-gel-tactic-13-low-top-volleyball-shoes-men-s-white-05098107",
+      "product_ref": "61d8128e5f38c4ce3644ddaa814866295c0f6bd0eb6da7b7f02e320278ed7009",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "mizuno-dynablitz-white-gold-87bd8f8d",
+      "product_ref": "ed5f5ac25684a824a655b923928982fbb555816964ec8dba06f2592246ca21ab",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "nike-g-t-hustle-3-pink-a4e142b6",
+      "product_ref": "d677baaf0fd152ac351267f1be2f68c401730f9c16dbe5465286784d05b18217",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "nike-g-t-hustle-3-navy-blue-5eec12d5",
+      "product_ref": "204a2ec679ee8b968eb34fac45f2f2a25c3da3fe85caec5129e0939ec49e0845",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "nike-kobe-6-protro-sail-all-star-8b22ec15",
+      "product_ref": "78f85029d5b6c9533cd2626638f7e09891ca3a0a3a96ab2f9226d302994f5901",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "nike-lebron-22-pink-white-341fa592",
+      "product_ref": "e5900e90f8cfd4cca1e89ac9ea68a42bc49ac6e5ba755479d53c285da0eed4cf",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "nike-lebron-witness-8-ep-black-purple-82ec8905",
+      "product_ref": "cf9e97f0e1d84de5d5f6c344ffcdd98b7b0aa8f303dfaa961d60178fb99efde3",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "nike-kd-18-white-blue-59f615d1",
+      "product_ref": "4745a25156f08f4d81e310debc2e6c7929dc1c4db71ee2dfcc25746138d571b2",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "air-jordan-40-blue-grey-71071960",
+      "product_ref": "0916b3c1de8435d6e9692f30d7472f7f6cf878ad7515a5435f23d050e3554412",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "jordan-zion-4-white-black-0f3d597d",
+      "product_ref": "8b9e1da26d557132bf13bcde44757f28802e3ac54d77e35ec3cf35d0937b2378",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "jordan-tatum-3-white-pink-10f9c40f",
+      "product_ref": "86683f78558a4d4a665ca507371bf7b796e0754c289bdea9f31764428b8a870f",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "nike-kobe-6-protro-dodgers-d517dd2b",
+      "product_ref": "dbf9285dcbbbfac9fae365fdf57185909d514b7da1ba30a9ca9a729b29326d8b",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "nike-lebron-21-christ-the-king-c2f9764a",
+      "product_ref": "a8e7304bd62e356b4433a9729bd4996ed654ab053146ea7f0777e14b01fa6905",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "nike-lebron-7-qs-mvp-26c2929a",
+      "product_ref": "7a5c3f67ed7892e5819d361f6d2608b64a88544524167090635af2a32e63896b",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "nike-lebron-20-four-horsemen-32e5536c",
+      "product_ref": "42ef083474534c01a0de82f9d6c4f1c1ce9d1b7461f93cb547f3ce2cad6ccfd8",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "nike-kd-trey-5-x-ink-splatter-f5c8e668",
+      "product_ref": "e7dc28bc7b678c179f59b2a3c7d0e06fb6f020ac5643e91e38bde26e32013b77",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "nike-kd-10-finals-ep-9e4067ac",
+      "product_ref": "da085c2d1f9db8fe0f109db7624a66d1672c59b155a383591bee9745e4980cfe",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "nike-g-t-hustle-academy-beige-fd4a58eb",
+      "product_ref": "d0da3de32bee0676eddfc5108fabddfb18c0102ccc16a8d5742d2f63170296aa",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "nike-g-t-hustle-3-blue-4594ef27",
+      "product_ref": "944620f1798c6e0e8f3fdff7633016aeffa22b247a5eef9cff6deea0423db622",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "nike-g-t-hustle-green-eedd0863",
+      "product_ref": "b5406fdd9053533b0be6a26c865123de46b005cd705851a8b9ab46bcea07aacd",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "nike-g-t-hustle-3-grey-b3d420a7",
+      "product_ref": "5d4366be9c143554a2d8e036744e67b5be48efa10b8679ba51a6637bc5c10c43",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "nike-lebron-witness-8-grey-blue-a09cc404",
+      "product_ref": "4adc8a602d34149af768919634e92477a71020cdcb1f124bd94a7be0da339daa",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "nike-lebron-witness-7-grey-4d461dc4",
+      "product_ref": "f0b3d3cf0aadf58241cba2a9bb36a46de60c93bd956f1ed29a156e8de5135db3",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "nike-lebron-witness-8-beige-green-7e448e17",
+      "product_ref": "2ccfc8cd61ba521ec9bb66ca6810eeb83b63201a3d26e4c69de521bac4929fcc",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "nike-lebron-witness-8-white-blue-d9ab9145",
+      "product_ref": "bdc2b78bf4a2229d0037d15ba7caa9a4bcd55f5d353e8e1e09a266d81cfa64b3",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "nike-book-1-white-orange-ee357e92",
+      "product_ref": "2624375a584479e74d50ff73dc522f06fe273728382dc8330e26e758ca7f64db",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "nike-book-1-grey-4f750628",
+      "product_ref": "dd3e895f39d137cb10907b6b79dde4b3b3af57f041a98914e0211fc06a0c9825",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "asics-gelburst-28-black-41a82020",
+      "product_ref": "7041ea73bd8d211cde40be279e5565b6dc5638cf81f957e5952b35e24940fd21",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "nike-ja-3-blue-yellow-99122218",
+      "product_ref": "3325eec91dd24fde17a235cdbc2f95468cf5812fc62355b799bf793f024cb67a",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "nike-book-1-black-f9e943e4",
+      "product_ref": "8ca2b499db117aab7bfb664c8f4b56498dd39dae474c5e8d05f51d063008a0f4",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "nike-book-1-pink-08fa5c3a",
+      "product_ref": "765f4b3aafe1ce3b7b3ec00376f2ea0ba00a47cca71ec3653e48c7465bd70e02",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "nike-giannis-immortality-3-white-black-b61567d5",
+      "product_ref": "7e572a9f64ae59c2c2ab2bf2de5c33a95735d8aaf7b0e60dfde2673c710b1d89",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "nike-sabrina-2-white-e19dfbb4",
+      "product_ref": "c4e053c13997f7093c4d8f0cd79a8401a25455d91ac9bd5f7c7a0e4209053baf",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "nike-sabrina-1-purple-yellow-e8a0104e",
+      "product_ref": "1acb0ed16cec80faf6af1a8c7966c6b0200cbc8afbda7b82155eb379dae4c6d4",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "nike-sabrina-1-magnetic-1ec56f7f",
+      "product_ref": "18410f4c58ad15f832715816ca16539bd7a149657e4834c876c000eeacede79b",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "nike-sabrina-2-marine-blue-e330b13a",
+      "product_ref": "9699ccbbf0cd99afae61d4c38f4bef5d6f07a696aca82cac7cb76de8ff62ba60",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "air-jordan-37-low-lapis-pf-4957b048",
+      "product_ref": "d1a12229b2a7e5c2a61ff091dbc5b94e43806dd7b0f63c4f3cd463d67c919b1f",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "air-jordan-36-gc-pf-5c883c1b",
+      "product_ref": "7437a4dbc4a54cab5a54d6a22fc2bea3805dca0424d5438bdbb390303bc67322",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "jordan-tatum-3-pink-57cbeda3",
+      "product_ref": "08969477be141b35a5b117af8470a8388c1897e9418e9aab7b87dad72994e819",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "jordan-tatum-3-black-gold-c5cca8fe",
+      "product_ref": "a53191164b8545aa6354dbd62ebf677a46ce9b8500b6925bdaa211a01b740696",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "jordan-tatum-3-ghost-green-c17ddd85",
+      "product_ref": "9d8f97418d9ffe82086e430b3b9831cd469d26983b2902b9af31c63797a02278",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "adidas-harden-vol-7-blue-b9689707",
+      "product_ref": "1c58d07b03b6c194782b86d28fbf2dd717f06c319806427c960094c189093b65",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "adidas-dame-9-silver-black-80d73cb2",
+      "product_ref": "57c72e76a276bb80c9ac35f96ab6cfe8c3999a62811d6b2e8a02d19aef8827ee",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "adidas-dame-certified-white-red-c208ce84",
+      "product_ref": "104c6c03531f230f41cd9eb04304c88b800a44bfad1e3c2282f6a29271b41029",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "jordan-luka-4-black-white-red-b195cf7b",
+      "product_ref": "c273e1bc7d5552523481004b53ab55829cae16e9eb261d35efd0652845696986",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "jordan-luka-1-mint-foam-pf-2924a8cc",
+      "product_ref": "85d9275059406e83e7da144cecfa57b505261c5a4a7f4d0ceaec45719333c0ef",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "jordan-luka-2-tropical-twist-5dfc9a69",
+      "product_ref": "f855ee00ecfb05a1d85e0020a24af4fa7fbca639752d15aa1de042f0d1da4a89",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "jordan-zion-2-hope-diamond-83649706",
+      "product_ref": "6ac9e3a39fece1cf55ed7c70d720e667f9a0fac3fcb1b79327177f59a501a535",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "jordan-zion-4-black-67541171",
+      "product_ref": "e36764f84d48260db78531769e947e3b9b0d71831e278229143bf3c6544bc260",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "li-ning-wade-all-city-13-beige-208b1028",
+      "product_ref": "9e3568c653ebcdb84bbaba0a37d898e7aab86cfb98f854801beb1a9485787bda",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "li-ning-wade-808-5-ultra-v2-island-blue-ff61bfbb",
+      "product_ref": "2f9c579ac39e068964057f42add3a63cbb386616602ca4970e902fa118764928",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "li-ning-wade-all-city-13-encore-early-lotus-72755460",
+      "product_ref": "3c7181f151ea9b356f062e3b48f3d9584a4957f81855b259e3799706eee1a89d",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "li-ning-wade-son-of-flash-white-bfadd05e",
+      "product_ref": "78b28ef9cc62545d98e7605389f978052ae55bb2bdc36091a95baa7c0190c8f5",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "li-ning-wade-all-city-13-encore-champagne-4910d95f",
+      "product_ref": "6026a737c7e2b195bc4cbc99bc7e49b7a6146e4a395b2e84338e07bb4d74e2f3",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "nike-g-t-cut-3-blue-pink-70d7a0ab",
+      "product_ref": "5808137f9c70e277f24773056627dedeaccbc9e259eda02238a485ae7bf90c3f",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "li-ning-wade-all-city-12-grey-31872acc",
+      "product_ref": "3ee8c483c77c0435cf7688161a7e97fdb03acf3c4e501a3110a99984c3528bf6",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "li-ning-wade-shadow-5-v2-cloud-blue-2d81c9da",
+      "product_ref": "0c8284e2f796849b8c67c751fbf05db3a6f11a58e78cfee6f9e4d54236aace2b",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "li-ning-way-of-wade-7-orange-grey-3dbb3e71",
+      "product_ref": "d12889257f7888ceab5238cca5a113ea6f63d0161999a56a06abc2ba77c193b3",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "li-ning-way-of-wade-11-white-black-c07cc813",
+      "product_ref": "54f42b222f176af5f6a4a686187603f8802ee0ad688061e73503f8a9403cd0cb",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "li-ning-way-of-wade-1-white-d703b8cf",
+      "product_ref": "6e967ee1ba55a5f3e96f75afb16126d18ee5db1dcbfabc5c45d7fc78ed2969b0",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "li-ning-way-of-wade-10-away-4dece901",
+      "product_ref": "195312ebc5f3901db60b223df27d7c6e3dc6b57b95753e6da5ccd660373125ac",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "li-ning-way-of-wade-10-white-grey-2f5933e1",
+      "product_ref": "8db38e40e408470202b2b0175800e544964ddd6efabe7f1732b71f14b19734db",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "li-ning-way-of-wade-11-sky-blue-ad31efd8",
+      "product_ref": "fce4dc869742f85a6c4a2afe88f57ecc74d137bad0e2a4d9b61710895c3ef153",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "li-ning-way-of-wade-1-grey-white-61e6e2d9",
+      "product_ref": "aee26dc50034f24ce35d81b159127325f1beacba20b1cb993e5532a110d64531",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "anta-kai-grey-black-red-5406984e",
+      "product_ref": "febac065c2000543bf61962edddb32e431995e7a04b09b241b281072ae42f51c",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "anta-kai-1-white-silver-080c764d",
+      "product_ref": "bfbe1af6e21e2fc2ec6393e104e259c1da7a9cdcb553a0764ef89cb8659bef8f",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "anta-kai-1-black-gold-f0b34b7d",
+      "product_ref": "be98898e51b09a06309a6853ae4bfd55342509c6764abd21d4fbd96dd5c26473",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "anta-kai-1-sky-blue-purple-orange-fc6aaec4",
+      "product_ref": "666b5a29d17c07209f6046c82d725f045f9af4fcf88ad73f62776a049f8f1bcb",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "anta-kai-1-white-blue-c331c5be",
+      "product_ref": "3a5a97491921b0e8f4ebde764e540bb7fef8a0278d102ab1ae16ec5499d824cf",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "anta-kai-1-mother-s-day-3113a23a",
+      "product_ref": "5eebbc55c411ea28b9451896670c3ff285dfcd4b6b5e74f7e507ee0ed81bca52",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "anta-kai-2-black-green-orange-a0f5265c",
+      "product_ref": "243c022cc96004d2c7d6da14d7e3c5c30da710f57b1e0b8fae2f963b5e265d53",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "puma-mb-01-white-blue-6f29c9a0",
+      "product_ref": "448c7fc608c31256a13a3b52c917fea5c22909a063303269388ce7a1734fe171",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "puma-mb-05-pink-silver-093213fd",
+      "product_ref": "7d444db6d3d81b0ab10da5a04ed7c2ebf8bf545429f42411ee416c3d066b9415",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "puma-mb-01-white-grey-f875d2d6",
+      "product_ref": "87a196190bc0bb3b7d2a2c44755d81a1fe9bbbcca245511e0296ca191b9e4817",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "puma-mb-04-red-yellow-46cf9cb1",
+      "product_ref": "e3de1fb43f2025cc8c6c0afe0ec45944c527f8ab85ceea6c36c3007ff0fbdbb9",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "puma-mb-04-black-blue-cea7dc3c",
+      "product_ref": "27245cf92db2ac50d0d285298ed17d17f718a3eb6caaa3c321bbb3ad15ed8e90",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "puma-mb-01-white-8d8c508d",
+      "product_ref": "5bc93026490d86c165941169e68295d6f696bdf786ca2bab385bf4ce26643ab8",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "puma-mb-01-white-red-26702691",
+      "product_ref": "1f8e8174ace1cf2f049f961e8d5059dacd6a2979c1fdcd7805590b060bff06c6",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "under-armour-curry-splash-25-white-12a06cd2",
+      "product_ref": "dfd128c5417eccfceee3ca676eaece9e6faf00d841cdeb81536f89568d9f2182",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "under-armour-curry-11-white-black-grey-ebd530ef",
+      "product_ref": "c6ad17a4dd7b305194d9f689754c42d5127049085ce3f851dad41b2cd74604e5",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "under-armour-curry-3-black-2f1059ea",
+      "product_ref": "7d842db64b484bb24b94c6ae14a724945a6045b5f0fe0e3a1cb380fe4d701bd0",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "under-armour-curry-4-low-flotro-curry-camp-97644500",
+      "product_ref": "4937949de02c7078b0278cdb3766cb3fa179f20312a4a2e4e0719cb1f6191e39",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "nike-zoom-freak-5-tb-wolf-grey-f32aee96",
+      "product_ref": "1ddf27f82cab7718e57bf9f08a3e96bf055fa954fd8f5186a22889e3e70bbcc5",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "nike-zoom-freak-5-pe-all-star-01f805fd",
+      "product_ref": "205a75e3f5a945d277efc4edfe14c2af3627443cbcfd6f4d4271cf6322382f59",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "nike-kobe-11-black-85f88d35",
+      "product_ref": "74d44b4fe2f8a0423a88d58c542dac0e7381aae1a874e3e2821088837a430ae1",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "nike-sabrina-2-grey-white-1768e4ba",
+      "product_ref": "a9a192355b40b1503bb1d79a55bea357eac7473f0954e00da3e1ea076fd744e8",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "nike-ja-3-white-d3bae028",
+      "product_ref": "5109174e493b4ee11ec2a0087e137ab521cbed4ac1f47d9d1190d4e36c8ada3c",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "nike-g-t-cut-3-white-a99769cb",
+      "product_ref": "edf19bd801748fb1d2322384a95bcee176d77691c91637171114f6ca51815120",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "nike-ja-2-black-grey-34b0a87c",
+      "product_ref": "15684873d3a26abf2ce0d5ed6243e0752efe125611ce9c7a74bf4708617a016c",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "kool-aid-x-nike-ja-2-dark-red-f0da819a",
+      "product_ref": "b49800e2be4ed8026ecf58c9d94b07a571bc61e5ce04cdb60442db4f37fc0e5a",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "air-jordan-39-black-b8022d3e",
+      "product_ref": "78efce957f021e1095bae76a6438e93cd973de04586960c2434d6083f3f5aebd",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "nike-g-t-cut-3-turbo-black-label-d5ed4765",
+      "product_ref": "6d497c77e90c228ddf06491f48dc4da28dac89fed24de611aeb30f5b714a00a7",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "solefly-x-air-jordan-3-white-green-be041bf6",
+      "product_ref": "9cb8f750b593d5f1c3f670a9323b67d1a133526fd0eb75d569f34f6f58505e9e",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "hoka-mafate-speed-4-lite-white-black",
+      "product_ref": "245af095ba8b4af01ae04ba3cd94d6a6b2db91cc070f294d60da481bad7136c2",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "adidas-barreda-yellow",
+      "product_ref": "372faf13eb441295daaee1bc7e0fd96184419b5b7f8ede319b133edad2317254",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "adidas-barreda-black",
+      "product_ref": "ff881a62db13fc575e9986b5ea971cdb8c53c0196bd7c758c2a4bf99c2dc5f5e",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "asics-gel-1130-white-silver-purple",
+      "product_ref": "16b5fb5e82009b7fcf9207a6404a0c86fa0cc2be28d55cad9b79cdcba9b640c6",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "asics-gel-kayano-14-beige-silver-blue",
+      "product_ref": "9ee06b4e13e83c2c22d6c5c31e01825d4b8bf40606a20a12ef384c1dfdad3ce6",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "asics-gel-kayano-14-black",
+      "product_ref": "a24478f7061df1807a66e614e4a1d6ee4f00878da2242053646d3f498d32ab3e",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "nike-lebron-22-christmas",
+      "product_ref": "2232c4f1cfbb51eb2aa122b65ace747dab71748c3d8fcd8cfc4480ae501406d9",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "nike-giannis-immortality-4-beige",
+      "product_ref": "196964a27e8e3563192de2f74905be83af868029fd9802ebcb42ee0c2fb3ed90",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    },
+    {
+      "slug": "nike-kd-18-pink",
+      "product_ref": "2836e7af8325b04486f822a447bd86070b4f218b555331bbad3b6cc11550c9e8",
+      "frames": [],
+      "missing_angles": [
+        "lateral",
+        "medial",
+        "three-quarter",
+        "rear",
+        "outsole"
+      ]
+    }
+  ],
+  "target_catalog_count": 209,
+  "target_footwear_count": 200,
+  "metadata_extension_sha256": "1849a685b8325968b2b43c4ca70185b670202f8128b7a1da91072b03c94dd5c8"
+}

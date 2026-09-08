@@ -2,6 +2,8 @@ import { createHash } from "node:crypto"
 import { readdir, readFile } from "node:fs/promises"
 import { fileURLToPath } from "node:url"
 import path from "node:path"
+import { readNormalizedWebpDimensions } from "./catalog_webp.mjs"
+import { formatSupplierMediaReport, verifySupplierCatalogMedia } from "./verify_supplier_catalog_media.mjs"
 
 const siteRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..")
 const catalogDir = path.join(siteRoot, "public", "catalog")
@@ -12,75 +14,6 @@ const expectedGalleryAssets = expectedRootAssets * 4
 
 function fail(message) {
   throw new Error(`Catalog verification failed: ${message}`)
-}
-
-function readNormalizedWebpDimensions(bytes) {
-  if (
-    bytes.length < 30 ||
-    bytes.toString("ascii", 0, 4) !== "RIFF" ||
-    bytes.toString("ascii", 8, 12) !== "WEBP"
-  ) {
-    fail("a catalog file is not a RIFF WebP image")
-  }
-
-  const declaredLength = bytes.readUInt32LE(4) + 8
-  if (declaredLength !== bytes.length) {
-    fail("a WebP RIFF length does not exactly match the file")
-  }
-
-  const chunks = []
-  let offset = 12
-  while (offset < bytes.length) {
-    if (offset + 8 > bytes.length) {
-      fail("a WebP has a truncated chunk header")
-    }
-    const name = bytes.toString("ascii", offset, offset + 4)
-    const length = bytes.readUInt32LE(offset + 4)
-    const dataStart = offset + 8
-    const dataEnd = dataStart + length
-    const paddedEnd = dataEnd + (length % 2)
-    if (dataEnd > bytes.length || paddedEnd > bytes.length) {
-      fail(`a WebP ${JSON.stringify(name)} chunk exceeds the RIFF boundary`)
-    }
-    if (length % 2 === 1 && bytes[dataEnd] !== 0) {
-      fail(`a WebP ${JSON.stringify(name)} chunk has non-zero padding`)
-    }
-    chunks.push({ name, dataStart, length })
-    offset = paddedEnd
-  }
-  if (offset !== bytes.length) fail("a WebP has trailing bytes")
-  if (
-    chunks.length !== 1 ||
-    !["VP8 ", "VP8L"].includes(chunks[0].name)
-  ) {
-    fail(
-      "normalized catalog WebP may contain only one VP8/VP8L image chunk (no metadata or animation)",
-    )
-  }
-
-  const { name, dataStart, length } = chunks[0]
-  if (name === "VP8 ") {
-    if (
-      length < 10 ||
-      bytes[dataStart + 3] !== 0x9d ||
-      bytes[dataStart + 4] !== 0x01 ||
-      bytes[dataStart + 5] !== 0x2a
-    ) {
-      fail("a VP8 image has an invalid key-frame signature")
-    }
-    return [
-      bytes.readUInt16LE(dataStart + 6) & 0x3fff,
-      bytes.readUInt16LE(dataStart + 8) & 0x3fff,
-    ]
-  }
-
-  if (name === "VP8L") {
-    if (length < 5 || bytes[dataStart] !== 0x2f) {
-      fail("a VP8L image has an invalid signature")
-    }
-    const packed = bytes.readUInt32LE(dataStart + 1)
-    return [(packed & 0x3fff) + 1, ((packed >>> 14) & 0x3fff) + 1]
-  }
 }
 
 function requireUtcTimestamp(value, field) {
@@ -140,6 +73,13 @@ for (const slug of manifestSlugs) {
     if (!galleryFiles.includes(`${slug}-${index}.webp`)) {
       fail(`${slug} is missing gallery view ${index}`)
     }
+  }
+}
+for (const file of galleryFiles) {
+  const bytes = await readFile(path.join(galleryDir, file))
+  const dimensions = readNormalizedWebpDimensions(bytes)
+  if (dimensions[0] !== 1600 || dimensions[1] !== 1200) {
+    fail(`gallery/${file} is not a normalized 1600×1200 image`)
   }
 }
 
@@ -284,3 +224,7 @@ for (const item of manifest.items) {
 console.log(
   `Catalog assets verified: ${expectedRootAssets} unique local 1600×1200 WebP files and ${expectedGalleryAssets} gallery files`,
 )
+console.log(formatSupplierMediaReport(await verifySupplierCatalogMedia({
+  projectRoot: siteRoot,
+  requireComplete: process.argv.includes("--require-complete"),
+})))

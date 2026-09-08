@@ -25,6 +25,8 @@
     "media:thumbnails:build": "python scripts/build_catalog_card_thumbnails.py",
     "test:media-official": "node scripts/run_official_media_pipeline.mjs test",
     "test:media-unified": "python -m unittest scripts.test_verify_unified_catalog_media scripts.test_import_ai_contact_sheet scripts.test_build_unified_catalog_media",
+    "test:media-supplier": "node --test scripts/test_supplier_catalog_media.mjs",
+    "verify:media-supplier": "node scripts/verify_supplier_catalog_media.mjs --require-complete",
     "verify:assets": "node scripts/verify_catalog_assets.mjs",
     "verify:boundaries": "node scripts/verify_site_boundaries.mjs",
     "verify:dist": "node scripts/verify_dist_portability.mjs",
@@ -32,8 +34,8 @@
     "verify:media-pipeline": "node scripts/verify_product_media_pipeline.mjs",
     "verify:card-thumbnails": "node scripts/verify_catalog_card_thumbnails.mjs",
     "verify:release-rights": "node scripts/verify_release_rights.mjs",
-    "verify:release": "npm run verify:assets && npm run verify:card-thumbnails && npm run verify:release-rights && npm run media:storefront:qa && npm run media:unified:qa",
-    "check": "npm run lint && npm test && npm run test:media-official && npm run test:media-unified && npm run verify:media-pipeline && npm run test:maintainer && npm run build"
+    "verify:release": "npm run verify:assets && npm run verify:media-supplier && npm run verify:card-thumbnails && npm run verify:release-rights && npm run media:storefront:qa && npm run media:unified:qa",
+    "check": "npm run lint && npm test && npm run test:media-official && npm run test:media-unified && npm run test:media-supplier && npm run verify:media-pipeline && npm run test:maintainer && npm run build"
   },
   "dependencies": {
     "lucide-react": "1.27.0",

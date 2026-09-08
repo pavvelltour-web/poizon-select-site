@@ -80,9 +80,12 @@ if (
 }
 if (
   packageManifest.scripts?.["verify:release"] !==
-  "npm run verify:assets && npm run verify:card-thumbnails && npm run verify:release-rights && npm run media:storefront:qa && npm run media:unified:qa"
+  "npm run verify:assets && npm run verify:media-supplier && npm run verify:card-thumbnails && npm run verify:release-rights && npm run media:storefront:qa && npm run media:unified:qa"
 ) {
-  fail("verify:release must include assets, card thumbnails, release rights, approved media and unified catalog QA")
+  fail("verify:release must include assets, complete supplier media, card thumbnails, release rights, approved media and unified catalog QA")
+}
+if (packageManifest.scripts?.["verify:media-supplier"] !== "node scripts/verify_supplier_catalog_media.mjs --require-complete") {
+  fail("verify:media-supplier must require complete reviewed supplier galleries")
 }
 if (
   packageManifest.scripts?.["verify:build-version"] !==
@@ -224,6 +227,7 @@ for (const file of publicFiles) {
       relative.startsWith(`catalog${path.sep}thumbs${path.sep}`) &&
        (/^[a-z0-9-]+-[1-3]-(?:640|960|1280)\.webp$/.test(path.basename(file)) || path.basename(file) === "manifest.json")
     ) &&
+    !(/^catalog\/supplier\/[a-z0-9]+(?:-[a-z0-9]+)*-[1-5]\.webp$/.test(relative.split(path.sep).join("/"))) &&
     !allowedCatalogEntries.has(path.basename(file))
   ) {
     fail(`public/catalog contains an unexpected release artifact: ${relative}`)
