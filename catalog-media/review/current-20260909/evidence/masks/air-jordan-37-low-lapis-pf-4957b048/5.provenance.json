@@ -1,0 +1,25 @@
+{
+  "slug": "air-jordan-37-low-lapis-pf-4957b048",
+  "position": 5,
+  "created_at": "2026-09-09T13:47:13Z",
+  "original_path": "C:\\Users\\user\\Desktop\\poizon-project\\.codex-artifacts\\catalog-finish-20260909\\normalized\\air-jordan-37-low-lapis-pf-4957b048\\5.webp",
+  "original_sha256": "943d8d0b0f677a3471da9f447ca8fa66476d5e19b4a3820b3740a14facaf8a6a",
+  "output_path": "C:\\Users\\user\\Desktop\\poizon-project\\.codex-artifacts\\catalog-finish-20260909\\rembg-refined\\air-jordan-37-low-lapis-pf-4957b048\\5.webp",
+  "output_sha256": "d9c492bfe754dea65de448a937d2c13eb6a9b7596bb2ba3611297d50305a4b0e",
+  "model": "isnet-general-use",
+  "model_files": {
+    "model-cache\\models\\isnet-general-use\\isnet-general-use.onnx": "60920e99c45464f2ba57bee2ad08c919a52bbf852739e96947fbb4358c0d964a"
+  },
+  "mask_inference_rotation_ccw": -90,
+  "mask_method": "rembg only_mask; native output probability alpha; same source RGB composited on RGB242243243; no shoe generation, resampling or source overwrite; mask-only inference orientation recorded separately",
+  "mask_path": "C:\\Users\\user\\Desktop\\poizon-project\\.codex-artifacts\\catalog-finish-20260909\\rembg-refined\\air-jordan-37-low-lapis-pf-4957b048\\5.mask.png",
+  "mask_sha256": "55b250b1a947615c84101b46dc8d9355a34edc332b29e6ecdbbcb13c9f292dd7",
+  "dimensions": [
+    1600,
+    1200
+  ],
+  "output_bytes": 251022,
+  "dominant_subject_rgb_max_delta": 5,
+  "visual_review_status": "pending",
+  "elapsed_seconds": 3.07
+}

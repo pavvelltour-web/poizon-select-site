@@ -1,0 +1,25 @@
+{
+  "slug": "anta-kai-grey-black-red-5406984e",
+  "position": 5,
+  "created_at": "2026-09-09T13:48:45Z",
+  "original_path": "C:\\Users\\user\\Desktop\\poizon-project\\.codex-artifacts\\catalog-finish-20260909\\normalized\\anta-kai-grey-black-red-5406984e\\5.webp",
+  "original_sha256": "64a9eb84c91d1551971c2557585c3c17c57fee1ec1982c2b5aaaae6f2af1482a",
+  "output_path": "C:\\Users\\user\\Desktop\\poizon-project\\.codex-artifacts\\catalog-finish-20260909\\rembg-refined\\anta-kai-grey-black-red-5406984e\\5.webp",
+  "output_sha256": "34c82fcb687b7a14cbef60a34068ffeaeaccc770c52319c8425ab47c516f5437",
+  "model": "isnet-general-use",
+  "model_files": {
+    "model-cache\\models\\isnet-general-use\\isnet-general-use.onnx": "60920e99c45464f2ba57bee2ad08c919a52bbf852739e96947fbb4358c0d964a"
+  },
+  "mask_inference_rotation_ccw": -90,
+  "mask_method": "rembg only_mask; native output probability alpha; same source RGB composited on RGB242243243; no shoe generation, resampling or source overwrite; mask-only inference orientation recorded separately",
+  "mask_path": "C:\\Users\\user\\Desktop\\poizon-project\\.codex-artifacts\\catalog-finish-20260909\\rembg-refined\\anta-kai-grey-black-red-5406984e\\5.mask.png",
+  "mask_sha256": "7c4ea67a8178cc88decc4ca276125f3434a22dff5e906114b7023fa3478d3651",
+  "dimensions": [
+    1600,
+    1200
+  ],
+  "output_bytes": 217050,
+  "dominant_subject_rgb_max_delta": 5,
+  "visual_review_status": "pending",
+  "elapsed_seconds": 2.98
+}

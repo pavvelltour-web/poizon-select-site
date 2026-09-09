@@ -1,0 +1,12 @@
+{
+  "slug": "li-ning-way-of-wade-1-grey-white-61e6e2d9",
+  "position": 5,
+  "output_sha256": "1b5dc202b8da1e92309b5880f5b7ba9a00f182fe49a51896d3d122c90043912a",
+  "output_path": "C:\\Users\\user\\Desktop\\poizon-project\\.codex-artifacts\\catalog-finish-20260909\\rembg-refined\\li-ning-way-of-wade-1-grey-white-61e6e2d9\\5.webp",
+  "status": "approved",
+  "reviewed_at": "2026-09-09T13:50:06.186191+00:00",
+  "reviewer": "/root/normalizer_prepare",
+  "evidence": "Faint straight right background residue removed; full pale-gray patterned sole, black carbon shank, white Li-Ning logo and pale-blue round forefoot marker retained. Compared refined output at full resolution to original, including interior material patches. Pixel geometry checks pass.",
+  "identity_and_angle": true,
+  "composition_and_edges": true
+}

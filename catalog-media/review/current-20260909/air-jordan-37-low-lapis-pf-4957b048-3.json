@@ -1,0 +1,11 @@
+{
+  "slug": "air-jordan-37-low-lapis-pf-4957b048",
+  "position": 3,
+  "output_sha256": "19dc5baeadb39891cd4fd2c4db8cbfc691f15244e96c2a072097afe203af1db2",
+  "status": "approved",
+  "reviewed_at": "2026-09-09T13:50:05.651393+00:00",
+  "reviewer": "/root/normalizer_prepare",
+  "evidence": "Original normalized F3 previously viewed against corresponding source in complete contact sheet: matching model/colorway/details, canonical side or complete pair view, full shoe outlines, centered scale and clean outer background. Exact previously reviewed hash reverified; this frame was not refined.",
+  "identity_and_angle": true,
+  "composition_and_edges": true
+}

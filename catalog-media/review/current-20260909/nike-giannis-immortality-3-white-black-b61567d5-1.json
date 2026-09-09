@@ -1,0 +1,12 @@
+{
+  "slug": "nike-giannis-immortality-3-white-black-b61567d5",
+  "position": 1,
+  "output_path": "C:\\Users\\user\\Desktop\\poizon-project\\.codex-artifacts\\catalog-finish-20260909\\normalized\\nike-giannis-immortality-3-white-black-b61567d5\\1.webp",
+  "output_sha256": "931f3f32d5e933d81c1a4bee6b63b2bc7549b5bb0fa7a09099d8aaaec37e2d87",
+  "status": "approved",
+  "reviewed_at": "2026-09-09T13:48:15Z",
+  "reviewer": "/root/media_ready_inventory",
+  "evidence": "Original F1-F4 had already been visually compared against exact source contact sheet: correct identity/color/angles, complete silhouettes, clean neutral canvas; current hash unchanged.",
+  "identity_and_angle": true,
+  "composition_and_edges": true
+}

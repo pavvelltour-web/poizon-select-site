@@ -1,0 +1,25 @@
+{
+  "slug": "li-ning-way-of-wade-11-sky-blue-ad31efd8",
+  "position": 5,
+  "created_at": "2026-09-09T13:46:38Z",
+  "original_path": "C:\\Users\\user\\Desktop\\poizon-project\\.codex-artifacts\\catalog-finish-20260909\\normalized\\li-ning-way-of-wade-11-sky-blue-ad31efd8\\5.webp",
+  "original_sha256": "12326beac363c029b8042ffa241759c6d6f35c4dacba6b6c1427cae7d64ff00e",
+  "output_path": "C:\\Users\\user\\Desktop\\poizon-project\\.codex-artifacts\\catalog-finish-20260909\\rembg-refined\\li-ning-way-of-wade-11-sky-blue-ad31efd8\\5.webp",
+  "output_sha256": "bd2ee72b2132afa2f8ef1b87f01ace94de47f2f38ce8c15d0239aac54ccc8325",
+  "model": "isnet-general-use",
+  "model_files": {
+    "model-cache\\models\\isnet-general-use\\isnet-general-use.onnx": "60920e99c45464f2ba57bee2ad08c919a52bbf852739e96947fbb4358c0d964a"
+  },
+  "mask_inference_rotation_ccw": -90,
+  "mask_method": "rembg only_mask; native output probability alpha; same source RGB composited on RGB242243243; no shoe generation, resampling or source overwrite; mask-only inference orientation recorded separately",
+  "mask_path": "C:\\Users\\user\\Desktop\\poizon-project\\.codex-artifacts\\catalog-finish-20260909\\rembg-refined\\li-ning-way-of-wade-11-sky-blue-ad31efd8\\5.mask.png",
+  "mask_sha256": "efb74ed98b86ee5eaa9f71f13803b957ce804f4103457cd1374f910aec369579",
+  "dimensions": [
+    1600,
+    1200
+  ],
+  "output_bytes": 349674,
+  "dominant_subject_rgb_max_delta": 4,
+  "visual_review_status": "pending",
+  "elapsed_seconds": 3.05
+}

@@ -1,0 +1,11 @@
+{
+  "slug": "li-ning-way-of-wade-1-white-d703b8cf",
+  "position": 3,
+  "output_sha256": "9566e7d0fe9495b998b0e0db46ec97ff5570fbce58851a0d22bded4731942d10",
+  "status": "approved",
+  "reviewed_at": "2026-09-09T13:50:06.010619+00:00",
+  "reviewer": "/root/normalizer_prepare",
+  "evidence": "Original normalized F3 previously viewed against corresponding source in complete contact sheet: matching model/colorway/details, canonical side or complete pair view, full shoe outlines, centered scale and clean outer background. Exact previously reviewed hash reverified; this frame was not refined.",
+  "identity_and_angle": true,
+  "composition_and_edges": true
+}

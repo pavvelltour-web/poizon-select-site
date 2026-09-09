@@ -1,0 +1,25 @@
+{
+  "slug": "nike-lebron-20-four-horsemen-32e5536c",
+  "position": 5,
+  "created_at": "2026-09-09T13:48:10Z",
+  "original_path": "C:\\Users\\user\\Desktop\\poizon-project\\.codex-artifacts\\catalog-finish-20260909\\normalized\\nike-lebron-20-four-horsemen-32e5536c\\5.webp",
+  "original_sha256": "a9fde9b34e2cfe72240aa3fd8795dc7df2b6cf28452dace2e892fa2cba802bf4",
+  "output_path": "C:\\Users\\user\\Desktop\\poizon-project\\.codex-artifacts\\catalog-finish-20260909\\rembg-refined\\nike-lebron-20-four-horsemen-32e5536c\\5.webp",
+  "output_sha256": "d28a079ec7845abc6e32ff779e95fe7fd907af0c31f2dafb1651e91f38eb7e2c",
+  "model": "isnet-general-use",
+  "model_files": {
+    "model-cache\\models\\isnet-general-use\\isnet-general-use.onnx": "60920e99c45464f2ba57bee2ad08c919a52bbf852739e96947fbb4358c0d964a"
+  },
+  "mask_inference_rotation_ccw": -90,
+  "mask_method": "rembg only_mask; native output probability alpha; same source RGB composited on RGB242243243; no shoe generation, resampling or source overwrite; mask-only inference orientation recorded separately",
+  "mask_path": "C:\\Users\\user\\Desktop\\poizon-project\\.codex-artifacts\\catalog-finish-20260909\\rembg-refined\\nike-lebron-20-four-horsemen-32e5536c\\5.mask.png",
+  "mask_sha256": "b394489301624ce2afd6ced7f87704413f7537a65aba9972fba3cdaa90ca4f6a",
+  "dimensions": [
+    1600,
+    1200
+  ],
+  "output_bytes": 243158,
+  "dominant_subject_rgb_max_delta": 5,
+  "visual_review_status": "pending",
+  "elapsed_seconds": 4.22
+}

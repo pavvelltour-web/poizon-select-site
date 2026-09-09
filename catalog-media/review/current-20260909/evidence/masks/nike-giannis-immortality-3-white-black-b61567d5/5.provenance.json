@@ -1,0 +1,25 @@
+{
+  "slug": "nike-giannis-immortality-3-white-black-b61567d5",
+  "position": 5,
+  "created_at": "2026-09-09T13:46:17Z",
+  "original_path": "C:\\Users\\user\\Desktop\\poizon-project\\.codex-artifacts\\catalog-finish-20260909\\normalized\\nike-giannis-immortality-3-white-black-b61567d5\\5.webp",
+  "original_sha256": "a6419f9058c30617ca05eec28213e119e615bf0109edf7d62198b78422eb9a8e",
+  "output_path": "C:\\Users\\user\\Desktop\\poizon-project\\.codex-artifacts\\catalog-finish-20260909\\rembg-refined\\nike-giannis-immortality-3-white-black-b61567d5\\5.webp",
+  "output_sha256": "5eb1c6ccf5b9b581da47b31641fc626b0acae68110b287de5c7f1260bdb2772b",
+  "model": "isnet-general-use",
+  "model_files": {
+    "model-cache\\models\\isnet-general-use\\isnet-general-use.onnx": "60920e99c45464f2ba57bee2ad08c919a52bbf852739e96947fbb4358c0d964a"
+  },
+  "mask_inference_rotation_ccw": -90,
+  "mask_method": "rembg only_mask; native output probability alpha; same source RGB composited on RGB242243243; no shoe generation, resampling or source overwrite; mask-only inference orientation recorded separately",
+  "mask_path": "C:\\Users\\user\\Desktop\\poizon-project\\.codex-artifacts\\catalog-finish-20260909\\rembg-refined\\nike-giannis-immortality-3-white-black-b61567d5\\5.mask.png",
+  "mask_sha256": "6769c849729cdd6004f1570316b23e44c115d70879bf09cdea8b0427c39e8485",
+  "dimensions": [
+    1600,
+    1200
+  ],
+  "output_bytes": 181496,
+  "dominant_subject_rgb_max_delta": 5,
+  "visual_review_status": "pending",
+  "elapsed_seconds": 2.67
+}

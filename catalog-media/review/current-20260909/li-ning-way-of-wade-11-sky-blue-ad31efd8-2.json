@@ -1,0 +1,12 @@
+{
+  "slug": "li-ning-way-of-wade-11-sky-blue-ad31efd8",
+  "position": 2,
+  "output_path": "C:\\Users\\user\\Desktop\\poizon-project\\.codex-artifacts\\catalog-finish-20260909\\normalized\\li-ning-way-of-wade-11-sky-blue-ad31efd8\\2.webp",
+  "output_sha256": "39374cb25cf90ee162036c785c7111248fc3461aac9c8d04cde35bf73915ebd6",
+  "status": "approved",
+  "reviewed_at": "2026-09-09T13:48:15Z",
+  "reviewer": "/root/media_ready_inventory",
+  "evidence": "Original F1-F4 had already been visually compared against exact source contact sheet: correct identity/color/angles, complete silhouettes, clean neutral canvas; current hash unchanged.",
+  "identity_and_angle": true,
+  "composition_and_edges": true
+}

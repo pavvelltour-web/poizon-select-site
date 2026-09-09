@@ -1,0 +1,25 @@
+{
+  "slug": "li-ning-blade-4-v2-cushioning-slip-resistant-support-lightweight-rebo-5b0d5469",
+  "position": 5,
+  "created_at": "2026-09-09T13:47:45Z",
+  "original_path": "C:\\Users\\user\\Desktop\\poizon-project\\.codex-artifacts\\catalog-finish-20260909\\normalized\\li-ning-blade-4-v2-cushioning-slip-resistant-support-lightweight-rebo-5b0d5469\\5.webp",
+  "original_sha256": "bfedf0374eae69e02b3936eff848ac9f98456c95827539ebbd0a05f6ae68dc35",
+  "output_path": "C:\\Users\\user\\Desktop\\poizon-project\\.codex-artifacts\\catalog-finish-20260909\\rembg-refined\\li-ning-blade-4-v2-cushioning-slip-resistant-support-lightweight-rebo-5b0d5469\\5.webp",
+  "output_sha256": "a120074682c3fb0553f965569e8b2423d2c40b7dbc0324cc655d7de031f19a6e",
+  "model": "isnet-general-use",
+  "model_files": {
+    "model-cache\\models\\isnet-general-use\\isnet-general-use.onnx": "60920e99c45464f2ba57bee2ad08c919a52bbf852739e96947fbb4358c0d964a"
+  },
+  "mask_inference_rotation_ccw": -90,
+  "mask_method": "rembg only_mask; native output probability alpha; same source RGB composited on RGB242243243; no shoe generation, resampling or source overwrite; mask-only inference orientation recorded separately",
+  "mask_path": "C:\\Users\\user\\Desktop\\poizon-project\\.codex-artifacts\\catalog-finish-20260909\\rembg-refined\\li-ning-blade-4-v2-cushioning-slip-resistant-support-lightweight-rebo-5b0d5469\\5.mask.png",
+  "mask_sha256": "65db58421ece7c0c15963196d0599412bc50b303e6cb285042493c6ba166092f",
+  "dimensions": [
+    1600,
+    1200
+  ],
+  "output_bytes": 192478,
+  "dominant_subject_rgb_max_delta": 4,
+  "visual_review_status": "pending",
+  "elapsed_seconds": 2.68
+}

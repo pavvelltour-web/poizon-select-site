@@ -1,0 +1,11 @@
+{
+  "slug": "nike-kobe-11-black-85f88d35",
+  "position": 3,
+  "output_sha256": "7b09f396ed9d41cf100036c70bf2ebff3ab8db13cfe275f0dc2ff0a130b9acb7",
+  "status": "approved",
+  "reviewed_at": "2026-09-09T13:50:06.336096+00:00",
+  "reviewer": "/root/normalizer_prepare",
+  "evidence": "Original normalized F3 previously viewed against corresponding source in complete contact sheet: matching model/colorway/details, canonical side or complete pair view, full shoe outlines, centered scale and clean outer background. Exact previously reviewed hash reverified; this frame was not refined.",
+  "identity_and_angle": true,
+  "composition_and_edges": true
+}

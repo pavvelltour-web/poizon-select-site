@@ -68,7 +68,11 @@ def measure(path: Path, position: int) -> dict:
             checks["scale"] = (abs(subject_width - expected) <= expected * 0.05 or abs(subject_height - 760) <= 760 * 0.05) and subject_width <= expected * 1.05 and subject_height <= 760 * 1.05
         else:
             expected = TARGET_HEIGHT[position]
-            checks["scale"] = abs(subject_height - expected) <= expected * 0.05 and subject_width <= 1184 * 1.05
+            height_matches = abs(subject_height - expected) <= expected * 0.05
+            # The rear pair must preserve proportions and may reach its
+            # 1184px width cap before its 760px height target (trainer standard).
+            rear_width_matches = position == 4 and abs(subject_width - 1184) <= 1184 * 0.05
+            checks["scale"] = (height_matches or rear_width_matches) and subject_width <= 1184 * 1.05 and subject_height <= expected * 1.05
     else:
         checks.update(safe_margins=False, centered=False, scale=False)
     result["pixel_checks_passed"] = all(checks.values())

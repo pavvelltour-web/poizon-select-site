@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "created_at": "2026-09-09T13:53:05Z",
+  "mode": "write",
+  "normalized_report_sha256": "7764811be087875590e6558f1c571830b7bed22293ac2db771383a4f914cb597",
+  "plan_sha256": "0873d454619bb37afedd24970c41fa9cfd60d9f97f3a4fd2d4064161ebccc775",
+  "approval_files": [
+    "C:\\Users\\user\\Desktop\\poizon-project\\.codex-artifacts\\catalog-finish-20260909\\final-output-approvals.json"
+  ],
+  "approval_product_count": 24,
+  "normalized_product_count": 24,
+  "integrated_product_count": 22,
+  "ready_product_count": 22,
+  "ready_frame_count": 110,
+  "products": [
+    "li-ning-dlo-1-cushioning-slip-resistant-abrasion-resistant-rebound-gr-2adc6fb0",
+    "nike-giannis-immortality-4-low-top-basketball-shoes-men-s-white-1825e752",
+    "li-ning-blade-4-v2-cushioning-slip-resistant-support-lightweight-rebo-5b0d5469",
+    "jordan-luka-3-slip-resistant-abrasion-resistant-low-top-basketball-sh-bdfb07c7",
+    "li-ning-blade-5-slip-resistant-coverage-lightweight-rebound-low-top-p-de33a8c5",
+    "nike-air-max-dn-premium-metallic-gold-women-s-4c698630",
+    "nike-dunk-abrasion-resistant-low-top-skateboard-shoes-unisex-silver-w-95bc0ce1",
+    "nike-air-tech-challenge-2-slip-resistant-abrasion-resistant-slip-resi-54f37d76",
+    "jordan-zion-4-white-black-0f3d597d",
+    "nike-lebron-20-four-horsemen-32e5536c",
+    "nike-giannis-immortality-3-white-black-b61567d5",
+    "air-jordan-37-low-lapis-pf-4957b048",
+    "jordan-tatum-3-ghost-green-c17ddd85",
+    "li-ning-wade-808-5-ultra-v2-island-blue-ff61bfbb",
+    "li-ning-wade-all-city-13-encore-champagne-4910d95f",
+    "li-ning-way-of-wade-11-white-black-c07cc813",
+    "li-ning-way-of-wade-1-white-d703b8cf",
+    "li-ning-way-of-wade-11-sky-blue-ad31efd8",
+    "li-ning-way-of-wade-1-grey-white-61e6e2d9",
+    "anta-kai-grey-black-red-5406984e",
+    "nike-kobe-11-black-85f88d35",
+    "nike-ja-3-white-d3bae028"
+  ],
+  "blocked": [
+    {
+      "slug": "nike-book-1-grey-4f750628",
+      "reason": "nonofficial source URL is absent from exact current supplier metadata"
+    },
+    {
+      "slug": "air-jordan-36-gc-pf-5c883c1b",
+      "reason": "nonofficial source URL is absent from exact current supplier metadata"
+    }
+  ],
+  "complete_product_count_after_batch": 22,
+  "queued_file_count": 330,
+  "image_pixels_edited": false,
+  "supplier_verifier": {
+    "exit_code": 0,
+    "stdout": "Supplier catalog file integrity verified: 176 products, 110 local 1600×1200 WebP frames; 110 frames have hash-bound visual review; 22/176 complete five-angle sets. STANDARDIZATION INCOMPLETE: 154 products; first 5: [{\"slug\":\"li-ning-shining-2-v2-basketball-shoes-men-s-low-top-floating-green-sk-3dd1b30b\",\"missing_angles\":[\"lateral\",\"medial\",\"three-quarter\",\"rear\",\"outsole\"],\"pending_review_positions\":[],\"order_mismatch\":false},{\"slug\":\"li-ning-flash-strike-12-cushioning-slip-resistant-abrasion-resistant-fcc501a0\",\"missing_angles\":[\"lateral\",\"medial\",\"three-quarter\",\"rear\",\"outsole\"],\"pending_review_positions\":[],\"order_mismatch\":false},{\"slug\":\"li-ning-wade-all-city-13-low-top-basketball-shoes-men-s-plain-purple-a24987f9\",\"missing_angles\":[\"lateral\",\"medial\",\"three-quarter\",\"rear\",\"outsole\"],\"pending_review_positions\":[],\"order_mismatch\":false},{\"slug\":\"jordan-zion-3-fresh-paint-f1aade88\",\"missing_angles\":[\"lateral\",\"medial\",\"three-quarter\",\"rear\",\"outsole\"],\"pending_review_positions\":[],\"order_mismatch\":false},{\"slug\":\"li-ning-badfive-3-low-cushioning-abrasion-resistant-lightweight-low-t-103b32bb\",\"missing_angles\":[\"lateral\",\"medial\",\"three-quarter\",\"rear\",\"outsole\"],\"pending_review_positions\":[],\"order_mismatch\":false}]\n",
+    "stderr": ""
+  }
+}

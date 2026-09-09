@@ -1,0 +1,25 @@
+{
+  "slug": "li-ning-wade-all-city-13-encore-champagne-4910d95f",
+  "position": 5,
+  "created_at": "2026-09-09T13:46:32Z",
+  "original_path": "C:\\Users\\user\\Desktop\\poizon-project\\.codex-artifacts\\catalog-finish-20260909\\normalized\\li-ning-wade-all-city-13-encore-champagne-4910d95f\\5.webp",
+  "original_sha256": "7b0589c778e6f3a429e0e8a51a20115140fc9a6cc486c8755db903e088075199",
+  "output_path": "C:\\Users\\user\\Desktop\\poizon-project\\.codex-artifacts\\catalog-finish-20260909\\rembg-refined\\li-ning-wade-all-city-13-encore-champagne-4910d95f\\5.webp",
+  "output_sha256": "8e40b5c4f3952e0db2bc52a8034d9fb97399e4d56563060dcb6a8f2ee7b51dc9",
+  "model": "isnet-general-use",
+  "model_files": {
+    "model-cache\\models\\isnet-general-use\\isnet-general-use.onnx": "60920e99c45464f2ba57bee2ad08c919a52bbf852739e96947fbb4358c0d964a"
+  },
+  "mask_inference_rotation_ccw": -90,
+  "mask_method": "rembg only_mask; native output probability alpha; same source RGB composited on RGB242243243; no shoe generation, resampling or source overwrite; mask-only inference orientation recorded separately",
+  "mask_path": "C:\\Users\\user\\Desktop\\poizon-project\\.codex-artifacts\\catalog-finish-20260909\\rembg-refined\\li-ning-wade-all-city-13-encore-champagne-4910d95f\\5.mask.png",
+  "mask_sha256": "01aedfbacb276e8388113769c52d09f14a89329893ec69ec230399021c5cf3f1",
+  "dimensions": [
+    1600,
+    1200
+  ],
+  "output_bytes": 286838,
+  "dominant_subject_rgb_max_delta": 5,
+  "visual_review_status": "pending",
+  "elapsed_seconds": 3.04
+}

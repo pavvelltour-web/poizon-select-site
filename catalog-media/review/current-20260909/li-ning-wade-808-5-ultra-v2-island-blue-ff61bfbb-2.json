@@ -1,0 +1,11 @@
+{
+  "slug": "li-ning-wade-808-5-ultra-v2-island-blue-ff61bfbb",
+  "position": 2,
+  "output_sha256": "e6e2eb780ef85da7d95aae679b6cfa36b44bccaa9b3c83b02696b989dad3b409",
+  "status": "approved",
+  "reviewed_at": "2026-09-09T13:50:05.805701+00:00",
+  "reviewer": "/root/normalizer_prepare",
+  "evidence": "Original normalized F2 previously viewed against corresponding source in complete contact sheet: matching model/colorway/details, canonical side or complete pair view, full shoe outlines, centered scale and clean outer background. Exact previously reviewed hash reverified; this frame was not refined.",
+  "identity_and_angle": true,
+  "composition_and_edges": true
+}

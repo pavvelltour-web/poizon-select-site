@@ -1,0 +1,12 @@
+{
+  "slug": "li-ning-wade-all-city-13-encore-champagne-4910d95f",
+  "position": 1,
+  "output_path": "C:\\Users\\user\\Desktop\\poizon-project\\.codex-artifacts\\catalog-finish-20260909\\normalized\\li-ning-wade-all-city-13-encore-champagne-4910d95f\\1.webp",
+  "output_sha256": "cdcb0934f71b18e6708db68f228384a44f0c63f71d8c153a136813cbbf792b11",
+  "status": "approved",
+  "reviewed_at": "2026-09-09T13:48:15Z",
+  "reviewer": "/root/media_ready_inventory",
+  "evidence": "Original F1-F4 had already been visually compared against exact source contact sheet: correct identity/color/angles, complete silhouettes, clean neutral canvas; current hash unchanged.",
+  "identity_and_angle": true,
+  "composition_and_edges": true
+}

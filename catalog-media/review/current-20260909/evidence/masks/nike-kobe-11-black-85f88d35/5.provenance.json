@@ -1,0 +1,25 @@
+{
+  "slug": "nike-kobe-11-black-85f88d35",
+  "position": 5,
+  "created_at": "2026-09-09T13:47:36Z",
+  "original_path": "C:\\Users\\user\\Desktop\\poizon-project\\.codex-artifacts\\catalog-finish-20260909\\normalized\\nike-kobe-11-black-85f88d35\\5.webp",
+  "original_sha256": "d788dd42e2fe65440a39d3ff098b2fc5f84598ba785bf0d620e14d1d10b8ae22",
+  "output_path": "C:\\Users\\user\\Desktop\\poizon-project\\.codex-artifacts\\catalog-finish-20260909\\rembg-refined\\nike-kobe-11-black-85f88d35\\5.webp",
+  "output_sha256": "ab7f61713ece65510994e7a71dc9443958328e8fbc66b51129dd9ab1d9230947",
+  "model": "isnet-general-use",
+  "model_files": {
+    "model-cache\\models\\isnet-general-use\\isnet-general-use.onnx": "60920e99c45464f2ba57bee2ad08c919a52bbf852739e96947fbb4358c0d964a"
+  },
+  "mask_inference_rotation_ccw": -90,
+  "mask_method": "rembg only_mask; native output probability alpha; same source RGB composited on RGB242243243; no shoe generation, resampling or source overwrite; mask-only inference orientation recorded separately",
+  "mask_path": "C:\\Users\\user\\Desktop\\poizon-project\\.codex-artifacts\\catalog-finish-20260909\\rembg-refined\\nike-kobe-11-black-85f88d35\\5.mask.png",
+  "mask_sha256": "f94a8f54cde8dbb92aec243beeacce428072c1f59e000ddce3c89a4b5df5c148",
+  "dimensions": [
+    1600,
+    1200
+  ],
+  "output_bytes": 105710,
+  "dominant_subject_rgb_max_delta": 5,
+  "visual_review_status": "pending",
+  "elapsed_seconds": 2.57
+}
