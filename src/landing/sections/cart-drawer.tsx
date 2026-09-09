@@ -191,7 +191,10 @@ export function CartDrawer({ storefront }: CartDrawerProps) {
                     ? formatRub(storefront.cartTotalRub)
                     : "Цена недоступна"}
                 </strong>
-                <small>Доставка СДЭК рассчитывается и оплачивается отдельно после прибытия.</small>
+                <small>
+                  В цену включена международная доставка 1500 ₽ за товар. Доставку
+                  по РФ рассчитывает RAKETA; она оплачивается отдельно после прибытия.
+                </small>
               </div>
 
               <section className="payment-methods" data-od-id="payment-methods" aria-labelledby="payment-methods-title">
@@ -243,7 +246,7 @@ export function CartDrawer({ storefront }: CartDrawerProps) {
               </label>
 
               <fieldset className="checkout-delivery">
-                <legend>Доставка СДЭК</legend>
+                <legend>Доставка по РФ через RAKETA / СДЭК</legend>
                 <div className="checkout-delivery__methods">
                   <label>
                     <input
@@ -319,7 +322,11 @@ export function CartDrawer({ storefront }: CartDrawerProps) {
                   checked={storefront.checkoutConsents.offerAccepted}
                   onChange={(event) => storefront.updateCheckoutConsent("offerAccepted", event.target.checked)}
                 />
-                <span>Принимаю условия <a href="/offer">публичной оферты</a>.</span>
+                <span>
+                  Подтверждаю ознакомление с <a href="/offer">условиями публичной оферты</a>
+                  {" "}(байерские услуги под выкуп) и тем, что после фактического
+                  выкупа расходы на товар надлежащего качества не возвращаются.
+                </span>
               </label>
               <label className="checkout-form__check">
                 <input
@@ -328,9 +335,15 @@ export function CartDrawer({ storefront }: CartDrawerProps) {
                   onChange={(event) => storefront.updateCheckoutConsent("personalDataAccepted", event.target.checked)}
                 />
                 <span>
-                  Даю отдельное согласие на <a href="/personal-data-consent">обработку персональных данных</a>.
+                  Даю согласие на <a href="/personal-data-consent">обработку персональных
+                  данных и их трансграничную передачу</a>, включая паспортные
+                  данные и ИНН, для таможенного оформления и доставки из КНР.
                 </span>
               </label>
+              <small>
+                Паспортные данные и ИНН запросим после оплаты исключительно для
+                таможенного декларирования вашей посылки.
+              </small>
 
               <button className="dialog-primary button button--primary" type="submit" disabled={!canSubmit}>
                 {storefront.checkoutResult.status === "submitting"
@@ -361,7 +374,11 @@ export function CartDrawer({ storefront }: CartDrawerProps) {
                           <dd>{formatRub(storefront.checkoutResult.amounts.payableNowRub)}</dd>
                         </div>
                         <div>
-                          <dt>Доставка отдельно</dt>
+                          <dt>Международная доставка включена</dt>
+                          <dd>{formatRub(storefront.checkoutResult.amounts.internationalDeliveryIncludedRub)}</dd>
+                        </div>
+                        <div>
+                          <dt>Доставка по РФ отдельно</dt>
                           <dd>{formatRub(storefront.checkoutResult.amounts.deliveryDueLaterRub)}</dd>
                         </div>
                         <div>
@@ -369,7 +386,9 @@ export function CartDrawer({ storefront }: CartDrawerProps) {
                           <dd>
                             {storefront.checkoutResult.delivery.quoteStatus === "live"
                               ? "актуальный"
-                              : "предварительный"}
+                              : storefront.checkoutResult.delivery.quoteStatus === "estimated"
+                                ? "предварительный"
+                                : "включён в товар"}
                           </dd>
                         </div>
                       </dl>

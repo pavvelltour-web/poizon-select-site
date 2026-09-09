@@ -23,6 +23,9 @@ export function Footer() {
         </div>
         <nav className="footer-links" aria-label="Юридическая информация">
           <a href="/delivery-returns">Доставка и возврат</a>
+          <a href="/how-it-works">Как это работает</a>
+          <a href="/faq">FAQ</a>
+          <a href="/authenticity">Гарантия оригинальности</a>
           <a href="/offer">Публичная оферта</a>
           <a href="/privacy">Политика данных</a>
           <a href="/personal-data-consent">Согласие</a>

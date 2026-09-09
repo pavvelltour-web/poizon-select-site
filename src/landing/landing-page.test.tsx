@@ -471,6 +471,9 @@ describe("LandingPage", () => {
     ["/cookies", "Уведомление о cookie"],
     ["/contacts", "Контакты"],
     ["/delivery-returns", "Доставка и возврат"],
+    ["/how-it-works", "Как работает KICKSBASE"],
+    ["/faq", "Частые вопросы"],
+    ["/authenticity", "Гарантия оригинальности"],
   ])("renders dedicated storefront route %s", (path, heading) => {
     window.history.replaceState(null, "", path)
     render(<LandingPage configuredBotUsername={null} />)
@@ -1090,6 +1093,7 @@ describe("LandingPage", () => {
             amounts: {
               merchandise_rub: 24500,
               payable_now_rub: 24500,
+              delivery_included_rub: 1500,
               delivery_due_later_rub: 880,
               currency: "RUB",
             },
@@ -1176,7 +1180,7 @@ describe("LandingPage", () => {
     })
     const payment = await screen.findByRole("dialog", { name: "Оплата" })
     expect(within(payment).getByText(/KB-20260801-TEST/)).toBeInTheDocument()
-    expect(within(payment).getByText(/Доставка 880 ₽ оплачивается отдельно/)).toBeInTheDocument()
+    expect(within(payment).getByText(/Доставка по РФ 880 ₽ оплачивается отдельно/)).toBeInTheDocument()
     expect(within(payment).getByRole("link", { name: "Перейти к оплате" })).toHaveAttribute(
       "href",
       "https://securepay.tbank.ru/test",
@@ -1271,14 +1275,14 @@ describe("LandingPage", () => {
     )).toBe(false)
   })
 
-  it("states the v10 split-payment terms on the offer and delivery pages", () => {
+  it("states the international and Russian delivery split on the offer and delivery pages", () => {
     window.history.replaceState(null, "", "/offer")
     const view = render(<LandingPage configuredBotUsername={null} />)
-    expect(screen.getByText(/оплачивается отдельно после прибытия товара/i)).toBeInTheDocument()
+    expect(screen.getByText(/международная доставка 1500 ₽/i)).toBeInTheDocument()
 
     view.unmount()
     window.history.replaceState(null, "", "/delivery-returns")
     render(<LandingPage configuredBotUsername={null} />)
-    expect(screen.getByText(/оплачивается отдельно после прибытия товара/i)).toBeInTheDocument()
+    expect(screen.getByText(/международная доставка 1500 ₽/i)).toBeInTheDocument()
   })
 })

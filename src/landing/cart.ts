@@ -88,7 +88,7 @@ export interface CatalogSearchOffer {
   sizeCn: string | null
   available: boolean | null
   priceCny: number
-  // Final amount for this exact size. It includes the fixed RF delivery and
+  // Final amount for this exact size. It includes fixed international delivery and
   // is the only live RUB amount the storefront may display to a customer.
   totalRub: number
 }
@@ -171,6 +171,7 @@ export interface CheckoutCatalogSnapshot {
 export interface CheckoutAmounts {
   merchandiseRub: number
   payableNowRub: number
+  internationalDeliveryIncludedRub: number
   deliveryDueLaterRub: number
   currency: string
 }
@@ -183,10 +184,10 @@ export interface CheckoutDeliveryQuote {
   address: string | null
   pvzCode: string | null
   amountRub: number
-  quoteStatus: "estimated" | "live"
+  quoteStatus: "estimated" | "live" | "included"
   minDays: number | null
   maxDays: number | null
-  paymentTiming: "separate_after_arrival"
+  paymentTiming: "separate_after_arrival" | "included_in_merchandise"
 }
 
 export interface CheckoutResult {
@@ -206,6 +207,7 @@ interface CheckoutResponseBody {
   amounts: {
     merchandise_rub: number
     payable_now_rub: number
+    delivery_included_rub: number
     delivery_due_later_rub: number
     currency: string
   }
@@ -217,10 +219,10 @@ interface CheckoutResponseBody {
     address: string | null
     pvz_code: string | null
     amount_rub: number
-    quote_status: "estimated" | "live"
+    quote_status: "estimated" | "live" | "included"
     min_days: number | null
     max_days: number | null
-    payment_timing: "separate_after_arrival"
+    payment_timing: "separate_after_arrival" | "included_in_merchandise"
   }
   status: "payment_ready" | "payment_unavailable" | "payment_failed"
   payment_url: string | null
@@ -1225,6 +1227,7 @@ export async function submitCheckout(
     amounts: {
       merchandiseRub: body.amounts.merchandise_rub,
       payableNowRub: body.amounts.payable_now_rub,
+      internationalDeliveryIncludedRub: body.amounts.delivery_included_rub,
       deliveryDueLaterRub: body.amounts.delivery_due_later_rub,
       currency: body.amounts.currency,
     },

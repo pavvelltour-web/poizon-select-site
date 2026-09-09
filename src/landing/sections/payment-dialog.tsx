@@ -83,7 +83,8 @@ export function PaymentDialog({ storefront }: PaymentDialogProps) {
           <p className="modal-help" aria-live="polite">{result.message}</p>
           {result.delivery ? (
             <p className="modal-help">
-              Доставка {formatRub(result.amounts?.deliveryDueLaterRub ?? 0)} оплачивается отдельно после прибытия.
+              Международная доставка {formatRub(result.amounts?.internationalDeliveryIncludedRub ?? 0)} уже включена.
+              Доставка по РФ {formatRub(result.amounts?.deliveryDueLaterRub ?? 0)} оплачивается отдельно после прибытия.
             </p>
           ) : null}
         </div>
