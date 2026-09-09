@@ -84,8 +84,8 @@ if (
 ) {
   fail("verify:release must include assets, complete supplier media, card thumbnails, release rights, approved media and unified catalog QA")
 }
-if (packageManifest.scripts?.["verify:media-supplier"] !== "node scripts/verify_supplier_catalog_media.mjs --require-complete") {
-  fail("verify:media-supplier must require complete reviewed supplier galleries")
+if (packageManifest.scripts?.["verify:media-supplier"] !== "node scripts/verify_supplier_catalog_media.mjs --require-activated-complete") {
+  fail("verify:media-supplier must require every activated supplier gallery to be complete and reviewed")
 }
 if (
   packageManifest.scripts?.["verify:build-version"] !==

@@ -63,14 +63,17 @@ async function withFixture(run) {
 }
 
 test("accepts complete dynamic supplier inventory and reports honest integrity scope", () => withFixture(async (state) => {
-  const report = await state.verify({ requireComplete: true })
+  const report = await state.verify({ requireComplete: true, requireActivatedComplete: true })
   assert.equal(report.product_count, 1)
   assert.equal(report.frame_count, 5)
   assert.equal(report.approved_frame_count, 5)
   assert.equal(report.standardized, true)
+  assert.equal(report.activated_product_count, 1)
+  assert.equal(report.activated_complete, true)
   assert.equal(report.provenance_counts["supplier-normalized"], 5)
   assert.match(report.note, /does not independently prove/u)
   assert.match(formatSupplierMediaReport(report), /1\/1 complete five-angle sets/u)
+  assert.match(formatSupplierMediaReport(report), /1 galleries activated/u)
 }))
 
 test("reports incomplete supplier angles without misrepresenting standardization", () => withFixture(async (state) => {
@@ -85,6 +88,7 @@ test("reports incomplete supplier angles without misrepresenting standardization
   assert.deepEqual(report.incomplete[0].pending_review_positions, [1])
   assert.match(formatSupplierMediaReport(report), /STANDARDIZATION INCOMPLETE/u)
   await assert.rejects(state.verify({ requireComplete: true }), /standardization incomplete/u)
+  await assert.rejects(state.verify({ requireActivatedComplete: true }), /activated gallery standardization incomplete/u)
 }))
 
 test("accepts an explicitly inventoried product with no accepted frames only in non-strict mode", () => withFixture(async (state) => {
@@ -95,6 +99,25 @@ test("accepts an explicitly inventoried product with no accepted frames only in 
   assert.equal(report.frame_count, 0)
   assert.equal(report.standardized, false)
   await assert.rejects(state.verify({ requireComplete: true }), /standardization incomplete/u)
+  await assert.rejects(state.verify({ requireActivatedComplete: true }), /no supplier galleries are activated/u)
+}))
+
+test("permits an incremental release only when every activated gallery is complete", () => withFixture(async (state) => {
+  const pendingSlug = "supplier-gallery-not-activated"
+  state.manifest.expected_product_slugs.push(pendingSlug)
+  state.manifest.products.push({
+    slug: pendingSlug,
+    product_ref: digest(pendingSlug),
+    frames: [],
+    missing_angles: REQUIRED_ANGLES,
+  })
+  const report = await state.verify({ requireActivatedComplete: true })
+  assert.equal(report.product_count, 2)
+  assert.equal(report.complete_product_count, 1)
+  assert.equal(report.standardized, false)
+  assert.equal(report.activated_product_count, 1)
+  assert.equal(report.activated_complete, true)
+  assert.deepEqual(report.incomplete_activated, [])
 }))
 
 test("treats unknown angles and wrong canonical order as incomplete", () => withFixture(async (state) => {

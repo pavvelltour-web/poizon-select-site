@@ -26,7 +26,7 @@
     "test:media-official": "node scripts/run_official_media_pipeline.mjs test",
     "test:media-unified": "python -m unittest scripts.test_verify_unified_catalog_media scripts.test_import_ai_contact_sheet scripts.test_build_unified_catalog_media",
     "test:media-supplier": "node --test scripts/test_supplier_catalog_media.mjs",
-    "verify:media-supplier": "node scripts/verify_supplier_catalog_media.mjs --require-complete",
+    "verify:media-supplier": "node scripts/verify_supplier_catalog_media.mjs --require-activated-complete",
     "verify:assets": "node scripts/verify_catalog_assets.mjs",
     "verify:boundaries": "node scripts/verify_site_boundaries.mjs",
     "verify:dist": "node scripts/verify_dist_portability.mjs",

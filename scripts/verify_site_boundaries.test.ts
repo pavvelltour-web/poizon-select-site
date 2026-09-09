@@ -75,7 +75,7 @@ describe("standalone site runtime boundary", () => {
   it.each([1, 6])("checks the public supplier-gallery position %s boundary", (position) => {
     const fixture = makeFixture()
     const supplierDirectory = path.join(fixture, "public", "catalog", "supplier")
-    mkdirSync(supplierDirectory)
+    mkdirSync(supplierDirectory, { recursive: true })
     copyFileSync(
       path.join(fixture, "public", "catalog", "adidas-campus-00s-core-black.webp"),
       path.join(supplierDirectory, `test-supplier-${position}.webp`),
@@ -88,7 +88,7 @@ describe("standalone site runtime boundary", () => {
     }
   })
 
-  it("rejects removing the strict supplier-gallery completion gate", () => {
+  it("rejects removing the strict activated-gallery completion gate", () => {
     const fixture = makeFixture()
     const manifestPath = path.join(fixture, "package.json")
     const manifest = JSON.parse(readFileSync(manifestPath, "utf8"))
@@ -96,7 +96,9 @@ describe("standalone site runtime boundary", () => {
     writeFileSync(manifestPath, JSON.stringify(manifest), "utf8")
     const result = runVerifier(fixture)
     expect(result.status).not.toBe(0)
-    expect(result.stderr).toContain("verify:media-supplier must require complete reviewed supplier galleries")
+    expect(result.stderr).toContain(
+      "verify:media-supplier must require every activated supplier gallery to be complete and reviewed",
+    )
   })
 
   it("rejects a browser runtime network call", () => {

@@ -1,9 +1,10 @@
 # Supplier catalogue media integration
 
-The current manifest inventories 176 supplier footwear identities, with no
-approved local output frames yet. The remaining 24 active footwear cards use
-the separate legacy catalogue media path. The source-selection plan, raw image
-candidates and final output approval are separate records.
+The current manifest inventories 176 supplier footwear identities. Entries
+without accepted frames stay explicit so coverage cannot be overstated and the
+storefront keeps their existing supplier/legacy gallery. The remaining 24 active
+footwear cards use the separate legacy catalogue media path. The source-selection
+plan, raw image candidates and final output approval are separate records.
 
 `src/landing/supplier-catalog-media.ts` exports `getSupplierCatalogMedia`.
 Call it with the authoritative `slug`, `productRef` and original `images`.
@@ -29,9 +30,14 @@ the identity reference list. Native generation sidecars are working evidence;
 they are not automatically approved final manifest entries.
 
 `npm run verify:assets` checks integrity and explicitly reports incomplete
-coverage. `npm run verify:media-supplier` requires every supplier gallery to be
-complete and reviewed and is included in `verify:release`. A normal development
-build passing does not mean the media standard or release gate has passed.
+full-inventory coverage. Production supports an incremental, fail-closed rollout:
+`npm run verify:media-supplier` rejects every partially populated or
+pending-review activated gallery and is included in `verify:release`. A local
+gallery is activated only when all five ordered frames are hash-bound and
+visually approved. Entries with zero accepted frames remain unactivated and keep
+their existing gallery. Reports must continue to distinguish activated galleries
+from untouched products; a normal development build passing does not mean an
+incomplete local gallery can ship.
 
 For independent catalogue coverage verification, run the supplier verifier with
 `--catalog-metadata <absolute-path-to-current-supplier-metadata.json>`; it checks

@@ -132,6 +132,7 @@ export async function verifySupplierCatalogMedia({
   projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".."),
   manifestPath = "catalog-media/supplier-catalog-media.json",
   requireComplete = false,
+  requireActivatedComplete = false,
   catalogMetadataPath,
 } = {}) {
   const manifest = JSON.parse(await readContainedFile(projectRoot, manifestPath, "manifestPath", "catalog-media/"))
@@ -164,6 +165,7 @@ export async function verifySupplierCatalogMedia({
   const outputHashes = new Set()
   const productRefs = new Set()
   const incomplete = []
+  const incompleteActivated = []
   const kinds = { "supplier-normalized": 0, "official-original": 0, "generated-reference": 0 }
   let approvedFrames = 0
   for (const product of manifest.products) {
@@ -216,7 +218,11 @@ export async function verifySupplierCatalogMedia({
     const missing = REQUIRED_ANGLES.filter((angle) => !knownAngles.has(angle))
     if (!same(product.missing_angles, missing)) fail(`${label}.missing_angles must truthfully list absent canonical angles in standard order`)
     const orderMismatch = product.frames.some((frame, index) => frame.angle !== REQUIRED_ANGLES[index])
-    if (missing.length || pendingPositions.length || orderMismatch) incomplete.push({ slug: label, missing_angles: missing, pending_review_positions: pendingPositions, order_mismatch: orderMismatch })
+    if (missing.length || pendingPositions.length || orderMismatch) {
+      const record = { slug: label, missing_angles: missing, pending_review_positions: pendingPositions, order_mismatch: orderMismatch }
+      incomplete.push(record)
+      if (product.frames.length > 0) incompleteActivated.push(record)
+    }
   }
   const diskFiles = await listAssetFiles(path.join(projectRoot, "public/catalog/supplier"))
   if (!same(diskFiles, [...files].sort())) fail("supplier manifest files must exactly match all files in public/catalog/supplier (no untracked or missing assets)")
@@ -226,17 +232,25 @@ export async function verifySupplierCatalogMedia({
     approved_frame_count: approvedFrames,
     complete_product_count: manifest.products.length - incomplete.length,
     standardized: incomplete.length === 0,
+    activated_product_count: manifest.products.filter((product) => product.frames.length > 0).length,
+    activated_complete: incompleteActivated.length === 0,
+    incomplete_activated: incompleteActivated,
     provenance_counts: kinds,
     incomplete,
     note: "File integrity and declared evidence were checked. This does not independently prove pixel composition, model/colour identity, source ownership, or reuse rights.",
   }
   if (requireComplete && !report.standardized) fail(`standardization incomplete for ${incomplete.length}/${report.product_count} products; first ${Math.min(5, incomplete.length)}: ${JSON.stringify(incomplete.slice(0, 5))}`)
+  if (requireActivatedComplete && report.activated_product_count === 0) fail("no supplier galleries are activated")
+  if (requireActivatedComplete && !report.activated_complete) {
+    fail(`activated gallery standardization incomplete for ${incompleteActivated.length}/${report.activated_product_count} products; first ${Math.min(5, incompleteActivated.length)}: ${JSON.stringify(incompleteActivated.slice(0, 5))}`)
+  }
   return report
 }
 
 export function formatSupplierMediaReport(report) {
   return `Supplier catalog file integrity verified: ${report.product_count} products, ${report.frame_count} local 1600×1200 WebP frames; ` +
-    `${report.approved_frame_count} frames have hash-bound visual review; ${report.complete_product_count}/${report.product_count} complete five-angle sets. ` +
+    `${report.approved_frame_count} frames have hash-bound visual review; ${report.complete_product_count}/${report.product_count} complete five-angle sets; ` +
+    `${report.activated_product_count} galleries activated and ${report.activated_complete ? "all activated galleries are complete" : `${report.incomplete_activated.length} activated galleries are incomplete`}. ` +
     (report.standardized ? "All declared angle/review records are complete." :
       `STANDARDIZATION INCOMPLETE: ${report.incomplete.length} products; first ${Math.min(5, report.incomplete.length)}: ${JSON.stringify(report.incomplete.slice(0, 5))}`)
 }
@@ -247,6 +261,7 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
   for (let index = 0; index < args.length; index += 1) {
     const argument = args[index]
     if (argument === "--require-complete") options.requireComplete = true
+    else if (argument === "--require-activated-complete") options.requireActivatedComplete = true
     else if (["--project-root", "--manifest", "--catalog-metadata"].includes(argument) && args[index + 1] && !args[index + 1].startsWith("--")) {
       const key = { "--project-root": "projectRoot", "--manifest": "manifestPath", "--catalog-metadata": "catalogMetadataPath" }[argument]
       options[key] = args[++index]
