@@ -550,7 +550,7 @@ function LiveSearchResultCard({
               }}
             >
               <Send aria-hidden="true" size={16} />
-              Открыть @{botUsername ?? "Telegram"}
+              Открыть каталог-бот @{botUsername ?? "Telegram"}
             </a>
           ) : null}
         </div>

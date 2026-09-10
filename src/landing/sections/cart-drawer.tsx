@@ -192,8 +192,8 @@ export function CartDrawer({ storefront }: CartDrawerProps) {
                     : "Цена недоступна"}
                 </strong>
                 <small>
-                  В цену включена международная доставка 1500 ₽ за товар. Доставку
-                  по РФ рассчитывает RAKETA; она оплачивается отдельно после прибытия.
+                  В цену включена международная доставка 1500 ₽ за товар. Подключённый
+                  перевозчик рассчитывает доставку по РФ до оплаты; она оплачивается отдельно.
                 </small>
               </div>
 
@@ -246,7 +246,7 @@ export function CartDrawer({ storefront }: CartDrawerProps) {
               </label>
 
               <fieldset className="checkout-delivery">
-                <legend>Доставка по РФ через RAKETA / СДЭК</legend>
+                <legend>Доставка по РФ</legend>
                 <div className="checkout-delivery__methods">
                   <label>
                     <input
@@ -323,9 +323,9 @@ export function CartDrawer({ storefront }: CartDrawerProps) {
                   onChange={(event) => storefront.updateCheckoutConsent("offerAccepted", event.target.checked)}
                 />
                 <span>
-                  Подтверждаю ознакомление с <a href="/offer">условиями публичной оферты</a>
-                  {" "}(байерские услуги под выкуп) и тем, что после фактического
-                  выкупа расходы на товар надлежащего качества не возвращаются.
+                  Принимаю <a href="/offer">условия публичной оферты</a>. Мои
+                  обязательные права потребителя, включая возврат стандартного
+                  товара, сохраняются.
                 </span>
               </label>
               <label className="checkout-form__check">
@@ -335,14 +335,15 @@ export function CartDrawer({ storefront }: CartDrawerProps) {
                   onChange={(event) => storefront.updateCheckoutConsent("personalDataAccepted", event.target.checked)}
                 />
                 <span>
-                  Даю согласие на <a href="/personal-data-consent">обработку персональных
-                  данных и их трансграничную передачу</a>, включая паспортные
-                  данные и ИНН, для таможенного оформления и доставки из КНР.
+                  Даю отдельное согласие на <a href="/personal-data-consent#checkout-data">обработку
+                  персональных данных, указанных при оформлении заказа</a>, для его исполнения,
+                  оплаты, доставки и поддержки.
                 </span>
               </label>
               <small>
-                Паспортные данные и ИНН запросим после оплаты исключительно для
-                таможенного декларирования вашей посылки.
+                Паспортные данные и ИНН здесь не собираются. Если перевозчик
+                подтвердит их необходимость, после оплаты будет отдельная
+                защищённая форма, отдельное согласие и перечень получателей.
               </small>
 
               <button className="dialog-primary button button--primary" type="submit" disabled={!canSubmit}>

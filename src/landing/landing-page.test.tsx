@@ -419,11 +419,11 @@ describe("LandingPage", () => {
     expect(firstCard).toHaveAccessibleName(/LeBron NXXT Genisus/)
     expect(within(firstCard).getByText(/LeBron NXXT Genisus/)).toBeInTheDocument()
     expect(
-      screen.getByText(/Срок и итоговую стоимость показываем до оплаты/),
+      screen.getByText(/Международная доставка 1500 ₽ включена в товар/),
     ).toBeInTheDocument()
     expect(screen.queryByText(/менеджер/i)).toBeNull()
-    expect(screen.getByLabelText("Согласие на использование cookie")).toHaveTextContent(
-      "Сайт использует необходимые файлы cookie для работы витрины и сохранения корзины. Продолжая использование сайта, вы соглашаетесь с Политикой обработки персональных данных.",
+    expect(screen.getByLabelText("Уведомление об использовании cookie")).toHaveTextContent(
+      "Используем только технически необходимые файлы cookie для безопасности, входа, работы витрины и сохранения корзины.",
     )
     const paymentMethods = screen.getByLabelText("Способы оплаты")
     for (const method of ["МИР", "СБП", "Visa", "Mastercard"]) {
@@ -473,7 +473,7 @@ describe("LandingPage", () => {
     ["/delivery-returns", "Доставка и возврат"],
     ["/how-it-works", "Как работает KICKSBASE"],
     ["/faq", "Частые вопросы"],
-    ["/authenticity", "Гарантия оригинальности"],
+    ["/authenticity", "Проверка товара и документов"],
   ])("renders dedicated storefront route %s", (path, heading) => {
     window.history.replaceState(null, "", path)
     render(<LandingPage configuredBotUsername={null} />)
@@ -885,7 +885,7 @@ describe("LandingPage", () => {
       .toBeEnabled()
     expect(within(confirmedCard!).getByRole("button", { name: "Скопировать запрос" }))
       .toBeInTheDocument()
-    expect(within(confirmedCard!).getByRole("link", { name: "Открыть @SelectBuyerBot" }))
+    expect(within(confirmedCard!).getByRole("link", { name: "Открыть каталог-бот @SelectBuyerBot" }))
       .toBeInTheDocument()
     expect(within(unknownCard!).getByRole("combobox", { name: "Размер и предложение" }))
       .toBeDisabled()
@@ -1278,11 +1278,31 @@ describe("LandingPage", () => {
   it("states the international and Russian delivery split on the offer and delivery pages", () => {
     window.history.replaceState(null, "", "/offer")
     const view = render(<LandingPage configuredBotUsername={null} />)
-    expect(screen.getByText(/международная доставка 1500 ₽/i)).toBeInTheDocument()
+    expect(document.body).toHaveTextContent("международную доставку 1500 ₽")
 
     view.unmount()
     window.history.replaceState(null, "", "/delivery-returns")
     render(<LandingPage configuredBotUsername={null} />)
-    expect(screen.getByText(/международная доставка 1500 ₽/i)).toBeInTheDocument()
+    expect(screen.getByText(/Международная доставка 1500 ₽/)).toBeInTheDocument()
+  })
+
+  it("keeps mandatory consumer rights in the published offer", () => {
+    window.history.replaceState(null, "", "/offer")
+    render(<LandingPage configuredBotUsername={null} />)
+
+    expect(screen.getByText(/в течение 7 дней после неё/)).toBeInTheDocument()
+    expect(screen.getByText(/срок отказа после передачи составляет 3 месяца/)).toBeInTheDocument()
+    expect(screen.getByText(/не позднее 10 дней/)).toBeInTheDocument()
+    expect(screen.getByText(/документально подтверждённых расходов/)).toBeInTheDocument()
+    expect(document.body).not.toHaveTextContent(/возврату не подлежит/i)
+    expect(document.body).not.toHaveTextContent(/без возможности возврата/i)
+  })
+
+  it("limits checkout consent to data collected in checkout", () => {
+    window.history.replaceState(null, "", "/personal-data-consent#checkout-data")
+    render(<LandingPage configuredBotUsername={null} />)
+
+    expect(screen.getByText(/чекбоксы SMS-входа и корзины не охватывают паспортные данные/)).toBeInTheDocument()
+    expect(screen.getByText(/запрашиваются отдельно для конкретного заказа/)).toBeInTheDocument()
   })
 })

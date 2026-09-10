@@ -55,7 +55,7 @@ describe("Header SMS login", () => {
     await user.click(screen.getByRole("button", { name: "Войти по SMS" }))
     await user.type(screen.getByRole("textbox", { name: "Телефон" }), "+79990000000")
     await user.click(
-      screen.getByRole("checkbox", { name: /Согласен на обработку телефона/i }),
+      screen.getByRole("checkbox", { name: /Согласен на обработку номера телефона/i }),
     )
     await user.click(screen.getByRole("button", { name: "Получить код" }))
 
@@ -85,7 +85,7 @@ describe("Header SMS login", () => {
     await user.click(screen.getByRole("button", { name: "Войти по SMS" }))
     await user.type(screen.getByRole("textbox", { name: "Телефон" }), "+79990000000")
     await user.click(
-      screen.getByRole("checkbox", { name: /Согласен на обработку телефона/i }),
+      screen.getByRole("checkbox", { name: /Согласен на обработку номера телефона/i }),
     )
     await user.click(screen.getByRole("button", { name: "Получить код" }))
 

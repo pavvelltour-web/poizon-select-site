@@ -393,7 +393,7 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
           </p>
 
           <label className="request-box">
-            <span>Запрос для Telegram</span>
+            <span>Данные выбранного товара</span>
             <textarea readOnly value={storefront.request} rows={3} />
           </label>
 
@@ -409,7 +409,7 @@ export function ProductSheet({ storefront }: ProductSheetProps) {
               </button>
               <a className="button button--primary" href={botUrl} target="_blank" rel="noreferrer">
                 <Send aria-hidden="true" size={18} />
-                Открыть @{botUsername}
+                Открыть каталог-бот @{botUsername}
               </a>
             </div>
           ) : (

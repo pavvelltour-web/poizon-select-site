@@ -21,11 +21,11 @@ export function InfoSections({
             </div>
             <div className="trust-card" data-od-id="trust-delivery">
               <strong>Доставка</strong>
-              <p>Срок и итоговую стоимость показываем до оплаты. Международная доставка 1500 ₽ включена в товар; доставку по РФ рассчитывает RAKETA. Ориентир из Китая до Москвы — 10–18 дней.</p>
+              <p>Международная доставка 1500 ₽ включена в товар. Онлайн-оплата доступна только после рабочего расчёта перевозчика и точного тарифа по РФ. Ориентир из Китая до Москвы — 10–18 дней, предельный срок — 60 дней с оплаты.</p>
             </div>
             <div className="trust-card" data-od-id="trust-returns">
               <strong>Возврат и размер</strong>
-              <p>Из наличия — возврат до 7 дней. Под выкуп из Китая — 100% до выкупа; после выкупа действуют условия индивидуального заказа.</p>
+              <p>Стандартный товар — возврат до передачи и в течение 7 дней после получения независимо от места закупки. Отдельная услуга не уменьшает положенный по закону возврат стоимости товара.</p>
             </div>
           </div>
         </section>
@@ -34,11 +34,11 @@ export function InfoSections({
           <div className="contacts-copy">
             <p className="eyebrow">Связаться с KICKSBASE</p>
             <h2 id="contacts-title" data-od-id="contacts-title">Контакты</h2>
-            <p>По вопросам заказа и наличия можно написать напрямую.</p>
+            <p>По заказам пишите на почту; Telegram-бот используйте для каталога и общих вопросов без номера оформленного заказа, адреса, паспорта, ИНН и платёжных реквизитов.</p>
           </div>
           <div className="contact-list" data-od-id="contact-list">
             <a className="contact-item" href="mailto:support@kicksbase.ru" data-od-id="contact-email"><span>Почта</span><strong>support@kicksbase.ru</strong></a>
-            <a className="contact-item" href="https://t.me/kicksbase_officialbot" target="_blank" rel="noreferrer" data-od-id="contact-telegram-bot"><span>Telegram-бот</span><strong>@kicksbase_officialbot</strong></a>
+            <a className="contact-item" href="https://t.me/kicksbase_officialbot" target="_blank" rel="noreferrer" data-od-id="contact-telegram-bot"><span>Telegram каталог-бот</span><strong>@kicksbase_officialbot</strong></a>
             <span className="contact-item is-pending" aria-disabled="true" data-od-id="contact-telegram-channel"><span>Telegram-канал</span><strong>Ссылка уточняется</strong></span>
           </div>
         </section>

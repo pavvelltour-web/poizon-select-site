@@ -530,7 +530,7 @@ export function Header({
             {!challengeId ? (
               <label className="sms-login__consent">
                 <input type="checkbox" checked={personalDataAccepted} onChange={(event) => setPersonalDataAccepted(event.target.checked)} />
-                <span>Согласен на обработку телефона для сервисного SMS-входа. <a href="/personal-data-consent">Условия согласия</a>.</span>
+                <span>Согласен на обработку номера телефона, IP-адреса и технических событий только для сервисного SMS-входа. <a href="/personal-data-consent#sms-data">Условия согласия</a>.</span>
               </label>
             ) : (
               <label>

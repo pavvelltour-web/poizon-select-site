@@ -301,8 +301,8 @@ export function ProductDetailPage({ product, storefront }: ProductDetailPageProp
           <div className="pdp-assurance">
             <BadgeCheck aria-hidden="true" size={21} />
             <span>
-              <strong>Проверка подлинности</strong>
-              <small>Перед отправкой проверяем товар и сохраняем документы заказа.</small>
+              <strong>Проверка товара и документов</strong>
+              <small>Перед отправкой сверяем модель, артикул и размер с заказом.</small>
             </span>
           </div>
 
@@ -314,7 +314,7 @@ export function ProductDetailPage({ product, storefront }: ProductDetailPageProp
               rel="noopener noreferrer"
             >
               <Send aria-hidden="true" size={18} />
-              Задать вопрос в Telegram
+              Открыть каталог-бот
             </a>
           ) : null}
         </section>

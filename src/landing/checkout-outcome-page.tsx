@@ -29,7 +29,6 @@ function readOrderReference(): string | null {
 
 export function CheckoutOutcomePage({
   outcome,
-  botUrl,
 }: CheckoutOutcomePageProps) {
   const reference = readOrderReference()
   const returnedFromBank = outcome === "success"
@@ -105,12 +104,10 @@ export function CheckoutOutcomePage({
               </small>
             </span>
           </div>
-          {botUrl ? (
-            <a href={botUrl} target="_blank" rel="noopener noreferrer">
-              <Send aria-hidden="true" size={18} />
-              Задать вопрос в Telegram
-            </a>
-          ) : null}
+          <a href="mailto:support@kicksbase.ru">
+            <Send aria-hidden="true" size={18} />
+            Написать в поддержку
+          </a>
         </aside>
       </div>
     </article>
