@@ -164,7 +164,11 @@ fi
 git -C "$backend_dir" switch --detach "$backend_sha"
 git -C "$frontend_dir" switch --detach "$frontend_sha"
 
-docker compose build api bot select
+docker compose build api bot
+# The production storefront gate deliberately rejects "unknown" and abbreviated
+# versions. Pass the immutable target commit explicitly instead of relying on a
+# shell environment variable reaching the Docker build context.
+docker compose build --build-arg "BUILD_VERSION=$frontend_sha" select
 printf 'IMAGES_BUILT=ok\n'
 
 docker compose stop api bot
